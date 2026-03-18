@@ -177,7 +177,7 @@ export default function YourApplication() {
               <FileText className="h-9 w-9 text-accent-yellow" />
               Your Applications
             </h2>
-            <p className="text-body-text text-base mt-2">Track and manage your university applications.</p>
+            <p className="text-body-text font-medium mt-2">Track and manage your university applications.</p>
           </div>
 
           <button
@@ -194,18 +194,18 @@ export default function YourApplication() {
           {applications.map(app => (
             <div
               key={app.id}
-              className="bg-white rounded-2xl border border-light-color/50 p-8 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white rounded-3xl border border-light-color/50 p-8 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                 {/* left */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-3 flex-wrap">
-                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">{app.id}</span>
-                    <span className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-bold border ${statusClass(app.status)}`}>
+                    <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{app.id}</span>
+                    <span className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border ${statusClass(app.status)}`}>
                       {statusIcon(app.status)} {app.status}
                     </span>
                   </div>
-                  <h3 className="text-2xl font-bold text-dark-blue truncate mb-1">{app.program}</h3>
+                  <h3 className="text-2xl font-black text-dark-blue truncate mb-1">{app.program}</h3>
                   <p className="text-base text-body-text">{app.university} · {app.country}</p>
 
                   <MiniProgress completedStep={app.step} />

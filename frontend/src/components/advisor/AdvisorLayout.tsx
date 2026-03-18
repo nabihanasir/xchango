@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
-  Home, School, FileText, MessageSquare,
-  LogOut, Menu, X, Search, Bell, ChevronRight
+  Home, FileText, User as UserIcon, LogOut,
+  Menu, X, Search, Bell, ChevronRight, GraduationCap
 } from 'lucide-react';
 
-const DashboardLayout = () => {
+const AdvisorLayout = () => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: 'Dashboard',               path: '/dashboard',              icon: Home },
-    { name: 'University & Programmes', path: '/dashboard/programmes',   icon: School },
-    { name: 'Your Application',        path: '/dashboard/applications', icon: FileText },
-    { name: 'Communicate',             path: '/dashboard/communicate',  icon: MessageSquare },
+    { name: 'Dashboard',    path: '/advisor',              icon: Home },
+    { name: 'Applications', path: '/advisor/applications', icon: FileText },
+    { name: 'Students',     path: '/advisor/students',     icon: GraduationCap },
+    { name: 'Profile',      path: '/advisor/profile',      icon: UserIcon },
   ];
 
   return (
@@ -32,13 +32,13 @@ const DashboardLayout = () => {
         className={`${collapsed ? 'w-20' : 'w-72'} bg-dark-blue hidden lg:flex flex-col transition-all duration-300 z-30 shadow-2xl relative shadow-dark-blue/20`}
       >
         <div className="h-24 flex items-center px-6 border-b border-white/5">
-          <Link to="/dashboard" className="flex items-center gap-3 overflow-hidden">
+          <Link to="/advisor" className="flex items-center gap-3 overflow-hidden">
             <div className="bg-accent-yellow h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-accent-yellow/20">
               <span className="font-black text-dark-blue text-lg">X</span>
             </div>
             {!collapsed && (
               <span className="text-white font-black text-xl tracking-tight uppercase">
-                Student Panel
+                Advisor Panel
               </span>
             )}
           </Link>
@@ -46,7 +46,7 @@ const DashboardLayout = () => {
 
         <nav className="flex-1 py-10 px-4 space-y-2 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
+            const isActive = location.pathname === item.path || (item.path !== '/advisor' && location.pathname.startsWith(item.path));
             const Icon = item.icon;
 
             return (
@@ -93,11 +93,11 @@ const DashboardLayout = () => {
         }`}
       >
         <div className="h-24 flex items-center justify-between px-6 border-b border-white/5">
-           <Link to="/dashboard" className="flex items-center gap-3">
+           <Link to="/advisor" className="flex items-center gap-3">
             <div className="bg-accent-yellow h-10 w-10 rounded-xl flex items-center justify-center">
               <span className="font-black text-dark-blue text-lg">X</span>
             </div>
-            <span className="text-white font-black text-xl tracking-tight uppercase">Dashboard</span>
+            <span className="text-white font-black text-xl tracking-tight uppercase">Advisor</span>
           </Link>
           <button onClick={() => setIsMobileMenuOpen(false)} className="text-white/60 p-2">
             <X className="h-6 w-6" />
@@ -105,7 +105,7 @@ const DashboardLayout = () => {
         </div>
         <nav className="p-4 space-y-2 mt-6">
           {navItems.map((item) => {
-             const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
+             const isActive = location.pathname === item.path || (item.path !== '/advisor' && location.pathname.startsWith(item.path));
              const Icon = item.icon;
              return (
                <Link
@@ -133,7 +133,7 @@ const DashboardLayout = () => {
             </button>
             <div className="relative group hidden md:block">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-blue/40 group-focus-within:text-dark-blue transition-colors" />
-              <input type="text" placeholder="Search programmes..." className="pl-12 pr-6 py-3 bg-slate-100/50 rounded-2xl w-64 lg:w-96 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-yellow/20 focus:bg-white transition-all border border-transparent focus:border-accent-yellow/30" />
+              <input type="text" placeholder="Search applications..." className="pl-12 pr-6 py-3 bg-slate-100/50 rounded-2xl w-64 lg:w-96 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-yellow/20 focus:bg-white transition-all border border-transparent focus:border-accent-yellow/30" />
             </div>
           </div>
 
@@ -144,10 +144,10 @@ const DashboardLayout = () => {
             </button>
             <div className="h-8 w-px bg-dark-blue/5 hidden sm:block" />
             <div className="flex items-center gap-3 bg-white border border-light-color/80 py-1.5 pl-1.5 pr-4 rounded-full shadow-sm hover:shadow-md transition-shadow cursor-pointer select-none">
-              <div className="bg-dark-blue h-10 w-10 rounded-full flex items-center justify-center font-bold text-white text-xs ring-4 ring-slate-50">ST</div>
+              <div className="bg-dark-blue h-10 w-10 rounded-full flex items-center justify-center font-bold text-white text-xs ring-4 ring-slate-50">AV</div>
               <div className="hidden sm:block">
-                <p className="text-[13px] font-black text-dark-blue leading-none">Student Name</p>
-                <p className="text-[11px] font-bold text-accent-yellow uppercase tracking-tighter mt-1">Undergraduate</p>
+                <p className="text-[13px] font-black text-dark-blue leading-none">Advisor Name</p>
+                <p className="text-[11px] font-bold text-accent-yellow uppercase tracking-tighter mt-1">Academic Advisor</p>
               </div>
             </div>
           </div>
@@ -172,4 +172,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default AdvisorLayout;

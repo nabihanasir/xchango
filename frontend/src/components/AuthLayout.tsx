@@ -27,7 +27,7 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
           <img 
             src="/logo.png" 
             alt="Xchango Logo" 
-            className="h-[350px] w-auto max-w-full -mb-12 object-contain" 
+            className="h-[140px] w-auto max-w-full -mb-4 object-contain" 
           />
           <h2 className="text-h2 font-bold text-dark-blue mb-2 leading-tight relative z-10">
             {title}

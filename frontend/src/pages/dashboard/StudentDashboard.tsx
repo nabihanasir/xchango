@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 
 const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass, delay }: any) => (
   <div
-    className={`bg-white rounded-2xl p-8 shadow-lg shadow-black/5 border border-light-color/50 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 animate-fade-in-up`}
+    className={`bg-white rounded-3xl p-8 shadow-lg shadow-black/5 border border-light-color/50 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 animate-fade-in-up`}
     style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
   >
     <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${gradientClass} opacity-10 rounded-bl-full transition-transform duration-500 group-hover:scale-110`} />
     <div className="flex items-start justify-between relative z-10">
       <div>
-        <p className="text-body-text text-sm font-semibold mb-2 uppercase tracking-wider">{title}</p>
-        <h3 className="text-5xl font-bold text-dark-blue">{value}</h3>
+        <p className="text-body-text/60 text-[11px] font-black mb-1 uppercase tracking-[0.1em]">{title}</p>
+        <h3 className="text-4xl font-black text-dark-blue tracking-tighter">{value}</h3>
       </div>
       <div className={`p-4 rounded-2xl ${colorClass} bg-opacity-10 transition-colors duration-300`}>
         <Icon className={`h-8 w-8 ${colorClass.replace('bg-', 'text-')}`} />
@@ -22,55 +22,55 @@ const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass, delay }
 const QuickAction = ({ title, description, icon: Icon, to, delay }: any) => (
   <Link
     to={to}
-    className={`block bg-white p-8 rounded-2xl border border-light-color/50 shadow-sm hover:shadow-xl hover:shadow-black/5 hover:border-dark-blue/20 transition-all duration-300 group animate-fade-in-up`}
+    className={`block bg-white p-8 rounded-3xl border border-light-color/50 shadow-sm hover:shadow-xl hover:shadow-black/5 hover:border-dark-blue/20 transition-all duration-300 group animate-fade-in-up`}
     style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
   >
     <div className="flex items-center gap-4 mb-5">
       <div className="p-4 bg-light-color/50 rounded-2xl group-hover:bg-dark-blue group-hover:text-white transition-colors duration-300 text-dark-blue">
         <Icon className="h-7 w-7" />
       </div>
-      <h4 className="text-xl font-bold text-dark-blue group-hover:text-navy-hover transition-colors">{title}</h4>
+      <h4 className="text-xl font-black text-dark-blue group-hover:text-navy-hover transition-colors">{title}</h4>
     </div>
-    <p className="text-body-text text-base mb-6 line-clamp-2 leading-relaxed">{description}</p>
-    <div className="flex items-center text-accent-yellow font-bold text-base group-hover:text-yellow-default transition-colors">
+    <p className="text-body-text text-sm font-medium mb-6 line-clamp-2 leading-relaxed">{description}</p>
+    <div className="flex items-center text-accent-yellow font-black text-sm uppercase tracking-widest group-hover:text-yellow-default transition-colors">
       <span>Get Started</span>
-      <ArrowRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" />
+      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
     </div>
   </Link>
 );
 
 export default function StudentDashboard() {
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-10 animate-fade-in">
       {/* Welcome Section */}
       <div className="relative overflow-hidden bg-dark-blue rounded-3xl p-10 md:p-14 shadow-2xl shadow-dark-blue/20">
         <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 h-96 bg-accent-yellow/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-          <div className="space-y-6 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-accent-yellow text-sm font-bold uppercase tracking-wider backdrop-blur-md">
-              <Sparkles className="h-4 w-4" />
+          <div className="space-y-6 max-w-2xl text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-accent-yellow text-xs font-black uppercase tracking-[0.2em] backdrop-blur-md self-center md:self-start">
+              <Sparkles className="h-3.5 w-3.5" />
               <span>Welcome to your future</span>
             </div>
-            <h2 className="text-5xl md:text-6xl font-bold text-white leading-tight">
+            <h2 className="text-5xl md:text-6xl font-black text-white leading-[1.1] tracking-tight">
               Ready to start your <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-yellow to-yellow-default">global journey?</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-yellow to-yellow-default underline decoration-accent-yellow/30 underline-offset-8">global journey?</span>
             </h2>
-            <p className="text-white/80 text-xl max-w-xl leading-relaxed">
+            <p className="text-white/80 text-lg md:text-xl max-w-xl leading-relaxed font-medium">
               Discover top universities, track your applications, and connect with advisors — all in one place.
             </p>
-            <div className="pt-2 flex flex-wrap gap-4">
-              <Link to="/dashboard/programmes" className="px-8 py-4 rounded-xl bg-accent-yellow hover:bg-yellow-default text-dark-blue font-bold text-lg shadow-lg shadow-accent-yellow/20 hover:shadow-accent-yellow/40 transition-all duration-300 hover:-translate-y-1 flex items-center gap-2">
+            <div className="pt-4 flex flex-wrap gap-4 justify-center md:justify-start">
+              <Link to="/dashboard/programmes" className="px-10 py-5 rounded-2xl bg-accent-yellow hover:bg-yellow-default text-dark-blue font-black text-lg shadow-lg shadow-accent-yellow/20 hover:shadow-accent-yellow/40 transition-all duration-300 hover:-translate-y-1 flex items-center gap-3">
                 Explore Universities
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-6 w-6" />
               </Link>
             </div>
           </div>
-          <div className="hidden md:block relative">
-            <div className="absolute inset-0 bg-gradient-to-tr from-accent-yellow/20 to-transparent rounded-full blur-2xl" />
-            <Globe className="h-56 w-56 text-white/10 animate-[spin_60s_linear_infinite]" strokeWidth={1} />
-            <Award className="h-28 w-28 text-accent-yellow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_15px_rgba(251,210,19,0.5)]" />
+          <div className="hidden lg:block relative">
+            <div className="absolute inset-0 bg-gradient-to-tr from-accent-yellow/20 to-transparent rounded-full blur-2xl transform scale-150" />
+            <Globe className="h-64 w-64 text-white/10 animate-[spin_60s_linear_infinite]" strokeWidth={1} />
+            <Award className="h-32 w-32 text-accent-yellow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_20px_rgba(251,210,19,0.5)]" />
           </div>
         </div>
       </div>
