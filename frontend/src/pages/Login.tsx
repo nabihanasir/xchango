@@ -4,15 +4,31 @@ import { Link } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+ 
+const { login } = useAuth();
 
+const handleSubmit = async (e: React.SyntheticEvent) => {
+  e.preventDefault();
+
+  const res = await fetch('http://localhost:5000/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+  login(data.data);          // saves user + token to context and localStorage
+  window.location.href = '/dashboard';  // redirect after login
+};
   return (
     <AuthLayout title="Welcome Back" subtitle="Please sign in to your account">
-      <form className="space-y-6 w-full" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-6 w-full" onSubmit={handleSubmit}>
         
         <InputField
           label="Email Address"

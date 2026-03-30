@@ -10,24 +10,42 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   // Form State
-  const [fullName, setFullName] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [sapId, setSapId] = useState('');
-  const [role, setRole] = useState('Student');
+  const [role, setRole] = useState('student');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+  e.preventDefault();
+
+  if (password !== confirmPassword) {
+    alert('Passwords do not match');
+    return;
+  }
+  const res = await fetch('http://localhost:5000/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, phone, sapId, role, password }),
+  });
+
+  const data = await res.json();
+  console.log(data);
+
+  };
+  
   return (
     <AuthLayout title="Create Account" subtitle="Join Xchango today">
-      <form className="space-y-6 w-full" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-6 w-full" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           <InputField
             label="Full Name"
             type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             placeholder="John Doe"
             icon={<User className="h-5 w-5 text-body-text" />}
             required
@@ -78,7 +96,7 @@ export default function Signup() {
                 className="block w-full pl-10 pr-3 py-3 border border-light-color rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-blue focus:border-transparent transition-all text-body-text bg-white appearance-none"
                 required
               >
-                <option value="Student">Student</option>
+                <option value="student">Student</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-body-text">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -106,7 +124,7 @@ export default function Signup() {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPassword(!showPassword)} 
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-body-text hover:text-dark-blue focus:outline-none transition-colors"
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

@@ -9,7 +9,7 @@ const generateToken = (id: string, role: string) => {
 };
 
 export const registerUser = async (userData: any) => {
-  const { email, password, name, role } = userData;
+  const { email, password, name, role, phone, sapId } = userData;
 
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -24,6 +24,8 @@ export const registerUser = async (userData: any) => {
     email,
     password: hashedPassword,
     role: role || UserRole.STUDENT,
+    phone,
+    sapId,
   });
 
   return {
@@ -31,7 +33,7 @@ export const registerUser = async (userData: any) => {
     name: user.name,
     email: user.email,
     role: user.role,
-    token: generateToken(user._id as string, user.role),
+    token: generateToken(user._id.toString(), user.role),
   };
 };
 
@@ -46,7 +48,7 @@ export const loginUser = async (credentials: any) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id as string, user.role),
+      token: generateToken(user._id.toString(), user.role),
     };
   } else {
     throw new Error('Invalid email or password');
