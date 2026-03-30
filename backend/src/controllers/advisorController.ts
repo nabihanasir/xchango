@@ -8,8 +8,8 @@ export const getAssignedApps = async (req: any, res: Response) => {
 };
 
 export const updateApplicationStatus = async (req: Request, res: Response) => {
-  const { status, remarks } = req.body;
-  const application = await advisorService.reviewApplication(req.params.id as string, status, remarks);
+  const { status } = req.body;
+  const application = await advisorService.reviewApplication(req.params.id as string, status);
   sendResponse(res, 200, 'Application status updated', application);
 };
 

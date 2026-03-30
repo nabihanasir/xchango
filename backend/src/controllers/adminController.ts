@@ -34,12 +34,12 @@ export const uploadOfferLetter = async (req: any, res: Response) => {
 };
 
 export const addCourseMapping = async (req: Request, res: Response) => {
-  const { homeCourseId, targetCourseId } = req.body;
-  const mapping = await adminService.createMapping(homeCourseId, targetCourseId);
-  sendResponse(201, 'Course mapping added', mapping);
+  const { homeCourseId, hostCourseId, applicationId } = req.body;
+  const mapping = await adminService.createMapping(homeCourseId, hostCourseId, applicationId);
+  sendResponse(res, 201, 'Course mapping added', mapping);
 };
 
 export const getCourseMappings = async (req: Request, res: Response) => {
   const mappings = await adminService.getAllMappings();
-  sendResponse(200, 'Course mappings fetched', mappings);
+  sendResponse(res, 200, 'Course mappings fetched', mappings);
 };

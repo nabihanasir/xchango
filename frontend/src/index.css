@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,6 +6,34 @@
 
 @layer base {
   body {
-    @apply font-sans;
+    @apply font-sans bg-slate-50 text-slate-800 antialiased selection:bg-accent-yellow/30 selection:text-dark-blue;
+  }
+}
+
+/* Base custom utilities for glassmorphism and modern styling */
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)];
+  }
+  .glass-card {
+    @apply bg-white border border-slate-200/60 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300;
+  }
+  .glass-sidebar {
+    @apply bg-[#060424]/95 backdrop-blur-2xl border-r border-white/10 shadow-[4px_0_24px_rgba(4,2,20,0.2)];
+  }
+  .text-gradient {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-accent-yellow to-yellow-default;
+  }
+  .text-gradient-blue {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-dark-blue to-[#1A1558];
+  }
+  .custom-scrollbar::-webkit-scrollbar { 
+    @apply w-1.5; 
+  }
+  .custom-scrollbar::-webkit-scrollbar-track { 
+    @apply bg-transparent; 
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb { 
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors; 
   }
 }

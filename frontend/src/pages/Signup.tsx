@@ -82,23 +82,23 @@ export default function Signup() {
           />
 
           {/* Role Selection */}
-          <div className="space-y-2 md:col-span-2">
-            <label className="block text-small font-bold text-dark-blue uppercase tracking-wider">
+          <div className="space-y-1.5 md:col-span-2">
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest pl-1">
               Role
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Shield className="h-5 w-5 text-body-text" />
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-dark-blue transition-colors">
+                <Shield className="h-5 w-5" />
               </div>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-light-color rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-blue focus:border-transparent transition-all text-body-text bg-white appearance-none"
+                className="block w-full pl-12 pr-10 py-3.5 bg-slate-50 hover:bg-slate-100/50 focus:bg-white border border-slate-200 focus:border-accent-yellow/50 rounded-xl focus:outline-none focus:ring-4 focus:ring-accent-yellow/10 transition-all text-slate-800 font-medium shadow-sm appearance-none cursor-pointer"
                 required
               >
-                <option value="student">Student</option>
+                <option value="student">Student Account</option>
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-body-text">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                 </svg>
@@ -106,57 +106,29 @@ export default function Signup() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-small font-bold text-dark-blue uppercase tracking-wider">
-              Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-body-text" />
-              </div>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="block w-full pl-10 pr-10 py-3 border border-light-color rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-blue focus:border-transparent transition-all text-body-text placeholder-gray-400"
-                placeholder="••••••••"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)} 
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-body-text hover:text-dark-blue focus:outline-none transition-colors"
-              >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
-            </div>
-          </div>
+          <InputField
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            icon={<Lock className="h-5 w-5" />}
+            rightIcon={showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            onRightIconClick={() => setShowPassword(!showPassword)}
+            required
+          />
 
-          <div className="space-y-2">
-            <label className="block text-small font-bold text-dark-blue uppercase tracking-wider">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-body-text" />
-              </div>
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="block w-full pl-10 pr-10 py-3 border border-light-color rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-blue focus:border-transparent transition-all text-body-text placeholder-gray-400"
-                placeholder="••••••••"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-body-text hover:text-dark-blue focus:outline-none transition-colors"
-              >
-                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
-            </div>
-          </div>
+          <InputField
+            label="Confirm Password"
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
+            icon={<Lock className="h-5 w-5" />}
+            rightIcon={showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            onRightIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            required
+          />
           
         </div>
 

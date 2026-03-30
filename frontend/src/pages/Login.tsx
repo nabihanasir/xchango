@@ -24,7 +24,13 @@ const handleSubmit = async (e: React.SyntheticEvent) => {
 
   const data = await res.json();
   login(data.data);          // saves user + token to context and localStorage
-  window.location.href = '/dashboard';  // redirect after login
+  const destination =
+    data.data.role === 'advisor'
+      ? '/advisor'
+      : data.data.role === 'admin'
+        ? '/admin'
+        : '/dashboard';
+  window.location.href = destination;
 };
   return (
     <AuthLayout title="Welcome Back" subtitle="Please sign in to your account">
@@ -40,37 +46,22 @@ const handleSubmit = async (e: React.SyntheticEvent) => {
           required
         />
 
-        <div className="space-y-2">
-          <div className="flex justify-between items-center px-1">
-            <label className="block text-small font-bold text-dark-blue uppercase tracking-wider">
-              Password
-            </label>
-            <a href="#" className="text-small text-accent-yellow hover:text-yellow-default font-medium transition-colors">
+        <InputField
+          label="Password"
+          labelRight={
+            <a href="#" className="text-[11px] text-accent-yellow hover:text-yellow-default font-bold transition-colors uppercase tracking-widest">
               Forgot Password?
             </a>
-          </div>
-          
-          <div className="relative">
-             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-body-text" />
-             </div>
-             <input
-               type={showPassword ? 'text' : 'password'}
-               value={password}
-               onChange={(e) => setPassword(e.target.value)}
-               className="block w-full pl-10 pr-10 py-3 border border-light-color rounded-lg focus:outline-none focus:ring-2 focus:ring-dark-blue focus:border-transparent transition-all text-body-text placeholder-gray-400"
-               placeholder="••••••••"
-               required
-             />
-             <button
-               type="button"
-               onClick={() => setShowPassword(!showPassword)}
-               className="absolute inset-y-0 right-0 pr-3 flex items-center text-body-text hover:text-dark-blue focus:outline-none transition-colors"
-             >
-               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-             </button>
-          </div>
-        </div>
+          }
+          type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          icon={<Lock className="h-5 w-5" />}
+          rightIcon={showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          onRightIconClick={() => setShowPassword(!showPassword)}
+          required
+        />
 
         <Button type="submit" variant="primary" className="py-4 text-lg mt-6">
           Sign In

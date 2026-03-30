@@ -6,6 +6,7 @@ import adminRoutes from './adminRoutes';
 import documentRoutes from './documentRoutes';
 import chatRoutes from './chatRoutes';
 import notificationRoutes from './notificationRoutes';
+import courseEquivalencyRoutes from './courseEquivalencyRoutes';
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/admin', adminRoutes);
 router.use('/documents', documentRoutes);
 router.use('/chat', chatRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/equivalency', courseEquivalencyRoutes);
 
 export default router;

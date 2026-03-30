@@ -5,6 +5,9 @@ import Country from './models/Country';
 import University from './models/University';
 import Application, { ApplicationStatus } from './models/Application';
 import StudentProfile from './models/StudentProfile';
+import Course, { CourseType } from './models/Course';
+import CourseRequest from './models/CourseRequest';
+import CourseMatchResult from './models/CourseMatchResult';
 import bcrypt from 'bcryptjs';
 
 dotenv.config();
@@ -20,6 +23,9 @@ const seed = async () => {
     await University.deleteMany({});
     await Application.deleteMany({});
     await StudentProfile.deleteMany({});
+    await Course.deleteMany({});
+    await CourseRequest.deleteMany({});
+    await CourseMatchResult.deleteMany({});
 
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash('password123', salt);
@@ -29,6 +35,8 @@ const seed = async () => {
       name: 'Admin User',
       email: 'admin@xchango.com',
       password,
+      phone: '+92-300-0000001',
+      sapId: '70000001',
       role: UserRole.ADMIN,
       isActive: true,
     });
@@ -38,6 +46,8 @@ const seed = async () => {
       name: 'Advisor One',
       email: 'advisor@xchango.com',
       password,
+      phone: '+92-300-0000002',
+      sapId: '70000002',
       role: UserRole.ADVISOR,
       isActive: true,
     });
@@ -47,6 +57,8 @@ const seed = async () => {
       name: 'Nabiha Nasir',
       email: 'student@xchango.com',
       password,
+      phone: '+92-300-0000003',
+      sapId: '70000003',
       role: UserRole.STUDENT,
       isActive: true,
     });
@@ -64,6 +76,8 @@ const seed = async () => {
       name: 'Alice Johnson',
       email: 'alice@example.com',
       password,
+      phone: '+92-300-0000004',
+      sapId: '70000004',
       role: UserRole.STUDENT,
       isActive: true,
     });
@@ -102,6 +116,13 @@ const seed = async () => {
       seatLimit: 40,
     });
 
+    const homeUniversity = await University.create({
+      name: 'FAST National University',
+      countryId: malaysia._id,
+      website: 'https://www.nu.edu.pk',
+      seatLimit: 999,
+    });
+
     // Create Applications
     await Application.create({
       studentId: student1._id,
@@ -117,6 +138,61 @@ const seed = async () => {
       selectedUniversity: um._id,
       status: ApplicationStatus.SUBMITTED,
       intake: 'Spring 2026',
+    });
+
+    const hostCourse1 = await Course.create({
+      name: 'Advanced Data Structures',
+      code: 'SNU-CS301',
+      description: 'Tree structures, graph representations, heaps, hashing, and algorithmic analysis.',
+      outlineText: 'Trees, AVL trees, heaps, graphs, shortest path, hashing, amortized analysis, recursion, greedy methods.',
+      creditHours: 3,
+      universityId: snu._id,
+      type: CourseType.HOST,
+    });
+
+    const hostCourse2 = await Course.create({
+      name: 'Database Systems',
+      code: 'UM-CS240',
+      description: 'Relational modelling, SQL design, transactions, concurrency, and normalization.',
+      outlineText: 'ER modelling, relational algebra, SQL, normalization, indexing, transactions, concurrency control, query optimization.',
+      creditHours: 3,
+      universityId: um._id,
+      type: CourseType.HOST,
+    });
+
+    const homeCourse1 = await Course.create({
+      name: 'Data Structures and Algorithms',
+      code: 'CS2005',
+      description: 'Core data structures and asymptotic analysis for problem solving.',
+      outlineText: 'Arrays, linked lists, trees, heaps, graphs, hashing, recursion, greedy algorithms, dynamic programming, complexity analysis.',
+      creditHours: 3,
+      universityId: homeUniversity._id,
+      type: CourseType.HOME,
+    });
+
+    const homeCourse2 = await Course.create({
+      name: 'Database Management Systems',
+      code: 'CS3007',
+      description: 'Relational databases, query languages, and transaction management.',
+      outlineText: 'Data modelling, ER diagrams, SQL, normalization, indexing, transactions, concurrency, recovery, query optimization.',
+      creditHours: 3,
+      universityId: homeUniversity._id,
+      type: CourseType.HOME,
+    });
+
+    await CourseRequest.create({
+      studentId: student1._id,
+      status: 'pending',
+      items: [
+        {
+          hostCourseId: hostCourse1._id,
+          homeCourseId: homeCourse1._id,
+        },
+        {
+          hostCourseId: hostCourse2._id,
+          homeCourseId: homeCourse2._id,
+        },
+      ],
     });
 
     console.log('Data Seeded Successfully with Alignment and expanded scope!');

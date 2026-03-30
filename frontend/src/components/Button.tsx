@@ -12,12 +12,12 @@ export default function Button({
   ...props 
 }: ButtonProps) {
   
-  const baseClasses = "w-full flex justify-center items-center py-3 px-4 rounded-lg focus:outline-none transition-colors disabled:cursor-not-allowed";
+  const baseClasses = "w-full flex justify-center items-center py-3.5 px-6 rounded-xl focus:outline-none transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 active:scale-[0.98]";
   
   const variants = {
-    primary: "border border-transparent text-white bg-dark-blue hover:bg-navy-hover focus:ring-2 focus:ring-offset-2 focus:ring-dark-blue disabled:bg-blue-faded font-bold",
-    secondary: "border border-transparent text-white bg-yellow-default hover:bg-accent-yellow disabled:bg-yellow-faded font-medium",
-    ghost: "bg-transparent border border-body-text text-dark-blue hover:border-transparent hover:text-opacity-80 disabled:bg-light-color disabled:text-gray-500 disabled:border-transparent"
+    primary: "text-white bg-gradient-to-r from-dark-blue to-dark-blue-light hover:scale-[1.02] shadow-lg shadow-dark-blue/20 focus:ring-4 focus:ring-dark-blue/20 font-bold tracking-wide border border-white/10",
+    secondary: "text-dark-blue bg-gradient-to-r from-accent-yellow to-yellow-default hover:scale-[1.02] shadow-lg shadow-accent-yellow/30 focus:ring-4 focus:ring-accent-yellow/20 font-bold tracking-wide",
+    ghost: "bg-slate-100/50 hover:bg-slate-100 text-slate-700 font-bold transition-all border border-transparent hover:border-slate-200"
   };
 
   return (

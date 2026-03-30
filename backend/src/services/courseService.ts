@@ -2,7 +2,7 @@ import Course from '../models/Course';
 import CourseMapping from '../models/CourseMapping';
 import { calculateSimilarity } from '../utils/similarity';
 
-export const createCourseMapping = async (homeCourseId: string, targetCourseId: string) => {
+export const createCourseMapping = async (homeCourseId: string, targetCourseId: string, applicationId: string) => {
   const homeCourse = await Course.findById(homeCourseId);
   const targetCourse = await Course.findById(targetCourseId);
 
@@ -13,13 +13,14 @@ export const createCourseMapping = async (homeCourseId: string, targetCourseId: 
   const similarityScore = calculateSimilarity(homeCourse.name, targetCourse.name);
 
   return await CourseMapping.create({
-    homeCourse: homeCourseId,
-    targetCourse: targetCourseId,
+    applicationId,
+    homeCourseId,
+    hostCourseId: targetCourseId,
     similarityScore,
-    isApproved: false
+    status: 'pending',
   });
 };
 
 export const getAllMappings = async () => {
-  return await CourseMapping.find().populate('homeCourse targetCourse reviewedBy');
+  return await CourseMapping.find().populate('homeCourseId hostCourseId advisorId');
 };

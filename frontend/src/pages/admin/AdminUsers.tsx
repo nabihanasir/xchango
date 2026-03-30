@@ -12,7 +12,7 @@ export default function AdminUsers() {
     { 
       header: 'Name', 
       accessor: 'name',
-      render: (value: any, row: any) => `${row.name || (row.firstName + ' ' + row.lastName)}`
+      render: (_value: any, row: any) => `${row.name || (row.firstName + ' ' + row.lastName)}`
     },
     { header: 'Email', accessor: 'email' },
     { header: 'Role', accessor: 'role' },

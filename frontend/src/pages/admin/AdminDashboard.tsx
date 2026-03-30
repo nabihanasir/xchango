@@ -1,7 +1,6 @@
-import React from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, AreaChart, Area
+  AreaChart, Area
 } from 'recharts';
 import { adminStats, countryData, monthlyTrend } from '../../data/adminData';
 import StatCard from '../../components/admin/StatCard';
@@ -11,21 +10,23 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-8 rounded-3xl border border-light-color/50 shadow-sm relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card rounded-[2rem] p-8 lg:p-10 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-yellow/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+        
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-yellow/10 text-accent-yellow text-xs font-bold uppercase tracking-widest mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent-yellow/10 border border-accent-yellow/20 text-accent-yellow text-[11px] font-bold uppercase tracking-widest mb-4">
             <Sparkles className="h-3.5 w-3.5" />
             <span>Overview Report</span>
           </div>
-          <h2 className="text-3xl font-black text-dark-blue">Welcome Back, Admin!</h2>
-          <p className="text-body-text font-medium mt-1">Here's what's happening with Xchango today.</p>
+          <h2 className="text-[2.5rem] font-black text-slate-800 tracking-tight leading-none mb-2">Welcome Back, Admin!</h2>
+          <p className="text-slate-500 font-medium text-[15px]">Here's what's happening with Xchango today.</p>
         </div>
-        <div className="hidden md:flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-light-color/40">
+        <div className="hidden md:flex items-center gap-4 bg-slate-50 border border-slate-200 p-5 rounded-[1.25rem] shadow-sm relative z-10">
            <div className="text-right">
-             <p className="text-xs font-bold text-body-text/60 uppercase">System Status</p>
-             <p className="text-sm font-black text-green-500">All Systems Operational</p>
+             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">System Status</p>
+             <p className="text-[15px] font-bold text-emerald-500">All Systems Operational</p>
            </div>
-           <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+           <div className="h-3 w-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
         </div>
       </div>
 
@@ -39,13 +40,15 @@ export default function AdminDashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Applications Trend */}
-        <div className="bg-white p-6 lg:p-8 rounded-3xl border border-light-color/50 shadow-sm space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-black text-dark-blue flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-blue-500" />
-              Monthly Application Trend
+        <div className="glass-card rounded-[2rem] p-6 lg:p-8 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
+              <div className="p-2 bg-blue-500/10 rounded-xl">
+                <TrendingUp className="h-5 w-5 text-blue-500" />
+              </div>
+              Monthly Trend
             </h3>
-            <select className="bg-slate-50 border-none text-xs font-bold text-dark-blue/60 focus:ring-0 rounded-lg px-3 py-1.5">
+            <select className="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-500 focus:ring-2 focus:ring-accent-yellow/20 rounded-xl px-4 py-2 outline-none transition-all cursor-pointer">
               <option>Last 7 Months</option>
               <option>Last Year</option>
             </select>
@@ -64,13 +67,13 @@ export default function AdminDashboard() {
                   dataKey="month" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{fill: '#6B6B6B', fontSize: 12, fontWeight: 600}} 
+                  tick={{fill: '#64748b', fontSize: 11, fontWeight: 700}} 
                   dy={10}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{fill: '#6B6B6B', fontSize: 12, fontWeight: 600}} 
+                  tick={{fill: '#64748b', fontSize: 11, fontWeight: 700}} 
                 />
                 <Tooltip 
                   contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
@@ -91,11 +94,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Applications per Country */}
-        <div className="bg-white p-6 lg:p-8 rounded-3xl border border-light-color/50 shadow-sm space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-black text-dark-blue flex items-center gap-2">
-              <Globe className="h-5 w-5 text-accent-yellow" />
-              Applications per Country
+        <div className="glass-card rounded-[2rem] p-6 lg:p-8 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
+              <div className="p-2 bg-accent-yellow/10 rounded-xl">
+                <Globe className="h-5 w-5 text-yellow-default" />
+              </div>
+              Applications by Country
             </h3>
           </div>
           <div className="h-[300px] w-full">
@@ -108,7 +113,7 @@ export default function AdminDashboard() {
                   type="category" 
                   axisLine={false} 
                   tickLine={false}
-                  tick={{fill: '#090638', fontSize: 12, fontWeight: 700}}
+                  tick={{fill: '#090638', fontSize: 11, fontWeight: 800}}
                 />
                 <Tooltip 
                   cursor={{fill: '#F8FAFC'}}

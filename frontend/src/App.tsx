@@ -7,6 +7,8 @@ import StudentDashboard from './pages/dashboard/StudentDashboard';
 import UniversityProgrammes from './pages/dashboard/UniversityProgrammes';
 import YourApplication from './pages/dashboard/YourApplication';
 import Communicate from './pages/dashboard/Communicate';
+import CourseEquivalencyBrowse from './pages/dashboard/CourseEquivalencyBrowse';
+import CourseEquivalencyRequests from './pages/dashboard/CourseEquivalencyRequests';
 
 import ApplicationWizard from './pages/dashboard/ApplicationWizard';
 
@@ -20,6 +22,8 @@ import AdvisorLayout from './components/advisor/AdvisorLayout';
 import AdvisorDashboard from './pages/advisor/AdvisorDashboard';
 import AdvisorApplications from './pages/advisor/AdvisorApplications';
 import AdvisorProfile from './pages/advisor/AdvisorProfile';
+import AdvisorEquivalencyRequests from './pages/advisor/AdvisorEquivalencyRequests';
+import AdvisorEquivalencyRequestDetail from './pages/advisor/AdvisorEquivalencyRequestDetail';
 
 import { AdminUniversities, AdminCourses, AdminSettings } from './pages/admin/StubPages';
 
@@ -37,6 +41,8 @@ function App() {
           <Route path="applications" element={<YourApplication />} />
           <Route path="applications/new" element={<ApplicationWizard />} />
           <Route path="communicate" element={<Communicate />} />
+          <Route path="equivalency/courses" element={<CourseEquivalencyBrowse />} />
+          <Route path="equivalency/requests" element={<CourseEquivalencyRequests />} />
         </Route>
 
         {/* Admin Routes */}
@@ -53,6 +59,8 @@ function App() {
         <Route path="/advisor" element={<AdvisorLayout />}>
           <Route index element={<AdvisorDashboard />} />
           <Route path="applications" element={<AdvisorApplications />} />
+          <Route path="requests" element={<AdvisorEquivalencyRequests />} />
+          <Route path="requests/:id" element={<AdvisorEquivalencyRequestDetail />} />
           <Route path="profile" element={<AdvisorProfile />} />
           <Route path="students" element={<div className="p-8"><h2 className="text-2xl font-bold">Assigned Students Page</h2><p className="mt-4">List of students assigned to you will appear here.</p></div>} />
         </Route>
