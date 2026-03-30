@@ -21,3 +21,25 @@ export const getUsers = async (req: Request, res: Response) => {
   const users = await adminService.getAllUsers();
   sendResponse(res, 200, 'Users fetched successfully', users);
 };
+
+export const createUser = async (req: Request, res: Response) => {
+  const user = await adminService.createUser(req.body);
+  sendResponse(res, 201, 'User created successfully', user);
+};
+
+export const uploadOfferLetter = async (req: any, res: Response) => {
+  const { applicationId, offerLetterUrl } = req.body;
+  const application = await adminService.updateApplicationOfferLetter(applicationId, offerLetterUrl);
+  sendResponse(res, 200, 'Offer letter uploaded successfully', application);
+};
+
+export const addCourseMapping = async (req: Request, res: Response) => {
+  const { homeCourseId, targetCourseId } = req.body;
+  const mapping = await adminService.createMapping(homeCourseId, targetCourseId);
+  sendResponse(201, 'Course mapping added', mapping);
+};
+
+export const getCourseMappings = async (req: Request, res: Response) => {
+  const mappings = await adminService.getAllMappings();
+  sendResponse(200, 'Course mappings fetched', mappings);
+};

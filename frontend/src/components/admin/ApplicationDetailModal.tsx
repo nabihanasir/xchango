@@ -170,8 +170,22 @@ export default function ApplicationDetailModal({ app, onClose }: ApplicationDeta
           >
             Close View
           </button>
+          {app.status === 'approved' && (
+            <button 
+              onClick={() => {
+                const url = prompt('Enter Offer Letter URL:');
+                if (url) {
+                  alert(`Offer Letter Issued Successfully for ${app.student}!`);
+                  onClose();
+                }
+              }}
+              className="px-6 py-3 bg-accent-yellow text-dark-blue font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20"
+            >
+              Issue Offer Letter
+            </button>
+          )}
           <button className="px-8 py-3 bg-dark-blue hover:bg-navy-hover text-white font-bold rounded-xl transition-all shadow-lg shadow-dark-blue/20 flex items-center gap-2">
-            Update Status
+            Download Full Report
             <Hash className="h-4 w-4 opacity-40 rotate-12" />
           </button>
         </footer>

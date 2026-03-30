@@ -79,8 +79,6 @@ export default function Signup() {
                 required
               >
                 <option value="Student">Student</option>
-                <option value="Advisor">Advisor</option>
-                <option value="RIO Admin">RIO Admin</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-body-text">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

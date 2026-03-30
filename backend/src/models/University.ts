@@ -2,29 +2,17 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IUniversity extends Document {
   name: string;
-  country: mongoose.Types.ObjectId;
-  location: string;
-  description: string;
+  countryId: mongoose.Types.ObjectId;
   website: string;
-  logoUrl?: string;
-  applicationDeadline: Date;
-  totalSeats: number;
-  availableSeats: number;
-  requirements: string[];
+  seatLimit: number;
 }
 
 const UniversitySchema: Schema = new Schema(
   {
-    name: { type: String, required: true, unique: true },
-    country: { type: Schema.Types.ObjectId, ref: 'Country', required: true },
-    location: { type: String, required: true },
-    description: { type: String },
+    name: { type: String, required: true },
+    countryId: { type: Schema.Types.ObjectId, ref: 'Country', required: true },
     website: { type: String },
-    logoUrl: { type: String },
-    applicationDeadline: { type: Date, required: true },
-    totalSeats: { type: Number, required: true },
-    availableSeats: { type: Number, required: true },
-    requirements: [{ type: String }],
+    seatLimit: { type: Number, required: true },
   },
   { timestamps: true }
 );

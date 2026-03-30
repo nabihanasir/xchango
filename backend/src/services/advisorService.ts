@@ -2,17 +2,17 @@ import Application, { ApplicationStatus } from '../models/Application';
 import AdvisorProfile from '../models/AdvisorProfile';
 
 export const getAssignedApplications = async (advisorId: string) => {
-  return await Application.find({ advisor: advisorId }).populate('student university');
+  return await Application.find({ advisorId }).populate('studentId selectedUniversity');
 };
 
-export const reviewApplication = async (applicationId: string, status: ApplicationStatus, remarks: string) => {
+export const reviewApplication = async (applicationId: string, status: ApplicationStatus) => {
   return await Application.findByIdAndUpdate(
     applicationId,
-    { status, remarks, reviewDate: new Date() },
+    { status },
     { new: true }
   );
 };
 
 export const getAdvisorProfile = async (userId: string) => {
-  return await AdvisorProfile.findOne({ user: userId }).populate('user', '-password');
+  return await AdvisorProfile.findOne({ userId }).populate('userId', '-password');
 };

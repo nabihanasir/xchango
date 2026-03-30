@@ -3,36 +3,27 @@ import mongoose, { Schema, Document } from 'mongoose';
 export enum UserRole {
   STUDENT = 'student',
   ADVISOR = 'advisor',
+  RIO = 'rio',
   ADMIN = 'admin',
 }
 
-export enum UserStatus {
-  ACTIVE = 'active',
-  PENDING = 'pending',
-  SUSPENDED = 'suspended',
-}
-
 export interface IUser extends Document {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   password: string;
   role: UserRole;
-  status: UserStatus;
-  isVerified: boolean;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const UserSchema: Schema = new Schema(
   {
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
-    role: { type: String, enum: Object.values(UserRole), default: UserRole.STUDENT },
-    status: { type: String, enum: Object.values(UserStatus), default: UserStatus.ACTIVE },
-    isVerified: { type: Boolean, default: false },
+    role: { type: String, enum: Object.values(UserRole), required: true },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

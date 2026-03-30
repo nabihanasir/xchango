@@ -9,7 +9,7 @@ const generateToken = (id: string, role: string) => {
 };
 
 export const registerUser = async (userData: any) => {
-  const { email, password, firstName, lastName, role } = userData;
+  const { email, password, name, role } = userData;
 
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -20,8 +20,7 @@ export const registerUser = async (userData: any) => {
   const hashedPassword = await bcrypt.hash(password, salt);
 
   const user = await User.create({
-    firstName,
-    lastName,
+    name,
     email,
     password: hashedPassword,
     role: role || UserRole.STUDENT,
@@ -29,8 +28,7 @@ export const registerUser = async (userData: any) => {
 
   return {
     _id: user._id,
-    firstName: user.firstName,
-    lastName: user.lastName,
+    name: user.name,
     email: user.email,
     role: user.role,
     token: generateToken(user._id as string, user.role),
@@ -45,8 +43,7 @@ export const loginUser = async (credentials: any) => {
   if (user && (await bcrypt.compare(password, user.password))) {
     return {
       _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      name: user.name,
       email: user.email,
       role: user.role,
       token: generateToken(user._id as string, user.role),

@@ -1,24 +1,27 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export enum CourseType {
+  HOME = 'home',
+  HOST = 'host',
+}
+
 export interface ICourse extends Document {
   name: string;
   code: string;
-  university: mongoose.Types.ObjectId;
-  description: string;
   credits: number;
+  universityId: mongoose.Types.ObjectId;
+  type: CourseType;
 }
 
 const CourseSchema: Schema = new Schema(
   {
     name: { type: String, required: true },
     code: { type: String, required: true },
-    university: { type: Schema.Types.ObjectId, ref: 'University', required: true },
-    description: { type: String },
     credits: { type: Number, required: true },
+    universityId: { type: Schema.Types.ObjectId, ref: 'University', required: true },
+    type: { type: String, enum: Object.values(CourseType), required: true },
   },
   { timestamps: true }
 );
-
-CourseSchema.index({ code: 1, university: 1 }, { unique: true });
 
 export default mongoose.model<ICourse>('Course', CourseSchema);

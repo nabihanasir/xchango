@@ -1,20 +1,32 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export enum MappingStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+}
+
 export interface ICourseMapping extends Document {
-  homeCourse: mongoose.Types.ObjectId;
-  targetCourse: mongoose.Types.ObjectId;
+  applicationId: mongoose.Types.ObjectId;
+  homeCourseId: mongoose.Types.ObjectId;
+  hostCourseId: mongoose.Types.ObjectId;
   similarityScore: number;
-  isApproved: boolean;
-  reviewedBy?: mongoose.Types.ObjectId;
+  status: MappingStatus;
+  advisorId: mongoose.Types.ObjectId;
 }
 
 const CourseMappingSchema: Schema = new Schema(
   {
-    homeCourse: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
-    targetCourse: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
-    similarityScore: { type: Number, min: 0, max: 1 },
-    isApproved: { type: Boolean, default: false },
-    reviewedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    applicationId: { type: Schema.Types.ObjectId, ref: 'Application', required: true },
+    homeCourseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+    hostCourseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+    similarityScore: { type: Number, default: 0 },
+    status: {
+      type: String,
+      enum: Object.values(MappingStatus),
+      default: MappingStatus.PENDING,
+    },
+    advisorId: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );

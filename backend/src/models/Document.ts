@@ -1,20 +1,39 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export enum DocumentType {
+  TRANSCRIPT = 'transcript',
+  PASSPORT = 'passport',
+  CV = 'cv',
+  OTHER = 'other',
+}
+
+export enum VerificationStatus {
+  PENDING = 'pending',
+  VERIFIED = 'verified',
+  REJECTED = 'rejected',
+}
+
 export interface IDocument extends Document {
-  name: string;
-  type: string;
-  url: string;
-  owner: mongoose.Types.ObjectId;
-  application?: mongoose.Types.ObjectId;
+  applicationId: mongoose.Types.ObjectId;
+  fileUrl: string;
+  documentType: DocumentType;
+  verificationStatus: VerificationStatus;
 }
 
 const DocumentSchema: Schema = new Schema(
   {
-    name: { type: String, required: true },
-    type: { type: String, required: true },
-    url: { type: String, required: true },
-    owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    application: { type: Schema.Types.ObjectId, ref: 'Application' },
+    applicationId: { type: Schema.Types.ObjectId, ref: 'Application', required: true },
+    fileUrl: { type: String, required: true },
+    documentType: {
+      type: String,
+      enum: Object.values(DocumentType),
+      required: true,
+    },
+    verificationStatus: {
+      type: String,
+      enum: Object.values(VerificationStatus),
+      default: VerificationStatus.PENDING,
+    },
   },
   { timestamps: true }
 );

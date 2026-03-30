@@ -17,6 +17,7 @@ const AdminLayout = () => {
     { name: 'Applications', path: '/admin/applications', icon: FileText },
     { name: 'Universities', path: '/admin/universities', icon: School },
     { name: 'Courses', path: '/admin/courses', icon: BookOpen },
+    { name: 'Messages', path: '/dashboard/communicate', icon: FileText },
     { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 
