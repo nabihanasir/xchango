@@ -1,0 +1,28 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const authRoutes_1 = __importDefault(require("./authRoutes"));
+const studentRoutes_1 = __importDefault(require("./studentRoutes"));
+const advisorRoutes_1 = __importDefault(require("./advisorRoutes"));
+const adminRoutes_1 = __importDefault(require("./adminRoutes"));
+const documentRoutes_1 = __importDefault(require("./documentRoutes"));
+const chatRoutes_1 = __importDefault(require("./chatRoutes"));
+const notificationRoutes_1 = __importDefault(require("./notificationRoutes"));
+const courseEquivalencyRoutes_1 = __importDefault(require("./courseEquivalencyRoutes"));
+const transcriptRoutes_1 = __importDefault(require("./transcriptRoutes"));
+const applicationRoutes_1 = __importDefault(require("./applicationRoutes"));
+const router = express_1.default.Router();
+router.use('/auth', authRoutes_1.default);
+router.use('/students', studentRoutes_1.default);
+router.use('/advisors', advisorRoutes_1.default);
+router.use('/admin', adminRoutes_1.default);
+router.use('/documents', documentRoutes_1.default);
+router.use('/transcript', transcriptRoutes_1.default);
+router.use('/applications', applicationRoutes_1.default);
+router.use('/chat', chatRoutes_1.default);
+router.use('/notifications', notificationRoutes_1.default);
+router.use('/equivalency', courseEquivalencyRoutes_1.default);
+exports.default = router;

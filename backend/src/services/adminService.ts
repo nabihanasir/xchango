@@ -1,6 +1,6 @@
 import University from '../models/University';
 import Course from '../models/Course';
-import Application from '../models/Application';
+import Application, { ApplicationStatus } from '../models/Application';
 import User from '../models/User';
 import Country from '../models/Country';
 import CourseMapping from '../models/CourseMapping';
@@ -9,8 +9,8 @@ import bcrypt from 'bcryptjs';
 export const getAllStats = async () => {
   const studentCount = await User.countDocuments({ role: 'student' });
   const applicationCount = await Application.countDocuments();
-  const approvedCount = await Application.countDocuments({ status: 'approved' });
-  const pendingCount = await Application.countDocuments({ status: 'submitted' }); // Adjusted for new status
+  const approvedCount = await Application.countDocuments({ status: ApplicationStatus.SHORTLISTED });
+  const pendingCount = await Application.countDocuments({ status: ApplicationStatus.PENDING_INTERVIEW });
 
   // Dashboard Stats matching frontend adminStats
   const adminStats = [
@@ -24,7 +24,7 @@ export const getAllStats = async () => {
   const countries = await Country.find();
   const countryData = await Promise.all(
     countries.map(async (c) => {
-      const apps = await Application.countDocuments({ selectedCountry: c._id });
+      const apps = await Application.countDocuments({ country: c.name });
       return { name: c.name, applications: apps };
     })
   );
@@ -72,7 +72,7 @@ export const updateApplicationOfferLetter = async (applicationId: string, offerL
     issuedBy: application.studentId, // Placeholder, usually an admin
   });
 
-  await Application.findByIdAndUpdate(applicationId, { status: 'offer_issued' });
+  await Application.findByIdAndUpdate(applicationId, { status: ApplicationStatus.READY_FOR_SUBMISSION });
   
   return offerLetter;
 };

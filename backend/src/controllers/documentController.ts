@@ -1,29 +1,47 @@
-import { Request, Response } from 'express';
-import Document from '../models/Document';
-import Application from '../models/Application';
+import { Response } from 'express';
+import { UserRole } from '../models/User';
+import * as studentService from '../services/studentService';
 import { sendResponse } from '../utils/response';
+import { toPublicFileUrl } from '../utils/upload';
+
+const assertStudentAccess = (req: any, studentId: string) => {
+  if (req.user.role === UserRole.STUDENT && req.user._id.toString() !== studentId) {
+    throw new Error('You are not authorized to access these documents.');
+  }
+};
 
 export const uploadDocument = async (req: any, res: Response) => {
   if (!req.file) {
-    return res.status(400).json({ success: false, message: 'No file uploaded', data: null });
+    res.status(400);
+    throw new Error('Please upload a document file.');
   }
 
-  const { applicationId, documentType } = req.body;
-  if (!applicationId || !documentType) {
-    return res.status(400).json({ success: false, message: 'applicationId and documentType are required', data: null });
+  const studentId = req.body.studentId || req.user._id.toString();
+  assertStudentAccess(req, studentId);
+
+  const type = req.body.type || req.body.documentType;
+  if (!type) {
+    res.status(400);
+    throw new Error('Document type is required.');
   }
 
-  const document = await Document.create({
-    applicationId,
-    documentType,
-    fileUrl: req.file.path,
+  const documents = await studentService.addDocument(studentId, {
+    type,
+    status: req.body.status || 'pending',
+    fileUrl: toPublicFileUrl(req.file.path),
   });
 
-  sendResponse(res, 201, 'Document uploaded successfully', document);
+  sendResponse(res, 201, 'Document uploaded successfully', documents);
 };
 
-export const getMyDocuments = async (req: any, res: Response) => {
-  const applications = await Application.find({ studentId: req.user._id }).select('_id');
-  const documents = await Document.find({ applicationId: { $in: applications.map((application) => application._id) } });
+export const getStudentDocuments = async (req: any, res: Response) => {
+  const studentId = req.params.studentId;
+  assertStudentAccess(req, studentId);
+  const documents = await studentService.getDocuments(studentId);
   sendResponse(res, 200, 'Documents fetched successfully', documents);
+};
+
+export const deleteDocument = async (req: any, res: Response) => {
+  const documents = await studentService.removeDocument(req.user._id.toString(), req.params.docId);
+  sendResponse(res, 200, 'Document deleted successfully', documents);
 };

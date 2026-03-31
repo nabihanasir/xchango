@@ -5,12 +5,12 @@ import Signup from './pages/Signup';
 import DashboardLayout from './components/DashboardLayout';
 import StudentDashboard from './pages/dashboard/StudentDashboard';
 import UniversityProgrammes from './pages/dashboard/UniversityProgrammes';
-import YourApplication from './pages/dashboard/YourApplication';
+import StudentApplicationsPage from './pages/dashboard/StudentApplicationsPage';
 import Communicate from './pages/dashboard/Communicate';
 import CourseEquivalencyBrowse from './pages/dashboard/CourseEquivalencyBrowse';
 import CourseEquivalencyRequests from './pages/dashboard/CourseEquivalencyRequests';
-
-import ApplicationWizard from './pages/dashboard/ApplicationWizard';
+import StudentProfile from './pages/dashboard/StudentProfile';
+import ApplicationWorkflowPage from './pages/dashboard/ApplicationWorkflowPage';
 
 // Admin Imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -37,9 +37,11 @@ function App() {
         {/* Dashboard Routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<StudentDashboard />} />
+          <Route path="profile" element={<StudentProfile />} />
           <Route path="programmes" element={<UniversityProgrammes />} />
-          <Route path="applications" element={<YourApplication />} />
-          <Route path="applications/new" element={<ApplicationWizard />} />
+          <Route path="applications" element={<StudentApplicationsPage />} />
+          <Route path="applications/new" element={<ApplicationWorkflowPage />} />
+          <Route path="applications/:id" element={<ApplicationWorkflowPage />} />
           <Route path="communicate" element={<Communicate />} />
           <Route path="equivalency/courses" element={<CourseEquivalencyBrowse />} />
           <Route path="equivalency/requests" element={<CourseEquivalencyRequests />} />

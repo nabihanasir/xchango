@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   Menu, X, Bell, ChevronRight, LogOut
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface NavItem {
   name: string;
@@ -24,6 +25,7 @@ interface GlobalLayoutProps {
 
 const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) => {
   const location = useLocation();
+  const { logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -110,6 +112,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) =
           </button>
           <Link
             to="/login"
+            onClick={logout}
             className="flex items-center gap-4 px-4 py-4 rounded-2xl text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
           >
             <LogOut className="h-5 w-5" />

@@ -70,6 +70,26 @@ const seed = async () => {
       program: 'BS Computer Science',
       semester: '6th',
       cgpa: 3.8,
+      basicInfo: {
+        fullName: 'Nabiha Nasir',
+        cmsId: '49141',
+        email: 'student@xchango.com',
+        phone: '+92-300-0000003',
+        department: 'BS Computer Science',
+        semester: 6,
+      },
+      preferences: {
+        preferredCountries: ['South Korea', 'Malaysia'],
+        degreeLevel: 'Undergraduate',
+        fieldOfInterest: 'Computer Science',
+        intake: 'Fall 2026',
+      },
+      transcript: {
+        fileUrl: '',
+        cgpa: 3.8,
+        totalCredits: 18,
+        semesters: [],
+      },
     });
 
     const student2 = await User.create({
@@ -88,6 +108,26 @@ const seed = async () => {
       program: 'BS Business Administration',
       semester: '4th',
       cgpa: 3.5,
+      basicInfo: {
+        fullName: 'Alice Johnson',
+        cmsId: '48220',
+        email: 'alice@example.com',
+        phone: '+92-300-0000004',
+        department: 'BS Business Administration',
+        semester: 4,
+      },
+      preferences: {
+        preferredCountries: ['Malaysia'],
+        degreeLevel: 'Undergraduate',
+        fieldOfInterest: 'Business Administration',
+        intake: 'Spring 2026',
+      },
+      transcript: {
+        fileUrl: '',
+        cgpa: 3.5,
+        totalCredits: 12,
+        semesters: [],
+      },
     });
 
     // Create Countries
@@ -126,18 +166,48 @@ const seed = async () => {
     // Create Applications
     await Application.create({
       studentId: student1._id,
-      selectedCountry: sk._id,
-      selectedUniversity: snu._id,
-      status: ApplicationStatus.APPROVED,
-      intake: 'Fall 2026',
+      country: 'South Korea',
+      university: 'KDU',
+      program: 'BS Computer Science',
+      travelHistory: {
+        hasTravelHistory: true,
+        details: 'Visited Malaysia for an academic event.',
+      },
+      passportValid: true,
+      financialEligible: true,
+      consentExtension: true,
+      medicalCondition: {
+        hasCondition: false,
+        details: '',
+      },
+      registrationNumber: '49141',
+      accommodationPreference: 'UNIVERSITY',
+      status: ApplicationStatus.SHORTLISTED,
+      documents: [],
+      selectedCourses: [],
     });
 
     await Application.create({
       studentId: student2._id,
-      selectedCountry: malaysia._id,
-      selectedUniversity: um._id,
-      status: ApplicationStatus.SUBMITTED,
-      intake: 'Spring 2026',
+      country: 'Malaysia',
+      university: 'MMU',
+      program: 'BS Business Administration',
+      travelHistory: {
+        hasTravelHistory: false,
+        details: '',
+      },
+      passportValid: true,
+      financialEligible: false,
+      consentExtension: true,
+      medicalCondition: {
+        hasCondition: false,
+        details: '',
+      },
+      registrationNumber: '48220',
+      accommodationPreference: 'SELF',
+      status: ApplicationStatus.PENDING_INTERVIEW,
+      documents: [],
+      selectedCourses: [],
     });
 
     const hostCourse1 = await Course.create({

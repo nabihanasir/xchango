@@ -1,16 +1,14 @@
 import express from 'express';
 import * as studentController from '../controllers/studentController';
-import { protect, authorize } from '../middleware/authMiddleware';
-import { UserRole } from '../models/User';
+import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 router.use(protect);
-router.use(authorize(UserRole.STUDENT));
 
 router.get('/profile', studentController.getProfile);
 router.put('/profile', studentController.updateProfile);
-router.post('/apply', studentController.apply);
-router.get('/applications', studentController.getApplications);
+router.get('/:id', studentController.getStudentById);
+router.put('/:id', studentController.updateStudentById);
 
 export default router;

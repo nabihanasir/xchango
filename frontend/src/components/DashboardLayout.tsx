@@ -1,11 +1,14 @@
 import {
-  Home, School, FileText, MessageSquare, BookOpenCheck, ListChecks
+  Home, School, FileText, MessageSquare, BookOpenCheck, ListChecks, UserRoundCog
 } from 'lucide-react';
 import GlobalLayout from './GlobalLayout';
+import { useAuth } from '../context/AuthContext';
 
 const DashboardLayout = () => {
+  const { user } = useAuth();
   const navItems = [
     { name: 'Dashboard',               path: '/dashboard',              icon: Home },
+    { name: 'Student Profile',         path: '/dashboard/profile',      icon: UserRoundCog },
     { name: 'University & Programmes', path: '/dashboard/programmes',   icon: School },
     { name: 'Your Application',        path: '/dashboard/applications', icon: FileText },
     { name: 'Browse Equivalency',      path: '/dashboard/equivalency/courses', icon: BookOpenCheck },
@@ -13,10 +16,17 @@ const DashboardLayout = () => {
     { name: 'Communicate',             path: '/dashboard/communicate',  icon: MessageSquare },
   ];
 
+  const initials = (user?.name || 'Student Name')
+    .split(' ')
+    .map((part) => part[0] || '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   const userProfile = {
-    initials: 'ST',
-    name: 'Student Name',
-    role: 'Undergraduate'
+    initials: initials || 'ST',
+    name: user?.name || 'Student Name',
+    role: 'Student'
   };
 
   return (
