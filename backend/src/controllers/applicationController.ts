@@ -28,7 +28,10 @@ export const updateApplicationStep = async (req: any, res: Response) => {
 };
 
 export const getApplication = async (req: any, res: Response) => {
-  const application = await applicationService.getApplicationById(req.params.id);
+  const application = await applicationService.getApplicationById(req.params.id, {
+    _id: req.user._id.toString(),
+    role: req.user.role,
+  });
   sendResponse(res, 200, 'Application fetched successfully', application);
 };
 
@@ -45,13 +48,31 @@ export const submitApplication = async (req: any, res: Response) => {
   sendResponse(res, 200, `Application submitted successfully.${warningSuffix}`, result.application);
 };
 
+export const assignAdvisor = async (req: any, res: Response) => {
+  const application = await applicationService.assignAdvisor(req.params.id, req.body.advisorId);
+  sendResponse(res, 200, 'Advisor assigned successfully', application);
+};
+
+export const getAdvisorApplications = async (req: any, res: Response) => {
+  const applications = await applicationService.getAdvisorApplications(req.user._id.toString());
+  sendResponse(res, 200, 'Assigned applications fetched successfully', applications);
+};
+
 export const scheduleInterview = async (req: any, res: Response) => {
-  const application = await applicationService.scheduleInterview(req.params.id, req.body);
+  const application = await applicationService.scheduleInterview(
+    req.params.id,
+    req.user._id.toString(),
+    req.body
+  );
   sendResponse(res, 200, 'Interview scheduled successfully', application);
 };
 
 export const updateStatus = async (req: any, res: Response) => {
-  const application = await applicationService.updateStatus(req.params.id, req.body.status as ApplicationStatus);
+  const application = await applicationService.updateStatus(
+    req.params.id,
+    req.user._id.toString(),
+    req.body.status as ApplicationStatus
+  );
   sendResponse(res, 200, 'Application status updated successfully', application);
 };
 

@@ -46,8 +46,8 @@ const UserSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
-    phone: { type: String, required: true },
-    sapId: { type: String, required: true, unique: true },
+    phone: { type: String, trim: true },
+    sapId: { type: String, trim: true, unique: true, sparse: true },
     role: { type: String, enum: Object.values(UserRole), required: true },
     isActive: { type: Boolean, default: true },
 }, { timestamps: true });

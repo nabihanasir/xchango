@@ -10,6 +10,15 @@ const generateToken = (id: string, role: string) => {
 
 export const registerUser = async (userData: any) => {
   const { email, password, name, role, phone, sapId } = userData;
+  const normalizedRole = role || UserRole.STUDENT;
+
+  if (normalizedRole !== UserRole.STUDENT) {
+    throw new Error('Self registration is only available for student accounts.');
+  }
+
+  if (!phone?.trim() || !sapId?.trim()) {
+    throw new Error('Phone and SAP ID are required for student registration.');
+  }
 
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -23,9 +32,9 @@ export const registerUser = async (userData: any) => {
     name,
     email,
     password: hashedPassword,
-    role: role || UserRole.STUDENT,
-    phone,
-    sapId,
+    role: normalizedRole,
+    phone: phone.trim(),
+    sapId: sapId.trim(),
   });
 
   return {

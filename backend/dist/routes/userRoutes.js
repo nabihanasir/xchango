@@ -37,14 +37,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const studentController = __importStar(require("../controllers/studentController"));
+const adminController = __importStar(require("../controllers/adminController"));
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const authorize_1 = require("../middleware/authorize");
 const User_1 = require("../models/User");
 const router = express_1.default.Router();
 router.use(authMiddleware_1.protect);
-router.get('/profile', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT), studentController.getProfile);
-router.put('/profile', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT), studentController.updateProfile);
-router.get('/:id', studentController.getStudentById);
-router.put('/:id', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT, User_1.UserRole.ADMIN), studentController.updateStudentById);
+router.use((0, authorize_1.authorizeRoles)(User_1.UserRole.ADMIN));
+router.get('/', adminController.getUsers);
+router.post('/', adminController.createUser);
 exports.default = router;

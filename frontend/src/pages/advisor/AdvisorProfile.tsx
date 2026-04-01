@@ -1,43 +1,109 @@
-import { User, Mail, Building, Briefcase } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Briefcase, Building, Mail, User } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+
+interface AdvisorProfileData {
+  _id: string;
+  designation: string;
+  department: string;
+  experience?: number;
+  userId: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+}
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 export default function AdvisorProfile() {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<AdvisorProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user?.token) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError('');
+
+      try {
+        const response = await fetch(`${API_BASE}/advisors/profile`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+        const payload = await response.json();
+
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || 'Unable to load advisor profile.');
+        }
+
+        setProfile(payload.data);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : 'Unable to load advisor profile.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadProfile();
+  }, [user?.token]);
+
+  if (loading) {
+    return <div className="glass-card h-64 rounded-[2rem] animate-pulse" />;
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-[2rem] border border-red-200 bg-red-50 px-6 py-5 text-sm font-medium text-red-700">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
-      <div className="bg-white rounded-3xl p-8 border border-light-color/50 shadow-md">
-        <h2 className="text-2xl font-black text-dark-blue mb-8">My Profile</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="glass-card rounded-[2rem] p-8 shadow-md">
+        <h2 className="mb-8 text-2xl font-black text-dark-blue">My Profile</h2>
+
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <div className="h-20 w-20 bg-dark-blue rounded-3xl flex items-center justify-center text-white">
+              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-dark-blue text-white">
                 <User className="h-10 w-10" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-dark-blue">Advisor Name</h3>
-                <p className="text-body-text">Senior Academic Advisor</p>
+                <h3 className="text-xl font-bold text-dark-blue">{profile?.userId.name || user?.name || 'Advisor'}</h3>
+                <p className="text-body-text">{profile?.designation || 'Advisor'}</p>
               </div>
             </div>
 
             <div className="space-y-4 pt-4">
               <div className="flex items-center gap-3 text-body-text">
                 <Mail className="h-5 w-5 text-accent-yellow" />
-                <span className="font-semibold">advisor@xchango.com</span>
+                <span className="font-semibold">{profile?.userId.email || user?.email || 'Email unavailable'}</span>
               </div>
               <div className="flex items-center gap-3 text-body-text">
                 <Building className="h-5 w-5 text-accent-yellow" />
-                <span className="font-semibold">Management Sciences</span>
+                <span className="font-semibold">{profile?.department || 'Department not set'}</span>
               </div>
               <div className="flex items-center gap-3 text-body-text">
                 <Briefcase className="h-5 w-5 text-accent-yellow" />
-                <span className="font-semibold">7 Years Experience</span>
+                <span className="font-semibold">{profile?.experience ?? 0} Years Experience</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-50 p-6 rounded-2xl border border-light-color/50">
-            <h4 className="font-bold text-dark-blue mb-4 uppercase text-xs tracking-widest">About</h4>
-            <p className="text-sm text-body-text leading-relaxed">
-              Dedicated academic advisor specializing in international exchange programs and course equivalency mapping within the Management Sciences department.
+          <div className="rounded-2xl border border-light-color/50 bg-slate-50 p-6">
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-dark-blue">Advisor scope</h4>
+            <p className="text-sm leading-relaxed text-body-text">
+              Your account can review only applications assigned by an admin and can access only the student profiles connected to those assigned applications.
             </p>
           </div>
         </div>

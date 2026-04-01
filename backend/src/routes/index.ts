@@ -3,6 +3,7 @@ import authRoutes from './authRoutes';
 import studentRoutes from './studentRoutes';
 import advisorRoutes from './advisorRoutes';
 import adminRoutes from './adminRoutes';
+import userRoutes from './userRoutes';
 import documentRoutes from './documentRoutes';
 import chatRoutes from './chatRoutes';
 import notificationRoutes from './notificationRoutes';
@@ -13,6 +14,7 @@ import applicationRoutes from './applicationRoutes';
 const router = express.Router();
 
 router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 router.use('/students', studentRoutes);
 router.use('/advisors', advisorRoutes);
 router.use('/admin', adminRoutes);

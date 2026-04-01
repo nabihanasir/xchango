@@ -72,6 +72,7 @@ const ApplicationInterviewSchema = new mongoose_1.Schema({
 }, { _id: false });
 const ApplicationSchema = new mongoose_1.Schema({
     studentId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    advisorId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', index: true },
     country: {
         type: String,
         enum: Object.values(ApplicationCountry),

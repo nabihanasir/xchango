@@ -36,11 +36,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateStudentById = exports.getStudentById = exports.updateProfile = exports.getProfile = void 0;
 const User_1 = require("../models/User");
 const studentService = __importStar(require("../services/studentService"));
+const applicationService = __importStar(require("../services/applicationService"));
 const response_1 = require("../utils/response");
 const assertStudentAccess = (req, studentId) => {
     if (req.user.role === User_1.UserRole.STUDENT && req.user._id.toString() !== studentId) {
         throw new Error('You are not authorized to access this student profile.');
     }
+};
+const assertStudentReadAccess = async (req, studentId) => {
+    if (req.user.role === User_1.UserRole.ADMIN) {
+        return;
+    }
+    if (req.user.role === User_1.UserRole.STUDENT) {
+        assertStudentAccess(req, studentId);
+        return;
+    }
+    if (req.user.role === User_1.UserRole.ADVISOR) {
+        const canAccess = await applicationService.advisorCanAccessStudent(req.user._id.toString(), studentId);
+        if (!canAccess) {
+            throw new Error('You are not authorized to access this student profile.');
+        }
+        return;
+    }
+    throw new Error('You are not authorized to access this student profile.');
+};
+const assertStudentWriteAccess = (req, studentId) => {
+    if (req.user.role === User_1.UserRole.ADMIN) {
+        return;
+    }
+    assertStudentAccess(req, studentId);
 };
 const getRequestedStudentId = (req) => req.params.id || req.user._id.toString();
 const getProfile = async (req, res) => {
@@ -55,14 +79,14 @@ const updateProfile = async (req, res) => {
 exports.updateProfile = updateProfile;
 const getStudentById = async (req, res) => {
     const studentId = getRequestedStudentId(req);
-    assertStudentAccess(req, studentId);
+    await assertStudentReadAccess(req, studentId);
     const profile = await studentService.getStudentProfile(studentId);
     (0, response_1.sendResponse)(res, 200, 'Student profile fetched', profile);
 };
 exports.getStudentById = getStudentById;
 const updateStudentById = async (req, res) => {
     const studentId = getRequestedStudentId(req);
-    assertStudentAccess(req, studentId);
+    assertStudentWriteAccess(req, studentId);
     const profile = await studentService.updateStudentProfile(studentId, req.body);
     (0, response_1.sendResponse)(res, 200, 'Student profile updated', profile);
 };

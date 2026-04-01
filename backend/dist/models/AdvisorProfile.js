@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const AdvisorProfileSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+    designation: { type: String, required: true, trim: true },
     department: { type: String, required: true },
     assignedStudents: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }],
     experience: { type: Number },

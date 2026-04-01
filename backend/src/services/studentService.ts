@@ -20,8 +20,8 @@ const buildDefaultProfile = (user: {
   _id: IStudentProfile['userId'];
   name: string;
   email: string;
-  phone: string;
-  sapId: string;
+  phone?: string;
+  sapId?: string;
 }) => ({
   userId: user._id,
   registrationNumber: user.sapId || '',
@@ -91,7 +91,7 @@ const syncProfileWithLegacyFields = (profile: IStudentProfile) => {
 
 const hydrateProfileFromUser = (
   profile: IStudentProfile,
-  user: { name: string; email: string; phone: string; sapId: string }
+  user: { name: string; email: string; phone?: string; sapId?: string }
 ) => {
   ensureProfileShape(profile);
   profile.basicInfo.fullName = profile.basicInfo.fullName || user.name || '';

@@ -42,6 +42,7 @@ export interface IApplicationInterview {
 
 export interface IApplication extends Document {
   studentId: mongoose.Types.ObjectId;
+  advisorId?: mongoose.Types.ObjectId;
   country: ApplicationCountry;
   university: string;
   program: string;
@@ -93,6 +94,7 @@ const ApplicationInterviewSchema = new Schema<IApplicationInterview>(
 const ApplicationSchema = new Schema<IApplication>(
   {
     studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    advisorId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
     country: {
       type: String,
       enum: Object.values(ApplicationCountry),

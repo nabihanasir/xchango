@@ -1,12 +1,13 @@
 import express from 'express';
 import * as adminController from '../controllers/adminController';
-import { protect, authorize } from '../middleware/authMiddleware';
+import { protect } from '../middleware/authMiddleware';
+import { authorizeRoles } from '../middleware/authorize';
 import { UserRole } from '../models/User';
 
 const router = express.Router();
 
 router.use(protect);
-router.use(authorize(UserRole.ADMIN));
+router.use(authorizeRoles(UserRole.ADMIN));
 
 router.get('/stats', adminController.getDashboardStats);
 router.get('/users', adminController.getUsers);

@@ -54,14 +54,18 @@ export const applicationApi = {
     unwrap<WorkflowApplication>(applicationApiClient.get(`/applications/${applicationId}`)),
   getStudentApplications: (studentId: string) =>
     unwrap<WorkflowApplication[]>(applicationApiClient.get(`/applications/student/${studentId}`)),
+  getAdvisorApplications: () =>
+    unwrap<WorkflowApplication[]>(applicationApiClient.get('/applications/advisor')),
   submitApplication: (applicationId: string) =>
     unwrap<WorkflowApplication>(applicationApiClient.post(`/applications/${applicationId}/submit`)),
   updateStatus: (applicationId: string, status: ApplicationStatus) =>
     unwrap<WorkflowApplication>(applicationApiClient.patch(`/applications/${applicationId}/status`, { status })),
+  assignAdvisor: (applicationId: string, advisorId: string) =>
+    unwrap<WorkflowApplication>(applicationApiClient.patch(`/applications/${applicationId}/assign-advisor`, { advisorId })),
   scheduleInterview: (
     applicationId: string,
     payload: { date: string; location: string; stakeholders: string[] }
-  ) => unwrap<WorkflowApplication>(applicationApiClient.post(`/applications/${applicationId}/interview`, payload)),
+  ) => unwrap<WorkflowApplication>(applicationApiClient.patch(`/applications/${applicationId}/schedule-interview`, payload)),
   uploadDocuments: async (applicationId: string, type: string, files: File[]) => {
     const formData = new FormData();
     formData.append('type', type);

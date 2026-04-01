@@ -12,6 +12,15 @@ export type ApplicationStatus =
   | 'COURSE_SELECTION_PENDING'
   | 'READY_FOR_SUBMISSION';
 
+export interface ApplicationUserSummary {
+  _id: string;
+  name: string;
+  email: string;
+  sapId?: string;
+  phone?: string;
+  role?: string;
+}
+
 export interface WorkflowApplicationDocument {
   _id?: string;
   type: string;
@@ -31,7 +40,8 @@ export interface WorkflowApplicationInterview {
 
 export interface WorkflowApplication {
   _id: string;
-  studentId: string;
+  studentId: string | ApplicationUserSummary;
+  advisorId?: string | ApplicationUserSummary | null;
   country: ApplicationCountry;
   university: string;
   program: string;
@@ -91,4 +101,24 @@ export const applicationStatusTone: Record<ApplicationStatus, string> = {
   DOCUMENT_PENDING: 'bg-orange-100 text-orange-700',
   COURSE_SELECTION_PENDING: 'bg-cyan-100 text-cyan-700',
   READY_FOR_SUBMISSION: 'bg-green-100 text-green-700',
+};
+
+export const getApplicationUserId = (
+  user: string | ApplicationUserSummary | null | undefined
+) => {
+  if (!user) {
+    return '';
+  }
+
+  return typeof user === 'string' ? user : user._id;
+};
+
+export const getApplicationUserSummary = (
+  user: string | ApplicationUserSummary | null | undefined
+) => {
+  if (!user || typeof user === 'string') {
+    return null;
+  }
+
+  return user;
 };

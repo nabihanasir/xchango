@@ -1,10 +1,12 @@
 import University from '../models/University';
 import Course from '../models/Course';
 import Application, { ApplicationStatus } from '../models/Application';
-import User from '../models/User';
+import User, { UserRole } from '../models/User';
 import Country from '../models/Country';
 import CourseMapping from '../models/CourseMapping';
+import AdvisorProfile from '../models/AdvisorProfile';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 export const getAllStats = async () => {
   const studentCount = await User.countDocuments({ role: 'student' });
@@ -52,11 +54,82 @@ export const getAllUsers = async () => {
   return await User.find().select('-password');
 };
 
+const generateTemporaryPassword = () => {
+  return crypto.randomBytes(6).toString('base64url');
+};
+
 export const createUser = async (userData: any) => {
-  const { password, ...rest } = userData;
+  const {
+    name,
+    email,
+    password,
+    role,
+    phone,
+    sapId,
+    designation,
+    department,
+    experience,
+  } = userData;
+
+  if (!name?.trim() || !email?.trim() || !role) {
+    throw new Error('Name, email, and role are required.');
+  }
+
+  const normalizedRole = role as UserRole;
+  const existingUser = await User.findOne({ email: email.trim().toLowerCase() });
+  if (existingUser) {
+    throw new Error('User already exists.');
+  }
+
+  if (normalizedRole === UserRole.ADVISOR) {
+    if (!designation?.trim() || !department?.trim()) {
+      throw new Error('Designation and department are required for advisors.');
+    }
+  }
+
+  if (normalizedRole === UserRole.STUDENT && (!phone?.trim() || !sapId?.trim())) {
+    throw new Error('Phone and SAP ID are required for student accounts.');
+  }
+
+  const plainPassword = password?.trim() || generateTemporaryPassword();
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  return await User.create({ ...rest, password: hashedPassword });
+  const hashedPassword = await bcrypt.hash(plainPassword, salt);
+
+  const user = await User.create({
+    name: name.trim(),
+    email: email.trim().toLowerCase(),
+    password: hashedPassword,
+    role: normalizedRole,
+    phone: phone?.trim() || undefined,
+    sapId: sapId?.trim() || undefined,
+  });
+
+  try {
+    if (normalizedRole === UserRole.ADVISOR) {
+      await AdvisorProfile.create({
+        userId: user._id,
+        designation: designation.trim(),
+        department: department.trim(),
+        assignedStudents: [],
+        experience: typeof experience === 'number' ? experience : 0,
+      });
+    }
+  } catch (error) {
+    await User.findByIdAndDelete(user._id);
+    throw error;
+  }
+
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone,
+    sapId: user.sapId,
+    designation: normalizedRole === UserRole.ADVISOR ? designation?.trim() : undefined,
+    department: normalizedRole === UserRole.ADVISOR ? department?.trim() : undefined,
+    ...(password?.trim() ? {} : { password: plainPassword }),
+  };
 };
 
 export const updateApplicationOfferLetter = async (applicationId: string, offerLetterUrl: string) => {

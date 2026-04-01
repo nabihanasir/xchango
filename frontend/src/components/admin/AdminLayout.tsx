@@ -3,8 +3,10 @@ import {
   BookOpen, Settings
 } from 'lucide-react';
 import GlobalLayout from '../GlobalLayout';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminLayout = () => {
+  const { user } = useAuth();
   const navItems = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Users', path: '/admin/users', icon: Users },
@@ -15,9 +17,16 @@ const AdminLayout = () => {
     { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 
+  const initials = (user?.name || 'Admin')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+
   const userProfile = {
-    initials: 'AD',
-    name: 'Admin User',
+    initials: initials || 'AD',
+    name: user?.name || 'Admin User',
     role: 'Super Admin'
   };
 

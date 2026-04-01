@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.selectCourses = exports.uploadDocuments = exports.updateStatus = exports.scheduleInterview = exports.submitApplication = exports.getStudentApplications = exports.getApplication = exports.updateApplicationStep = exports.createApplication = void 0;
+exports.selectCourses = exports.uploadDocuments = exports.updateStatus = exports.scheduleInterview = exports.getAdvisorApplications = exports.assignAdvisor = exports.submitApplication = exports.getStudentApplications = exports.getApplication = exports.updateApplicationStep = exports.createApplication = void 0;
 const User_1 = require("../models/User");
 const applicationService = __importStar(require("../services/applicationService"));
 const response_1 = require("../utils/response");
@@ -56,7 +56,10 @@ const updateApplicationStep = async (req, res) => {
 };
 exports.updateApplicationStep = updateApplicationStep;
 const getApplication = async (req, res) => {
-    const application = await applicationService.getApplicationById(req.params.id);
+    const application = await applicationService.getApplicationById(req.params.id, {
+        _id: req.user._id.toString(),
+        role: req.user.role,
+    });
     (0, response_1.sendResponse)(res, 200, 'Application fetched successfully', application);
 };
 exports.getApplication = getApplication;
@@ -73,13 +76,23 @@ const submitApplication = async (req, res) => {
     (0, response_1.sendResponse)(res, 200, `Application submitted successfully.${warningSuffix}`, result.application);
 };
 exports.submitApplication = submitApplication;
+const assignAdvisor = async (req, res) => {
+    const application = await applicationService.assignAdvisor(req.params.id, req.body.advisorId);
+    (0, response_1.sendResponse)(res, 200, 'Advisor assigned successfully', application);
+};
+exports.assignAdvisor = assignAdvisor;
+const getAdvisorApplications = async (req, res) => {
+    const applications = await applicationService.getAdvisorApplications(req.user._id.toString());
+    (0, response_1.sendResponse)(res, 200, 'Assigned applications fetched successfully', applications);
+};
+exports.getAdvisorApplications = getAdvisorApplications;
 const scheduleInterview = async (req, res) => {
-    const application = await applicationService.scheduleInterview(req.params.id, req.body);
+    const application = await applicationService.scheduleInterview(req.params.id, req.user._id.toString(), req.body);
     (0, response_1.sendResponse)(res, 200, 'Interview scheduled successfully', application);
 };
 exports.scheduleInterview = scheduleInterview;
 const updateStatus = async (req, res) => {
-    const application = await applicationService.updateStatus(req.params.id, req.body.status);
+    const application = await applicationService.updateStatus(req.params.id, req.user._id.toString(), req.body.status);
     (0, response_1.sendResponse)(res, 200, 'Application status updated successfully', application);
 };
 exports.updateStatus = updateStatus;

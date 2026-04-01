@@ -4,6 +4,8 @@ import Application, {
   ApplicationStatus,
   IApplication,
 } from '../models/Application';
+import User, { UserRole } from '../models/User';
+import AdvisorProfile from '../models/AdvisorProfile';
 
 export const applicationOptions: Record<ApplicationCountry, string[]> = {
   [ApplicationCountry.MALAYSIA]: ['MMU', 'UTHM'],
@@ -40,6 +42,28 @@ const ensureApplicationAccess = (application: IApplication | null, studentId: st
   }
 
   return application;
+};
+
+const ensureApplicationExists = (application: IApplication | null) => {
+  if (!application) {
+    throw new Error('Application not found.');
+  }
+
+  return application;
+};
+
+const ensureAdvisorOwnsApplication = (application: IApplication, advisorId: string) => {
+  if (!application.advisorId || application.advisorId.toString() !== advisorId) {
+    throw new Error('You are not authorized to access this application.');
+  }
+
+  return application;
+};
+
+const populateApplication = <T>(query: T) => {
+  return (query as any)
+    .populate('studentId', 'name email sapId phone role')
+    .populate('advisorId', 'name email role');
 };
 
 const validateUniversitySelection = (country: ApplicationCountry, university: string) => {
@@ -214,17 +238,36 @@ export const updateApplicationStep = async (
   return application;
 };
 
-export const getApplicationById = async (applicationId: string) => {
-  const application = await Application.findById(applicationId).populate('studentId', 'name email sapId');
-  if (!application) {
-    throw new Error('Application not found.');
+export const getApplicationById = async (
+  applicationId: string,
+  actor: { _id: string; role: UserRole }
+) => {
+  const application = ensureApplicationExists(
+    await populateApplication(Application.findById(applicationId))
+  );
+
+  if (actor.role === UserRole.ADMIN) {
+    return application;
   }
 
-  return application;
+  if (actor.role === UserRole.STUDENT) {
+    return ensureApplicationAccess(application, actor._id);
+  }
+
+  if (actor.role === UserRole.ADVISOR) {
+    return ensureAdvisorOwnsApplication(application, actor._id);
+  }
+
+  throw new Error('You are not authorized to access this application.');
 };
 
 export const getStudentApplications = async (studentId: string) =>
   Application.find({ studentId }).sort({ createdAt: -1 });
+
+export const getAdvisorApplications = async (advisorId: string) =>
+  populateApplication(
+    Application.find({ advisorId }).sort({ createdAt: -1 })
+  );
 
 export const submitApplication = async (applicationId: string, studentId: string) => {
   const application = ensureApplicationAccess(await Application.findById(applicationId), studentId);
@@ -238,34 +281,60 @@ export const submitApplication = async (applicationId: string, studentId: string
   };
 };
 
+export const assignAdvisor = async (applicationId: string, advisorId: string) => {
+  const application = ensureApplicationExists(await Application.findById(applicationId));
+  const advisor = await User.findById(advisorId);
+
+  if (!advisor || advisor.role !== UserRole.ADVISOR) {
+    throw new Error('Advisor not found.');
+  }
+
+  application.advisorId = advisor._id as any;
+  application.status = ApplicationStatus.PENDING_INTERVIEW;
+  await application.save();
+
+  const assignedStudentIds = await Application.distinct('studentId', { advisorId });
+  await AdvisorProfile.findOneAndUpdate(
+    { userId: advisorId },
+    { assignedStudents: assignedStudentIds }
+  );
+
+  return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
+};
+
 export const scheduleInterview = async (
   applicationId: string,
+  advisorId: string,
   interview: {
     date: Date;
     location: string;
     stakeholders: string[];
   }
 ) => {
-  const application = await Application.findById(applicationId);
-  if (!application) {
-    throw new Error('Application not found.');
-  }
+  const application = ensureAdvisorOwnsApplication(
+    ensureApplicationExists(await Application.findById(applicationId)),
+    advisorId
+  );
 
-  if (application.status !== ApplicationStatus.PENDING_INTERVIEW) {
+  if (![ApplicationStatus.PENDING_INTERVIEW, ApplicationStatus.INTERVIEW_SCHEDULED].includes(application.status)) {
     throw new Error('Only applications pending interview can be scheduled.');
   }
 
   application.interview = interview;
   application.status = ApplicationStatus.INTERVIEW_SCHEDULED;
   await application.save();
-  return application;
+  return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
 };
 
-export const updateStatus = async (applicationId: string, status: ApplicationStatus) => {
-  const application = await Application.findById(applicationId);
-  if (!application) {
-    throw new Error('Application not found.');
-  }
+export const updateStatus = async (
+  applicationId: string,
+  advisorId: string,
+  status: ApplicationStatus
+) => {
+  const application = ensureAdvisorOwnsApplication(
+    ensureApplicationExists(await Application.findById(applicationId)),
+    advisorId
+  );
 
   if (![ApplicationStatus.SHORTLISTED, ApplicationStatus.REJECTED].includes(status)) {
     throw new Error('Only shortlist or reject decisions are supported here.');
@@ -277,7 +346,7 @@ export const updateStatus = async (applicationId: string, status: ApplicationSta
 
   application.status = status;
   await application.save();
-  return application;
+  return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
 };
 
 export const uploadDocuments = async (
@@ -315,4 +384,9 @@ export const selectCourses = async (
   application.status = calculatePostShortlistStatus(application);
   await application.save();
   return application;
+};
+
+export const advisorCanAccessStudent = async (advisorId: string, studentId: string) => {
+  const application = await Application.exists({ advisorId, studentId });
+  return Boolean(application);
 };
