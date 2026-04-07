@@ -10,28 +10,43 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
- 
-const { login } = useAuth();
+  const [errorMessage, setErrorMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-const handleSubmit = async (e: React.SyntheticEvent) => {
-  e.preventDefault();
+  const { login } = useAuth();
 
-  const res = await fetch('http://localhost:5000/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setErrorMessage('');
 
-  const data = await res.json();
-  login(data.data);          // saves user + token to context and localStorage
-  const destination =
-    data.data.role === 'advisor'
-      ? '/advisor'
-      : data.data.role === 'admin'
-        ? '/admin'
-        : '/dashboard';
-  window.location.href = destination;
-};
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.success || !data?.data) {
+        throw new Error(data?.message || 'Invalid email or password.');
+      }
+
+      login(data.data);
+      const destination =
+        data.data.role === 'advisor'
+          ? '/advisor'
+          : data.data.role === 'admin'
+            ? '/admin'
+            : '/dashboard';
+      window.location.href = destination;
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to sign in.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
   return (
     <AuthLayout title="Welcome Back" subtitle="Please sign in to your account">
       <form className="space-y-6 w-full" onSubmit={handleSubmit}>
@@ -64,9 +79,15 @@ const handleSubmit = async (e: React.SyntheticEvent) => {
         />
 
         <Button type="submit" variant="primary" className="py-4 text-lg mt-6">
-          Sign In
+          {submitting ? 'Signing In...' : 'Sign In'}
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
+
+        {errorMessage ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {errorMessage}
+          </div>
+        ) : null}
       </form>
 
       <div className="w-full mt-8 flex items-center justify-between">

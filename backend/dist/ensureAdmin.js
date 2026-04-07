@@ -62,8 +62,8 @@ const ensureAdmin = async () => {
                 isActive: true,
             },
         }, {
-            new: true,
             upsert: true,
+            returnDocument: 'after',
         });
         console.log('Admin user is ready.');
         console.log(`Email: ${ADMIN_EMAIL}`);

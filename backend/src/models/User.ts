@@ -25,11 +25,25 @@ const UserSchema: Schema = new Schema(
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
     phone: { type: String, trim: true },
-    sapId: { type: String, trim: true, unique: true, sparse: true },
+    sapId: { type: String, trim: true },
     role: { type: String, enum: Object.values(UserRole), required: true },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
+);
+
+UserSchema.index(
+  { sapId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      sapId: {
+        $exists: true,
+        $type: 'string',
+        $gt: '',
+      },
+    },
+  }
 );
 
 export default mongoose.model<IUser>('User', UserSchema);
