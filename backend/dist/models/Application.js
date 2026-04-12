@@ -63,7 +63,18 @@ const ApplicationDocumentSchema = new mongoose_1.Schema({
     fileUrl: { type: String, required: true, trim: true },
 }, { _id: true });
 const SelectedCourseSchema = new mongoose_1.Schema({
-    courseName: { type: String, required: true, trim: true },
+    course: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course', required: true },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending',
+    },
+    advisorComment: { type: String, default: '', trim: true },
+}, { _id: true });
+const AIRecommendationSchema = new mongoose_1.Schema({
+    course: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course', required: true },
+    matchScore: { type: Number, required: true, min: 0, max: 100 },
+    reason: { type: String, required: true, trim: true },
 }, { _id: true });
 const ApplicationInterviewSchema = new mongoose_1.Schema({
     date: { type: Date, required: true },
@@ -105,5 +116,6 @@ const ApplicationSchema = new mongoose_1.Schema({
     interview: { type: ApplicationInterviewSchema, required: false },
     documents: { type: [ApplicationDocumentSchema], default: [] },
     selectedCourses: { type: [SelectedCourseSchema], default: [] },
+    aiRecommendations: { type: [AIRecommendationSchema], default: [] },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('Application', ApplicationSchema);

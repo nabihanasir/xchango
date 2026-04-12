@@ -31,7 +31,16 @@ export interface IApplicationDocument {
 
 export interface ISelectedCourse {
   _id?: mongoose.Types.ObjectId;
-  courseName: string;
+  course: mongoose.Types.ObjectId;
+  status: 'pending' | 'approved' | 'rejected';
+  advisorComment: string;
+}
+
+export interface IAIRecommendation {
+  _id?: mongoose.Types.ObjectId;
+  course: mongoose.Types.ObjectId;
+  matchScore: number;
+  reason: string;
 }
 
 export interface IApplicationInterview {
@@ -63,6 +72,7 @@ export interface IApplication extends Document {
   interview?: IApplicationInterview;
   documents: IApplicationDocument[];
   selectedCourses: ISelectedCourse[];
+  aiRecommendations: IAIRecommendation[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,7 +87,22 @@ const ApplicationDocumentSchema = new Schema<IApplicationDocument>(
 
 const SelectedCourseSchema = new Schema<ISelectedCourse>(
   {
-    courseName: { type: String, required: true, trim: true },
+    course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending',
+    },
+    advisorComment: { type: String, default: '', trim: true },
+  },
+  { _id: true }
+);
+
+const AIRecommendationSchema = new Schema<IAIRecommendation>(
+  {
+    course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+    matchScore: { type: Number, required: true, min: 0, max: 100 },
+    reason: { type: String, required: true, trim: true },
   },
   { _id: true }
 );
@@ -127,6 +152,7 @@ const ApplicationSchema = new Schema<IApplication>(
     interview: { type: ApplicationInterviewSchema, required: false },
     documents: { type: [ApplicationDocumentSchema], default: [] },
     selectedCourses: { type: [SelectedCourseSchema], default: [] },
+    aiRecommendations: { type: [AIRecommendationSchema], default: [] },
   },
   { timestamps: true }
 );

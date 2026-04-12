@@ -1,133 +1,172 @@
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area
+import { useEffect, useState } from 'react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
-import { adminStats, countryData, monthlyTrend } from '../../data/adminData';
+import { Globe, Sparkles, TrendingUp } from 'lucide-react';
 import StatCard from '../../components/admin/StatCard';
-import { Sparkles, TrendingUp, Globe } from 'lucide-react';
+import { adminApi, type AdminDashboardMetrics } from '../../lib/adminApi';
+
+const emptyMetrics: AdminDashboardMetrics = {
+  adminStats: [],
+  countryData: [],
+  monthlyTrend: [],
+};
 
 export default function AdminDashboard() {
+  const [metrics, setMetrics] = useState<AdminDashboardMetrics>(emptyMetrics);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadStats = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const data = await adminApi.getStats();
+        if (!cancelled) {
+          setMetrics(data);
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : 'Unable to load dashboard stats.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadStats();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="space-y-8">
-      {/* Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card rounded-[2rem] p-8 lg:p-10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent-yellow/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-        
-        <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent-yellow/10 border border-accent-yellow/20 text-accent-yellow text-[11px] font-bold uppercase tracking-widest mb-4">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Overview Report</span>
+      <div className="relative overflow-hidden rounded-[2rem] p-8 lg:p-10 glass-card">
+        <div className="absolute right-0 top-0 h-[400px] w-[400px] -translate-y-1/2 translate-x-1/4 rounded-full bg-accent-yellow/5 blur-[80px] pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-yellow/20 bg-accent-yellow/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-accent-yellow">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Overview Report</span>
+            </div>
+            <h2 className="mb-2 text-[2.5rem] font-black leading-none tracking-tight text-slate-800">
+              Welcome Back, Admin!
+            </h2>
+            <p className="text-[15px] font-medium text-slate-500">
+              Live metrics from the current backend state.
+            </p>
           </div>
-          <h2 className="text-[2.5rem] font-black text-slate-800 tracking-tight leading-none mb-2">Welcome Back, Admin!</h2>
-          <p className="text-slate-500 font-medium text-[15px]">Here's what's happening with Xchango today.</p>
-        </div>
-        <div className="hidden md:flex items-center gap-4 bg-slate-50 border border-slate-200 p-5 rounded-[1.25rem] shadow-sm relative z-10">
-           <div className="text-right">
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">System Status</p>
-             <p className="text-[15px] font-bold text-emerald-500">All Systems Operational</p>
-           </div>
-           <div className="h-3 w-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+          <div className="relative z-10 hidden items-center gap-4 rounded-[1.25rem] border border-slate-200 bg-slate-50 p-5 shadow-sm md:flex">
+            <div className="text-right">
+              <p className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">System Status</p>
+              <p className="text-[15px] font-bold text-emerald-500">Admin API Connected</p>
+            </div>
+            <div className="h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+          </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {adminStats.map((stat, idx) => (
-          <StatCard key={idx} {...stat} />
-        ))}
+      {error ? (
+        <div className="rounded-[1.75rem] border border-red-200 bg-red-50 px-6 py-5 text-sm font-medium text-red-700">
+          {error}
+        </div>
+      ) : null}
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {(loading ? Array.from({ length: 4 }) : metrics.adminStats).map((stat, index) =>
+          loading ? (
+            <div key={index} className="h-40 animate-pulse rounded-2xl border border-light-color/50 bg-white shadow-lg shadow-black/5" />
+          ) : (
+            <StatCard key={`${stat.title}-${index}`} {...stat} />
+          )
+        )}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Applications Trend */}
-        <div className="glass-card rounded-[2rem] p-6 lg:p-8 relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
-              <div className="p-2 bg-blue-500/10 rounded-xl">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="glass-card relative overflow-hidden rounded-[2rem] p-6 lg:p-8">
+          <div className="mb-8 flex items-center justify-between">
+            <h3 className="flex items-center gap-3 text-xl font-black text-slate-800">
+              <div className="rounded-xl bg-blue-500/10 p-2">
                 <TrendingUp className="h-5 w-5 text-blue-500" />
               </div>
               Monthly Trend
             </h3>
-            <select className="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-500 focus:ring-2 focus:ring-accent-yellow/20 rounded-xl px-4 py-2 outline-none transition-all cursor-pointer">
-              <option>Last 7 Months</option>
-              <option>Last Year</option>
-            </select>
           </div>
           <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyTrend}>
-                <defs>
-                  <linearGradient id="colorApps" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#090638" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#090638" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                <XAxis 
-                  dataKey="month" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fill: '#64748b', fontSize: 11, fontWeight: 700}} 
-                  dy={10}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fill: '#64748b', fontSize: 11, fontWeight: 700}} 
-                />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                  itemStyle={{ color: '#090638', fontWeight: 800 }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="apps" 
-                  stroke="#090638" 
-                  strokeWidth={4} 
-                  fillOpacity={1} 
-                  fill="url(#colorApps)" 
-                  animationDuration={1500}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div className="h-full animate-pulse rounded-2xl bg-slate-100" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={metrics.monthlyTrend}>
+                  <defs>
+                    <linearGradient id="colorApps" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#090638" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#090638" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="#F1F5F9" strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" axisLine={false} dy={10} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} tickLine={false} />
+                  <YAxis axisLine={false} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                    itemStyle={{ color: '#090638', fontWeight: 800 }}
+                  />
+                  <Area type="monotone" dataKey="apps" stroke="#090638" strokeWidth={4} fill="url(#colorApps)" fillOpacity={1} />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
-        {/* Applications per Country */}
-        <div className="glass-card rounded-[2rem] p-6 lg:p-8 relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
-              <div className="p-2 bg-accent-yellow/10 rounded-xl">
+        <div className="glass-card relative overflow-hidden rounded-[2rem] p-6 lg:p-8">
+          <div className="mb-8 flex items-center justify-between">
+            <h3 className="flex items-center gap-3 text-xl font-black text-slate-800">
+              <div className="rounded-xl bg-accent-yellow/10 p-2">
                 <Globe className="h-5 w-5 text-yellow-default" />
               </div>
               Applications by Country
             </h3>
           </div>
           <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={countryData} layout="vertical" margin={{ left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F1F5F9" />
-                <XAxis type="number" hide />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  axisLine={false} 
-                  tickLine={false}
-                  tick={{fill: '#090638', fontSize: 11, fontWeight: 800}}
-                />
-                <Tooltip 
-                  cursor={{fill: '#F8FAFC'}}
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                />
-                <Bar 
-                  dataKey="applications" 
-                  fill="#FBD213" 
-                  radius={[0, 10, 10, 0]} 
-                  barSize={24}
-                  animationDuration={1500}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div className="h-full animate-pulse rounded-2xl bg-slate-100" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={metrics.countryData} layout="vertical" margin={{ left: 20 }}>
+                  <CartesianGrid stroke="#F1F5F9" strokeDasharray="3 3" horizontal={false} />
+                  <XAxis hide type="number" />
+                  <YAxis
+                    axisLine={false}
+                    dataKey="name"
+                    tick={{ fill: '#090638', fontSize: 11, fontWeight: 800 }}
+                    tickLine={false}
+                    type="category"
+                  />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    cursor={{ fill: '#F8FAFC' }}
+                  />
+                  <Bar dataKey="applications" fill="#FBD213" radius={[0, 10, 10, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>

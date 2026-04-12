@@ -1,5 +1,12 @@
 import axios from 'axios';
-import type { ApplicationDraftPayload, ApplicationStatus, WorkflowApplication } from '../types/application';
+import type {
+  ApplicationCourseSummary,
+  ApplicationDraftPayload,
+  ApplicationStatus,
+  SelectedCourseStatus,
+  WorkflowApplication,
+  WorkflowApplicationAIRecommendation,
+} from '../types/application';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
@@ -79,6 +86,18 @@ export const applicationApi = {
       })
     );
   },
-  selectCourses: (applicationId: string, courseNames: string[]) =>
-    unwrap<WorkflowApplication>(applicationApiClient.post(`/applications/${applicationId}/courses`, { courseNames })),
+  getAvailableCourses: (applicationId: string) =>
+    unwrap<ApplicationCourseSummary[]>(applicationApiClient.get(`/applications/${applicationId}/available-courses`)),
+  selectCourses: (applicationId: string, courseIds: string[]) =>
+    unwrap<WorkflowApplication>(applicationApiClient.post(`/applications/${applicationId}/courses`, { courseIds })),
+  generateAiRecommendations: (applicationId: string) =>
+    unwrap<WorkflowApplication>(applicationApiClient.post(`/applications/${applicationId}/ai-recommendations`)),
+  getAiRecommendations: (applicationId: string) =>
+    unwrap<WorkflowApplicationAIRecommendation[]>(
+      applicationApiClient.get(`/applications/${applicationId}/ai-recommendations`)
+    ),
+  updateCourseDecision: (
+    applicationId: string,
+    payload: { courseId: string; status: Exclude<SelectedCourseStatus, 'pending'>; advisorComment?: string }
+  ) => unwrap<WorkflowApplication>(applicationApiClient.put(`/applications/${applicationId}/course-decision`, payload)),
 };

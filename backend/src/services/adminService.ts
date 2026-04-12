@@ -8,6 +8,27 @@ import AdvisorProfile from '../models/AdvisorProfile';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
+const populateApplications = <T>(query: T) =>
+  (query as any)
+    .populate('studentId', 'name email sapId phone role')
+    .populate('advisorId', 'name email role')
+    .populate({
+      path: 'selectedCourses.course',
+      select: 'name code description outlineText creditHours type universityId',
+      populate: {
+        path: 'universityId',
+        select: 'name',
+      },
+    })
+    .populate({
+      path: 'aiRecommendations.course',
+      select: 'name code description outlineText creditHours type universityId',
+      populate: {
+        path: 'universityId',
+        select: 'name',
+      },
+    });
+
 export const getAllStats = async () => {
   const studentCount = await User.countDocuments({ role: 'student' });
   const applicationCount = await Application.countDocuments();
@@ -53,6 +74,9 @@ export const createCourse = async (courseData: any) => {
 export const getAllUsers = async () => {
   return await User.find().select('-password');
 };
+
+export const getAllApplications = async () =>
+  populateApplications(Application.find().sort({ createdAt: -1 }));
 
 const generateTemporaryPassword = () => {
   return crypto.randomBytes(6).toString('base64url');

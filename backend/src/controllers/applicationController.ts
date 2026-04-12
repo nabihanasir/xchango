@@ -97,11 +97,44 @@ export const uploadDocuments = async (req: any, res: Response) => {
 };
 
 export const selectCourses = async (req: any, res: Response) => {
-  const courseNames = Array.isArray(req.body.courseNames) ? req.body.courseNames : [];
+  const courseIds = Array.isArray(req.body.courseIds) ? req.body.courseIds : [];
   const application = await applicationService.selectCourses(
     req.params.id,
     req.user._id.toString(),
-    courseNames
+    courseIds
   );
   sendResponse(res, 200, 'Application courses selected successfully', application);
+};
+
+export const getAvailableCourses = async (req: any, res: Response) => {
+  const courses = await applicationService.listAvailableCourses(req.params.id, {
+    _id: req.user._id.toString(),
+    role: req.user.role,
+  });
+  sendResponse(res, 200, 'Available courses fetched successfully', courses);
+};
+
+export const generateAiRecommendations = async (req: any, res: Response) => {
+  const application = await applicationService.generateAiRecommendations(
+    req.params.id,
+    req.user._id.toString()
+  );
+  sendResponse(res, 200, 'AI recommendations generated successfully', application);
+};
+
+export const getAiRecommendations = async (req: any, res: Response) => {
+  const recommendations = await applicationService.getAiRecommendations(
+    req.params.id,
+    req.user._id.toString()
+  );
+  sendResponse(res, 200, 'AI recommendations fetched successfully', recommendations);
+};
+
+export const updateCourseDecision = async (req: any, res: Response) => {
+  const application = await applicationService.updateCourseDecision(
+    req.params.id,
+    req.user._id.toString(),
+    req.body
+  );
+  sendResponse(res, 200, 'Course decision updated successfully', application);
 };

@@ -36,14 +36,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.advisorCanAccessStudent = exports.selectCourses = exports.uploadDocuments = exports.updateStatus = exports.scheduleInterview = exports.assignAdvisor = exports.submitApplication = exports.getAdvisorApplications = exports.getStudentApplications = exports.getApplicationById = exports.updateApplicationStep = exports.createApplication = exports.applicationOptions = void 0;
+exports.advisorCanAccessStudent = exports.updateCourseDecision = exports.getAiRecommendations = exports.generateAiRecommendations = exports.selectCourses = exports.listAvailableCourses = exports.uploadDocuments = exports.updateStatus = exports.scheduleInterview = exports.assignAdvisor = exports.submitApplication = exports.getAdvisorApplications = exports.getStudentApplications = exports.getApplicationById = exports.updateApplicationStep = exports.createApplication = exports.applicationOptions = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const Application_1 = __importStar(require("../models/Application"));
 const User_1 = __importStar(require("../models/User"));
 const AdvisorProfile_1 = __importDefault(require("../models/AdvisorProfile"));
+const Course_1 = __importStar(require("../models/Course"));
+const University_1 = __importDefault(require("../models/University"));
+const studentService_1 = require("./studentService");
+const aiRecommendation_service_1 = require("./aiRecommendation.service");
 exports.applicationOptions = {
     [Application_1.ApplicationCountry.MALAYSIA]: ['MMU', 'UTHM'],
     [Application_1.ApplicationCountry.SOUTH_KOREA]: ['KDU'],
     [Application_1.ApplicationCountry.TURKEY]: ['GTU'],
+};
+const accessibleStatusesForCourseWork = [
+    Application_1.ApplicationStatus.SHORTLISTED,
+    Application_1.ApplicationStatus.DOCUMENT_PENDING,
+    Application_1.ApplicationStatus.COURSE_SELECTION_PENDING,
+    Application_1.ApplicationStatus.READY_FOR_SUBMISSION,
+];
+const normalizeText = (value) => value?.trim().toLowerCase() || '';
+const ensureObjectId = (value, message) => {
+    if (!mongoose_1.default.Types.ObjectId.isValid(value)) {
+        throw new Error(message);
+    }
 };
 const ensureApplicationAccess = (application, studentId) => {
     if (!application) {
@@ -66,10 +83,32 @@ const ensureAdvisorOwnsApplication = (application, advisorId) => {
     }
     return application;
 };
+const ensureCourseWorkStatus = (application) => {
+    if (!accessibleStatusesForCourseWork.includes(application.status)) {
+        throw new Error('Course decisions are only available after the application has been shortlisted.');
+    }
+    return application;
+};
 const populateApplication = (query) => {
     return query
         .populate('studentId', 'name email sapId phone role')
-        .populate('advisorId', 'name email role');
+        .populate('advisorId', 'name email role')
+        .populate({
+        path: 'selectedCourses.course',
+        select: 'name code description outlineText creditHours type universityId',
+        populate: {
+            path: 'universityId',
+            select: 'name',
+        },
+    })
+        .populate({
+        path: 'aiRecommendations.course',
+        select: 'name code description outlineText creditHours type universityId',
+        populate: {
+            path: 'universityId',
+            select: 'name',
+        },
+    });
 };
 const validateUniversitySelection = (country, university) => {
     const supportedUniversities = exports.applicationOptions[country];
@@ -167,6 +206,52 @@ const buildSubmissionWarnings = (application) => {
     }
     return warnings;
 };
+const buildRecommendationStudentProfile = async (application) => {
+    const profile = await (0, studentService_1.ensureStudentProfile)(application.studentId.toString());
+    const transcriptCourseNames = profile.transcript.semesters.flatMap((semester) => semester.courses.map((course) => course.courseName));
+    return {
+        degreeLevel: profile.preferences.degreeLevel,
+        background: [
+            profile.program,
+            profile.basicInfo.department,
+            application.program,
+            profile.registrationNumber ? `Registration ${profile.registrationNumber}` : '',
+        ]
+            .filter(Boolean)
+            .join(' '),
+        gpa: profile.cgpa || profile.transcript.cgpa || 0,
+        interests: [
+            profile.preferences.fieldOfInterest,
+            ...profile.preferences.preferredCountries,
+            application.program,
+        ].filter(Boolean),
+        transcriptCourses: transcriptCourseNames,
+        targetProgram: application.program,
+    };
+};
+const getAvailableCoursesForApplication = async (application) => {
+    const applicationUniversity = normalizeText(application.university);
+    const universities = await University_1.default.find().populate('countryId', 'name');
+    const exactUniversityIds = universities
+        .filter((university) => normalizeText(university.name) === applicationUniversity)
+        .map((university) => university._id);
+    const countryUniversityIds = universities
+        .filter((university) => normalizeText(university.countryId?.name) === normalizeText(application.country))
+        .map((university) => university._id);
+    const preferredUniversityIds = exactUniversityIds.length ? exactUniversityIds : countryUniversityIds;
+    const preferredCourses = await Course_1.default.find({
+        type: Course_1.CourseType.HOST,
+        ...(preferredUniversityIds.length ? { universityId: { $in: preferredUniversityIds } } : {}),
+    })
+        .populate('universityId', 'name')
+        .sort({ code: 1, name: 1 });
+    if (preferredCourses.length) {
+        return preferredCourses;
+    }
+    return Course_1.default.find({ type: Course_1.CourseType.HOST })
+        .populate('universityId', 'name')
+        .sort({ code: 1, name: 1 });
+};
 const createApplication = async (studentId, payload) => {
     if (!payload.country || !payload.university || !payload.program) {
         throw new Error('country, university, and program are required.');
@@ -195,6 +280,7 @@ const createApplication = async (studentId, payload) => {
         status: Application_1.ApplicationStatus.DRAFT,
         documents: [],
         selectedCourses: [],
+        aiRecommendations: [],
     });
 };
 exports.createApplication = createApplication;
@@ -222,7 +308,7 @@ const getApplicationById = async (applicationId, actor) => {
     throw new Error('You are not authorized to access this application.');
 };
 exports.getApplicationById = getApplicationById;
-const getStudentApplications = async (studentId) => Application_1.default.find({ studentId }).sort({ createdAt: -1 });
+const getStudentApplications = async (studentId) => populateApplication(Application_1.default.find({ studentId }).sort({ createdAt: -1 }));
 exports.getStudentApplications = getStudentApplications;
 const getAdvisorApplications = async (advisorId) => populateApplication(Application_1.default.find({ advisorId }).sort({ createdAt: -1 }));
 exports.getAdvisorApplications = getAdvisorApplications;
@@ -277,29 +363,80 @@ const updateStatus = async (applicationId, advisorId, status) => {
 exports.updateStatus = updateStatus;
 const uploadDocuments = async (applicationId, studentId, documents) => {
     const application = ensureApplicationAccess(await Application_1.default.findById(applicationId), studentId);
-    if (![Application_1.ApplicationStatus.SHORTLISTED, Application_1.ApplicationStatus.DOCUMENT_PENDING, Application_1.ApplicationStatus.COURSE_SELECTION_PENDING, Application_1.ApplicationStatus.READY_FOR_SUBMISSION].includes(application.status)) {
+    if (!accessibleStatusesForCourseWork.includes(application.status)) {
         throw new Error('Documents can only be uploaded after shortlisting.');
     }
     application.documents.push(...documents);
     application.status = calculatePostShortlistStatus(application);
     await application.save();
-    return application;
+    return (0, exports.getApplicationById)(applicationId, { _id: studentId, role: User_1.UserRole.STUDENT });
 };
 exports.uploadDocuments = uploadDocuments;
-const selectCourses = async (applicationId, studentId, courseNames) => {
+const listAvailableCourses = async (applicationId, actor) => {
+    const application = await (0, exports.getApplicationById)(applicationId, actor);
+    return getAvailableCoursesForApplication(application);
+};
+exports.listAvailableCourses = listAvailableCourses;
+const selectCourses = async (applicationId, studentId, courseIds) => {
     const application = ensureApplicationAccess(await Application_1.default.findById(applicationId), studentId);
-    if (![Application_1.ApplicationStatus.SHORTLISTED, Application_1.ApplicationStatus.DOCUMENT_PENDING, Application_1.ApplicationStatus.COURSE_SELECTION_PENDING, Application_1.ApplicationStatus.READY_FOR_SUBMISSION].includes(application.status)) {
+    if (!accessibleStatusesForCourseWork.includes(application.status)) {
         throw new Error('Courses can only be selected after shortlisting.');
     }
-    application.selectedCourses = courseNames
-        .map((courseName) => courseName.trim())
-        .filter(Boolean)
-        .map((courseName) => ({ courseName }));
+    const normalizedIds = Array.from(new Set(courseIds
+        .map((courseId) => courseId?.trim())
+        .filter(Boolean)));
+    normalizedIds.forEach((courseId) => ensureObjectId(courseId, 'One or more selected course IDs are invalid.'));
+    const availableCourses = await getAvailableCoursesForApplication(application);
+    const availableCourseIds = new Set(availableCourses.map((course) => course._id.toString()));
+    normalizedIds.forEach((courseId) => {
+        if (!availableCourseIds.has(courseId)) {
+            throw new Error('One or more selected courses are not available for this application.');
+        }
+    });
+    application.selectedCourses = normalizedIds.map((courseId) => ({
+        course: new mongoose_1.default.Types.ObjectId(courseId),
+        status: 'pending',
+        advisorComment: '',
+    }));
     application.status = calculatePostShortlistStatus(application);
     await application.save();
-    return application;
+    return (0, exports.getApplicationById)(applicationId, { _id: studentId, role: User_1.UserRole.STUDENT });
 };
 exports.selectCourses = selectCourses;
+const generateAiRecommendations = async (applicationId, advisorId) => {
+    const application = ensureCourseWorkStatus(ensureAdvisorOwnsApplication(ensureApplicationExists(await Application_1.default.findById(applicationId)), advisorId));
+    const [studentProfile, availableCourses] = await Promise.all([
+        buildRecommendationStudentProfile(application),
+        getAvailableCoursesForApplication(application),
+    ]);
+    const recommendations = (0, aiRecommendation_service_1.getCourseRecommendations)(studentProfile, availableCourses);
+    application.aiRecommendations = recommendations.map((recommendation) => ({
+        course: recommendation.courseId,
+        matchScore: recommendation.matchScore,
+        reason: recommendation.reason,
+    }));
+    await application.save();
+    return (0, exports.getApplicationById)(applicationId, { _id: advisorId, role: User_1.UserRole.ADVISOR });
+};
+exports.generateAiRecommendations = generateAiRecommendations;
+const getAiRecommendations = async (applicationId, advisorId) => {
+    const application = ensureAdvisorOwnsApplication(ensureApplicationExists(await populateApplication(Application_1.default.findById(applicationId))), advisorId);
+    return application.aiRecommendations;
+};
+exports.getAiRecommendations = getAiRecommendations;
+const updateCourseDecision = async (applicationId, advisorId, payload) => {
+    ensureObjectId(payload.courseId, 'Invalid course ID.');
+    const application = ensureCourseWorkStatus(ensureAdvisorOwnsApplication(ensureApplicationExists(await Application_1.default.findById(applicationId)), advisorId));
+    const selectedCourse = application.selectedCourses.find((courseItem) => courseItem.course.toString() === payload.courseId);
+    if (!selectedCourse) {
+        throw new Error('The selected course was not found on this application.');
+    }
+    selectedCourse.status = payload.status;
+    selectedCourse.advisorComment = payload.advisorComment?.trim() || '';
+    await application.save();
+    return (0, exports.getApplicationById)(applicationId, { _id: advisorId, role: User_1.UserRole.ADVISOR });
+};
+exports.updateCourseDecision = updateCourseDecision;
 const advisorCanAccessStudent = async (advisorId, studentId) => {
     const application = await Application_1.default.exists({ advisorId, studentId });
     return Boolean(application);

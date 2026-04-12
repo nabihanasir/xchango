@@ -12,6 +12,7 @@ import ReviewStep from '../../components/steps/ReviewStep';
 import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
 import {
+  type ApplicationCourseSummary,
   applicationStatusTone,
   countryOptions,
   type ApplicationCountry,
@@ -63,6 +64,8 @@ export default function ApplicationWorkflowPage() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
   const [savingCourses, setSavingCourses] = useState(false);
+  const [availableCourses, setAvailableCourses] = useState<ApplicationCourseSummary[]>([]);
+  const [loadingAvailableCourses, setLoadingAvailableCourses] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -114,6 +117,43 @@ export default function ApplicationWorkflowPage() {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (!application || !postShortlistStatuses.some((status) => status === application.status)) {
+      setAvailableCourses([]);
+      setLoadingAvailableCourses(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadAvailableCourses = async () => {
+      setLoadingAvailableCourses(true);
+
+      try {
+        const courses = await applicationApi.getAvailableCourses(application._id);
+        if (!cancelled) {
+          setAvailableCourses(courses);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setErrorMessage(
+            error instanceof Error ? error.message : 'Unable to load available courses.'
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingAvailableCourses(false);
+        }
+      }
+    };
+
+    void loadAvailableCourses();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [application?._id, application?.status]);
 
   const universityOptions = useMemo(() => {
     if (!draft.country) {
@@ -255,7 +295,7 @@ export default function ApplicationWorkflowPage() {
     }
   };
 
-  const handleCourseSave = async (courseNames: string[]) => {
+  const handleCourseSave = async (courseIds: string[]) => {
     if (!application) {
       return;
     }
@@ -265,7 +305,7 @@ export default function ApplicationWorkflowPage() {
     setSuccessMessage('');
 
     try {
-      const updatedApplication = await applicationApi.selectCourses(application._id, courseNames);
+      const updatedApplication = await applicationApi.selectCourses(application._id, courseIds);
       setApplication(updatedApplication);
       setSuccessMessage('Selected courses saved successfully.');
     } catch (error) {
@@ -407,6 +447,8 @@ export default function ApplicationWorkflowPage() {
           />
           <CourseSelection
             selectedCourses={application.selectedCourses}
+            availableCourses={availableCourses}
+            loadingCourses={loadingAvailableCourses}
             saving={savingCourses}
             errorMessage={errorMessage}
             onSave={handleCourseSave}

@@ -49,12 +49,16 @@ router.post('/', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT), appli
 router.get('/student/:studentId', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT, User_1.UserRole.ADMIN), applicationController.getStudentApplications);
 router.get('/advisor', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.getAdvisorApplications);
 router.get('/:id', applicationController.getApplication);
+router.get('/:id/available-courses', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT, User_1.UserRole.ADVISOR, User_1.UserRole.ADMIN), applicationController.getAvailableCourses);
+router.get('/:id/ai-recommendations', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.getAiRecommendations);
 router.patch('/:id', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT), applicationController.updateApplicationStep);
 router.post('/:id/submit', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT), applicationController.submitApplication);
 router.patch('/:id/assign-advisor', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADMIN), applicationController.assignAdvisor);
 router.patch('/:id/schedule-interview', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.scheduleInterview);
 router.post('/:id/interview', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.scheduleInterview);
 router.patch('/:id/status', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.updateStatus);
+router.post('/:id/ai-recommendations', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.generateAiRecommendations);
+router.put('/:id/course-decision', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.updateCourseDecision);
 router.post('/:id/documents', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT), applicationDocumentUpload.array('files'), applicationController.uploadDocuments);
 router.post('/:id/courses', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT), applicationController.selectCourses);
 exports.default = router;

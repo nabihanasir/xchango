@@ -22,6 +22,11 @@ export const getUsers = async (req: Request, res: Response) => {
   sendResponse(res, 200, 'Users fetched successfully', users);
 };
 
+export const getApplications = async (_req: Request, res: Response) => {
+  const applications = await adminService.getAllApplications();
+  sendResponse(res, 200, 'Applications fetched successfully', applications);
+};
+
 export const createUser = async (req: Request, res: Response) => {
   const user = await adminService.createUser(req.body);
   sendResponse(res, 201, 'User created successfully', user);

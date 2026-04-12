@@ -25,7 +25,9 @@ import AdvisorProfile from './pages/advisor/AdvisorProfile';
 import AdvisorEquivalencyRequests from './pages/advisor/AdvisorEquivalencyRequests';
 import AdvisorEquivalencyRequestDetail from './pages/advisor/AdvisorEquivalencyRequestDetail';
 
-import { AdminUniversities, AdminCourses, AdminSettings } from './pages/admin/StubPages';
+import AdminUniversities from './pages/admin/AdminUniversities';
+import AdminCourses from './pages/admin/AdminCourses';
+import { AdminSettings } from './pages/admin/StubPages';
 
 function App() {
   return (

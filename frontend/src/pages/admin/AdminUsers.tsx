@@ -1,16 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import DataTable from '../../components/admin/DataTable';
 import SearchFilter from '../../components/admin/SearchFilter';
-import { useAuth } from '../../context/AuthContext';
-
-interface AdminUserRecord {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-  isActive?: boolean;
-  createdAt?: string;
-}
+import { adminApi, type AdminUserRecord } from '../../lib/adminApi';
 
 interface CreateUserFormState {
   name: string;
@@ -20,8 +11,6 @@ interface CreateUserFormState {
   department: string;
   password: string;
 }
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const defaultForm: CreateUserFormState = {
   name: '',
@@ -33,7 +22,6 @@ const defaultForm: CreateUserFormState = {
 };
 
 export default function AdminUsers() {
-  const { user } = useAuth();
   const [users, setUsers] = useState<AdminUserRecord[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [form, setForm] = useState<CreateUserFormState>(defaultForm);
@@ -47,27 +35,12 @@ export default function AdminUsers() {
 
   useEffect(() => {
     const loadUsers = async () => {
-      if (!user?.token) {
-        setLoading(false);
-        return;
-      }
-
       setLoading(true);
       setError('');
 
       try {
-        const response = await fetch(`${API_BASE}/users`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
-        const payload = await response.json();
-
-        if (!response.ok || !payload.success) {
-          throw new Error(payload.message || 'Unable to load users.');
-        }
-
-        setUsers(payload.data);
+        const data = await adminApi.getUsers();
+        setUsers(data);
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Unable to load users.');
       } finally {
@@ -76,7 +49,7 @@ export default function AdminUsers() {
     };
 
     void loadUsers();
-  }, [user?.token]);
+  }, []);
 
   const filteredUsers = useMemo(() => {
     return users.filter((record) => {
@@ -116,38 +89,22 @@ export default function AdminUsers() {
   ];
 
   const handleCreateUser = async () => {
-    if (!user?.token) {
-      return;
-    }
-
     setSubmitting(true);
     setCreateError('');
     setGeneratedPassword('');
 
     try {
-      const response = await fetch(`${API_BASE}/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          role: form.role,
-          designation: form.role === 'advisor' ? form.designation : undefined,
-          department: form.role === 'advisor' ? form.department : undefined,
-          password: form.password || undefined,
-        }),
+      const createdUser = await adminApi.createUser({
+        name: form.name,
+        email: form.email,
+        role: form.role,
+        designation: form.role === 'advisor' ? form.designation : undefined,
+        department: form.role === 'advisor' ? form.department : undefined,
+        password: form.password || undefined,
       });
-      const payload = await response.json();
 
-      if (!response.ok || !payload.success) {
-        throw new Error(payload.message || 'Unable to create user.');
-      }
-
-      setUsers((current) => [payload.data, ...current]);
-      setGeneratedPassword(payload.data.password || '');
+      setUsers((current) => [createdUser, ...current]);
+      setGeneratedPassword(createdUser.password || '');
       setForm(defaultForm);
       setShowAddModal(false);
     } catch (submitError) {

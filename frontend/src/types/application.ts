@@ -12,6 +12,8 @@ export type ApplicationStatus =
   | 'COURSE_SELECTION_PENDING'
   | 'READY_FOR_SUBMISSION';
 
+export type SelectedCourseStatus = 'pending' | 'approved' | 'rejected';
+
 export interface ApplicationUserSummary {
   _id: string;
   name: string;
@@ -19,6 +21,22 @@ export interface ApplicationUserSummary {
   sapId?: string;
   phone?: string;
   role?: string;
+}
+
+export interface ApplicationUniversitySummary {
+  _id: string;
+  name: string;
+}
+
+export interface ApplicationCourseSummary {
+  _id: string;
+  code: string;
+  name: string;
+  description?: string;
+  outlineText?: string;
+  creditHours: number;
+  type: 'home' | 'host';
+  universityId?: ApplicationUniversitySummary | string;
 }
 
 export interface WorkflowApplicationDocument {
@@ -29,7 +47,16 @@ export interface WorkflowApplicationDocument {
 
 export interface WorkflowApplicationCourse {
   _id?: string;
-  courseName: string;
+  course: string | ApplicationCourseSummary | null;
+  status: SelectedCourseStatus;
+  advisorComment: string;
+}
+
+export interface WorkflowApplicationAIRecommendation {
+  _id?: string;
+  course: string | ApplicationCourseSummary | null;
+  matchScore: number;
+  reason: string;
 }
 
 export interface WorkflowApplicationInterview {
@@ -62,6 +89,7 @@ export interface WorkflowApplication {
   interview?: WorkflowApplicationInterview;
   documents: WorkflowApplicationDocument[];
   selectedCourses: WorkflowApplicationCourse[];
+  aiRecommendations: WorkflowApplicationAIRecommendation[];
   createdAt: string;
   updatedAt: string;
 }
@@ -121,4 +149,51 @@ export const getApplicationUserSummary = (
   }
 
   return user;
+};
+
+export const getApplicationCourseId = (
+  course: string | ApplicationCourseSummary | null | undefined
+) => {
+  if (!course) {
+    return '';
+  }
+
+  return typeof course === 'string' ? course : course._id;
+};
+
+export const getApplicationCourseSummary = (
+  course: string | ApplicationCourseSummary | null | undefined
+) => {
+  if (!course || typeof course === 'string') {
+    return null;
+  }
+
+  return course;
+};
+
+export const getApplicationCourseLabel = (
+  course: string | ApplicationCourseSummary | null | undefined
+) => {
+  if (!course) {
+    return 'Unknown course';
+  }
+
+  if (typeof course === 'string') {
+    return course;
+  }
+
+  return `${course.code} · ${course.name}`;
+};
+
+export const getApplicationCourseUniversity = (
+  course: string | ApplicationCourseSummary | null | undefined
+) => {
+  const summary = getApplicationCourseSummary(course);
+  if (!summary?.universityId) {
+    return '';
+  }
+
+  return typeof summary.universityId === 'string'
+    ? ''
+    : summary.universityId.name;
 };

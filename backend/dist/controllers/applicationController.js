@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.selectCourses = exports.uploadDocuments = exports.updateStatus = exports.scheduleInterview = exports.getAdvisorApplications = exports.assignAdvisor = exports.submitApplication = exports.getStudentApplications = exports.getApplication = exports.updateApplicationStep = exports.createApplication = void 0;
+exports.updateCourseDecision = exports.getAiRecommendations = exports.generateAiRecommendations = exports.getAvailableCourses = exports.selectCourses = exports.uploadDocuments = exports.updateStatus = exports.scheduleInterview = exports.getAdvisorApplications = exports.assignAdvisor = exports.submitApplication = exports.getStudentApplications = exports.getApplication = exports.updateApplicationStep = exports.createApplication = void 0;
 const User_1 = require("../models/User");
 const applicationService = __importStar(require("../services/applicationService"));
 const response_1 = require("../utils/response");
@@ -110,8 +110,31 @@ const uploadDocuments = async (req, res) => {
 };
 exports.uploadDocuments = uploadDocuments;
 const selectCourses = async (req, res) => {
-    const courseNames = Array.isArray(req.body.courseNames) ? req.body.courseNames : [];
-    const application = await applicationService.selectCourses(req.params.id, req.user._id.toString(), courseNames);
+    const courseIds = Array.isArray(req.body.courseIds) ? req.body.courseIds : [];
+    const application = await applicationService.selectCourses(req.params.id, req.user._id.toString(), courseIds);
     (0, response_1.sendResponse)(res, 200, 'Application courses selected successfully', application);
 };
 exports.selectCourses = selectCourses;
+const getAvailableCourses = async (req, res) => {
+    const courses = await applicationService.listAvailableCourses(req.params.id, {
+        _id: req.user._id.toString(),
+        role: req.user.role,
+    });
+    (0, response_1.sendResponse)(res, 200, 'Available courses fetched successfully', courses);
+};
+exports.getAvailableCourses = getAvailableCourses;
+const generateAiRecommendations = async (req, res) => {
+    const application = await applicationService.generateAiRecommendations(req.params.id, req.user._id.toString());
+    (0, response_1.sendResponse)(res, 200, 'AI recommendations generated successfully', application);
+};
+exports.generateAiRecommendations = generateAiRecommendations;
+const getAiRecommendations = async (req, res) => {
+    const recommendations = await applicationService.getAiRecommendations(req.params.id, req.user._id.toString());
+    (0, response_1.sendResponse)(res, 200, 'AI recommendations fetched successfully', recommendations);
+};
+exports.getAiRecommendations = getAiRecommendations;
+const updateCourseDecision = async (req, res) => {
+    const application = await applicationService.updateCourseDecision(req.params.id, req.user._id.toString(), req.body);
+    (0, response_1.sendResponse)(res, 200, 'Course decision updated successfully', application);
+};
+exports.updateCourseDecision = updateCourseDecision;

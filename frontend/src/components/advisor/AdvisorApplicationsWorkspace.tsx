@@ -1,13 +1,26 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
-import { Check, Eye, FileText, GraduationCap, UserRound, X } from 'lucide-react';
+import {
+  Check,
+  Eye,
+  FileText,
+  GraduationCap,
+  Sparkles,
+  UserRound,
+  X,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
 import { resolveUploadUrl, studentProfileApi } from '../../lib/studentProfileApi';
 import {
   applicationStatusTone,
+  getApplicationCourseId,
+  getApplicationCourseLabel,
+  getApplicationCourseSummary,
+  getApplicationCourseUniversity,
   getApplicationUserId,
   getApplicationUserSummary,
   type ApplicationStatus,
+  type SelectedCourseStatus,
   type WorkflowApplication,
 } from '../../types/application';
 import type { StudentProfile } from '../../types/studentProfile';
@@ -26,6 +39,12 @@ const SummaryCard = ({ title, value }: { title: string; value: string }) => (
   </div>
 );
 
+const selectedCourseTone: Record<SelectedCourseStatus, string> = {
+  pending: 'bg-slate-100 text-slate-700',
+  approved: 'bg-emerald-100 text-emerald-700',
+  rejected: 'bg-rose-100 text-rose-700',
+};
+
 export default function AdvisorApplicationsWorkspace({
   showHero = false,
 }: {
@@ -39,12 +58,15 @@ export default function AdvisorApplicationsWorkspace({
   const [selectedApplicationId, setSelectedApplicationId] = useState('');
   const [selectedApplication, setSelectedApplication] = useState<WorkflowApplication | null>(null);
   const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null);
+  const [courseCommentDrafts, setCourseCommentDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [pageError, setPageError] = useState('');
   const [detailsError, setDetailsError] = useState('');
   const [actionError, setActionError] = useState('');
   const [activeDecision, setActiveDecision] = useState<ApplicationStatus | null>(null);
+  const [generatingSuggestions, setGeneratingSuggestions] = useState(false);
+  const [activeCourseDecision, setActiveCourseDecision] = useState('');
 
   const stats = useMemo(() => {
     const pending = applications.filter((item) => item.status === 'PENDING_INTERVIEW').length;
@@ -53,6 +75,16 @@ export default function AdvisorApplicationsWorkspace({
 
     return { pending, shortlisted, rejected };
   }, [applications]);
+
+  const aiRecommendationIds = useMemo(
+    () =>
+      new Set(
+        (selectedApplication?.aiRecommendations || [])
+          .map((recommendation) => getApplicationCourseId(recommendation.course))
+          .filter(Boolean)
+      ),
+    [selectedApplication?.aiRecommendations]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -97,6 +129,7 @@ export default function AdvisorApplicationsWorkspace({
     if (!selectedApplicationId) {
       setSelectedApplication(null);
       setStudentProfile(null);
+      setCourseCommentDrafts({});
       setDetailsError('');
       return;
     }
@@ -115,14 +148,31 @@ export default function AdvisorApplicationsWorkspace({
           throw new Error('Student record could not be resolved for this application.');
         }
 
-        const profile = await studentProfileApi.getStudentProfile(studentId);
+        const [profile, aiRecommendations] = await Promise.all([
+          studentProfileApi.getStudentProfile(studentId),
+          applicationApi.getAiRecommendations(selectedApplicationId),
+        ]);
+
         if (cancelled) {
           return;
         }
 
+        const hydratedApplication = {
+          ...application,
+          aiRecommendations,
+        };
+
         startTransition(() => {
-          setSelectedApplication(application);
+          setSelectedApplication(hydratedApplication);
           setStudentProfile(profile);
+          setCourseCommentDrafts(
+            Object.fromEntries(
+              hydratedApplication.selectedCourses.map((course) => [
+                getApplicationCourseId(course.course),
+                course.advisorComment || '',
+              ])
+            )
+          );
         });
       } catch (error) {
         if (!cancelled) {
@@ -149,6 +199,14 @@ export default function AdvisorApplicationsWorkspace({
       )
     );
     setSelectedApplication(updatedApplication);
+    setCourseCommentDrafts(
+      Object.fromEntries(
+        updatedApplication.selectedCourses.map((course) => [
+          getApplicationCourseId(course.course),
+          course.advisorComment || '',
+        ])
+      )
+    );
   };
 
   const handleOpen = (applicationId: string, target: 'application' | 'student') => {
@@ -163,8 +221,7 @@ export default function AdvisorApplicationsWorkspace({
     status: Extract<ApplicationStatus, 'SHORTLISTED' | 'REJECTED'>,
     applicationId = selectedApplicationId
   ) => {
-    const targetId = applicationId;
-    if (!targetId) {
+    if (!applicationId) {
       return;
     }
 
@@ -172,12 +229,55 @@ export default function AdvisorApplicationsWorkspace({
     setActionError('');
 
     try {
-      const updatedApplication = await applicationApi.updateStatus(targetId, status);
+      const updatedApplication = await applicationApi.updateStatus(applicationId, status);
       syncApplication(updatedApplication);
     } catch (error) {
       setActionError(error instanceof Error ? error.message : 'Unable to update application status.');
     } finally {
       setActiveDecision(null);
+    }
+  };
+
+  const handleGenerateSuggestions = async () => {
+    if (!selectedApplicationId) {
+      return;
+    }
+
+    setGeneratingSuggestions(true);
+    setActionError('');
+
+    try {
+      const updatedApplication = await applicationApi.generateAiRecommendations(selectedApplicationId);
+      syncApplication(updatedApplication);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to generate AI suggestions.');
+    } finally {
+      setGeneratingSuggestions(false);
+    }
+  };
+
+  const handleCourseDecision = async (
+    courseId: string,
+    status: Exclude<SelectedCourseStatus, 'pending'>
+  ) => {
+    if (!selectedApplicationId) {
+      return;
+    }
+
+    setActiveCourseDecision(`${courseId}-${status}`);
+    setActionError('');
+
+    try {
+      const updatedApplication = await applicationApi.updateCourseDecision(selectedApplicationId, {
+        courseId,
+        status,
+        advisorComment: courseCommentDrafts[courseId] || '',
+      });
+      syncApplication(updatedApplication);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to update course decision.');
+    } finally {
+      setActiveCourseDecision('');
     }
   };
 
@@ -202,10 +302,10 @@ export default function AdvisorApplicationsWorkspace({
               Advisor Review Queue
             </p>
             <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
-              Review assigned applications and linked student profiles.
+              Review assigned applications and AI-assisted course recommendations.
             </h1>
             <p className="mt-4 max-w-2xl text-base text-slate-200 md:text-lg">
-              This workspace only loads applications assigned to you and the student profiles behind those applications.
+              AI suggests course matches and reasons, but the final approval or rejection remains with the advisor.
             </p>
           </div>
         </section>
@@ -227,14 +327,14 @@ export default function AdvisorApplicationsWorkspace({
         <div className="border-b border-slate-200/80 px-6 py-6">
           <h2 className="text-2xl font-black text-slate-900">Assigned Applications</h2>
           <p className="mt-1 text-sm font-medium text-slate-500">
-            Advisors can review only applications assigned to their account.
+            Review application status first, then use AI suggestions as decision support for course approvals.
           </p>
         </div>
 
         {loading ? (
           <div className="space-y-3 p-6">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-16 rounded-2xl bg-slate-100 animate-pulse" />
+              <div key={index} className="h-16 animate-pulse rounded-2xl bg-slate-100" />
             ))}
           </div>
         ) : applications.length === 0 ? (
@@ -259,7 +359,14 @@ export default function AdvisorApplicationsWorkspace({
                   const canReview = application.status === 'PENDING_INTERVIEW';
 
                   return (
-                    <tr key={application._id} className={application._id === selectedApplicationId ? 'bg-sky-50/60' : 'hover:bg-slate-50/70'}>
+                    <tr
+                      key={application._id}
+                      className={
+                        application._id === selectedApplicationId
+                          ? 'bg-sky-50/60'
+                          : 'hover:bg-slate-50/70'
+                      }
+                    >
                       <td className="px-6 py-4">
                         <p className="font-bold text-slate-900">{student?.name || 'Student record'}</p>
                         <p className="mt-1 text-sm text-slate-500">{student?.email || 'Email unavailable'}</p>
@@ -270,7 +377,9 @@ export default function AdvisorApplicationsWorkspace({
                         <p className="mt-1 text-sm text-slate-500">{application.program}</p>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${applicationStatusTone[application.status]}`}>
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${applicationStatusTone[application.status]}`}
+                        >
                           {formatStatus(application.status)}
                         </span>
                       </td>
@@ -344,61 +453,293 @@ export default function AdvisorApplicationsWorkspace({
       ) : null}
 
       <section ref={applicationRef} className="glass-card rounded-[2rem] p-6 lg:p-8">
-        <h2 className="text-2xl font-black text-slate-900">Application Details</h2>
-        <p className="mt-1 text-sm font-medium text-slate-500">
-          Review the selected application before making a decision.
-        </p>
-
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-black text-slate-900">Application Details</h2>
+            <p className="mt-1 text-sm font-medium text-slate-500">
+              Review the application and use AI only as explainable decision support.
+            </p>
+          </div>
+          {selectedApplication ? (
+            <button
+              type="button"
+              onClick={() => void handleGenerateSuggestions()}
+              disabled={generatingSuggestions}
+              className="inline-flex items-center gap-2 rounded-full bg-dark-blue px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-[#0f1f48] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>{generatingSuggestions ? 'Generating...' : 'Generate AI Suggestions'}</span>
+            </button>
+          ) : null}
+        </div>
         {detailsLoading ? (
-          <div className="mt-6 h-48 rounded-2xl bg-slate-100 animate-pulse" />
+          <div className="mt-6 h-48 animate-pulse rounded-2xl bg-slate-100" />
         ) : selectedApplication ? (
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">Application summary</p>
-                <h3 className="mt-3 text-2xl font-black text-slate-900">{selectedApplication.university}</h3>
-                <p className="mt-1 text-sm font-medium text-slate-500">{selectedApplication.program}</p>
+          <div className="mt-6 space-y-6">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">
+                    Application summary
+                  </p>
+                  <h3 className="mt-3 text-2xl font-black text-slate-900">{selectedApplication.university}</h3>
+                  <p className="mt-1 text-sm font-medium text-slate-500">{selectedApplication.program}</p>
+                </div>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Country:</span> {selectedApplication.country}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Registration number:</span> {selectedApplication.registrationNumber || 'Pending'}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Passport valid:</span> {selectedApplication.passportValid ? 'Yes' : 'No'}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Financially eligible:</span> {selectedApplication.financialEligible ? 'Yes' : 'Flagged for review'}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Travel history:</span> {selectedApplication.travelHistory.hasTravelHistory ? selectedApplication.travelHistory.details || 'Declared' : 'No'}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Medical condition:</span> {selectedApplication.medicalCondition.hasCondition ? selectedApplication.medicalCondition.details || 'Declared' : 'No'}</p>
               </div>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Country:</span> {selectedApplication.country}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Registration number:</span> {selectedApplication.registrationNumber || 'Pending'}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Passport valid:</span> {selectedApplication.passportValid ? 'Yes' : 'No'}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Financially eligible:</span> {selectedApplication.financialEligible ? 'Yes' : 'Flagged for review'}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Travel history:</span> {selectedApplication.travelHistory.hasTravelHistory ? selectedApplication.travelHistory.details || 'Declared' : 'No'}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Medical condition:</span> {selectedApplication.medicalCondition.hasCondition ? selectedApplication.medicalCondition.details || 'Declared' : 'No'}</p>
+
+              <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
+                <div className="inline-flex rounded-full bg-dark-blue px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white">
+                  {formatStatus(selectedApplication.status)}
+                </div>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Student:</span> {selectedStudent?.name || 'Student record'}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Email:</span> {selectedStudent?.email || 'Email unavailable'}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Documents:</span> {selectedApplication.documents.length}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Selected courses:</span> {selectedApplication.selectedCourses.length}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">AI suggestions:</span> {selectedApplication.aiRecommendations.length}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview date:</span> {selectedApplication.interview ? new Date(selectedApplication.interview.date).toLocaleDateString() : 'Not scheduled'}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview location:</span> {selectedApplication.interview?.location || 'Not scheduled'}</p>
+                {selectedApplication.status === 'PENDING_INTERVIEW' ? (
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => void handleDecision('SHORTLISTED')}
+                      disabled={activeDecision !== null}
+                      className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Check className="h-4 w-4" />
+                      <span>{activeDecision === 'SHORTLISTED' ? 'Approving...' : 'Approve Application'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleDecision('REJECTED')}
+                      disabled={activeDecision !== null}
+                      className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <X className="h-4 w-4" />
+                      <span>{activeDecision === 'REJECTED' ? 'Rejecting...' : 'Reject Application'}</span>
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </div>
 
-            <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
-              <div className="inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white bg-dark-blue">
-                {formatStatus(selectedApplication.status)}
-              </div>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Student:</span> {selectedStudent?.name || 'Student record'}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Email:</span> {selectedStudent?.email || 'Email unavailable'}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Documents:</span> {selectedApplication.documents.length}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Selected courses:</span> {selectedApplication.selectedCourses.length}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview date:</span> {selectedApplication.interview ? new Date(selectedApplication.interview.date).toLocaleDateString() : 'Not scheduled'}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview location:</span> {selectedApplication.interview?.location || 'Not scheduled'}</p>
-              {selectedApplication.status === 'PENDING_INTERVIEW' ? (
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => void handleDecision('SHORTLISTED')}
-                    disabled={activeDecision !== null}
-                    className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <Check className="h-4 w-4" />
-                    <span>{activeDecision === 'SHORTLISTED' ? 'Approving...' : 'Approve Application'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleDecision('REJECTED')}
-                    disabled={activeDecision !== null}
-                    className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <X className="h-4 w-4" />
-                    <span>{activeDecision === 'REJECTED' ? 'Rejecting...' : 'Reject Application'}</span>
-                  </button>
+            <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50/70 p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">AI Recommendation Panel</h3>
+                  <p className="mt-2 max-w-3xl text-sm text-slate-600">
+                    The AI scores available courses against the student profile and explains why. It does not approve anything.
+                  </p>
                 </div>
-              ) : null}
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600">
+                  Advisor remains final decision-maker
+                </div>
+              </div>
+
+              {selectedApplication.aiRecommendations.length ? (
+                <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                  {selectedApplication.aiRecommendations.map((recommendation) => {
+                    const courseId = getApplicationCourseId(recommendation.course);
+                    const isSelectedByStudent = selectedApplication.selectedCourses.some(
+                      (course) => getApplicationCourseId(course.course) === courseId
+                    );
+
+                    return (
+                      <article key={recommendation._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="font-black text-slate-900">
+                              {getApplicationCourseLabel(recommendation.course)}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500">
+                              {getApplicationCourseUniversity(recommendation.course) || 'University not linked'}
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-dark-blue px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white">
+                            {recommendation.matchScore}% match
+                          </span>
+                        </div>
+                        <p className="mt-4 text-sm leading-6 text-slate-600">{recommendation.reason}</p>
+                        <div className="mt-4">
+                          <span
+                            className={`inline-flex rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] ${
+                              isSelectedByStudent
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-700'
+                            }`}
+                          >
+                            {isSelectedByStudent ? 'Also selected by student' : 'AI-only suggestion'}
+                          </span>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-5 rounded-[1.5rem] border border-dashed border-slate-300 bg-white px-5 py-8 text-center text-sm font-medium text-slate-500">
+                  No AI suggestions generated yet for this application.
+                </div>
+              )}
+            </div>
+            <div className="grid gap-6 xl:grid-cols-2">
+              <section className="rounded-[1.75rem] border border-slate-200 p-6">
+                <h3 className="text-xl font-black text-slate-900">Student Selected Courses</h3>
+                <p className="mt-2 text-sm text-slate-500">
+                  Approve or reject each selected course after comparing it with AI suggestions.
+                </p>
+
+                <div className="mt-5 space-y-4">
+                  {selectedApplication.selectedCourses.length ? (
+                    selectedApplication.selectedCourses.map((selectedCourse) => {
+                      const courseId = getApplicationCourseId(selectedCourse.course);
+                      const summary = getApplicationCourseSummary(selectedCourse.course);
+                      const isAiRecommended = aiRecommendationIds.has(courseId);
+
+                      return (
+                        <article key={selectedCourse._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-5">
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="font-black text-slate-900">
+                                {getApplicationCourseLabel(selectedCourse.course)}
+                              </p>
+                              <p className="mt-1 text-sm text-slate-500">
+                                {getApplicationCourseUniversity(selectedCourse.course) || 'University not linked'}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <span
+                                className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${selectedCourseTone[selectedCourse.status]}`}
+                              >
+                                {selectedCourse.status}
+                              </span>
+                              <span
+                                className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
+                                  isAiRecommended
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-amber-100 text-amber-700'
+                                }`}
+                              >
+                                {isAiRecommended ? 'AI recommended' : 'Not recommended by AI'}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="mt-4 text-sm text-slate-600">
+                            {summary?.description || 'No course description is available for this selection.'}
+                          </p>
+                          <textarea
+                            value={courseCommentDrafts[courseId] || ''}
+                            onChange={(event) =>
+                              setCourseCommentDrafts((current) => ({
+                                ...current,
+                                [courseId]: event.target.value,
+                              }))
+                            }
+                            placeholder="Add advisor rationale for this course decision"
+                            className="mt-4 min-h-24 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-dark-blue focus:ring-4 focus:ring-dark-blue/10"
+                          />
+                          <div className="mt-4 flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => void handleCourseDecision(courseId, 'approved')}
+                              disabled={activeCourseDecision.length > 0}
+                              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                              <span>
+                                {activeCourseDecision === `${courseId}-approved`
+                                  ? 'Saving...'
+                                  : 'Approve Course'}
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleCourseDecision(courseId, 'rejected')}
+                              disabled={activeCourseDecision.length > 0}
+                              className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-3 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              <span>
+                                {activeCourseDecision === `${courseId}-rejected`
+                                  ? 'Saving...'
+                                  : 'Reject Course'}
+                              </span>
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    })
+                  ) : (
+                    <div className="rounded-[1.5rem] border border-dashed border-slate-300 px-5 py-8 text-sm font-medium text-slate-500">
+                      The student has not selected any courses yet.
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              <section className="rounded-[1.75rem] border border-slate-200 p-6">
+                <h3 className="text-xl font-black text-slate-900">Comparison View</h3>
+                <p className="mt-2 text-sm text-slate-500">
+                  Compare student-selected courses with AI-suggested courses before recording a decision.
+                </p>
+
+                <div className="mt-5 space-y-4">
+                  {selectedApplication.aiRecommendations.length ? (
+                    selectedApplication.aiRecommendations.map((recommendation) => {
+                      const courseId = getApplicationCourseId(recommendation.course);
+                      const selectedMatch = selectedApplication.selectedCourses.find(
+                        (course) => getApplicationCourseId(course.course) === courseId
+                      );
+
+                      return (
+                        <article key={recommendation._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="font-black text-slate-900">
+                                {getApplicationCourseLabel(recommendation.course)}
+                              </p>
+                              <p className="mt-1 text-sm text-slate-500">
+                                {getApplicationCourseUniversity(recommendation.course) || 'University not linked'}
+                              </p>
+                            </div>
+                            <span className="rounded-full bg-dark-blue px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white">
+                              {recommendation.matchScore}%
+                            </span>
+                          </div>
+                          <p className="mt-4 text-sm text-slate-600">{recommendation.reason}</p>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <span
+                              className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
+                                selectedMatch
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : 'bg-slate-100 text-slate-700'
+                              }`}
+                            >
+                              {selectedMatch ? 'Chosen by student' : 'Not chosen by student'}
+                            </span>
+                            {selectedMatch ? (
+                              <span
+                                className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${selectedCourseTone[selectedMatch.status]}`}
+                              >
+                                Advisor status: {selectedMatch.status}
+                              </span>
+                            ) : null}
+                          </div>
+                        </article>
+                      );
+                    })
+                  ) : (
+                    <div className="rounded-[1.5rem] border border-dashed border-slate-300 px-5 py-8 text-sm font-medium text-slate-500">
+                      Generate AI suggestions to unlock the comparison view.
+                    </div>
+                  )}
+                </div>
+              </section>
             </div>
           </div>
         ) : (
@@ -415,7 +756,7 @@ export default function AdvisorApplicationsWorkspace({
         </p>
 
         {detailsLoading ? (
-          <div className="mt-6 h-48 rounded-2xl bg-slate-100 animate-pulse" />
+          <div className="mt-6 h-48 animate-pulse rounded-2xl bg-slate-100" />
         ) : studentProfile ? (
           <div className="mt-6 grid gap-4 xl:grid-cols-2">
             <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
@@ -429,6 +770,7 @@ export default function AdvisorApplicationsWorkspace({
               <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Department:</span> {studentProfile.basicInfo.department || 'N/A'}</p>
               <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Semester:</span> {studentProfile.basicInfo.semester || 'N/A'}</p>
               <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">CGPA:</span> {studentProfile.transcript.cgpa.toFixed(2)}</p>
+              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Field of interest:</span> {studentProfile.preferences.fieldOfInterest || 'Not provided'}</p>
               <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Preferred countries:</span> {studentProfile.preferences.preferredCountries.join(', ') || 'Not provided'}</p>
             </div>
 

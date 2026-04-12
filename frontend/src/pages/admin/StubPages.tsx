@@ -17,6 +17,4 @@ const StubPage = ({ title }: { title: string }) => (
   </div>
 );
 
-export const AdminUniversities = () => <StubPage title="University Management" />;
-export const AdminCourses = () => <StubPage title="Course Catalog" />;
 export const AdminSettings = () => <StubPage title="Admin Settings" />;
