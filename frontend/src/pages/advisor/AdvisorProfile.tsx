@@ -1,20 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Briefcase, Building, Mail, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-
-interface AdvisorProfileData {
-  _id: string;
-  designation: string;
-  department: string;
-  experience?: number;
-  userId: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-}
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { advisorApi, type AdvisorProfileData } from '../../lib/advisorApi';
 
 export default function AdvisorProfile() {
   const { user } = useAuth();
@@ -33,18 +20,8 @@ export default function AdvisorProfile() {
       setError('');
 
       try {
-        const response = await fetch(`${API_BASE}/advisors/profile`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
-        const payload = await response.json();
-
-        if (!response.ok || !payload.success) {
-          throw new Error(payload.message || 'Unable to load advisor profile.');
-        }
-
-        setProfile(payload.data);
+        const data = await advisorApi.getProfile();
+        setProfile(data);
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Unable to load advisor profile.');
       } finally {

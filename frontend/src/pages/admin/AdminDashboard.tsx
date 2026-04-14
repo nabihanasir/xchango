@@ -90,13 +90,14 @@ export default function AdminDashboard() {
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {(loading ? Array.from({ length: 4 }) : metrics.adminStats).map((stat, index) =>
-          loading ? (
-            <div key={index} className="h-40 animate-pulse rounded-2xl border border-light-color/50 bg-white shadow-lg shadow-black/5" />
-          ) : (
-            <StatCard key={`${stat.title}-${index}`} {...stat} />
-          )
-        )}
+        {loading 
+          ? Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-40 animate-pulse rounded-2xl border border-light-color/50 bg-white shadow-lg shadow-black/5" />
+            ))
+          : metrics.adminStats.map((stat, index) => (
+              <StatCard key={`${stat.title}-${index}`} {...stat} />
+            ))
+        }
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">

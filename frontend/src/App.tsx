@@ -24,6 +24,7 @@ import AdvisorApplications from './pages/advisor/AdvisorApplications';
 import AdvisorProfile from './pages/advisor/AdvisorProfile';
 import AdvisorEquivalencyRequests from './pages/advisor/AdvisorEquivalencyRequests';
 import AdvisorEquivalencyRequestDetail from './pages/advisor/AdvisorEquivalencyRequestDetail';
+import AdvisorStudents from './pages/advisor/AdvisorStudents';
 
 import AdminUniversities from './pages/admin/AdminUniversities';
 import AdminCourses from './pages/admin/AdminCourses';
@@ -66,7 +67,8 @@ function App() {
           <Route path="requests" element={<AdvisorEquivalencyRequests />} />
           <Route path="requests/:id" element={<AdvisorEquivalencyRequestDetail />} />
           <Route path="profile" element={<AdvisorProfile />} />
-          <Route path="students" element={<div className="p-8"><h2 className="text-2xl font-bold">Assigned Students Page</h2><p className="mt-4">List of students assigned to you will appear here.</p></div>} />
+          <Route path="students" element={<AdvisorStudents />} />
+          <Route path="communicate" element={<Communicate />} />
         </Route>
 
         {/* Default route redirect */}

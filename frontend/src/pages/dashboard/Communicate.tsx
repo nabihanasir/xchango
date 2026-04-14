@@ -1,36 +1,54 @@
 import { useEffect, useState, useRef } from 'react';
 import { MessageSquare, Search, Send, User as UserIcon } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
+import { useAuth } from '../../context/AuthContext';
+import { chatApi, type Conversation, type ChatMessage } from '../../lib/chatApi';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
 
 export default function Communicate() {
-  const [conversations, setConversations] = useState<any[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<any>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const { user } = useAuth();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!user) return;
+
     const newSocket = io(API_URL);
     setSocket(newSocket);
 
-    // Mock fetching conversations for now, in real app call API
-    setConversations([
-      { id: '1', name: 'Advisor Sarah', role: 'Advisor', lastMessage: 'Reviewing your application...', online: true },
-      { id: '2', name: 'Admin RIO', role: 'Admin', lastMessage: 'Documents received.', online: false },
-    ]);
+    newSocket.emit('join_room', user._id);
+
+    const loadConversations = async () => {
+      try {
+        const data = await chatApi.getConversations();
+        setConversations(data);
+      } catch (err) {
+        console.error('Failed to load conversations', err);
+      }
+    };
+
+    void loadConversations();
 
     return () => {
       newSocket.disconnect();
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (socket) {
-      socket.on('receive_message', (message: any) => {
+      socket.on('receive_message', (message: ChatMessage) => {
         setMessages((prev) => [...prev, message]);
+        // Update last message in conversations locally
+        setConversations(prevConvs => prevConvs.map(conv => 
+          conv._id === message.conversation 
+            ? { ...conv, lastMessage: message }
+            : conv
+        ));
       });
     }
   }, [socket]);
@@ -39,26 +57,47 @@ export default function Communicate() {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() === '' || !socket) return;
-
-    const messageData = {
-      text: newMessage,
-      sender: 'me', // In real app, use auth user ID
-      createdAt: new Date().toISOString(),
-    };
-
-    socket.emit('send_message', { receiverId: currentConversation?.id, message: messageData });
-    setMessages((prev) => [...prev, messageData]);
-    setNewMessage('');
+  const loadMessages = async (conversationId: string) => {
+    try {
+      const data = await chatApi.getMessages(conversationId);
+      setMessages(data);
+    } catch (err) {
+      console.error('Failed to load messages', err);
+    }
   };
 
-  const selectConversation = (conv: any) => {
+  const handleSendMessage = async () => {
+    if (newMessage.trim() === '' || !socket || !currentConversation || !user) return;
+
+    try {
+      const sentMessage = await chatApi.sendMessage(currentConversation._id, newMessage);
+      
+      const receiver = currentConversation.participants.find(p => p._id !== user._id);
+      
+      if (receiver) {
+        socket.emit('send_message', { receiverId: receiver._id, message: sentMessage });
+      }
+
+      setMessages((prev) => [...prev, sentMessage]);
+      setConversations(prevConvs => prevConvs.map(conv => 
+        conv._id === currentConversation._id 
+          ? { ...conv, lastMessage: sentMessage }
+          : conv
+      ));
+      setNewMessage('');
+    } catch (err) {
+      console.error('Failed to send message', err);
+    }
+  };
+
+  const selectConversation = (conv: Conversation) => {
     setCurrentConversation(conv);
-    // Mock messages for selection
-    setMessages([
-      { text: `Hello! I'm ${conv.name}. How can I help you?`, sender: 'them', createdAt: new Date().toISOString() },
-    ]);
+    void loadMessages(conv._id);
+  };
+
+  const getOtherParticipant = (conv: Conversation) => {
+    if (!user) return null;
+    return conv.participants.find(p => p._id !== user._id);
   };
 
   return (
@@ -81,27 +120,37 @@ export default function Communicate() {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {conversations.map((conv) => (
-            <div 
-              key={conv.id} 
-              onClick={() => selectConversation(conv)}
-              className={`px-5 py-5 border-b border-light-color/50 flex items-center gap-4 cursor-pointer hover:bg-light-color/10 transition-colors ${currentConversation?.id === conv.id ? 'bg-light-color/30' : ''}`}
-            >
-              <div className="relative flex-shrink-0">
-                <div className="h-14 w-14 bg-dark-blue rounded-full flex items-center justify-center text-white">
-                  <UserIcon className="h-7 w-7" />
+          {conversations.length === 0 ? (
+            <div className="p-8 text-center text-body-text/60">No conversations found.</div>
+          ) : (
+            conversations.map((conv) => {
+              const other = getOtherParticipant(conv);
+              if (!other) return null;
+
+              return (
+                <div 
+                  key={conv._id} 
+                  onClick={() => selectConversation(conv)}
+                  className={`px-5 py-5 border-b border-light-color/50 flex items-center gap-4 cursor-pointer hover:bg-light-color/10 transition-colors ${currentConversation?._id === conv._id ? 'bg-light-color/30' : ''}`}
+                >
+                  <div className="relative flex-shrink-0">
+                    <div className="h-14 w-14 bg-dark-blue rounded-full flex items-center justify-center text-white">
+                      <UserIcon className="h-7 w-7" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-baseline mb-1">
+                      <h4 className="text-base font-bold text-dark-blue truncate">{other.name}</h4>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-2">
+                        {other.role}
+                      </span>
+                    </div>
+                    <p className="text-sm text-body-text truncate">{conv.lastMessage?.text || 'No messages yet'}</p>
+                  </div>
                 </div>
-                {conv.online && <div className="absolute bottom-0.5 right-0.5 h-3.5 w-3.5 bg-green-500 rounded-full border-2 border-white" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline mb-1">
-                  <h4 className="text-base font-bold text-dark-blue truncate">{conv.name}</h4>
-                  <span className="text-xs text-gray-500 flex-shrink-0 ml-2">Just now</span>
-                </div>
-                <p className="text-sm text-body-text truncate">{conv.lastMessage}</p>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -113,43 +162,45 @@ export default function Communicate() {
               <div className="flex items-center gap-5">
                 <div className="h-14 w-14 bg-dark-blue rounded-full flex items-center justify-center text-white relative flex-shrink-0">
                   <UserIcon className="h-7 w-7" />
-                  {currentConversation.online && <div className="absolute bottom-0.5 right-0.5 h-3.5 w-3.5 bg-green-500 rounded-full border-2 border-white" />}
                 </div>
                 <div>
-                  <h3 className="font-bold text-dark-blue text-xl">{currentConversation.name}</h3>
-                  <p className={`text-sm ${currentConversation.online ? 'text-green-500' : 'text-gray-400'} font-medium tracking-wide`}>
-                    {currentConversation.online ? 'Online' : 'Offline'}
+                  <h3 className="font-bold text-dark-blue text-xl">{getOtherParticipant(currentConversation)?.name || 'Unknown'}</h3>
+                  <p className="text-sm text-slate-500 font-medium tracking-wide">
+                    {getOtherParticipant(currentConversation)?.role || 'User'}
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-light-color/10">
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[70%] rounded-2xl px-6 py-4 shadow-sm relative ${msg.sender === 'me' ? 'bg-dark-blue text-white rounded-tr-sm shadow-md' : 'bg-white border border-light-color/50 rounded-tl-sm'}`}>
-                    <p className={`text-base leading-relaxed ${msg.sender === 'me' ? 'text-white/90' : 'text-body-text'}`}>{msg.text}</p>
-                    <span className="text-xs text-gray-400 absolute -bottom-6 right-2">
-                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+              {messages.map((msg, i) => {
+                const isMe = msg.sender === user?._id;
+                return (
+                  <div key={msg._id || i} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[70%] rounded-2xl px-6 py-4 shadow-sm relative ${isMe ? 'bg-dark-blue text-white rounded-tr-sm shadow-md' : 'bg-white border border-light-color/50 rounded-tl-sm'}`}>
+                      <p className={`text-base leading-relaxed ${isMe ? 'text-white/90' : 'text-body-text'}`}>{msg.text}</p>
+                      <span className={`text-[10px] font-semibold absolute -bottom-6 ${isMe ? 'right-2' : 'left-2'} text-slate-400`}>
+                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               <div ref={scrollRef} />
             </div>
 
-            <div className="p-5 bg-white border-t border-light-color/50">
+            <div className="p-5 bg-white border-t border-light-color/50 mt-4">
               <div className="flex items-center gap-3 bg-light-color/20 border border-light-color p-2 rounded-2xl">
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyPress={(e) => e.key === 'Enter' && void handleSendMessage()}
                   placeholder="Type your message..."
                   className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 px-4 text-base text-body-text"
                 />
                 <button 
-                  onClick={handleSendMessage}
+                  onClick={() => void handleSendMessage()}
                   className="bg-accent-yellow hover:bg-yellow-default text-dark-blue p-3.5 rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-yellow"
                 >
                   <Send className="h-5 w-5" />

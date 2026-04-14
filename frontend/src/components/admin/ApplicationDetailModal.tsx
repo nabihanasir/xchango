@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Mail, Phone, Calendar, Hash, Target, GraduationCap, MapPin, CheckCircle2, Calculator } from 'lucide-react';
-import TranscriptCalculator from './TranscriptCalculator';
+import { X, Mail, Phone, Calendar, Hash, GraduationCap, MapPin, CheckCircle2, Calculator } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import { adminApi } from '../../lib/adminApi';
 import type { WorkflowApplication } from '../../types/application';

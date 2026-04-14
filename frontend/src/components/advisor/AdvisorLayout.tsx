@@ -1,5 +1,5 @@
 import {
-  Home, FileText, User as UserIcon, ClipboardCheck
+  Home, FileText, User as UserIcon, ClipboardCheck, Users, MessageSquare
 } from 'lucide-react';
 import GlobalLayout from '../GlobalLayout';
 import { useAuth } from '../../context/AuthContext';
@@ -8,11 +8,13 @@ const AdvisorLayout = () => {
   const { user } = useAuth();
   const navItems = [
     { name: 'Dashboard',    path: '/advisor',              icon: Home },
+    { name: 'My Students',  path: '/advisor/students',     icon: Users },
     { name: 'Applications', path: '/advisor/applications', icon: FileText },
     { name: 'Equivalency Requests', path: '/advisor/requests', icon: ClipboardCheck },
-    { name: 'Messages',     path: '/dashboard/communicate', icon: FileText },
+    { name: 'Messages',     path: '/advisor/communicate',  icon: MessageSquare },
     { name: 'Profile',      path: '/advisor/profile',      icon: UserIcon },
   ];
+
 
   const initials = (user?.name || 'Advisor')
     .split(' ')
