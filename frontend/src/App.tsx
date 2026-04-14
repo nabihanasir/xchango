@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
+import LoginPage from './pages/LoginPage';
 import Signup from './pages/Signup';
+import LandingPage from './pages/LandingPage';
 
 import DashboardLayout from './components/DashboardLayout';
 import StudentDashboard from './pages/dashboard/StudentDashboard';
@@ -34,7 +35,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<Signup />} />
         
         {/* Dashboard Routes */}
@@ -72,8 +74,7 @@ function App() {
         </Route>
 
         {/* Default route redirect */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
