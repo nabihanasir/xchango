@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,6 +11,27 @@
   }
   body {
     @apply font-sans bg-slate-50 text-slate-800 antialiased selection:bg-accent-yellow/30 selection:text-dark-blue;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700 !important;
+    letter-spacing: -0.03em;
+  }
+  h1 {
+    font-size: clamp(2rem, 3vw, 3rem) !important;
+    line-height: 1.08 !important;
+  }
+  h2 {
+    font-size: clamp(1.65rem, 2.4vw, 2.3rem) !important;
+    line-height: 1.12 !important;
+  }
+  h3 {
+    font-size: clamp(1.2rem, 1.6vw, 1.55rem) !important;
+    line-height: 1.2 !important;
+  }
+  h4 {
+    font-size: clamp(1.05rem, 1.2vw, 1.25rem) !important;
+    line-height: 1.25 !important;
   }
   #root {
     @apply min-h-screen;

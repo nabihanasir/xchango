@@ -7,6 +7,7 @@ export default {
   theme: {
     fontFamily: {
       sans: ['Outfit', 'sans-serif'],
+      display: ['Manrope', 'sans-serif'],
     },
     extend: {
       fontSize: {
