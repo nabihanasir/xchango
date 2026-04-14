@@ -5,6 +5,20 @@ import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
 import { applicationStatusTone, type WorkflowApplication } from '../../types/application';
 
+const workflowStages = [
+  { label: 'Profile', statuses: [] as string[] },
+  { label: 'Application', statuses: ['PENDING'] },
+  { label: 'Advisor Assigned', statuses: ['ASSIGNED'] },
+  { label: 'Interview', statuses: ['INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED'] },
+  { label: 'Course Approval', statuses: ['COURSE_REQUEST_ENABLED'] },
+];
+
+const formatStatus = (status: string) =>
+  status
+    .replaceAll('_', ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
 export default function StudentApplicationsPage() {
   const { user } = useAuth();
   const studentId = user?._id ?? '';
@@ -98,11 +112,33 @@ export default function StudentApplicationsPage() {
                   <CalendarClock className="h-4 w-4" />
                   Created {new Date(application.createdAt).toLocaleDateString()}
                 </div>
+                <div className="mt-5 grid gap-2 md:grid-cols-5">
+                  {workflowStages.map((stage, index) => {
+                    const active =
+                      stage.statuses.length === 0 ||
+                      workflowStages
+                        .slice(0, index + 1)
+                        .some((item) => item.statuses.includes(application.status));
+
+                    return (
+                      <div
+                        key={stage.label}
+                        className={`rounded-2xl border px-3 py-3 text-center text-[11px] font-black uppercase tracking-[0.18em] ${
+                          active
+                            ? 'border-dark-blue bg-dark-blue text-white'
+                            : 'border-slate-200 bg-slate-50 text-slate-400'
+                        }`}
+                      >
+                        {stage.label}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="flex flex-col items-start gap-3 lg:items-end">
                 <div className={`rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.2em] ${applicationStatusTone[application.status]}`}>
-                  {application.status.replaceAll('_', ' ')}
+                  {formatStatus(application.status)}
                 </div>
                 <Link
                   to={`/dashboard/applications/${application._id}`}

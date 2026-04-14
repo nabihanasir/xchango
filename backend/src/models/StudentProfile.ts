@@ -50,6 +50,8 @@ export interface IStudentProfile extends Document {
   program: string;
   semester: string;
   cgpa: number;
+  isProfileComplete: boolean;
+  profileCompletionIssues: string[];
   basicInfo: IStudentBasicInfo;
   preferences: IStudentPreferences;
   transcript: IStudentTranscript;
@@ -94,6 +96,8 @@ const StudentProfileSchema: Schema<IStudentProfile> = new Schema(
     program: { type: String, default: '', trim: true },
     semester: { type: String, default: '', trim: true },
     cgpa: { type: Number, default: 0, min: 0 },
+    isProfileComplete: { type: Boolean, default: false },
+    profileCompletionIssues: { type: [String], default: [] },
     basicInfo: {
       fullName: { type: String, default: '', trim: true },
       cmsId: { type: String, default: '', trim: true },

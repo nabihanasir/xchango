@@ -14,6 +14,11 @@ import {
   getCourseRecommendations,
   type RecommendationStudentProfile,
 } from './aiRecommendation.service';
+import {
+  ForbiddenError,
+  NotFoundError,
+  ValidationError,
+} from '../errors/AppError';
 
 export const applicationOptions: Record<ApplicationCountry, string[]> = {
   [ApplicationCountry.MALAYSIA]: ['MMU', 'UTHM'],
@@ -57,17 +62,32 @@ const normalizeText = (value?: string) => value?.trim().toLowerCase() || '';
 
 const ensureObjectId = (value: string, message: string) => {
   if (!mongoose.Types.ObjectId.isValid(value)) {
-    throw new Error(message);
+    throw new ValidationError(
+      'Invalid identifier.',
+      message,
+      'Provide a valid identifier and try again.',
+      'INVALID_IDENTIFIER'
+    );
   }
 };
 
 const ensureApplicationAccess = (application: IApplication | null, studentId: string) => {
   if (!application) {
-    throw new Error('Application not found.');
+    throw new NotFoundError(
+      'Application not found.',
+      'No application exists for the provided identifier.',
+      'Verify the application id and try again.',
+      'APPLICATION_NOT_FOUND'
+    );
   }
 
   if (application.studentId.toString() !== studentId) {
-    throw new Error('You are not authorized to access this application.');
+    throw new ForbiddenError(
+      'You are not authorized to access this application.',
+      'The application belongs to a different student.',
+      'Access the application using the correct student account.',
+      'APPLICATION_ACCESS_DENIED'
+    );
   }
 
   return application;
@@ -75,7 +95,12 @@ const ensureApplicationAccess = (application: IApplication | null, studentId: st
 
 const ensureApplicationExists = (application: IApplication | null) => {
   if (!application) {
-    throw new Error('Application not found.');
+    throw new NotFoundError(
+      'Application not found.',
+      'No application exists for the provided identifier.',
+      'Verify the application id and try again.',
+      'APPLICATION_NOT_FOUND'
+    );
   }
 
   return application;
@@ -83,7 +108,12 @@ const ensureApplicationExists = (application: IApplication | null) => {
 
 const ensureAdvisorOwnsApplication = (application: IApplication, advisorId: string) => {
   if (!application.advisorId || application.advisorId.toString() !== advisorId) {
-    throw new Error('You are not authorized to access this application.');
+    throw new ForbiddenError(
+      'You are not authorized to access this application.',
+      'This application is not assigned to the current advisor.',
+      'Open an application assigned to you or contact an administrator.',
+      'ADVISOR_ACCESS_DENIED'
+    );
   }
 
   return application;
@@ -91,7 +121,12 @@ const ensureAdvisorOwnsApplication = (application: IApplication, advisorId: stri
 
 const ensureCourseWorkStatus = (application: IApplication) => {
   if (!accessibleStatusesForCourseWork.includes(application.status as (typeof accessibleStatusesForCourseWork)[number])) {
-    throw new Error('Course decisions are only available after the application has been shortlisted.');
+    throw new ValidationError(
+      'Course request is not available yet.',
+      'Course decisions are only available after the application reaches the course request stage.',
+      'Complete the interview workflow before requesting or reviewing courses.',
+      'COURSE_REQUEST_NOT_AVAILABLE'
+    );
   }
 
   return application;
@@ -122,24 +157,63 @@ const populateApplication = <T>(query: T) => {
 const validateUniversitySelection = (country: ApplicationCountry, university: string) => {
   const supportedUniversities = applicationOptions[country];
   if (!supportedUniversities) {
-    throw new Error('Selected country is not supported.');
+    throw new ValidationError(
+      'Selected country is not supported.',
+      'The selected country is outside the configured application destinations.',
+      'Choose one of the supported countries and try again.',
+      'COUNTRY_NOT_SUPPORTED'
+    );
   }
 
   if (!supportedUniversities.includes(university)) {
-    throw new Error('Selected university is not available for the chosen country.');
+    throw new ValidationError(
+      'Selected university is not available for the chosen country.',
+      'The selected university does not belong to the chosen country.',
+      'Choose a listed university for the selected country.',
+      'UNIVERSITY_NOT_ALLOWED'
+    );
   }
 };
 
 const validateMedicalCondition = (input?: ApplicationStepInput['medicalCondition']) => {
   if (input?.hasCondition && !input.details?.trim()) {
-    throw new Error('Medical condition details are required.');
+    throw new ValidationError(
+      'Medical condition details are required.',
+      'A medical condition was marked as present but no details were submitted.',
+      'Add the required details and try again.',
+      'MEDICAL_DETAILS_REQUIRED'
+    );
   }
 };
 
 const validateTravelHistory = (input?: ApplicationStepInput['travelHistory']) => {
   if (input?.hasTravelHistory && !input.details?.trim()) {
-    throw new Error('Travel history details are required.');
+    throw new ValidationError(
+      'Travel history details are required.',
+      'Travel history was marked as present but no details were submitted.',
+      'Add the required details and try again.',
+      'TRAVEL_HISTORY_DETAILS_REQUIRED'
+    );
   }
+};
+
+const assertProfileComplete = async (studentId: string) => {
+  const profile = await ensureStudentProfile(studentId);
+
+  if (profile.isProfileComplete) {
+    return profile;
+  }
+
+  const missing = profile.profileCompletionIssues.length
+    ? profile.profileCompletionIssues.join(' and ')
+    : 'required profile fields';
+
+  throw new ValidationError(
+    `Profile incomplete. Missing ${missing}.`,
+    'The student profile must be completed before this workflow step is allowed.',
+    'Complete the student profile and upload all required records before trying again.',
+    'PROFILE_INCOMPLETE'
+  );
 };
 
 const calculatePostShortlistStatus = (application: IApplication) => {
@@ -223,11 +297,21 @@ const validateSubmission = (application: IApplication) => {
   validateMedicalCondition(application.medicalCondition);
 
   if (!application.registrationNumber.trim()) {
-    throw new Error('Registration number is required before submission.');
+    throw new ValidationError(
+      'Registration number is required before submission.',
+      'The application does not include a registration number.',
+      'Add the registration number and try again.',
+      'REGISTRATION_NUMBER_REQUIRED'
+    );
   }
 
   if (!application.passportValid) {
-    throw new Error('A valid passport is required before submission.');
+    throw new ValidationError(
+      'A valid passport is required before submission.',
+      'Passport validity was not confirmed for this application.',
+      'Confirm passport validity before submitting.',
+      'PASSPORT_REQUIRED'
+    );
   }
 };
 
@@ -301,8 +385,15 @@ const getAvailableCoursesForApplication = async (application: IApplication): Pro
 };
 
 export const createApplication = async (studentId: string, payload: ApplicationStepInput) => {
+  await assertProfileComplete(studentId);
+
   if (!payload.country || !payload.university || !payload.program) {
-    throw new Error('country, university, and program are required.');
+    throw new ValidationError(
+      'Country, university, and program are required.',
+      'The application draft is missing one or more required academic destination fields.',
+      'Provide country, university, and program before creating the application.',
+      'APPLICATION_FIELDS_MISSING'
+    );
   }
 
   validateUniversitySelection(payload.country, payload.university);
@@ -343,7 +434,12 @@ export const updateApplicationStep = async (
   const application = ensureApplicationAccess(await Application.findById(applicationId), studentId);
 
   if (application.status === ApplicationStatus.REJECTED) {
-    throw new Error('Rejected applications cannot be modified.');
+    throw new ValidationError(
+      'Rejected applications cannot be modified.',
+      'This application has already been rejected.',
+      'Create a new application if the student needs to reapply.',
+      'APPLICATION_LOCKED'
+    );
   }
 
   applyStepInput(application, payload);
@@ -371,7 +467,12 @@ export const getApplicationById = async (
     return ensureAdvisorOwnsApplication(application, actor._id);
   }
 
-  throw new Error('You are not authorized to access this application.');
+  throw new ForbiddenError(
+    'You are not authorized to access this application.',
+    'The current user role cannot access this application.',
+    'Use a student, advisor, or admin account with valid access.',
+    'APPLICATION_ACCESS_DENIED'
+  );
 };
 
 export const getStudentApplications = async (studentId: string) =>
@@ -381,9 +482,10 @@ export const getAdvisorApplications = async (advisorId: string) =>
   populateApplication(Application.find({ advisorId }).sort({ createdAt: -1 }));
 
 export const submitApplication = async (applicationId: string, studentId: string) => {
+  await assertProfileComplete(studentId);
   const application = ensureApplicationAccess(await Application.findById(applicationId), studentId);
   validateSubmission(application);
-  application.status = ApplicationStatus.PENDING_INTERVIEW;
+  application.status = ApplicationStatus.PENDING;
   await application.save();
 
   return {
@@ -395,13 +497,34 @@ export const submitApplication = async (applicationId: string, studentId: string
 export const assignAdvisor = async (applicationId: string, advisorId: string) => {
   const application = ensureApplicationExists(await Application.findById(applicationId));
   const advisor = await User.findById(advisorId);
+  const assignableStatuses = [
+    ApplicationStatus.DRAFT,
+    ApplicationStatus.SUBMITTED,
+    ApplicationStatus.PENDING,
+    ApplicationStatus.PENDING_INTERVIEW,
+    ApplicationStatus.ASSIGNED,
+  ];
 
   if (!advisor || advisor.role !== UserRole.ADVISOR) {
-    throw new Error('Advisor not found.');
+    throw new NotFoundError(
+      'Advisor not found.',
+      'The selected advisor account does not exist or is not an advisor.',
+      'Select a valid advisor and try again.',
+      'ADVISOR_NOT_FOUND'
+    );
+  }
+
+  if (!assignableStatuses.includes(application.status)) {
+    throw new ValidationError(
+      'Advisor assignment is not allowed for this application.',
+      `Applications in status ${application.status} cannot be assigned or reassigned to an advisor.`,
+      'Choose an application that is still awaiting advisor assignment.',
+      'APPLICATION_NOT_PENDING'
+    );
   }
 
   application.advisorId = advisor._id as any;
-  application.status = ApplicationStatus.PENDING_INTERVIEW;
+  application.status = ApplicationStatus.ASSIGNED;
   await application.save();
 
   const assignedStudentIds = await Application.distinct('studentId', { advisorId });
@@ -427,12 +550,47 @@ export const scheduleInterview = async (
     advisorId
   );
 
-  if (![ApplicationStatus.PENDING_INTERVIEW, ApplicationStatus.INTERVIEW_SCHEDULED].includes(application.status)) {
-    throw new Error('Only applications pending interview can be scheduled.');
+  if (![ApplicationStatus.ASSIGNED, ApplicationStatus.INTERVIEW_SCHEDULED].includes(application.status)) {
+    throw new ValidationError(
+      'Interview scheduling is not allowed yet.',
+      'Only assigned applications can be scheduled for interview.',
+      'Assign an advisor first and then schedule the interview.',
+      'INTERVIEW_SCHEDULING_NOT_ALLOWED'
+    );
   }
 
+  application.interviewDate = interview.date;
   application.interview = interview;
   application.status = ApplicationStatus.INTERVIEW_SCHEDULED;
+  await application.save();
+  return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
+};
+
+export const completeInterview = async (applicationId: string, advisorId: string) => {
+  const application = ensureAdvisorOwnsApplication(
+    ensureApplicationExists(await Application.findById(applicationId)),
+    advisorId
+  );
+
+  if (application.status !== ApplicationStatus.INTERVIEW_SCHEDULED) {
+    throw new ValidationError(
+      'Interview not scheduled yet.',
+      'Only scheduled interviews can be marked as completed.',
+      'Schedule the interview before marking it as completed.',
+      'INTERVIEW_NOT_SCHEDULED'
+    );
+  }
+
+  if (!application.interviewDate && !application.interview?.date) {
+    throw new ValidationError(
+      'Interview date is required.',
+      'The interview record does not include a scheduled date.',
+      'Set the interview date before marking the interview as completed.',
+      'INTERVIEW_DATE_REQUIRED'
+    );
+  }
+
+  application.status = ApplicationStatus.INTERVIEW_COMPLETED;
   await application.save();
   return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
 };
@@ -468,7 +626,12 @@ export const uploadDocuments = async (
   const application = ensureApplicationAccess(await Application.findById(applicationId), studentId);
 
   if (!accessibleStatusesForCourseWork.includes(application.status as (typeof accessibleStatusesForCourseWork)[number])) {
-    throw new Error('Documents can only be uploaded after shortlisting.');
+    throw new ValidationError(
+      'Documents can only be uploaded after shortlisting.',
+      'The application has not reached the document upload stage.',
+      'Wait until the application is shortlisted before uploading documents.',
+      'DOCUMENT_UPLOAD_NOT_ALLOWED'
+    );
   }
 
   application.documents.push(...documents);
@@ -482,6 +645,21 @@ export const listAvailableCourses = async (
   actor: { _id: string; role: UserRole }
 ) => {
   const application = await getApplicationById(applicationId, actor);
+  if (
+    ![
+      ApplicationStatus.INTERVIEW_COMPLETED,
+      ApplicationStatus.COURSE_REQUEST_ENABLED,
+      ...accessibleStatusesForCourseWork,
+    ].includes(application.status as ApplicationStatus)
+  ) {
+    throw new ValidationError(
+      'Interview not completed yet.',
+      'Course approval can only be requested after the advisor interview is completed.',
+      'Complete the advisor interview before requesting course approval.',
+      'INTERVIEW_NOT_COMPLETED'
+    );
+  }
+
   return getAvailableCoursesForApplication(application as IApplication);
 };
 
@@ -491,9 +669,13 @@ export const selectCourses = async (
   courseIds: string[]
 ) => {
   const application = ensureApplicationAccess(await Application.findById(applicationId), studentId);
-
-  if (!accessibleStatusesForCourseWork.includes(application.status as (typeof accessibleStatusesForCourseWork)[number])) {
-    throw new Error('Courses can only be selected after shortlisting.');
+  if (![ApplicationStatus.INTERVIEW_COMPLETED, ApplicationStatus.COURSE_REQUEST_ENABLED].includes(application.status)) {
+    throw new ValidationError(
+      'Interview not completed yet.',
+      'You must complete your advisor interview before requesting course approval.',
+      'Wait until the interview is marked completed, then submit course requests.',
+      'INTERVIEW_NOT_COMPLETED'
+    );
   }
 
   const normalizedIds = Array.from(
@@ -511,7 +693,12 @@ export const selectCourses = async (
 
   normalizedIds.forEach((courseId) => {
     if (!availableCourseIds.has(courseId)) {
-      throw new Error('One or more selected courses are not available for this application.');
+      throw new ValidationError(
+        'One or more selected courses are not available for this application.',
+        'At least one selected course does not match the current application scope.',
+        'Refresh the course list and choose available courses only.',
+        'COURSE_NOT_AVAILABLE'
+      );
     }
   });
 
@@ -520,7 +707,7 @@ export const selectCourses = async (
     status: 'pending',
     advisorComment: '',
   })) as IApplication['selectedCourses'];
-  application.status = calculatePostShortlistStatus(application);
+  application.status = ApplicationStatus.COURSE_REQUEST_ENABLED;
   await application.save();
   return getApplicationById(applicationId, { _id: studentId, role: UserRole.STUDENT });
 };
@@ -579,7 +766,12 @@ export const updateCourseDecision = async (
   );
 
   if (!selectedCourse) {
-    throw new Error('The selected course was not found on this application.');
+    throw new NotFoundError(
+      'Selected course not found.',
+      'The chosen course is not attached to this application.',
+      'Refresh the application and try again.',
+      'SELECTED_COURSE_NOT_FOUND'
+    );
   }
 
   selectedCourse.status = payload.status;
@@ -591,5 +783,16 @@ export const updateCourseDecision = async (
 
 export const advisorCanAccessStudent = async (advisorId: string, studentId: string) => {
   const application = await Application.exists({ advisorId, studentId });
+  return Boolean(application);
+};
+
+export const studentCanRequestCourseApproval = async (studentId: string) => {
+  const application = await Application.findOne({
+    studentId,
+    status: {
+      $in: [ApplicationStatus.INTERVIEW_COMPLETED, ApplicationStatus.COURSE_REQUEST_ENABLED],
+    },
+  }).sort({ updatedAt: -1 });
+
   return Boolean(application);
 };

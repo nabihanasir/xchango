@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { ForbiddenError, ValidationError } from '../errors/AppError';
 import { ApplicationStatus } from '../models/Application';
 import { UserRole } from '../models/User';
 import * as applicationService from '../services/applicationService';
@@ -7,7 +8,12 @@ import { toPublicFileUrl } from '../utils/upload';
 
 const assertStudentAccess = (req: any, studentId: string) => {
   if (req.user.role === UserRole.STUDENT && req.user._id.toString() !== studentId) {
-    throw new Error('You are not authorized to access these applications.');
+    throw new ForbiddenError(
+      'You are not authorized to access these applications.',
+      'The requested application records belong to another student.',
+      'Use the signed-in student account to access its own applications.',
+      'APPLICATION_ACCESS_DENIED'
+    );
   }
 };
 
@@ -67,6 +73,14 @@ export const scheduleInterview = async (req: any, res: Response) => {
   sendResponse(res, 200, 'Interview scheduled successfully', application);
 };
 
+export const completeInterview = async (req: any, res: Response) => {
+  const application = await applicationService.completeInterview(
+    req.params.id,
+    req.user._id.toString()
+  );
+  sendResponse(res, 200, 'Interview marked as completed successfully', application);
+};
+
 export const updateStatus = async (req: any, res: Response) => {
   const application = await applicationService.updateStatus(
     req.params.id,
@@ -78,8 +92,12 @@ export const updateStatus = async (req: any, res: Response) => {
 
 export const uploadDocuments = async (req: any, res: Response) => {
   if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
-    res.status(400);
-    throw new Error('Upload at least one application document.');
+    throw new ValidationError(
+      'Upload at least one application document.',
+      'The request did not include any files.',
+      'Attach one or more documents and try again.',
+      'APPLICATION_DOCUMENT_REQUIRED'
+    );
   }
 
   const documents = req.files.map((file: Express.Multer.File) => ({

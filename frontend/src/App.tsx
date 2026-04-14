@@ -30,6 +30,11 @@ import AdvisorStudents from './pages/advisor/AdvisorStudents';
 import AdminUniversities from './pages/admin/AdminUniversities';
 import AdminCourses from './pages/admin/AdminCourses';
 import { AdminSettings } from './pages/admin/StubPages';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import {
+  RequireInterviewCompleted,
+  RequireProfileComplete,
+} from './components/auth/WorkflowRouteGuard';
 
 function App() {
   return (
@@ -38,39 +43,46 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<Signup />} />
-        
-        {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<StudentDashboard />} />
-          <Route path="profile" element={<StudentProfile />} />
-          <Route path="programmes" element={<UniversityProgrammes />} />
-          <Route path="applications" element={<StudentApplicationsPage />} />
-          <Route path="applications/new" element={<ApplicationWorkflowPage />} />
-          <Route path="applications/:id" element={<ApplicationWorkflowPage />} />
-          <Route path="communicate" element={<Communicate />} />
-          <Route path="equivalency/courses" element={<CourseEquivalencyBrowse />} />
-          <Route path="equivalency/requests" element={<CourseEquivalencyRequests />} />
+
+        <Route element={<ProtectedRoute allowedRoles={['student']} />}>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<StudentDashboard />} />
+            <Route path="profile" element={<StudentProfile />} />
+            <Route path="programmes" element={<UniversityProgrammes />} />
+            <Route path="applications" element={<StudentApplicationsPage />} />
+            <Route element={<RequireProfileComplete />}>
+              <Route path="applications/new" element={<ApplicationWorkflowPage />} />
+            </Route>
+            <Route path="applications/:id" element={<ApplicationWorkflowPage />} />
+            <Route path="communicate" element={<Communicate />} />
+            <Route element={<RequireInterviewCompleted />}>
+              <Route path="equivalency/courses" element={<CourseEquivalencyBrowse />} />
+              <Route path="equivalency/requests" element={<CourseEquivalencyRequests />} />
+            </Route>
+          </Route>
         </Route>
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="applications" element={<AdminApplications />} />
-          <Route path="universities" element={<AdminUniversities />} />
-          <Route path="courses" element={<AdminCourses />} />
-          <Route path="settings" element={<AdminSettings />} />
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="applications" element={<AdminApplications />} />
+            <Route path="universities" element={<AdminUniversities />} />
+            <Route path="courses" element={<AdminCourses />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
         </Route>
 
-        {/* Advisor Routes */}
-        <Route path="/advisor" element={<AdvisorLayout />}>
-          <Route index element={<AdvisorDashboard />} />
-          <Route path="applications" element={<AdvisorApplications />} />
-          <Route path="requests" element={<AdvisorEquivalencyRequests />} />
-          <Route path="requests/:id" element={<AdvisorEquivalencyRequestDetail />} />
-          <Route path="profile" element={<AdvisorProfile />} />
-          <Route path="students" element={<AdvisorStudents />} />
-          <Route path="communicate" element={<Communicate />} />
+        <Route element={<ProtectedRoute allowedRoles={['advisor']} />}>
+          <Route path="/advisor" element={<AdvisorLayout />}>
+            <Route index element={<AdvisorDashboard />} />
+            <Route path="applications" element={<AdvisorApplications />} />
+            <Route path="requests" element={<AdvisorEquivalencyRequests />} />
+            <Route path="requests/:id" element={<AdvisorEquivalencyRequestDetail />} />
+            <Route path="profile" element={<AdvisorProfile />} />
+            <Route path="students" element={<AdvisorStudents />} />
+            <Route path="communicate" element={<Communicate />} />
+          </Route>
         </Route>
 
         {/* Default route redirect */}

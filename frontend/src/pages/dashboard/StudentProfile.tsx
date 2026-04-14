@@ -223,6 +223,29 @@ export default function StudentProfile() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className={summaryCardClassName}>
+          <div
+            className={`inline-flex rounded-2xl p-3 ${
+              profile.isProfileComplete
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-amber-100 text-amber-700'
+            }`}
+          >
+            <FileText className="h-5 w-5" />
+          </div>
+          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-400">
+            Profile Status
+          </p>
+          <p className="mt-2 text-2xl font-black text-slate-900">
+            {profile.isProfileComplete ? 'Complete' : 'Incomplete'}
+          </p>
+          <p className="mt-2 text-sm font-medium text-slate-500">
+            {profile.isProfileComplete
+              ? 'You can create an application.'
+              : `Missing ${profile.profileCompletionIssues.join(', ') || 'required fields'}.`}
+          </p>
+        </div>
+
+        <div className={summaryCardClassName}>
           <div className="inline-flex rounded-2xl bg-dark-blue p-3 text-white">
             <GraduationCap className="h-5 w-5" />
           </div>

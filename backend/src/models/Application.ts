@@ -14,8 +14,12 @@ export enum AccommodationPreference {
 export enum ApplicationStatus {
   DRAFT = 'DRAFT',
   SUBMITTED = 'SUBMITTED',
+  PENDING = 'PENDING',
+  ASSIGNED = 'ASSIGNED',
   PENDING_INTERVIEW = 'PENDING_INTERVIEW',
   INTERVIEW_SCHEDULED = 'INTERVIEW_SCHEDULED',
+  INTERVIEW_COMPLETED = 'INTERVIEW_COMPLETED',
+  COURSE_REQUEST_ENABLED = 'COURSE_REQUEST_ENABLED',
   SHORTLISTED = 'SHORTLISTED',
   REJECTED = 'REJECTED',
   DOCUMENT_PENDING = 'DOCUMENT_PENDING',
@@ -69,6 +73,7 @@ export interface IApplication extends Document {
   registrationNumber: string;
   accommodationPreference: AccommodationPreference;
   status: ApplicationStatus;
+  interviewDate?: Date;
   interview?: IApplicationInterview;
   documents: IApplicationDocument[];
   selectedCourses: ISelectedCourse[];
@@ -149,6 +154,7 @@ const ApplicationSchema = new Schema<IApplication>(
       enum: Object.values(ApplicationStatus),
       default: ApplicationStatus.DRAFT,
     },
+    interviewDate: { type: Date, required: false },
     interview: { type: ApplicationInterviewSchema, required: false },
     documents: { type: [ApplicationDocumentSchema], default: [] },
     selectedCourses: { type: [SelectedCourseSchema], default: [] },

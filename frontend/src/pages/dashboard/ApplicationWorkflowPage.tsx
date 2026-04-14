@@ -267,7 +267,7 @@ export default function ApplicationWorkflowPage() {
 
       const submittedApplication = await applicationApi.submitApplication(updatedApplication._id);
       setApplication(submittedApplication);
-      setSuccessMessage('Application submitted. Status is now Pending Interview.');
+      setSuccessMessage('Application submitted. Status is now Pending.');
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to submit application.');
     } finally {

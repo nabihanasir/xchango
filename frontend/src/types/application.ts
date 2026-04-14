@@ -4,8 +4,12 @@ export type AccommodationPreference = 'UNIVERSITY' | 'SELF';
 export type ApplicationStatus =
   | 'DRAFT'
   | 'SUBMITTED'
+  | 'PENDING'
+  | 'ASSIGNED'
   | 'PENDING_INTERVIEW'
   | 'INTERVIEW_SCHEDULED'
+  | 'INTERVIEW_COMPLETED'
+  | 'COURSE_REQUEST_ENABLED'
   | 'SHORTLISTED'
   | 'REJECTED'
   | 'DOCUMENT_PENDING'
@@ -86,6 +90,7 @@ export interface WorkflowApplication {
   registrationNumber: string;
   accommodationPreference: AccommodationPreference;
   status: ApplicationStatus;
+  interviewDate?: string;
   interview?: WorkflowApplicationInterview;
   documents: WorkflowApplicationDocument[];
   selectedCourses: WorkflowApplicationCourse[];
@@ -122,8 +127,12 @@ export const countryOptions: Record<ApplicationCountry, string[]> = {
 export const applicationStatusTone: Record<ApplicationStatus, string> = {
   DRAFT: 'bg-slate-100 text-slate-700',
   SUBMITTED: 'bg-blue-100 text-blue-700',
+  PENDING: 'bg-amber-100 text-amber-700',
+  ASSIGNED: 'bg-sky-100 text-sky-700',
   PENDING_INTERVIEW: 'bg-amber-100 text-amber-700',
   INTERVIEW_SCHEDULED: 'bg-indigo-100 text-indigo-700',
+  INTERVIEW_COMPLETED: 'bg-emerald-100 text-emerald-700',
+  COURSE_REQUEST_ENABLED: 'bg-teal-100 text-teal-700',
   SHORTLISTED: 'bg-emerald-100 text-emerald-700',
   REJECTED: 'bg-red-100 text-red-700',
   DOCUMENT_PENDING: 'bg-orange-100 text-orange-700',

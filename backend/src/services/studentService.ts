@@ -4,6 +4,7 @@ import StudentProfile, {
   IStudentTranscript,
 } from '../models/StudentProfile';
 import User from '../models/User';
+import { NotFoundError } from '../errors/AppError';
 
 interface StudentProfileUpdateInput {
   basicInfo?: Partial<IStudentProfile['basicInfo']>;
@@ -28,6 +29,8 @@ const buildDefaultProfile = (user: {
   program: '',
   semester: '1',
   cgpa: 0,
+  isProfileComplete: false,
+  profileCompletionIssues: [],
   basicInfo: {
     fullName: user.name || '',
     cmsId: user.sapId || '',
@@ -50,6 +53,11 @@ const buildDefaultProfile = (user: {
   },
   documents: [],
 });
+
+export interface ProfileCompletionResult {
+  isComplete: boolean;
+  missingFields: string[];
+}
 
 const ensureProfileShape = (profile: IStudentProfile) => {
   const basicInfo = profile.basicInfo as Partial<IStudentProfile['basicInfo']> | undefined;
@@ -89,6 +97,36 @@ const syncProfileWithLegacyFields = (profile: IStudentProfile) => {
   profile.cgpa = profile.transcript.cgpa || 0;
 };
 
+export const checkProfileCompletion = (profile: IStudentProfile): ProfileCompletionResult => {
+  ensureProfileShape(profile);
+
+  const missingFields: string[] = [];
+
+  if (!profile.basicInfo.fullName.trim()) missingFields.push('name');
+  if (!profile.basicInfo.email.trim()) missingFields.push('email');
+  if (!profile.basicInfo.phone.trim()) missingFields.push('phone');
+  if (!profile.basicInfo.cmsId.trim()) missingFields.push('registration number');
+  if (!profile.basicInfo.department.trim()) missingFields.push('program');
+  if (!profile.preferences.degreeLevel.trim()) missingFields.push('degree level');
+  if (!profile.preferences.fieldOfInterest.trim()) missingFields.push('field of interest');
+  if (!profile.preferences.intake.trim()) missingFields.push('intake');
+  if (!profile.preferences.preferredCountries.length) missingFields.push('preferred countries');
+  if (!profile.transcript.fileUrl.trim()) missingFields.push('transcript');
+  if ((profile.transcript.cgpa || 0) <= 0) missingFields.push('CGPA');
+  if (!profile.documents.length) missingFields.push('documents');
+
+  return {
+    isComplete: missingFields.length === 0,
+    missingFields,
+  };
+};
+
+const applyProfileCompletion = (profile: IStudentProfile) => {
+  const completion = checkProfileCompletion(profile);
+  profile.isProfileComplete = completion.isComplete;
+  profile.profileCompletionIssues = completion.missingFields;
+};
+
 const hydrateProfileFromUser = (
   profile: IStudentProfile,
   user: { name: string; email: string; phone?: string; sapId?: string }
@@ -104,14 +142,22 @@ const hydrateProfileFromUser = (
 export const ensureStudentProfile = async (userId: string) => {
   const user = await User.findById(userId).select('-password');
   if (!user) {
-    throw new Error('Student not found.');
+    throw new NotFoundError(
+      'Student not found.',
+      'No student account exists for the requested profile.',
+      'Verify the student account and try again.',
+      'STUDENT_NOT_FOUND'
+    );
   }
 
   let profile = await StudentProfile.findOne({ userId });
   if (!profile) {
     profile = await StudentProfile.create(buildDefaultProfile(user));
+    applyProfileCompletion(profile);
+    await profile.save();
   } else {
     hydrateProfileFromUser(profile, user);
+    applyProfileCompletion(profile);
     await profile.save();
   }
 
@@ -138,6 +184,7 @@ export const updateStudentProfile = async (userId: string, profileData: StudentP
   }
 
   syncProfileWithLegacyFields(profile);
+  applyProfileCompletion(profile);
   await profile.save();
   return profile;
 };
@@ -146,6 +193,7 @@ export const saveTranscript = async (userId: string, transcriptData: IStudentTra
   const profile = await ensureStudentProfile(userId);
   profile.transcript = transcriptData;
   syncProfileWithLegacyFields(profile);
+  applyProfileCompletion(profile);
   await profile.save();
   return profile.transcript;
 };
@@ -163,6 +211,7 @@ export const addDocument = async (userId: string, documentData: CreateDocumentIn
     status: documentData.status || 'pending',
     uploadedAt: new Date(),
   } as IStudentDocumentItem);
+  applyProfileCompletion(profile);
   await profile.save();
   return profile.documents;
 };
@@ -181,10 +230,16 @@ export const removeDocument = async (userId: string, documentId: string) => {
   );
 
   if (documentIndex === -1) {
-    throw new Error('Document not found.');
+    throw new NotFoundError(
+      'Document not found.',
+      'The requested student document does not exist.',
+      'Refresh the page and try again.',
+      'DOCUMENT_NOT_FOUND'
+    );
   }
 
   profile.documents.splice(documentIndex, 1);
+  applyProfileCompletion(profile);
   await profile.save();
   return profile.documents;
 };

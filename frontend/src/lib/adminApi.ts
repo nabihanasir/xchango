@@ -76,6 +76,8 @@ export const adminApi = {
     unwrap<AdminUserRecord>(apiClient.post('/admin/users', payload)),
   getApplications: () =>
     unwrap<WorkflowApplication[]>(apiClient.get('/admin/applications')),
+  getPendingApplications: () =>
+    unwrap<WorkflowApplication[]>(apiClient.get('/admin/applications/pending')),
   uploadOfferLetter: (payload: { applicationId: string; offerLetterUrl: string }) =>
     unwrap<Record<string, unknown>>(apiClient.post('/admin/offer-letter', payload)),
   getCountries: () => unwrap<CountryRecord[]>(apiClient.get('/catalog/countries')),

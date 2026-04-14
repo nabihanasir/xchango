@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCourseMappings = exports.addCourseMapping = exports.uploadOfferLetter = exports.createUser = exports.getApplications = exports.getUsers = exports.addCourse = exports.addUniversity = exports.getDashboardStats = void 0;
+exports.getCourseMappings = exports.addCourseMapping = exports.uploadOfferLetter = exports.createUser = exports.getPendingApplications = exports.getApplications = exports.getUsers = exports.addCourse = exports.addUniversity = exports.getDashboardStats = void 0;
 const adminService = __importStar(require("../services/adminService"));
 const response_1 = require("../utils/response");
 const getDashboardStats = async (req, res) => {
@@ -61,6 +61,11 @@ const getApplications = async (_req, res) => {
     (0, response_1.sendResponse)(res, 200, 'Applications fetched successfully', applications);
 };
 exports.getApplications = getApplications;
+const getPendingApplications = async (_req, res) => {
+    const applications = await adminService.getPendingApplications();
+    (0, response_1.sendResponse)(res, 200, 'Pending applications fetched successfully', applications);
+};
+exports.getPendingApplications = getPendingApplications;
 const createUser = async (req, res) => {
     const user = await adminService.createUser(req.body);
     (0, response_1.sendResponse)(res, 201, 'User created successfully', user);

@@ -50,8 +50,12 @@ var ApplicationStatus;
 (function (ApplicationStatus) {
     ApplicationStatus["DRAFT"] = "DRAFT";
     ApplicationStatus["SUBMITTED"] = "SUBMITTED";
+    ApplicationStatus["PENDING"] = "PENDING";
+    ApplicationStatus["ASSIGNED"] = "ASSIGNED";
     ApplicationStatus["PENDING_INTERVIEW"] = "PENDING_INTERVIEW";
     ApplicationStatus["INTERVIEW_SCHEDULED"] = "INTERVIEW_SCHEDULED";
+    ApplicationStatus["INTERVIEW_COMPLETED"] = "INTERVIEW_COMPLETED";
+    ApplicationStatus["COURSE_REQUEST_ENABLED"] = "COURSE_REQUEST_ENABLED";
     ApplicationStatus["SHORTLISTED"] = "SHORTLISTED";
     ApplicationStatus["REJECTED"] = "REJECTED";
     ApplicationStatus["DOCUMENT_PENDING"] = "DOCUMENT_PENDING";
@@ -113,6 +117,7 @@ const ApplicationSchema = new mongoose_1.Schema({
         enum: Object.values(ApplicationStatus),
         default: ApplicationStatus.DRAFT,
     },
+    interviewDate: { type: Date, required: false },
     interview: { type: ApplicationInterviewSchema, required: false },
     documents: { type: [ApplicationDocumentSchema], default: [] },
     selectedCourses: { type: [SelectedCourseSchema], default: [] },

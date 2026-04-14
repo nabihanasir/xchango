@@ -19,7 +19,6 @@ import {
   getApplicationCourseUniversity,
   getApplicationUserId,
   getApplicationUserSummary,
-  type ApplicationStatus,
   type SelectedCourseStatus,
   type WorkflowApplication,
 } from '../../types/application';
@@ -64,12 +63,16 @@ export default function AdvisorApplicationsWorkspace({
   const [pageError, setPageError] = useState('');
   const [detailsError, setDetailsError] = useState('');
   const [actionError, setActionError] = useState('');
-  const [activeDecision, setActiveDecision] = useState<ApplicationStatus | null>(null);
   const [generatingSuggestions, setGeneratingSuggestions] = useState(false);
   const [activeCourseDecision, setActiveCourseDecision] = useState('');
+  const [interviewForm, setInterviewForm] = useState({ date: '', location: 'Advisor Office' });
+  const [schedulingInterview, setSchedulingInterview] = useState(false);
+  const [completingInterview, setCompletingInterview] = useState(false);
 
   const stats = useMemo(() => {
-    const pending = applications.filter((item) => item.status === 'PENDING_INTERVIEW').length;
+    const pending = applications.filter((item) =>
+      ['ASSIGNED', 'INTERVIEW_SCHEDULED'].includes(item.status)
+    ).length;
     const shortlisted = applications.filter((item) => item.status === 'SHORTLISTED').length;
     const rejected = applications.filter((item) => item.status === 'REJECTED').length;
 
@@ -192,6 +195,22 @@ export default function AdvisorApplicationsWorkspace({
     };
   }, [selectedApplicationId]);
 
+  useEffect(() => {
+    if (!selectedApplication) {
+      setInterviewForm({ date: '', location: 'Advisor Office' });
+      return;
+    }
+
+    setInterviewForm({
+      date: selectedApplication.interviewDate
+        ? new Date(selectedApplication.interviewDate).toISOString().slice(0, 10)
+        : selectedApplication.interview?.date
+          ? new Date(selectedApplication.interview.date).toISOString().slice(0, 10)
+          : '',
+      location: selectedApplication.interview?.location || 'Advisor Office',
+    });
+  }, [selectedApplication]);
+
   const syncApplication = (updatedApplication: WorkflowApplication) => {
     setApplications((current) =>
       current.map((application) =>
@@ -215,27 +234,6 @@ export default function AdvisorApplicationsWorkspace({
       behavior: 'smooth',
       block: 'start',
     });
-  };
-
-  const handleDecision = async (
-    status: Extract<ApplicationStatus, 'SHORTLISTED' | 'REJECTED'>,
-    applicationId = selectedApplicationId
-  ) => {
-    if (!applicationId) {
-      return;
-    }
-
-    setActiveDecision(status);
-    setActionError('');
-
-    try {
-      const updatedApplication = await applicationApi.updateStatus(applicationId, status);
-      syncApplication(updatedApplication);
-    } catch (error) {
-      setActionError(error instanceof Error ? error.message : 'Unable to update application status.');
-    } finally {
-      setActiveDecision(null);
-    }
   };
 
   const handleGenerateSuggestions = async () => {
@@ -278,6 +276,47 @@ export default function AdvisorApplicationsWorkspace({
       setActionError(error instanceof Error ? error.message : 'Unable to update course decision.');
     } finally {
       setActiveCourseDecision('');
+    }
+  };
+
+  const handleScheduleInterview = async () => {
+    if (!selectedApplicationId || !interviewForm.date.trim()) {
+      setActionError('Select an interview date before scheduling.');
+      return;
+    }
+
+    setSchedulingInterview(true);
+    setActionError('');
+
+    try {
+      const updatedApplication = await applicationApi.scheduleInterview(selectedApplicationId, {
+        date: interviewForm.date,
+        location: interviewForm.location.trim() || 'Advisor Office',
+        stakeholders: user?._id ? [user._id] : [],
+      });
+      syncApplication(updatedApplication);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to schedule interview.');
+    } finally {
+      setSchedulingInterview(false);
+    }
+  };
+
+  const handleCompleteInterview = async () => {
+    if (!selectedApplicationId) {
+      return;
+    }
+
+    setCompletingInterview(true);
+    setActionError('');
+
+    try {
+      const updatedApplication = await applicationApi.completeInterview(selectedApplicationId);
+      syncApplication(updatedApplication);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to complete interview.');
+    } finally {
+      setCompletingInterview(false);
     }
   };
 
@@ -356,7 +395,6 @@ export default function AdvisorApplicationsWorkspace({
               <tbody className="divide-y divide-slate-100 bg-white">
                 {applications.map((application) => {
                   const student = getApplicationUserSummary(application.studentId);
-                  const canReview = application.status === 'PENDING_INTERVIEW';
 
                   return (
                     <tr
@@ -401,34 +439,6 @@ export default function AdvisorApplicationsWorkspace({
                             <UserRound className="h-3.5 w-3.5" />
                             <span>View Student Profile</span>
                           </button>
-                          {canReview ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedApplicationId(application._id);
-                                  void handleDecision('SHORTLISTED', application._id);
-                                }}
-                                disabled={activeDecision !== null}
-                                className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                <Check className="h-3.5 w-3.5" />
-                                <span>Approve</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedApplicationId(application._id);
-                                  void handleDecision('REJECTED', application._id);
-                                }}
-                                disabled={activeDecision !== null}
-                                className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                <X className="h-3.5 w-3.5" />
-                                <span>Reject</span>
-                              </button>
-                            </>
-                          ) : null}
                         </div>
                       </td>
                     </tr>
@@ -457,7 +467,7 @@ export default function AdvisorApplicationsWorkspace({
           <div>
             <h2 className="text-2xl font-black text-slate-900">Application Details</h2>
             <p className="mt-1 text-sm font-medium text-slate-500">
-              Review the application and use AI only as explainable decision support.
+              Review assigned students, schedule interviews, and unlock course approval after completion.
             </p>
           </div>
           {selectedApplication ? (
@@ -502,30 +512,75 @@ export default function AdvisorApplicationsWorkspace({
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Documents:</span> {selectedApplication.documents.length}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Selected courses:</span> {selectedApplication.selectedCourses.length}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">AI suggestions:</span> {selectedApplication.aiRecommendations.length}</p>
-                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview date:</span> {selectedApplication.interview ? new Date(selectedApplication.interview.date).toLocaleDateString() : 'Not scheduled'}</p>
+                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview date:</span> {selectedApplication.interviewDate ? new Date(selectedApplication.interviewDate).toLocaleDateString() : selectedApplication.interview ? new Date(selectedApplication.interview.date).toLocaleDateString() : 'Not scheduled'}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview location:</span> {selectedApplication.interview?.location || 'Not scheduled'}</p>
-                {selectedApplication.status === 'PENDING_INTERVIEW' ? (
-                  <div className="flex flex-wrap gap-3 pt-2">
+                <div className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+                    Interview Scheduler
+                  </p>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <label className="space-y-2 text-sm font-semibold text-slate-700">
+                      <span>Interview date</span>
+                      <input
+                        type="date"
+                        value={interviewForm.date}
+                        onChange={(event) =>
+                          setInterviewForm((current) => ({
+                            ...current,
+                            date: event.target.value,
+                          }))
+                        }
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-dark-blue focus:ring-4 focus:ring-dark-blue/10"
+                      />
+                    </label>
+                    <label className="space-y-2 text-sm font-semibold text-slate-700">
+                      <span>Location</span>
+                      <input
+                        type="text"
+                        value={interviewForm.location}
+                        onChange={(event) =>
+                          setInterviewForm((current) => ({
+                            ...current,
+                            location: event.target.value,
+                          }))
+                        }
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-dark-blue focus:ring-4 focus:ring-dark-blue/10"
+                        placeholder="Advisor office or meeting link"
+                      />
+                    </label>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
-                      onClick={() => void handleDecision('SHORTLISTED')}
-                      disabled={activeDecision !== null}
+                      onClick={() => void handleScheduleInterview()}
+                      disabled={
+                        schedulingInterview ||
+                        !['ASSIGNED', 'INTERVIEW_SCHEDULED'].includes(selectedApplication.status)
+                      }
+                      className="inline-flex items-center gap-2 rounded-full bg-dark-blue px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-[#0f1f48] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <span>{schedulingInterview ? 'Saving...' : 'Schedule Interview'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleCompleteInterview()}
+                      disabled={
+                        completingInterview || selectedApplication.status !== 'INTERVIEW_SCHEDULED'
+                      }
                       className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Check className="h-4 w-4" />
-                      <span>{activeDecision === 'SHORTLISTED' ? 'Approving...' : 'Approve Application'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void handleDecision('REJECTED')}
-                      disabled={activeDecision !== null}
-                      className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <X className="h-4 w-4" />
-                      <span>{activeDecision === 'REJECTED' ? 'Rejecting...' : 'Reject Application'}</span>
+                      <span>
+                        {completingInterview ? 'Completing...' : 'Mark Interview Completed'}
+                      </span>
                     </button>
                   </div>
-                ) : null}
+                  {selectedApplication.status === 'INTERVIEW_COMPLETED' ? (
+                    <p className="text-sm font-semibold text-emerald-700">
+                      Interview completed. The student can now request course approval.
+                    </p>
+                  ) : null}
+                </div>
               </div>
             </div>
 

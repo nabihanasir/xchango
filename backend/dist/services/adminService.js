@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllMappings = exports.createMapping = exports.updateApplicationOfferLetter = exports.createUser = exports.getAllApplications = exports.getAllUsers = exports.createCourse = exports.createUniversity = exports.getAllStats = void 0;
+exports.getAllMappings = exports.createMapping = exports.updateApplicationOfferLetter = exports.createUser = exports.getPendingApplications = exports.getAllApplications = exports.getAllUsers = exports.createCourse = exports.createUniversity = exports.getAllStats = void 0;
 const University_1 = __importDefault(require("../models/University"));
 const Course_1 = __importDefault(require("../models/Course"));
 const Application_1 = __importStar(require("../models/Application"));
@@ -107,6 +107,17 @@ const getAllUsers = async () => {
 exports.getAllUsers = getAllUsers;
 const getAllApplications = async () => populateApplications(Application_1.default.find().sort({ createdAt: -1 }));
 exports.getAllApplications = getAllApplications;
+const getPendingApplications = async () => populateApplications(Application_1.default.find({
+    status: {
+        $in: [
+            Application_1.ApplicationStatus.DRAFT,
+            Application_1.ApplicationStatus.SUBMITTED,
+            Application_1.ApplicationStatus.PENDING,
+            Application_1.ApplicationStatus.PENDING_INTERVIEW,
+        ],
+    },
+}).sort({ createdAt: -1 }));
+exports.getPendingApplications = getPendingApplications;
 const generateTemporaryPassword = () => {
     return crypto_1.default.randomBytes(6).toString('base64url');
 };

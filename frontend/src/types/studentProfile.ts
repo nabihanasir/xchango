@@ -49,6 +49,8 @@ export interface StudentProfile {
   program: string;
   semester: string;
   cgpa: number;
+  isProfileComplete: boolean;
+  profileCompletionIssues: string[];
   basicInfo: StudentBasicInfo;
   preferences: StudentPreferences;
   transcript: StudentTranscript;

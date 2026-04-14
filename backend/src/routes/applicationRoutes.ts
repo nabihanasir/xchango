@@ -2,6 +2,9 @@ import express from 'express';
 import * as applicationController from '../controllers/applicationController';
 import { protect } from '../middleware/authMiddleware';
 import { authorizeRoles } from '../middleware/authorize';
+import {
+  requireCompleteStudentProfile,
+} from '../middleware/workflowAccess';
 import { createUploader } from '../utils/upload';
 import { UserRole } from '../models/User';
 
@@ -10,7 +13,12 @@ const applicationDocumentUpload = createUploader('application-documents');
 
 router.use(protect);
 
-router.post('/', authorizeRoles(UserRole.STUDENT), applicationController.createApplication);
+router.post(
+  '/',
+  authorizeRoles(UserRole.STUDENT),
+  requireCompleteStudentProfile,
+  applicationController.createApplication
+);
 router.get(
   '/student/:studentId',
   authorizeRoles(UserRole.STUDENT, UserRole.ADMIN),
@@ -32,6 +40,7 @@ router.patch('/:id', authorizeRoles(UserRole.STUDENT), applicationController.upd
 router.post('/:id/submit', authorizeRoles(UserRole.STUDENT), applicationController.submitApplication);
 router.patch('/:id/assign-advisor', authorizeRoles(UserRole.ADMIN), applicationController.assignAdvisor);
 router.patch('/:id/schedule-interview', authorizeRoles(UserRole.ADVISOR), applicationController.scheduleInterview);
+router.patch('/:id/complete-interview', authorizeRoles(UserRole.ADVISOR), applicationController.completeInterview);
 router.post('/:id/interview', authorizeRoles(UserRole.ADVISOR), applicationController.scheduleInterview);
 router.patch('/:id/status', authorizeRoles(UserRole.ADVISOR), applicationController.updateStatus);
 router.post(

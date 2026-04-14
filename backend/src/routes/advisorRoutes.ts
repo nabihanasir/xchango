@@ -11,6 +11,7 @@ router.use(authorizeRoles(UserRole.ADVISOR));
 
 router.get('/profile', advisorController.getProfile);
 router.get('/applications', advisorController.getAssignedApps);
+router.get('/students', advisorController.getAssignedStudents);
 router.put('/applications/:id', advisorController.updateApplicationStatus);
 
 export default router;

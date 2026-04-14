@@ -11,6 +11,7 @@ router.use(authorizeRoles(UserRole.ADMIN));
 
 router.get('/stats', adminController.getDashboardStats);
 router.get('/applications', adminController.getApplications);
+router.get('/applications/pending', adminController.getPendingApplications);
 router.get('/users', adminController.getUsers);
 router.post('/users', adminController.createUser);
 router.post('/offer-letter', adminController.uploadOfferLetter);

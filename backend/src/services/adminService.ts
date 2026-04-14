@@ -78,6 +78,20 @@ export const getAllUsers = async () => {
 export const getAllApplications = async () =>
   populateApplications(Application.find().sort({ createdAt: -1 }));
 
+export const getPendingApplications = async () =>
+  populateApplications(
+    Application.find({
+      status: {
+        $in: [
+          ApplicationStatus.DRAFT,
+          ApplicationStatus.SUBMITTED,
+          ApplicationStatus.PENDING,
+          ApplicationStatus.PENDING_INTERVIEW,
+        ],
+      },
+    }).sort({ createdAt: -1 })
+  );
+
 const generateTemporaryPassword = () => {
   return crypto.randomBytes(6).toString('base64url');
 };

@@ -1,5 +1,6 @@
 import { apiClient } from './httpClient';
 import type { WorkflowApplication } from '../types/application';
+import type { StudentProfile } from '../types/studentProfile';
 
 interface ApiEnvelope<T> {
   success: boolean;
@@ -29,6 +30,7 @@ export const advisorApi = {
   getProfile: () => unwrap<AdvisorProfileData>(apiClient.get('/advisors/profile')),
   getAssignedApplications: () =>
     unwrap<WorkflowApplication[]>(apiClient.get('/advisors/applications')),
+  getStudents: () => unwrap<StudentProfile[]>(apiClient.get('/advisors/students')),
   updateApplicationStatus: (applicationId: string, status: string) =>
     unwrap<WorkflowApplication>(apiClient.put(`/advisors/applications/${applicationId}`, { status })),
 };

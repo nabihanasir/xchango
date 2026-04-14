@@ -65,6 +65,8 @@ const errorHandler = (err, req, res, _next) => {
     });
     res.status(statusCode).json({
         success: false,
+        code: normalizedError.code,
+        message: normalizedError.message,
         error: {
             code: normalizedError.code,
             message: normalizedError.message,

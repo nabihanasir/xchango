@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Mail, Phone, BookOpen, Clock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { advisorApi, type AdvisorProfileData } from '../../lib/advisorApi';
-import { studentProfileApi } from '../../lib/studentProfileApi';
 import type { StudentProfile } from '../../types/studentProfile';
 
 export default function AdvisorStudents() {
@@ -27,22 +26,11 @@ export default function AdvisorStudents() {
       try {
         const advisorProfile = await advisorApi.getProfile();
         if (cancelled) return;
-        
+
         setProfile(advisorProfile);
-
-        if (advisorProfile.assignedStudents && advisorProfile.assignedStudents.length > 0) {
-          const profiles = await Promise.all(
-            advisorProfile.assignedStudents.map((id) =>
-              studentProfileApi.getStudentProfile(id).catch(() => null)
-            )
-          );
-          
-          if (cancelled) return;
-
-          setStudents(profiles.filter((p): p is StudentProfile => p !== null));
-        } else {
-          setStudents([]);
-        }
+        const profiles = await advisorApi.getStudents();
+        if (cancelled) return;
+        setStudents(profiles);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Unable to load assigned students.');

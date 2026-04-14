@@ -34,26 +34,25 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteDocument = exports.getStudentDocuments = exports.uploadDocument = void 0;
+const AppError_1 = require("../errors/AppError");
 const User_1 = require("../models/User");
 const studentService = __importStar(require("../services/studentService"));
 const response_1 = require("../utils/response");
 const upload_1 = require("../utils/upload");
 const assertStudentAccess = (req, studentId) => {
     if (req.user.role === User_1.UserRole.STUDENT && req.user._id.toString() !== studentId) {
-        throw new Error('You are not authorized to access these documents.');
+        throw new AppError_1.ForbiddenError('You are not authorized to access these documents.', 'The requested document records belong to another student.', 'Use the correct student account to manage these documents.', 'DOCUMENT_ACCESS_DENIED');
     }
 };
 const uploadDocument = async (req, res) => {
     if (!req.file) {
-        res.status(400);
-        throw new Error('Please upload a document file.');
+        throw new AppError_1.ValidationError('Please upload a document file.', 'No document file was included in the request.', 'Attach a file and try again.', 'DOCUMENT_FILE_REQUIRED');
     }
     const studentId = req.body.studentId || req.user._id.toString();
     assertStudentAccess(req, studentId);
     const type = req.body.type || req.body.documentType;
     if (!type) {
-        res.status(400);
-        throw new Error('Document type is required.');
+        throw new AppError_1.ValidationError('Document type is required.', 'The request did not specify the document type.', 'Provide the document type and try again.', 'DOCUMENT_TYPE_REQUIRED');
     }
     const documents = await studentService.addDocument(studentId, {
         type,

@@ -12,18 +12,21 @@ const sendResponse = (res, statusCode, message, data = null) => {
 };
 exports.sendResponse = sendResponse;
 const sendError = (res, statusCode, message, reason, solution, code = 'REQUEST_ERROR') => {
+    const errorPayload = {
+        code,
+        message,
+        reason,
+        solution,
+        status: statusCode,
+        timestamp: new Date().toISOString(),
+        path: res.req?.originalUrl,
+        requestId: res.locals.requestId,
+    };
     return res.status(statusCode).json({
         success: false,
-        error: {
-            code,
-            message,
-            reason,
-            solution,
-            status: statusCode,
-            timestamp: new Date().toISOString(),
-            path: res.req?.originalUrl,
-            requestId: res.locals.requestId,
-        },
+        code,
+        message,
+        error: errorPayload,
     });
 };
 exports.sendError = sendError;

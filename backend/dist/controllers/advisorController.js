@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProfile = exports.updateApplicationStatus = exports.getAssignedApps = void 0;
+exports.getProfile = exports.updateApplicationStatus = exports.getAssignedStudents = exports.getAssignedApps = void 0;
 const advisorService = __importStar(require("../services/advisorService"));
 const response_1 = require("../utils/response");
 const getAssignedApps = async (req, res) => {
@@ -41,6 +41,11 @@ const getAssignedApps = async (req, res) => {
     (0, response_1.sendResponse)(res, 200, 'Assigned applications fetched', applications);
 };
 exports.getAssignedApps = getAssignedApps;
+const getAssignedStudents = async (req, res) => {
+    const students = await advisorService.getAssignedStudents(req.user._id);
+    (0, response_1.sendResponse)(res, 200, 'Assigned students fetched', students);
+};
+exports.getAssignedStudents = getAssignedStudents;
 const updateApplicationStatus = async (req, res) => {
     const { status } = req.body;
     const application = await advisorService.reviewApplication(req.params.id, status);

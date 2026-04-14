@@ -34,6 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTranscript = exports.uploadTranscript = void 0;
+const AppError_1 = require("../errors/AppError");
 const User_1 = require("../models/User");
 const transcriptParser_1 = require("../services/transcriptParser");
 const studentService = __importStar(require("../services/studentService"));
@@ -41,13 +42,12 @@ const response_1 = require("../utils/response");
 const upload_1 = require("../utils/upload");
 const assertStudentAccess = (req, studentId) => {
     if (req.user.role === User_1.UserRole.STUDENT && req.user._id.toString() !== studentId) {
-        throw new Error('You are not authorized to access this transcript.');
+        throw new AppError_1.ForbiddenError('You are not authorized to access this transcript.', 'The requested transcript belongs to another student.', 'Use the correct student account to access this transcript.', 'TRANSCRIPT_ACCESS_DENIED');
     }
 };
 const uploadTranscript = async (req, res) => {
     if (!req.file) {
-        res.status(400);
-        throw new Error('Please upload a transcript file.');
+        throw new AppError_1.ValidationError('Please upload a transcript file.', 'No transcript file was included in the request.', 'Attach a transcript file and try again.', 'TRANSCRIPT_FILE_REQUIRED');
     }
     const studentId = req.body.studentId || req.user._id.toString();
     assertStudentAccess(req, studentId);

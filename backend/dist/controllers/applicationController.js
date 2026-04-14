@@ -33,14 +33,15 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCourseDecision = exports.getAiRecommendations = exports.generateAiRecommendations = exports.getAvailableCourses = exports.selectCourses = exports.uploadDocuments = exports.updateStatus = exports.scheduleInterview = exports.getAdvisorApplications = exports.assignAdvisor = exports.submitApplication = exports.getStudentApplications = exports.getApplication = exports.updateApplicationStep = exports.createApplication = void 0;
+exports.updateCourseDecision = exports.getAiRecommendations = exports.generateAiRecommendations = exports.getAvailableCourses = exports.selectCourses = exports.uploadDocuments = exports.updateStatus = exports.completeInterview = exports.scheduleInterview = exports.getAdvisorApplications = exports.assignAdvisor = exports.submitApplication = exports.getStudentApplications = exports.getApplication = exports.updateApplicationStep = exports.createApplication = void 0;
+const AppError_1 = require("../errors/AppError");
 const User_1 = require("../models/User");
 const applicationService = __importStar(require("../services/applicationService"));
 const response_1 = require("../utils/response");
 const upload_1 = require("../utils/upload");
 const assertStudentAccess = (req, studentId) => {
     if (req.user.role === User_1.UserRole.STUDENT && req.user._id.toString() !== studentId) {
-        throw new Error('You are not authorized to access these applications.');
+        throw new AppError_1.ForbiddenError('You are not authorized to access these applications.', 'The requested application records belong to another student.', 'Use the signed-in student account to access its own applications.', 'APPLICATION_ACCESS_DENIED');
     }
 };
 const createApplication = async (req, res) => {
@@ -91,6 +92,11 @@ const scheduleInterview = async (req, res) => {
     (0, response_1.sendResponse)(res, 200, 'Interview scheduled successfully', application);
 };
 exports.scheduleInterview = scheduleInterview;
+const completeInterview = async (req, res) => {
+    const application = await applicationService.completeInterview(req.params.id, req.user._id.toString());
+    (0, response_1.sendResponse)(res, 200, 'Interview marked as completed successfully', application);
+};
+exports.completeInterview = completeInterview;
 const updateStatus = async (req, res) => {
     const application = await applicationService.updateStatus(req.params.id, req.user._id.toString(), req.body.status);
     (0, response_1.sendResponse)(res, 200, 'Application status updated successfully', application);
@@ -98,8 +104,7 @@ const updateStatus = async (req, res) => {
 exports.updateStatus = updateStatus;
 const uploadDocuments = async (req, res) => {
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
-        res.status(400);
-        throw new Error('Upload at least one application document.');
+        throw new AppError_1.ValidationError('Upload at least one application document.', 'The request did not include any files.', 'Attach one or more documents and try again.', 'APPLICATION_DOCUMENT_REQUIRED');
     }
     const documents = req.files.map((file) => ({
         type: req.body.type || 'supporting_document',

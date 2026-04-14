@@ -57,6 +57,8 @@ const StudentProfileSchema = new mongoose_1.Schema({
     program: { type: String, default: '', trim: true },
     semester: { type: String, default: '', trim: true },
     cgpa: { type: Number, default: 0, min: 0 },
+    isProfileComplete: { type: Boolean, default: false },
+    profileCompletionIssues: { type: [String], default: [] },
     basicInfo: {
         fullName: { type: String, default: '', trim: true },
         cmsId: { type: String, default: '', trim: true },

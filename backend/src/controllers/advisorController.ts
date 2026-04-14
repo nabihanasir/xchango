@@ -7,6 +7,11 @@ export const getAssignedApps = async (req: any, res: Response) => {
   sendResponse(res, 200, 'Assigned applications fetched', applications);
 };
 
+export const getAssignedStudents = async (req: any, res: Response) => {
+  const students = await advisorService.getAssignedStudents(req.user._id);
+  sendResponse(res, 200, 'Assigned students fetched', students);
+};
+
 export const updateApplicationStatus = async (req: Request, res: Response) => {
   const { status } = req.body;
   const application = await advisorService.reviewApplication(req.params.id as string, status);

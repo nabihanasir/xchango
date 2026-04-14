@@ -27,6 +27,11 @@ export const getApplications = async (_req: Request, res: Response) => {
   sendResponse(res, 200, 'Applications fetched successfully', applications);
 };
 
+export const getPendingApplications = async (_req: Request, res: Response) => {
+  const applications = await adminService.getPendingApplications();
+  sendResponse(res, 200, 'Pending applications fetched successfully', applications);
+};
+
 export const createUser = async (req: Request, res: Response) => {
   const user = await adminService.createUser(req.body);
   sendResponse(res, 201, 'User created successfully', user);

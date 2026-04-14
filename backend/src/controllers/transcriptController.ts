@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { ForbiddenError, ValidationError } from '../errors/AppError';
 import { UserRole } from '../models/User';
 import { parseTranscriptFile } from '../services/transcriptParser';
 import * as studentService from '../services/studentService';
@@ -7,14 +8,23 @@ import { toPublicFileUrl } from '../utils/upload';
 
 const assertStudentAccess = (req: any, studentId: string) => {
   if (req.user.role === UserRole.STUDENT && req.user._id.toString() !== studentId) {
-    throw new Error('You are not authorized to access this transcript.');
+    throw new ForbiddenError(
+      'You are not authorized to access this transcript.',
+      'The requested transcript belongs to another student.',
+      'Use the correct student account to access this transcript.',
+      'TRANSCRIPT_ACCESS_DENIED'
+    );
   }
 };
 
 export const uploadTranscript = async (req: any, res: Response) => {
   if (!req.file) {
-    res.status(400);
-    throw new Error('Please upload a transcript file.');
+    throw new ValidationError(
+      'Please upload a transcript file.',
+      'No transcript file was included in the request.',
+      'Attach a transcript file and try again.',
+      'TRANSCRIPT_FILE_REQUIRED'
+    );
   }
 
   const studentId = req.body.studentId || req.user._id.toString();

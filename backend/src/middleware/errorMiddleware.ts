@@ -109,6 +109,8 @@ export const errorHandler = (err: unknown, req: Request, res: Response, _next: N
 
   res.status(statusCode).json({
     success: false,
+    code: normalizedError.code,
+    message: normalizedError.message,
     error: {
       code: normalizedError.code,
       message: normalizedError.message,
