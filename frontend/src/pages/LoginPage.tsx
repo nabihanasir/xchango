@@ -68,22 +68,6 @@ export default function LoginPage() {
         exploration.
       </div>
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row">
-        <Link
-          to="/signup"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-accent-yellow to-yellow-default px-6 py-3 text-sm font-bold text-dark-blue shadow-lg shadow-accent-yellow/25 transition hover:-translate-y-0.5"
-        >
-          Sign Up
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-        <Link
-          to="/"
-          className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-dark-blue transition hover:border-dark-blue"
-        >
-          Back to Landing
-        </Link>
-      </div>
-
       <form className="w-full space-y-6" onSubmit={handleSubmit}>
         <InputField
           label="Email Address"
@@ -127,12 +111,21 @@ export default function LoginPage() {
       <div className="mt-8 flex w-full items-center justify-between">
         <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
         <Link
-          to="/"
+          to="/signup"
           className="text-center text-small font-bold uppercase tracking-wider text-body-text transition-colors hover:text-dark-blue"
+        >
+          Don&apos;t have an account? Sign up?
+        </Link>
+        <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
+      </div>
+
+      <div className="mt-4 text-center">
+        <Link
+          to="/"
+          className="text-small font-bold uppercase tracking-wider text-body-text transition-colors hover:text-dark-blue"
         >
           Back to landing page
         </Link>
-        <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
       </div>
     </AuthLayout>
   );
