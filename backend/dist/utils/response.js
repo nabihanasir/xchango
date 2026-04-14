@@ -6,14 +6,24 @@ const sendResponse = (res, statusCode, message, data = null) => {
         success: statusCode >= 200 && statusCode < 300,
         message,
         data,
+        timestamp: new Date().toISOString(),
+        requestId: res.locals.requestId,
     });
 };
 exports.sendResponse = sendResponse;
-const sendError = (res, statusCode, message) => {
+const sendError = (res, statusCode, message, reason, solution, code = 'REQUEST_ERROR') => {
     return res.status(statusCode).json({
         success: false,
-        message,
-        data: null,
+        error: {
+            code,
+            message,
+            reason,
+            solution,
+            status: statusCode,
+            timestamp: new Date().toISOString(),
+            path: res.req?.originalUrl,
+            requestId: res.locals.requestId,
+        },
     });
 };
 exports.sendError = sendError;

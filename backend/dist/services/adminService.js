@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllMappings = exports.createMapping = exports.updateApplicationOfferLetter = exports.createUser = exports.getAllUsers = exports.createCourse = exports.createUniversity = exports.getAllStats = void 0;
+exports.getAllMappings = exports.createMapping = exports.updateApplicationOfferLetter = exports.createUser = exports.getAllApplications = exports.getAllUsers = exports.createCourse = exports.createUniversity = exports.getAllStats = void 0;
 const University_1 = __importDefault(require("../models/University"));
 const Course_1 = __importDefault(require("../models/Course"));
 const Application_1 = __importStar(require("../models/Application"));
@@ -46,6 +46,25 @@ const CourseMapping_1 = __importDefault(require("../models/CourseMapping"));
 const AdvisorProfile_1 = __importDefault(require("../models/AdvisorProfile"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const crypto_1 = __importDefault(require("crypto"));
+const populateApplications = (query) => query
+    .populate('studentId', 'name email sapId phone role')
+    .populate('advisorId', 'name email role')
+    .populate({
+    path: 'selectedCourses.course',
+    select: 'name code description outlineText creditHours type universityId',
+    populate: {
+        path: 'universityId',
+        select: 'name',
+    },
+})
+    .populate({
+    path: 'aiRecommendations.course',
+    select: 'name code description outlineText creditHours type universityId',
+    populate: {
+        path: 'universityId',
+        select: 'name',
+    },
+});
 const getAllStats = async () => {
     const studentCount = await User_1.default.countDocuments({ role: 'student' });
     const applicationCount = await Application_1.default.countDocuments();
@@ -86,6 +105,8 @@ const getAllUsers = async () => {
     return await User_1.default.find().select('-password');
 };
 exports.getAllUsers = getAllUsers;
+const getAllApplications = async () => populateApplications(Application_1.default.find().sort({ createdAt: -1 }));
+exports.getAllApplications = getAllApplications;
 const generateTemporaryPassword = () => {
     return crypto_1.default.randomBytes(6).toString('base64url');
 };

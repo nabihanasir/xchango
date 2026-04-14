@@ -1,8 +1,5 @@
-import axios from 'axios';
+import { apiClient } from './httpClient';
 import type { WorkflowApplication } from '../types/application';
-
-// Reuse similar structure from admin/application APIs
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 interface ApiEnvelope<T> {
   success: boolean;
@@ -23,33 +20,15 @@ export interface AdvisorProfileData {
   assignedStudents?: string[];
 }
 
-const advisorApiClient = axios.create({
-  baseURL: API_BASE,
-});
-
-advisorApiClient.interceptors.request.use((config) => {
-  const storedUser = localStorage.getItem('user');
-  if (!storedUser) {
-    return config;
-  }
-
-  const user = JSON.parse(storedUser) as { token?: string };
-  if (user.token) {
-    config.headers.Authorization = `Bearer ${user.token}`;
-  }
-
-  return config;
-});
-
 const unwrap = async <T>(request: Promise<{ data: ApiEnvelope<T> }>) => {
   const response = await request;
   return response.data.data;
 };
 
 export const advisorApi = {
-  getProfile: () => unwrap<AdvisorProfileData>(advisorApiClient.get('/advisors/profile')),
+  getProfile: () => unwrap<AdvisorProfileData>(apiClient.get('/advisors/profile')),
   getAssignedApplications: () =>
-    unwrap<WorkflowApplication[]>(advisorApiClient.get('/advisors/applications')),
+    unwrap<WorkflowApplication[]>(apiClient.get('/advisors/applications')),
   updateApplicationStatus: (applicationId: string, status: string) =>
-    unwrap<WorkflowApplication>(advisorApiClient.put(`/advisors/applications/${applicationId}`, { status })),
+    unwrap<WorkflowApplication>(apiClient.put(`/advisors/applications/${applicationId}`, { status })),
 };

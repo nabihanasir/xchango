@@ -45,6 +45,7 @@ const router = express_1.default.Router();
 router.use(authMiddleware_1.protect);
 router.use((0, authorize_1.authorizeRoles)(User_1.UserRole.ADMIN));
 router.get('/stats', adminController.getDashboardStats);
+router.get('/applications', adminController.getApplications);
 router.get('/users', adminController.getUsers);
 router.post('/users', adminController.createUser);
 router.post('/offer-letter', adminController.uploadOfferLetter);

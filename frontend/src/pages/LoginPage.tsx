@@ -3,59 +3,70 @@ import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import Button from '../components/Button';
+import ErrorAlert from '../components/ErrorAlert';
 import InputField from '../components/InputField';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { authApi } from '../lib/authApi';
+import { parseApiError } from '../lib/errorUtils';
+import { AppApiError } from '../types/error';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [error, setError] = useState<AppApiError | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [submitting, setSubmitting] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setErrorMessage('');
+    setError(null);
 
-    const normalizedEmail = email.trim();
+    const nextFieldErrors: { email?: string; password?: string } = {};
+    const normalizedEmail = email.trim().toLowerCase();
 
-    if (!normalizedEmail || !password) {
-      setErrorMessage('Please enter both email and password.');
-      return;
+    if (!normalizedEmail) {
+      nextFieldErrors.email = 'Email is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      nextFieldErrors.email = 'Email is invalid format.';
     }
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(normalizedEmail)) {
-      setErrorMessage('Please enter a valid email address.');
+    if (!password) {
+      nextFieldErrors.password = 'Password is required.';
+    }
+
+    setFieldErrors(nextFieldErrors);
+    if (Object.keys(nextFieldErrors).length) {
       return;
     }
 
     setSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: normalizedEmail, password }),
+      const user = await authApi.login({ email: normalizedEmail, password });
+      login(user);
+
+      showToast({
+        tone: 'success',
+        title: 'Login successful',
+        description: 'Your account is ready and you are being redirected.',
       });
 
-      const data = await response.json();
-
-      if (!response.ok || !data?.success || !data?.data) {
-        throw new Error(data?.message || 'Invalid email or password.');
-      }
-
-      login(data.data);
-
-      const destination =
-        data.data.role === 'advisor' ? '/advisor' : data.data.role === 'admin' ? '/admin' : '/dashboard';
-
+      const destination = user.role === 'advisor' ? '/advisor' : user.role === 'admin' ? '/admin' : '/dashboard';
       navigate(destination, { replace: true });
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to sign in.');
+    } catch (caughtError) {
+      const normalizedError = parseApiError(caughtError);
+      setError(normalizedError);
+      showToast({
+        tone: 'error',
+        title: normalizedError.message,
+        description: normalizedError.solution,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -76,6 +87,7 @@ export default function LoginPage() {
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@example.com"
           icon={<Mail className="h-5 w-5 text-body-text" />}
+          error={fieldErrors.email}
           required
         />
 
@@ -93,6 +105,7 @@ export default function LoginPage() {
           icon={<Lock className="h-5 w-5" />}
           rightIcon={showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           onRightIconClick={() => setShowPassword((value) => !value)}
+          error={fieldErrors.password}
           required
         />
 
@@ -101,11 +114,7 @@ export default function LoginPage() {
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
 
-        {errorMessage ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-            {errorMessage}
-          </div>
-        ) : null}
+        {error ? <ErrorAlert error={error} titleOverride="Login failed" /> : null}
       </form>
 
       <div className="mt-8 flex w-full items-center justify-between">

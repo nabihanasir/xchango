@@ -35,30 +35,20 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMe = exports.login = exports.register = void 0;
 const authService = __importStar(require("../services/authService"));
+const asyncHandler_1 = require("../middleware/asyncHandler");
+const AppError_1 = require("../errors/AppError");
 const response_1 = require("../utils/response");
-const register = async (req, res) => {
-    try {
-        const user = await authService.registerUser(req.body);
-        (0, response_1.sendResponse)(res, 201, 'User registered successfully', user);
+exports.register = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const user = await authService.registerUser(req.body);
+    (0, response_1.sendResponse)(res, 201, 'User registered successfully', user);
+});
+exports.login = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const user = await authService.loginUser(req.body);
+    (0, response_1.sendResponse)(res, 200, 'Login successful', user);
+});
+exports.getMe = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    if (!req.user) {
+        throw new AppError_1.NotFoundError('User not found', 'The authenticated user profile could not be loaded.', 'Please sign in again or contact support if the issue continues.', 'USER_NOT_FOUND');
     }
-    catch (error) {
-        res.status(400);
-        throw new Error(error.message);
-    }
-};
-exports.register = register;
-const login = async (req, res) => {
-    try {
-        const user = await authService.loginUser(req.body);
-        (0, response_1.sendResponse)(res, 200, 'Login successful', user);
-    }
-    catch (error) {
-        res.status(401);
-        throw new Error(error.message);
-    }
-};
-exports.login = login;
-const getMe = async (req, res) => {
     (0, response_1.sendResponse)(res, 200, 'User profile fetched', req.user);
-};
-exports.getMe = getMe;
+});

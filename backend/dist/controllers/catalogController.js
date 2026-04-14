@@ -33,9 +33,14 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCourses = exports.getUniversities = void 0;
+exports.getCourses = exports.getUniversities = exports.getCountries = void 0;
 const catalogService = __importStar(require("../services/catalogService"));
 const response_1 = require("../utils/response");
+const getCountries = async (_req, res) => {
+    const countries = await catalogService.listCountries();
+    (0, response_1.sendResponse)(res, 200, 'Countries fetched successfully', countries);
+};
+exports.getCountries = getCountries;
 const getUniversities = async (_req, res) => {
     const universities = await catalogService.listUniversities();
     (0, response_1.sendResponse)(res, 200, 'Universities fetched successfully', universities);

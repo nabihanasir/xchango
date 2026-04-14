@@ -11,6 +11,7 @@ import courseEquivalencyRoutes from './courseEquivalencyRoutes';
 import transcriptRoutes from './transcriptRoutes';
 import applicationRoutes from './applicationRoutes';
 import catalogRoutes from './catalogRoutes';
+import errorDemoRoutes from './errorDemoRoutes';
 
 const router = express.Router();
 
@@ -26,5 +27,6 @@ router.use('/catalog', catalogRoutes);
 router.use('/chat', chatRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/equivalency', courseEquivalencyRoutes);
+router.use('/errors', errorDemoRoutes);
 
 export default router;

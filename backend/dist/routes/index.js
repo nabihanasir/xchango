@@ -16,6 +16,7 @@ const courseEquivalencyRoutes_1 = __importDefault(require("./courseEquivalencyRo
 const transcriptRoutes_1 = __importDefault(require("./transcriptRoutes"));
 const applicationRoutes_1 = __importDefault(require("./applicationRoutes"));
 const catalogRoutes_1 = __importDefault(require("./catalogRoutes"));
+const errorDemoRoutes_1 = __importDefault(require("./errorDemoRoutes"));
 const router = express_1.default.Router();
 router.use('/auth', authRoutes_1.default);
 router.use('/users', userRoutes_1.default);
@@ -29,4 +30,5 @@ router.use('/catalog', catalogRoutes_1.default);
 router.use('/chat', chatRoutes_1.default);
 router.use('/notifications', notificationRoutes_1.default);
 router.use('/equivalency', courseEquivalencyRoutes_1.default);
+router.use('/errors', errorDemoRoutes_1.default);
 exports.default = router;

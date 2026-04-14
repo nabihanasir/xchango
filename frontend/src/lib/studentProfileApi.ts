@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { apiClient } from './httpClient';
 import type {
   StudentDocument,
   StudentProfile,
@@ -13,24 +13,6 @@ interface ApiEnvelope<T> {
   message: string;
   data: T;
 }
-
-const studentApi = axios.create({
-  baseURL: API_BASE,
-});
-
-studentApi.interceptors.request.use((config) => {
-  const storedUser = localStorage.getItem('user');
-  if (!storedUser) {
-    return config;
-  }
-
-  const user = JSON.parse(storedUser) as { token?: string };
-  if (user.token) {
-    config.headers.Authorization = `Bearer ${user.token}`;
-  }
-
-  return config;
-});
 
 const unwrap = async <T>(request: Promise<{ data: ApiEnvelope<T> }>) => {
   const response = await request;
@@ -51,18 +33,18 @@ export const resolveUploadUrl = (fileUrl?: string) => {
 
 export const studentProfileApi = {
   getStudentProfile: (studentId: string) =>
-    unwrap<StudentProfile>(studentApi.get(`/students/${studentId}`)),
+    unwrap<StudentProfile>(apiClient.get(`/students/${studentId}`)),
   updateStudentProfile: (
     studentId: string,
     payload: Pick<StudentProfile, 'basicInfo' | 'preferences'>
-  ) => unwrap<StudentProfile>(studentApi.put(`/students/${studentId}`, payload)),
+  ) => unwrap<StudentProfile>(apiClient.put(`/students/${studentId}`, payload)),
   uploadTranscript: async (studentId: string, file: File) => {
     const formData = new FormData();
     formData.append('studentId', studentId);
     formData.append('file', file);
 
     return unwrap<StudentTranscript>(
-      studentApi.post('/transcript/upload', formData, {
+      apiClient.post('/transcript/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -70,7 +52,7 @@ export const studentProfileApi = {
     );
   },
   getTranscript: (studentId: string) =>
-    unwrap<StudentTranscript>(studentApi.get(`/transcript/${studentId}`)),
+    unwrap<StudentTranscript>(apiClient.get(`/transcript/${studentId}`)),
   uploadDocument: async (studentId: string, type: string, file: File) => {
     const formData = new FormData();
     formData.append('studentId', studentId);
@@ -78,7 +60,7 @@ export const studentProfileApi = {
     formData.append('file', file);
 
     return unwrap<StudentDocument[]>(
-      studentApi.post('/documents/upload', formData, {
+      apiClient.post('/documents/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -86,7 +68,7 @@ export const studentProfileApi = {
     );
   },
   getDocuments: (studentId: string) =>
-    unwrap<StudentDocument[]>(studentApi.get(`/documents/${studentId}`)),
+    unwrap<StudentDocument[]>(apiClient.get(`/documents/${studentId}`)),
   deleteDocument: (documentId: string) =>
-    unwrap<StudentDocument[]>(studentApi.delete(`/documents/${documentId}`)),
+    unwrap<StudentDocument[]>(apiClient.delete(`/documents/${documentId}`)),
 };

@@ -6,24 +6,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.protect = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
-const protect = async (req, res, next) => {
+const AppError_1 = require("../errors/AppError");
+const asyncHandler_1 = require("./asyncHandler");
+exports.protect = (0, asyncHandler_1.asyncHandler)(async (req, _res, next) => {
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-            token = req.headers.authorization.split(' ')[1];
-            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || 'secret');
-            req.user = await User_1.default.findById(decoded.id).select('-password');
-            if (!req.user) {
-                return res.status(401).json({ message: 'Not authorized, user not found' });
-            }
-            next();
+        token = req.headers.authorization.split(' ')[1];
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || 'secret');
+        req.user = await User_1.default.findById(decoded.id).select('-password');
+        if (!req.user) {
+            throw new AppError_1.AuthenticationError('Authentication failed', 'The token belongs to a user account that no longer exists.', 'Please log in again with a valid account.', 'AUTH_USER_NOT_FOUND');
         }
-        catch (error) {
-            return res.status(401).json({ message: 'Not authorized, token failed' });
-        }
+        next();
+        return;
     }
     if (!token) {
-        return res.status(401).json({ message: 'Not authorized, no token' });
+        throw new AppError_1.AuthenticationError('Authentication required', 'No bearer token was provided with the request.', 'Please log in and send a valid access token.', 'TOKEN_MISSING');
     }
-};
-exports.protect = protect;
+});

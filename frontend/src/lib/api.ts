@@ -1,4 +1,5 @@
 import type { AdvisorDecisionPayload, CourseRequest, CourseSummary } from '../types/equivalency';
+import { parseApiError } from './errorUtils';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -9,22 +10,26 @@ interface ApiEnvelope<T> {
 }
 
 const apiRequest = async <T>(path: string, token: string, init?: RequestInit): Promise<T> => {
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...(init?.headers || {}),
-    },
-  });
+  try {
+    const response = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...(init?.headers || {}),
+      },
+    });
 
-  const payload = (await response.json()) as ApiEnvelope<T>;
+    const payload = (await response.json()) as ApiEnvelope<T> & { error?: unknown };
 
-  if (!response.ok || !payload.success) {
-    throw new Error(payload.message || 'Something went wrong.');
+    if (!response.ok || !payload.success) {
+      throw parseApiError(payload);
+    }
+
+    return payload.data;
+  } catch (error) {
+    throw parseApiError(error);
   }
-
-  return payload.data;
 };
 
 export const equivalencyApi = {

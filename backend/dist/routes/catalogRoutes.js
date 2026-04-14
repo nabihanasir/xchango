@@ -44,6 +44,7 @@ const User_1 = require("../models/User");
 const router = express_1.default.Router();
 router.use(authMiddleware_1.protect);
 router.use((0, authorize_1.authorizeRoles)(User_1.UserRole.ADMIN, User_1.UserRole.ADVISOR, User_1.UserRole.STUDENT));
+router.get('/countries', catalogController.getCountries);
 router.get('/universities', catalogController.getUniversities);
 router.get('/courses', catalogController.getCourses);
 exports.default = router;

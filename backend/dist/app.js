@@ -9,10 +9,12 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const routes_1 = __importDefault(require("./routes"));
 const errorMiddleware_1 = require("./middleware/errorMiddleware");
 const path_1 = __importDefault(require("path"));
+const requestContext_1 = require("./middleware/requestContext");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+app.use(requestContext_1.attachRequestContext);
 // Main Routes
 app.use('/api', routes_1.default);
 // Static uploads folder

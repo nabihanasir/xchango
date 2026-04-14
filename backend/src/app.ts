@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import connectDB from './config/db';
 import routes from './routes';
 import { errorHandler, notFound } from './middleware/errorMiddleware';
 import path from 'path';
+import { attachRequestContext } from './middleware/requestContext';
 
 dotenv.config();
 
@@ -12,6 +12,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(attachRequestContext);
 
 // Main Routes
 app.use('/api', routes);
