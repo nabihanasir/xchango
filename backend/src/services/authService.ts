@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import User, { IUser, UserRole } from '../models/User';
 import { AuthenticationError, DatabaseError, ValidationError } from '../errors/AppError';
 
@@ -161,4 +162,144 @@ export const loginUser = async (credentials: any) => {
     'Please re-enter your credentials or reset your password if needed.',
     'INVALID_CREDENTIALS',
   );
+};
+
+const buildResetPasswordLink = (token: string) => {
+  const frontendBaseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  return `${frontendBaseUrl.replace(/\/$/, '')}/reset-password/${token}`;
+};
+
+export const requestPasswordReset = async (payload: any) => {
+  const normalizedEmail = payload?.email?.trim()?.toLowerCase();
+
+  if (!normalizedEmail) {
+    throw new ValidationError(
+      'Email is required',
+      'The password reset request did not include an email address.',
+      'Please enter your email address and try again.',
+      'EMAIL_REQUIRED',
+    );
+  }
+
+  let user: IUser | null;
+  try {
+    user = await User.findOne({ email: normalizedEmail });
+  } catch {
+    throw new DatabaseError(
+      'Unable to start password reset',
+      'The system could not look up the account for the provided email address.',
+      'Please try again in a moment.',
+      'PASSWORD_RESET_LOOKUP_FAILED',
+    );
+  }
+
+  const genericResponse = {
+    message: 'If an account exists for that email, a password reset link has been prepared.',
+  };
+
+  if (!user) {
+    return genericResponse;
+  }
+
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+  user.passwordResetToken = hashedResetToken;
+  user.passwordResetExpires = new Date(Date.now() + 1000 * 60 * 15);
+
+  try {
+    await user.save();
+  } catch {
+    throw new DatabaseError(
+      'Unable to save password reset request',
+      'The password reset token could not be stored for the account.',
+      'Please try again in a moment.',
+      'PASSWORD_RESET_SAVE_FAILED',
+    );
+  }
+
+  return {
+    ...genericResponse,
+    resetUrl: process.env.NODE_ENV === 'production' ? undefined : buildResetPasswordLink(resetToken),
+  };
+};
+
+export const resetPassword = async (token: string, payload: any) => {
+  if (!token?.trim()) {
+    throw new ValidationError(
+      'Reset token is required',
+      'The password reset request did not include a valid reset token.',
+      'Open the latest reset link and try again.',
+      'RESET_TOKEN_REQUIRED',
+    );
+  }
+
+  const password = payload?.password;
+  const confirmPassword = payload?.confirmPassword;
+
+  if (!password || password.length < 8) {
+    throw new ValidationError(
+      'Password is too short',
+      'The new password must be at least 8 characters long.',
+      'Please choose a stronger password with at least 8 characters.',
+      'PASSWORD_TOO_SHORT',
+    );
+  }
+
+  if (password !== confirmPassword) {
+    throw new ValidationError(
+      'Passwords do not match',
+      'The password confirmation does not match the new password.',
+      'Re-enter both password fields and try again.',
+      'PASSWORD_CONFIRMATION_MISMATCH',
+    );
+  }
+
+  const hashedResetToken = crypto.createHash('sha256').update(token.trim()).digest('hex');
+
+  let user: IUser | null;
+  try {
+    user = await User.findOne({
+      passwordResetToken: hashedResetToken,
+      passwordResetExpires: { $gt: new Date() },
+    });
+  } catch {
+    throw new DatabaseError(
+      'Unable to verify reset token',
+      'The system could not validate the password reset request.',
+      'Please try again in a moment.',
+      'PASSWORD_RESET_VERIFY_FAILED',
+    );
+  }
+
+  if (!user) {
+    throw new AuthenticationError(
+      'Reset link is invalid',
+      'The password reset token is invalid or has already expired.',
+      'Request a new password reset link and use it within 15 minutes.',
+      'INVALID_RESET_TOKEN',
+    );
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  user.password = hashedPassword;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  try {
+    await user.save();
+  } catch {
+    throw new DatabaseError(
+      'Unable to update password',
+      'The system could not save the new password for this account.',
+      'Please try again in a moment.',
+      'PASSWORD_RESET_UPDATE_FAILED',
+    );
+  }
+
+  return {
+    message: 'Your password has been reset successfully.',
+  };
 };

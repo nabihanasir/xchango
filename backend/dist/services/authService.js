@@ -36,9 +36,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginUser = exports.registerUser = void 0;
+exports.resetPassword = exports.requestPasswordReset = exports.loginUser = exports.registerUser = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const crypto_1 = __importDefault(require("crypto"));
 const User_1 = __importStar(require("../models/User"));
 const AppError_1 = require("../errors/AppError");
 const generateToken = (id, role) => {
@@ -127,3 +128,83 @@ const loginUser = async (credentials) => {
     throw new AppError_1.AuthenticationError('Login failed', 'The email address or password is incorrect.', 'Please re-enter your credentials or reset your password if needed.', 'INVALID_CREDENTIALS');
 };
 exports.loginUser = loginUser;
+const buildResetPasswordLink = (token) => {
+    const frontendBaseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    return `${frontendBaseUrl.replace(/\/$/, '')}/reset-password/${token}`;
+};
+const requestPasswordReset = async (payload) => {
+    const normalizedEmail = payload?.email?.trim()?.toLowerCase();
+    if (!normalizedEmail) {
+        throw new AppError_1.ValidationError('Email is required', 'The password reset request did not include an email address.', 'Please enter your email address and try again.', 'EMAIL_REQUIRED');
+    }
+    let user;
+    try {
+        user = await User_1.default.findOne({ email: normalizedEmail });
+    }
+    catch {
+        throw new AppError_1.DatabaseError('Unable to start password reset', 'The system could not look up the account for the provided email address.', 'Please try again in a moment.', 'PASSWORD_RESET_LOOKUP_FAILED');
+    }
+    const genericResponse = {
+        message: 'If an account exists for that email, a password reset link has been prepared.',
+    };
+    if (!user) {
+        return genericResponse;
+    }
+    const resetToken = crypto_1.default.randomBytes(32).toString('hex');
+    const hashedResetToken = crypto_1.default.createHash('sha256').update(resetToken).digest('hex');
+    user.passwordResetToken = hashedResetToken;
+    user.passwordResetExpires = new Date(Date.now() + 1000 * 60 * 15);
+    try {
+        await user.save();
+    }
+    catch {
+        throw new AppError_1.DatabaseError('Unable to save password reset request', 'The password reset token could not be stored for the account.', 'Please try again in a moment.', 'PASSWORD_RESET_SAVE_FAILED');
+    }
+    return {
+        ...genericResponse,
+        resetUrl: process.env.NODE_ENV === 'production' ? undefined : buildResetPasswordLink(resetToken),
+    };
+};
+exports.requestPasswordReset = requestPasswordReset;
+const resetPassword = async (token, payload) => {
+    if (!token?.trim()) {
+        throw new AppError_1.ValidationError('Reset token is required', 'The password reset request did not include a valid reset token.', 'Open the latest reset link and try again.', 'RESET_TOKEN_REQUIRED');
+    }
+    const password = payload?.password;
+    const confirmPassword = payload?.confirmPassword;
+    if (!password || password.length < 8) {
+        throw new AppError_1.ValidationError('Password is too short', 'The new password must be at least 8 characters long.', 'Please choose a stronger password with at least 8 characters.', 'PASSWORD_TOO_SHORT');
+    }
+    if (password !== confirmPassword) {
+        throw new AppError_1.ValidationError('Passwords do not match', 'The password confirmation does not match the new password.', 'Re-enter both password fields and try again.', 'PASSWORD_CONFIRMATION_MISMATCH');
+    }
+    const hashedResetToken = crypto_1.default.createHash('sha256').update(token.trim()).digest('hex');
+    let user;
+    try {
+        user = await User_1.default.findOne({
+            passwordResetToken: hashedResetToken,
+            passwordResetExpires: { $gt: new Date() },
+        });
+    }
+    catch {
+        throw new AppError_1.DatabaseError('Unable to verify reset token', 'The system could not validate the password reset request.', 'Please try again in a moment.', 'PASSWORD_RESET_VERIFY_FAILED');
+    }
+    if (!user) {
+        throw new AppError_1.AuthenticationError('Reset link is invalid', 'The password reset token is invalid or has already expired.', 'Request a new password reset link and use it within 15 minutes.', 'INVALID_RESET_TOKEN');
+    }
+    const salt = await bcryptjs_1.default.genSalt(10);
+    const hashedPassword = await bcryptjs_1.default.hash(password, salt);
+    user.password = hashedPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    try {
+        await user.save();
+    }
+    catch {
+        throw new AppError_1.DatabaseError('Unable to update password', 'The system could not save the new password for this account.', 'Please try again in a moment.', 'PASSWORD_RESET_UPDATE_FAILED');
+    }
+    return {
+        message: 'Your password has been reset successfully.',
+    };
+};
+exports.resetPassword = resetPassword;

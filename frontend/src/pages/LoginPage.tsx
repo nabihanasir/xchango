@@ -94,9 +94,12 @@ export default function LoginPage() {
         <InputField
           label="Password"
           labelRight={
-            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Secure access only
-            </span>
+            <Link
+              to="/forgot-password"
+              className="text-[11px] font-bold uppercase tracking-widest text-slate-400 transition-colors hover:text-dark-blue"
+            >
+              Forgot password?
+            </Link>
           }
           type={showPassword ? 'text' : 'password'}
           value={password}
@@ -123,7 +126,7 @@ export default function LoginPage() {
           to="/signup"
           className="text-center text-small font-bold uppercase tracking-wider text-body-text transition-colors hover:text-dark-blue"
         >
-          Don&apos;t have an account? Sign up?
+          Don&apos;t have an account? Sign up
         </Link>
         <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
       </div>

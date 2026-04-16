@@ -50,6 +50,8 @@ const UserSchema = new mongoose_1.Schema({
     sapId: { type: String, trim: true },
     role: { type: String, enum: Object.values(UserRole), required: true },
     isActive: { type: Boolean, default: true },
+    passwordResetToken: { type: String },
+    passwordResetExpires: { type: Date },
 }, { timestamps: true });
 UserSchema.index({ sapId: 1 }, {
     unique: true,

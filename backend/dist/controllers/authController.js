@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMe = exports.login = exports.register = void 0;
+exports.getMe = exports.resetPassword = exports.forgotPassword = exports.login = exports.register = void 0;
 const authService = __importStar(require("../services/authService"));
 const asyncHandler_1 = require("../middleware/asyncHandler");
 const AppError_1 = require("../errors/AppError");
@@ -45,6 +45,15 @@ exports.register = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
 exports.login = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const user = await authService.loginUser(req.body);
     (0, response_1.sendResponse)(res, 200, 'Login successful', user);
+});
+exports.forgotPassword = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const result = await authService.requestPasswordReset(req.body);
+    (0, response_1.sendResponse)(res, 200, 'Password reset requested successfully', result);
+});
+exports.resetPassword = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const token = Array.isArray(req.params.token) ? req.params.token[0] : req.params.token;
+    const result = await authService.resetPassword(token, req.body);
+    (0, response_1.sendResponse)(res, 200, 'Password reset successfully', result);
 });
 exports.getMe = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     if (!req.user) {
