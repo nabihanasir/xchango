@@ -8,9 +8,11 @@ import {
   UserRound,
   X,
 } from 'lucide-react';
+import DocumentList from '../../components/DocumentList';
 import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
 import { resolveUploadUrl, studentProfileApi } from '../../lib/studentProfileApi';
+import { documentApi } from '../../lib/documentApi';
 import {
   applicationStatusTone,
   getApplicationCourseId,
@@ -23,6 +25,7 @@ import {
   type WorkflowApplication,
 } from '../../types/application';
 import type { StudentProfile } from '../../types/studentProfile';
+import type { StudentDocument } from '../../types/document';
 
 const formatStatus = (status: string) =>
   status
@@ -57,14 +60,17 @@ export default function AdvisorApplicationsWorkspace({
   const [selectedApplicationId, setSelectedApplicationId] = useState('');
   const [selectedApplication, setSelectedApplication] = useState<WorkflowApplication | null>(null);
   const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null);
+  const [studentDocuments, setStudentDocuments] = useState<StudentDocument[]>([]);
   const [courseCommentDrafts, setCourseCommentDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [pageError, setPageError] = useState('');
   const [detailsError, setDetailsError] = useState('');
+  const [documentsError, setDocumentsError] = useState('');
   const [actionError, setActionError] = useState('');
   const [generatingSuggestions, setGeneratingSuggestions] = useState(false);
   const [activeCourseDecision, setActiveCourseDecision] = useState('');
+  const [updatingDocumentId, setUpdatingDocumentId] = useState('');
   const [interviewForm, setInterviewForm] = useState({ date: '', location: 'Advisor Office' });
   const [schedulingInterview, setSchedulingInterview] = useState(false);
   const [completingInterview, setCompletingInterview] = useState(false);
@@ -132,8 +138,10 @@ export default function AdvisorApplicationsWorkspace({
     if (!selectedApplicationId) {
       setSelectedApplication(null);
       setStudentProfile(null);
+      setStudentDocuments([]);
       setCourseCommentDrafts({});
       setDetailsError('');
+      setDocumentsError('');
       return;
     }
 
@@ -142,6 +150,7 @@ export default function AdvisorApplicationsWorkspace({
     const loadDetails = async () => {
       setDetailsLoading(true);
       setDetailsError('');
+      setDocumentsError('');
 
       try {
         const application = await applicationApi.getApplication(selectedApplicationId);
@@ -155,6 +164,18 @@ export default function AdvisorApplicationsWorkspace({
           studentProfileApi.getStudentProfile(studentId),
           applicationApi.getAiRecommendations(selectedApplicationId),
         ]);
+        const documents = await documentApi
+          .getStudentDocuments(studentId)
+          .catch((documentError) => {
+            if (!cancelled) {
+              setDocumentsError(
+                documentError instanceof Error
+                  ? documentError.message
+                  : 'Unable to load supporting documents.'
+              );
+            }
+            return [] as StudentDocument[];
+          });
 
         if (cancelled) {
           return;
@@ -168,6 +189,7 @@ export default function AdvisorApplicationsWorkspace({
         startTransition(() => {
           setSelectedApplication(hydratedApplication);
           setStudentProfile(profile);
+          setStudentDocuments(documents);
           setCourseCommentDrafts(
             Object.fromEntries(
               hydratedApplication.selectedCourses.map((course) => [
@@ -276,6 +298,22 @@ export default function AdvisorApplicationsWorkspace({
       setActionError(error instanceof Error ? error.message : 'Unable to update course decision.');
     } finally {
       setActiveCourseDecision('');
+    }
+  };
+
+  const handleDocumentStatusUpdate = async (documentId: string, status: 'approved' | 'rejected') => {
+    setUpdatingDocumentId(documentId);
+    setDocumentsError('');
+
+    try {
+      const updatedDocument = await documentApi.updateDocumentStatus(documentId, status);
+      setStudentDocuments((current) =>
+        current.map((document) => (document._id === updatedDocument._id ? updatedDocument : document))
+      );
+    } catch (error) {
+      setDocumentsError(error instanceof Error ? error.message : 'Unable to update document status.');
+    } finally {
+      setUpdatingDocumentId('');
     }
   };
 
@@ -835,7 +873,7 @@ export default function AdvisorApplicationsWorkspace({
                 <span>Supporting files</span>
               </h3>
               <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Transcript semesters:</span> {studentProfile.transcript.semesters.length}</p>
-              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Documents:</span> {studentProfile.documents.length}</p>
+              <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Documents:</span> {studentDocuments.length}</p>
               {studentProfile.transcript.fileUrl ? (
                 <a
                   href={resolveUploadUrl(studentProfile.transcript.fileUrl)}
@@ -846,26 +884,20 @@ export default function AdvisorApplicationsWorkspace({
                   <Eye className="h-4 w-4" />
                   <span>Open Transcript</span>
                 </a>
-              ) : (
-                <p className="text-sm text-slate-500">No transcript file uploaded yet.</p>
-              )}
-              <div className="space-y-3">
-                {studentProfile.documents.map((document) => (
-                  <a
-                    key={document._id}
-                    href={resolveUploadUrl(document.fileUrl)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm transition hover:border-dark-blue hover:bg-slate-50"
-                  >
-                    <span className="font-semibold text-slate-800">{document.type}</span>
-                    <span className="text-slate-500">{document.status}</span>
-                  </a>
-                ))}
-                {studentProfile.documents.length === 0 ? (
-                  <p className="text-sm font-medium text-slate-500">No supporting documents uploaded.</p>
-                ) : null}
-              </div>
+                ) : (
+                  <p className="text-sm text-slate-500">No transcript file uploaded yet.</p>
+                )}
+              {documentsError ? (
+                <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                  {documentsError}
+                </p>
+              ) : null}
+              <DocumentList
+                documents={studentDocuments}
+                updatingId={updatingDocumentId}
+                emptyMessage="No supporting documents uploaded."
+                onUpdateStatus={handleDocumentStatusUpdate}
+              />
             </div>
           </div>
         ) : (

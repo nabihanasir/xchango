@@ -9,6 +9,7 @@ const DashboardLayout = () => {
   const navItems = [
     { name: 'Dashboard',               path: '/dashboard',              icon: Home },
     { name: 'Student Profile',         path: '/dashboard/profile',      icon: UserRoundCog },
+    { name: 'Documents',               path: '/dashboard/documents',    icon: FileText },
     { name: 'University & Programmes', path: '/dashboard/programmes',   icon: School },
     { name: 'Your Application',        path: '/dashboard/applications', icon: FileText },
     { name: 'Browse Equivalency',      path: '/dashboard/equivalency/courses', icon: BookOpenCheck },

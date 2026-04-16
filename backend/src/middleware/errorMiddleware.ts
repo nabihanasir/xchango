@@ -8,6 +8,7 @@ import {
   ValidationError,
 } from '../errors/AppError';
 import { logger } from '../utils/logger';
+import multer from 'multer';
 
 const buildError = (err: unknown): AppError => {
   if (err instanceof AppError) {
@@ -52,6 +53,24 @@ const buildError = (err: unknown): AppError => {
       'Database operation failed',
       'The database could not complete the requested operation.',
       'Please try again shortly. If the issue continues, contact support.',
+    );
+  }
+
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return new ValidationError(
+        'Uploaded file is too large.',
+        'The uploaded file exceeds the maximum allowed size.',
+        'Choose a smaller file and try again.',
+        'FILE_TOO_LARGE'
+      );
+    }
+
+    return new ValidationError(
+      'Upload failed.',
+      err.message,
+      'Review the uploaded file and try again.',
+      'FILE_UPLOAD_ERROR'
     );
   }
 

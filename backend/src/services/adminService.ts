@@ -7,6 +7,7 @@ import CourseMapping from '../models/CourseMapping';
 import AdvisorProfile from '../models/AdvisorProfile';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import * as courseService from './courseService';
 
 const populateApplications = <T>(query: T) =>
   (query as any)
@@ -67,8 +68,8 @@ export const createUniversity = async (universityData: any) => {
   return await University.create(universityData);
 };
 
-export const createCourse = async (courseData: any) => {
-  return await Course.create(courseData);
+export const createCourse = async (adminId: string, courseData: any) => {
+  return courseService.createHomeCourse(adminId, courseData);
 };
 
 export const getAllUsers = async () => {

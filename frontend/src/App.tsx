@@ -7,6 +7,7 @@ import DashboardLayout from './components/DashboardLayout';
 import StudentDashboard from './pages/dashboard/StudentDashboard';
 import UniversityProgrammes from './pages/dashboard/UniversityProgrammes';
 import StudentApplicationsPage from './pages/dashboard/StudentApplicationsPage';
+import StudentDocuments from './pages/dashboard/StudentDocuments';
 import Communicate from './pages/dashboard/Communicate';
 import CourseEquivalencyBrowse from './pages/dashboard/CourseEquivalencyBrowse';
 import CourseEquivalencyRequests from './pages/dashboard/CourseEquivalencyRequests';
@@ -48,6 +49,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<StudentDashboard />} />
             <Route path="profile" element={<StudentProfile />} />
+            <Route path="documents" element={<StudentDocuments />} />
             <Route path="programmes" element={<UniversityProgrammes />} />
             <Route path="applications" element={<StudentApplicationsPage />} />
             <Route element={<RequireProfileComplete />}>
@@ -83,6 +85,7 @@ function App() {
             <Route path="students" element={<AdvisorStudents />} />
             <Route path="communicate" element={<Communicate />} />
           </Route>
+          <Route path="/student/documents" element={<Navigate to="/dashboard/documents" replace />} />
         </Route>
 
         {/* Default route redirect */}

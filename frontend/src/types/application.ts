@@ -36,11 +36,14 @@ export interface ApplicationCourseSummary {
   _id: string;
   code: string;
   name: string;
+  title?: string;
   description?: string;
   outlineText?: string;
   creditHours: number;
   type: 'home' | 'host';
-  universityId?: ApplicationUniversitySummary | string;
+  universityId?: ApplicationUniversitySummary | string | null;
+  isHomeCourse?: boolean;
+  createdBy?: string | ApplicationUserSummary | null;
 }
 
 export interface WorkflowApplicationDocument {

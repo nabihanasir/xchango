@@ -45,12 +45,6 @@ const TranscriptSemesterSchema = new mongoose_1.Schema({
     sgpa: { type: Number, default: 0, min: 0 },
     courses: { type: [TranscriptCourseSchema], default: [] },
 }, { _id: false });
-const StudentDocumentSchema = new mongoose_1.Schema({
-    type: { type: String, required: true, trim: true },
-    fileUrl: { type: String, required: true, trim: true },
-    status: { type: String, default: 'pending', trim: true },
-    uploadedAt: { type: Date, default: Date.now },
-}, { _id: true });
 const StudentProfileSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
     registrationNumber: { type: String, default: '', trim: true },
@@ -79,6 +73,5 @@ const StudentProfileSchema = new mongoose_1.Schema({
         totalCredits: { type: Number, default: 0, min: 0 },
         semesters: { type: [TranscriptSemesterSchema], default: [] },
     },
-    documents: { type: [StudentDocumentSchema], default: [] },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('StudentProfile', StudentProfileSchema);

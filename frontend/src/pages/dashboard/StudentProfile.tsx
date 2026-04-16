@@ -1,13 +1,11 @@
 import { startTransition, useEffect, useState } from 'react';
-import { FileText, Globe2, GraduationCap, NotebookPen } from 'lucide-react';
+import { FileText, GraduationCap } from 'lucide-react';
 import StudentProfileForm from '../../components/student/StudentProfileForm';
 import TranscriptUpload from '../../components/student/TranscriptUpload';
 import TranscriptViewer from '../../components/student/TranscriptViewer';
-import Documents from '../../components/student/Documents';
 import { useAuth } from '../../context/AuthContext';
 import { studentProfileApi } from '../../lib/studentProfileApi';
 import type {
-  StudentDocument,
   StudentProfile as StudentProfileType,
   StudentTranscript,
 } from '../../types/studentProfile';
@@ -20,16 +18,12 @@ export default function StudentProfile() {
 
   const [profile, setProfile] = useState<StudentProfileType | null>(null);
   const [transcript, setTranscript] = useState<StudentTranscript | null>(null);
-  const [documents, setDocuments] = useState<StudentDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState('');
   const [profileError, setProfileError] = useState('');
   const [transcriptError, setTranscriptError] = useState('');
-  const [documentsError, setDocumentsError] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingTranscript, setUploadingTranscript] = useState(false);
-  const [uploadingDocument, setUploadingDocument] = useState(false);
-  const [deletingDocumentId, setDeletingDocumentId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!studentId) {
@@ -44,10 +38,9 @@ export default function StudentProfile() {
       setPageError('');
 
       try {
-        const [profileData, transcriptData, documentsData] = await Promise.all([
+        const [profileData, transcriptData] = await Promise.all([
           studentProfileApi.getStudentProfile(studentId),
           studentProfileApi.getTranscript(studentId),
-          studentProfileApi.getDocuments(studentId),
         ]);
 
         if (cancelled) {
@@ -57,7 +50,6 @@ export default function StudentProfile() {
         startTransition(() => {
           setProfile(profileData);
           setTranscript(transcriptData);
-          setDocuments(documentsData);
         });
       } catch (error) {
         if (cancelled) {
@@ -127,38 +119,6 @@ export default function StudentProfile() {
     }
   };
 
-  const handleDocumentUpload = async (type: string, file: File) => {
-    if (!studentId) {
-      return;
-    }
-
-    setUploadingDocument(true);
-    setDocumentsError('');
-
-    try {
-      const updatedDocuments = await studentProfileApi.uploadDocument(studentId, type, file);
-      setDocuments(updatedDocuments);
-    } catch (error) {
-      setDocumentsError(error instanceof Error ? error.message : 'Unable to upload document.');
-    } finally {
-      setUploadingDocument(false);
-    }
-  };
-
-  const handleDocumentDelete = async (documentId: string) => {
-    setDeletingDocumentId(documentId);
-    setDocumentsError('');
-
-    try {
-      const updatedDocuments = await studentProfileApi.deleteDocument(documentId);
-      setDocuments(updatedDocuments);
-    } catch (error) {
-      setDocumentsError(error instanceof Error ? error.message : 'Unable to delete document.');
-    } finally {
-      setDeletingDocumentId(null);
-    }
-  };
-
   if (!user) {
     return (
       <div className="rounded-[2rem] border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm">
@@ -171,7 +131,7 @@ export default function StudentProfile() {
     return (
       <div className="space-y-4">
         <div className="glass-card h-36 rounded-[2rem] animate-pulse" />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="glass-card h-32 rounded-[2rem] animate-pulse" />
           ))}
@@ -196,13 +156,13 @@ export default function StudentProfile() {
         <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">
-              Riphah Outbound Mobility
+              Student Profile Hub
             </p>
             <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
               Student Profile Module
             </h1>
             <p className="mt-4 max-w-2xl text-base text-slate-200 md:text-lg">
-              Manage profile details, parse transcripts, organize required documents, and track application progress in one place.
+              Manage profile details, review transcripts, and track application progress in one place.
             </p>
           </div>
 
@@ -254,14 +214,6 @@ export default function StudentProfile() {
         </div>
 
         <div className={summaryCardClassName}>
-          <div className="inline-flex rounded-2xl bg-accent-yellow/20 p-3 text-dark-blue">
-            <NotebookPen className="h-5 w-5" />
-          </div>
-          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-400">Documents</p>
-          <p className="mt-2 text-4xl font-black text-slate-900">{documents.length}</p>
-        </div>
-
-        <div className={summaryCardClassName}>
           <div className="inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
             <FileText className="h-5 w-5" />
           </div>
@@ -269,13 +221,6 @@ export default function StudentProfile() {
           <p className="mt-2 text-4xl font-black text-slate-900">{transcript?.semesters.length ?? 0}</p>
         </div>
 
-        <div className={summaryCardClassName}>
-          <div className="inline-flex rounded-2xl bg-sky-100 p-3 text-sky-700">
-            <Globe2 className="h-5 w-5" />
-          </div>
-          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-400">Preferred Countries</p>
-          <p className="mt-2 text-4xl font-black text-slate-900">{profile.preferences.preferredCountries.length}</p>
-        </div>
       </div>
 
       <StudentProfileForm
@@ -294,15 +239,6 @@ export default function StudentProfile() {
       />
 
       <TranscriptViewer transcript={transcript} />
-
-      <Documents
-        documents={documents}
-        uploading={uploadingDocument}
-        deletingId={deletingDocumentId}
-        errorMessage={documentsError}
-        onUpload={handleDocumentUpload}
-        onDelete={handleDocumentDelete}
-      />
     </div>
   );
 }

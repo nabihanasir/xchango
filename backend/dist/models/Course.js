@@ -41,13 +41,25 @@ var CourseType;
     CourseType["HOST"] = "host";
 })(CourseType || (exports.CourseType = CourseType = {}));
 const CourseSchema = new mongoose_1.Schema({
-    name: { type: String, required: true },
-    code: { type: String, required: true },
+    title: { type: String, required: true, trim: true },
+    name: { type: String, default: '', trim: true },
+    code: { type: String, default: '', trim: true },
     description: { type: String, default: '' },
     outlineText: { type: String, default: '' },
     outlineFileUrl: { type: String, default: '' },
     creditHours: { type: Number, required: true, alias: 'credits' },
-    universityId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'University', required: true },
+    universityId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'University', default: null },
     type: { type: String, enum: Object.values(CourseType), required: true },
+    isHomeCourse: { type: Boolean, default: true },
+    createdBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', default: null },
 }, { timestamps: true });
+CourseSchema.pre('validate', function () {
+    const doc = this;
+    if (!doc.title && doc.name) {
+        doc.title = doc.name;
+    }
+    if (!doc.name && doc.title) {
+        doc.name = doc.title;
+    }
+});
 exports.default = mongoose_1.default.model('Course', CourseSchema);

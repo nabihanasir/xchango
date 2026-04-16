@@ -10,7 +10,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Globe, Sparkles, TrendingUp } from 'lucide-react';
+import { ArrowRight, BookOpen, Globe, Sparkles, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import StatCard from '../../components/admin/StatCard';
 import { adminApi, type AdminDashboardMetrics } from '../../lib/adminApi';
 
@@ -171,6 +172,28 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      <section className="glass-card rounded-[2rem] border border-slate-200 bg-white p-6 lg:p-8">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-accent-yellow/20 bg-accent-yellow/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-accent-yellow">
+              <BookOpen className="h-3.5 w-3.5" />
+              Home Course Catalog
+            </div>
+            <h3 className="mt-4 text-2xl font-black text-slate-800">Manage the central home-course list</h3>
+            <p className="mt-2 text-sm font-medium leading-7 text-slate-500">
+              Add, edit, and delete the home courses that advisors use while pairing student requests.
+            </p>
+          </div>
+          <Link
+            to="/admin/courses"
+            className="inline-flex items-center gap-2 rounded-[1.25rem] bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#120d52]"
+          >
+            Open Home Courses
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

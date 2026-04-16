@@ -139,7 +139,9 @@ export default function CourseEquivalencyRequests() {
                           <div className="rounded-[1.25rem] bg-slate-50 p-4">
                             <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Suggested Home Course</p>
                             <p className="mt-2 text-sm font-bold text-slate-700">
-                              {item.homeCourseId ? `${item.homeCourseId.code} · ${item.homeCourseId.name}` : 'Pending advisor pairing'}
+                              {item.homeCourseId
+                                ? item.homeCourseId.title || item.homeCourseId.name || item.homeCourseId.code
+                                : 'Pending advisor pairing'}
                             </p>
                           </div>
                           <div className="rounded-[1.25rem] bg-slate-50 p-4">

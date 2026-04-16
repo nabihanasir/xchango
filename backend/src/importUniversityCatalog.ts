@@ -186,6 +186,7 @@ const upsertCatalog = async (blocks: ParsedUniversityBlock[]) => {
         { universityId: university._id, code, type: CourseType.HOST },
         {
           $set: {
+            title: course.title,
             name: course.title,
             code,
             description: course.description,
@@ -194,6 +195,7 @@ const upsertCatalog = async (blocks: ParsedUniversityBlock[]) => {
             creditHours: course.creditHours,
             universityId: university._id,
             type: CourseType.HOST,
+            isHomeCourse: false,
           },
         },
         { returnDocument: 'after', upsert: true }

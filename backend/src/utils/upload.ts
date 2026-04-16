@@ -1,5 +1,5 @@
 import fs from 'fs';
-import multer from 'multer';
+import multer, { type Options as MulterOptions } from 'multer';
 import path from 'path';
 
 export const uploadsRoot = path.resolve(__dirname, '../../uploads');
@@ -27,9 +27,14 @@ const createStorage = (folderName: string) =>
     },
   });
 
-export const createUploader = (folderName: string, allowedExtensions?: string[]) =>
+export const createUploader = (
+  folderName: string,
+  allowedExtensions?: string[],
+  limits?: MulterOptions['limits']
+) =>
   multer({
     storage: createStorage(folderName),
+    limits,
     fileFilter: (_req, file, cb) => {
       if (!allowedExtensions?.length) {
         cb(null, true);
@@ -38,7 +43,9 @@ export const createUploader = (folderName: string, allowedExtensions?: string[])
 
       const extension = path.extname(file.originalname).toLowerCase();
       if (!allowedExtensions.includes(extension)) {
-        cb(new Error(`Invalid file type. Allowed types: ${allowedExtensions.join(', ')}`));
+        cb(
+          new Error(`Invalid file type. Allowed types: ${allowedExtensions.join(', ')}`)
+        );
         return;
       }
 
@@ -54,6 +61,8 @@ export const toPublicFileUrl = (filePath: string) => {
 const upload = createUploader('documents');
 
 export const transcriptUpload = createUploader('transcripts', ['.xlsx', '.xls', '.csv']);
-export const documentUpload = createUploader('documents');
+export const documentUpload = createUploader('documents', ['.pdf', '.jpg', '.jpeg', '.png'], {
+  fileSize: 5 * 1024 * 1024,
+});
 
 export default upload;

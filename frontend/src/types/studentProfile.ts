@@ -34,14 +34,6 @@ export interface StudentTranscript {
   semesters: TranscriptSemester[];
 }
 
-export interface StudentDocument {
-  _id: string;
-  type: string;
-  fileUrl: string;
-  status: string;
-  uploadedAt: string;
-}
-
 export interface StudentProfile {
   _id: string;
   userId: string;
@@ -54,7 +46,6 @@ export interface StudentProfile {
   basicInfo: StudentBasicInfo;
   preferences: StudentPreferences;
   transcript: StudentTranscript;
-  documents: StudentDocument[];
   createdAt: string;
   updatedAt: string;
 }

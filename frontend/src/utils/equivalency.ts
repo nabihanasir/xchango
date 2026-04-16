@@ -54,5 +54,5 @@ export const getScoreTrackClasses = (score: number) => {
   return 'bg-red-500';
 };
 
-export const getUniversityName = (university: { name: string } | string | undefined) =>
+export const getUniversityName = (university: { name: string } | string | null | undefined) =>
   typeof university === 'string' ? university : university?.name || 'University not set';

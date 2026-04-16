@@ -21,7 +21,6 @@ import {
   getRequestStatusClasses,
   getScoreBadgeClasses,
   getScoreTrackClasses,
-  getUniversityName,
 } from '../../utils/equivalency';
 
 type StatusDrafts = Record<string, ItemStatus>;
@@ -39,11 +38,14 @@ const getInitialCommentDrafts = (items: CourseRequestItem[]): CommentDrafts =>
     return acc;
   }, {});
 
+const getCourseTitle = (course?: CourseSummary | null) => course?.title || course?.name || course?.code || 'Untitled course';
+
 export default function AdvisorEquivalencyRequestDetail() {
   const { user } = useAuth();
   const { id } = useParams();
   const [request, setRequest] = useState<CourseRequest | null>(null);
   const [homeCourses, setHomeCourses] = useState<CourseSummary[]>([]);
+  const [courseSearch, setCourseSearch] = useState('');
   const [statusDrafts, setStatusDrafts] = useState<StatusDrafts>({});
   const [commentDrafts, setCommentDrafts] = useState<CommentDrafts>({});
   const [advisorComment, setAdvisorComment] = useState('');
@@ -52,6 +54,7 @@ export default function AdvisorEquivalencyRequestDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+  const [courseLoadError, setCourseLoadError] = useState('');
 
   const syncRequestState = (nextRequest: CourseRequest) => {
     setRequest(nextRequest);
@@ -67,23 +70,49 @@ export default function AdvisorEquivalencyRequestDetail() {
         return;
       }
 
-      try {
-        setError('');
-        const [requestResponse, homeCoursesResponse] = await Promise.all([
-          equivalencyApi.getAdvisorRequestById(user.token, id),
-          equivalencyApi.getHomeCourses(user.token),
-        ]);
-        syncRequestState(requestResponse);
-        setHomeCourses(homeCoursesResponse);
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load this request.');
-      } finally {
-        setIsLoading(false);
+      setIsLoading(true);
+      setError('');
+      setCourseLoadError('');
+
+      const [requestResult, coursesResult] = await Promise.allSettled([
+        equivalencyApi.getAdvisorRequestById(user.token, id),
+        equivalencyApi.getHomeCourses(user.token),
+      ]);
+
+      if (requestResult.status === 'fulfilled') {
+        syncRequestState(requestResult.value);
+      } else {
+        setError(requestResult.reason instanceof Error ? requestResult.reason.message : 'Unable to load this request.');
       }
+
+      if (coursesResult.status === 'fulfilled') {
+        setHomeCourses(coursesResult.value);
+      } else {
+        setHomeCourses([]);
+        setCourseLoadError('Unable to load courses. Please try again.');
+      }
+
+      setIsLoading(false);
     };
 
     void loadData();
   }, [id, user?.token]);
+
+  const filteredHomeCourses = useMemo(() => {
+    const query = courseSearch.trim().toLowerCase();
+    const sorted = [...homeCourses].sort((left, right) => getCourseTitle(left).localeCompare(getCourseTitle(right)));
+
+    if (!query) {
+      return sorted;
+    }
+
+    return sorted.filter((course) => {
+      const title = getCourseTitle(course).toLowerCase();
+      const description = (course.description || '').toLowerCase();
+      const creditHours = String(course.creditHours);
+      return title.includes(query) || description.includes(query) || creditHours.includes(query);
+    });
+  }, [courseSearch, homeCourses]);
 
   const summary = useMemo(
     () => ({
@@ -96,9 +125,7 @@ export default function AdvisorEquivalencyRequestDetail() {
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItemIds((current) =>
-      current.includes(itemId)
-        ? current.filter((idValue) => idValue !== itemId)
-        : [...current, itemId]
+      current.includes(itemId) ? current.filter((idValue) => idValue !== itemId) : [...current, itemId]
     );
   };
 
@@ -274,10 +301,10 @@ export default function AdvisorEquivalencyRequestDetail() {
                     <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
                       <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Host course</p>
                       <h2 className="mt-3 text-xl font-black text-slate-800">
-                        {item.hostCourseId.code} · {item.hostCourseId.name}
+                        {item.hostCourseId.code} · {getCourseTitle(item.hostCourseId)}
                       </h2>
                       <p className="mt-3 text-sm font-medium text-slate-500">
-                        {getUniversityName(item.hostCourseId.universityId)} · {item.hostCourseId.creditHours} credit hours
+                        {item.hostCourseId.creditHours} credit hours
                       </p>
                       <p className="mt-4 text-sm font-medium leading-7 text-slate-600">
                         {item.hostCourseId.description || 'No description provided for this host course.'}
@@ -286,30 +313,74 @@ export default function AdvisorEquivalencyRequestDetail() {
 
                     <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
                       <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Paired home course</p>
-                      <select
-                        value={item.homeCourseId?._id || ''}
-                        onChange={(event) => void handleHomeCourseChange(item._id, event.target.value)}
-                        className="mt-3 w-full rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
-                      >
-                        <option value="" disabled>Select a home course</option>
-                        {homeCourses.map((course) => (
-                          <option key={course._id} value={course._id}>
-                            {course.code} · {course.name}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="mt-3 space-y-3">
+                        <input
+                          type="text"
+                          value={courseSearch}
+                          onChange={(event) => setCourseSearch(event.target.value)}
+                          placeholder="Search home courses..."
+                          className="w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
+                        />
 
-                      <div className="mt-4 rounded-[1.25rem] bg-slate-50 p-4 text-sm font-medium text-slate-600">
-                        {item.homeCourseId ? (
-                          <>
-                            <p className="font-bold text-slate-700">{item.homeCourseId.name}</p>
-                            <p className="mt-1">
-                              {getUniversityName(item.homeCourseId.universityId)} · {item.homeCourseId.creditHours} credit hours
-                            </p>
-                          </>
-                        ) : (
-                          'Choose the equivalent home course before running the AI review.'
-                        )}
+                        <select
+                          value={item.homeCourseId?._id || ''}
+                          onChange={(event) => void handleHomeCourseChange(item._id, event.target.value)}
+                          className="w-full rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
+                          disabled={!filteredHomeCourses.length}
+                        >
+                          <option value="" disabled>
+                            {filteredHomeCourses.length ? 'Select a home course' : 'No home courses available'}
+                          </option>
+                          {filteredHomeCourses.map((course) => (
+                            <option key={course._id} value={course._id}>
+                              {getCourseTitle(course)} · {course.creditHours} CH
+                            </option>
+                          ))}
+                        </select>
+
+                        {courseLoadError ? (
+                          <div className="rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                            {courseLoadError}
+                          </div>
+                        ) : null}
+
+                        {!filteredHomeCourses.length && !courseLoadError ? (
+                          <div className="rounded-[1.25rem] border border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-500">
+                            No home courses available. Contact admin.
+                          </div>
+                        ) : null}
+
+                        <div className="rounded-[1.25rem] bg-slate-50 p-4 text-sm font-medium text-slate-600">
+                          {item.homeCourseId ? (
+                            <div className="space-y-3">
+                              <div>
+                                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Selected course</p>
+                                <p className="mt-1 font-bold text-slate-700">{getCourseTitle(item.homeCourseId)}</p>
+                              </div>
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div>
+                                  <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Credit Hours</label>
+                                  <input
+                                    type="text"
+                                    readOnly
+                                    value={`${item.homeCourseId.creditHours}`}
+                                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Description</label>
+                                  <textarea
+                                    readOnly
+                                    value={item.homeCourseId.description || 'No description provided.'}
+                                    className="mt-2 min-h-[96px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium leading-6 text-slate-600"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            'Choose the equivalent home course before running the AI review.'
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -339,9 +410,7 @@ export default function AdvisorEquivalencyRequestDetail() {
                       <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Per-course advisor comment</label>
                       <textarea
                         value={commentDrafts[item._id] || ''}
-                        onChange={(event) =>
-                          setCommentDrafts((current) => ({ ...current, [item._id]: event.target.value }))
-                        }
+                        onChange={(event) => setCommentDrafts((current) => ({ ...current, [item._id]: event.target.value }))}
                         rows={3}
                         className="mt-3 w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
                         placeholder="Optional feedback for this specific course pair."
@@ -378,11 +447,7 @@ export default function AdvisorEquivalencyRequestDetail() {
                         <div>
                           <p className="font-bold">AI match failed</p>
                           <p className="mt-1">{item.aiMatchError || 'Unknown matching error.'}</p>
-                          <button
-                            type="button"
-                            onClick={() => void handleRunMatch(item._id)}
-                            className="mt-3 inline-flex items-center text-sm font-bold text-red-700 underline"
-                          >
+                          <button type="button" onClick={() => void handleRunMatch(item._id)} className="mt-3 inline-flex items-center text-sm font-bold text-red-700 underline">
                             <RefreshCcw className="mr-2 h-4 w-4" />
                             Retry
                           </button>
@@ -417,7 +482,6 @@ export default function AdvisorEquivalencyRequestDetail() {
                           ))}
                         </ul>
                       </div>
-
                       <div className="rounded-[1.25rem] bg-white p-4">
                         <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-red-600">Missing topics</p>
                         <ul className="mt-3 space-y-2 text-sm font-medium text-slate-600">
@@ -426,7 +490,6 @@ export default function AdvisorEquivalencyRequestDetail() {
                           ))}
                         </ul>
                       </div>
-
                       <div className="rounded-[1.25rem] bg-white p-4">
                         <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-blue-600">Additional topics</p>
                         <ul className="mt-3 space-y-2 text-sm font-medium text-slate-600">
@@ -435,7 +498,6 @@ export default function AdvisorEquivalencyRequestDetail() {
                           ))}
                         </ul>
                       </div>
-
                       <div className="rounded-[1.25rem] bg-white p-4 lg:col-span-3">
                         <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Credit hour assessment</p>
                         <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{item.matchResult.reasoning.creditHourAssessment}</p>

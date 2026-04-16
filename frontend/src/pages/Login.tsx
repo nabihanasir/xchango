@@ -5,6 +5,7 @@ import AuthLayout from '../components/AuthLayout';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../lib/authApi';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,25 +22,10 @@ export default function Login() {
     setErrorMessage('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
+      const user = await authApi.login({ email: email.trim(), password });
 
-      const data = await res.json();
-
-      if (!res.ok || !data?.success || !data?.data) {
-        throw new Error(data?.message || 'Invalid email or password.');
-      }
-
-      login(data.data);
-      const destination =
-        data.data.role === 'advisor'
-          ? '/advisor'
-          : data.data.role === 'admin'
-            ? '/admin'
-            : '/dashboard';
+      login(user);
+      const destination = user.role === 'advisor' ? '/advisor' : user.role === 'admin' ? '/admin' : '/dashboard';
       window.location.href = destination;
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to sign in.');

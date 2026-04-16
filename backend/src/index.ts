@@ -1,5 +1,6 @@
 import app from './app';
 import connectDB from './config/db';
+import { seedDemoHomeCoursesIfNeeded } from './services/courseService';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
@@ -29,7 +30,9 @@ io.on('connection', (socket: any) => {
   });
 });
 
-connectDB().then(() => {
+connectDB().then(async () => {
+  await seedDemoHomeCoursesIfNeeded();
+
   httpServer.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   });

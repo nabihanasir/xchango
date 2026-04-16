@@ -211,6 +211,7 @@ const seed = async () => {
     });
 
     const hostCourse1 = await Course.create({
+      title: 'Advanced Data Structures',
       name: 'Advanced Data Structures',
       code: 'SNU-CS301',
       description: 'Tree structures, graph representations, heaps, hashing, and algorithmic analysis.',
@@ -218,9 +219,12 @@ const seed = async () => {
       creditHours: 3,
       universityId: snu._id,
       type: CourseType.HOST,
+      isHomeCourse: false,
+      createdBy: admin._id,
     });
 
     const hostCourse2 = await Course.create({
+      title: 'Database Systems',
       name: 'Database Systems',
       code: 'UM-CS240',
       description: 'Relational modelling, SQL design, transactions, concurrency, and normalization.',
@@ -228,9 +232,12 @@ const seed = async () => {
       creditHours: 3,
       universityId: um._id,
       type: CourseType.HOST,
+      isHomeCourse: false,
+      createdBy: admin._id,
     });
 
     const homeCourse1 = await Course.create({
+      title: 'Data Structures and Algorithms',
       name: 'Data Structures and Algorithms',
       code: 'CS2005',
       description: 'Core data structures and asymptotic analysis for problem solving.',
@@ -238,9 +245,12 @@ const seed = async () => {
       creditHours: 3,
       universityId: homeUniversity._id,
       type: CourseType.HOME,
+      isHomeCourse: true,
+      createdBy: admin._id,
     });
 
     const homeCourse2 = await Course.create({
+      title: 'Database Management Systems',
       name: 'Database Management Systems',
       code: 'CS3007',
       description: 'Relational databases, query languages, and transaction management.',
@@ -248,6 +258,8 @@ const seed = async () => {
       creditHours: 3,
       universityId: homeUniversity._id,
       type: CourseType.HOME,
+      isHomeCourse: true,
+      createdBy: admin._id,
     });
 
     await CourseRequest.create({

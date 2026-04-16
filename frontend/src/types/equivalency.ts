@@ -11,12 +11,15 @@ export interface CourseSummary {
   _id: string;
   code: string;
   name: string;
+  title?: string;
   description?: string;
   outlineText?: string;
   outlineFileUrl?: string;
   creditHours: number;
   type: 'home' | 'host';
-  universityId?: UniversitySummary | string;
+  universityId?: UniversitySummary | string | null;
+  isHomeCourse?: boolean;
+  createdBy?: string | { _id: string; name: string; email: string } | null;
 }
 
 export interface MatchReasoning {

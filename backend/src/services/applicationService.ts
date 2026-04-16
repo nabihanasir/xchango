@@ -60,6 +60,22 @@ const accessibleStatusesForCourseWork = [
 
 const normalizeText = (value?: string) => value?.trim().toLowerCase() || '';
 
+const getReferencedId = (value: unknown) => {
+  if (!value) {
+    return '';
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'object' && '_id' in value && (value as { _id?: unknown })._id != null) {
+    return String((value as { _id: unknown })._id);
+  }
+
+  return String(value);
+};
+
 const ensureObjectId = (value: string, message: string) => {
   if (!mongoose.Types.ObjectId.isValid(value)) {
     throw new ValidationError(
@@ -81,7 +97,7 @@ const ensureApplicationAccess = (application: IApplication | null, studentId: st
     );
   }
 
-  if (application.studentId.toString() !== studentId) {
+  if (getReferencedId(application.studentId) !== studentId) {
     throw new ForbiddenError(
       'You are not authorized to access this application.',
       'The application belongs to a different student.',
@@ -107,7 +123,7 @@ const ensureApplicationExists = (application: IApplication | null) => {
 };
 
 const ensureAdvisorOwnsApplication = (application: IApplication, advisorId: string) => {
-  if (!application.advisorId || application.advisorId.toString() !== advisorId) {
+  if (!application.advisorId || getReferencedId(application.advisorId) !== advisorId) {
     throw new ForbiddenError(
       'You are not authorized to access this application.',
       'This application is not assigned to the current advisor.',
@@ -328,7 +344,7 @@ const buildSubmissionWarnings = (application: IApplication) => {
 const buildRecommendationStudentProfile = async (
   application: IApplication
 ): Promise<RecommendationStudentProfile> => {
-  const profile = await ensureStudentProfile(application.studentId.toString());
+  const profile = await ensureStudentProfile(getReferencedId(application.studentId));
   const transcriptCourseNames = profile.transcript.semesters.flatMap((semester) =>
     semester.courses.map((course) => course.courseName)
   );

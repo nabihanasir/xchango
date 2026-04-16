@@ -184,8 +184,8 @@ export default function StudentProfileForm({
               <Globe2 className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Mobility Preferences</h3>
-              <p className="text-sm text-slate-500">Capture destination, degree, field, and intake priorities.</p>
+              <h3 className="text-lg font-bold text-slate-900">Academic Preferences</h3>
+              <p className="text-sm text-slate-500">Capture degree, field, intake, and preferred destination details.</p>
             </div>
           </div>
 

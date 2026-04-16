@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import * as advisorService from '../services/advisorService';
 import { sendResponse } from '../utils/response';
 
@@ -12,9 +12,13 @@ export const getAssignedStudents = async (req: any, res: Response) => {
   sendResponse(res, 200, 'Assigned students fetched', students);
 };
 
-export const updateApplicationStatus = async (req: Request, res: Response) => {
+export const updateApplicationStatus = async (req: any, res: Response) => {
   const { status } = req.body;
-  const application = await advisorService.reviewApplication(req.params.id as string, status);
+  const application = await advisorService.reviewApplication(
+    req.params.id as string,
+    req.user._id.toString(),
+    status
+  );
   sendResponse(res, 200, 'Application status updated', application);
 };
 

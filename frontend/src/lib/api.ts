@@ -36,7 +36,7 @@ export const equivalencyApi = {
   getHostCourses: (token: string) =>
     apiRequest<CourseSummary[]>('/equivalency/host-courses', token),
   getHomeCourses: (token: string) =>
-    apiRequest<CourseSummary[]>('/equivalency/home-courses', token),
+    apiRequest<CourseSummary[]>('/courses', token),
   getStudentRequests: (token: string) =>
     apiRequest<CourseRequest[]>('/equivalency/student/requests', token),
   createStudentRequest: (token: string, hostCourseIds: string[]) =>

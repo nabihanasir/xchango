@@ -12,7 +12,7 @@ const AdminLayout = () => {
     { name: 'Users', path: '/admin/users', icon: Users },
     { name: 'Applications', path: '/admin/applications', icon: FileText },
     { name: 'Universities', path: '/admin/universities', icon: School },
-    { name: 'Courses', path: '/admin/courses', icon: BookOpen },
+    { name: 'Home Courses', path: '/admin/courses', icon: BookOpen },
     { name: 'Messages', path: '/dashboard/communicate', icon: FileText },
     { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];

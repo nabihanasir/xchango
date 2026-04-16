@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeDocument = exports.getDocuments = exports.addDocument = exports.getTranscript = exports.saveTranscript = exports.updateStudentProfile = exports.getStudentProfile = exports.ensureStudentProfile = exports.checkProfileCompletion = void 0;
+exports.getTranscript = exports.saveTranscript = exports.updateStudentProfile = exports.getStudentProfile = exports.ensureStudentProfile = exports.checkProfileCompletion = void 0;
 const StudentProfile_1 = __importDefault(require("../models/StudentProfile"));
 const User_1 = __importDefault(require("../models/User"));
 const AppError_1 = require("../errors/AppError");
@@ -35,7 +35,6 @@ const buildDefaultProfile = (user) => ({
         totalCredits: 0,
         semesters: [],
     },
-    documents: [],
 });
 const ensureProfileShape = (profile) => {
     const basicInfo = profile.basicInfo;
@@ -61,7 +60,6 @@ const ensureProfileShape = (profile) => {
         totalCredits: transcript?.totalCredits ?? 0,
         semesters: transcript?.semesters ?? [],
     };
-    profile.documents = Array.isArray(profile.documents) ? profile.documents : [];
 };
 const syncProfileWithLegacyFields = (profile) => {
     ensureProfileShape(profile);
@@ -95,8 +93,6 @@ const checkProfileCompletion = (profile) => {
         missingFields.push('transcript');
     if ((profile.transcript.cgpa || 0) <= 0)
         missingFields.push('CGPA');
-    if (!profile.documents.length)
-        missingFields.push('documents');
     return {
         isComplete: missingFields.length === 0,
         missingFields,
@@ -171,33 +167,3 @@ const getTranscript = async (userId) => {
     return profile.transcript;
 };
 exports.getTranscript = getTranscript;
-const addDocument = async (userId, documentData) => {
-    const profile = await (0, exports.ensureStudentProfile)(userId);
-    profile.documents.unshift({
-        type: documentData.type,
-        fileUrl: documentData.fileUrl,
-        status: documentData.status || 'pending',
-        uploadedAt: new Date(),
-    });
-    applyProfileCompletion(profile);
-    await profile.save();
-    return profile.documents;
-};
-exports.addDocument = addDocument;
-const getDocuments = async (userId) => {
-    const profile = await (0, exports.ensureStudentProfile)(userId);
-    return profile.documents.sort((left, right) => new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime());
-};
-exports.getDocuments = getDocuments;
-const removeDocument = async (userId, documentId) => {
-    const profile = await (0, exports.ensureStudentProfile)(userId);
-    const documentIndex = profile.documents.findIndex((document) => document._id?.toString() === documentId);
-    if (documentIndex === -1) {
-        throw new AppError_1.NotFoundError('Document not found.', 'The requested student document does not exist.', 'Refresh the page and try again.', 'DOCUMENT_NOT_FOUND');
-    }
-    profile.documents.splice(documentIndex, 1);
-    applyProfileCompletion(profile);
-    await profile.save();
-    return profile.documents;
-};
-exports.removeDocument = removeDocument;

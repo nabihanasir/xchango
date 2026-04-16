@@ -26,8 +26,9 @@ const createStorage = (folderName) => multer_1.default.diskStorage({
         cb(null, `${safeBaseName || file.fieldname}-${Date.now()}${path_1.default.extname(file.originalname)}`);
     },
 });
-const createUploader = (folderName, allowedExtensions) => (0, multer_1.default)({
+const createUploader = (folderName, allowedExtensions, limits) => (0, multer_1.default)({
     storage: createStorage(folderName),
+    limits,
     fileFilter: (_req, file, cb) => {
         if (!allowedExtensions?.length) {
             cb(null, true);
@@ -49,5 +50,7 @@ const toPublicFileUrl = (filePath) => {
 exports.toPublicFileUrl = toPublicFileUrl;
 const upload = (0, exports.createUploader)('documents');
 exports.transcriptUpload = (0, exports.createUploader)('transcripts', ['.xlsx', '.xls', '.csv']);
-exports.documentUpload = (0, exports.createUploader)('documents');
+exports.documentUpload = (0, exports.createUploader)('documents', ['.pdf', '.jpg', '.jpeg', '.png'], {
+    fileSize: 5 * 1024 * 1024,
+});
 exports.default = upload;

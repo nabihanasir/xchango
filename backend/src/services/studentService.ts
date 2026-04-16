@@ -1,5 +1,4 @@
 import StudentProfile, {
-  IStudentDocumentItem,
   IStudentProfile,
   IStudentTranscript,
 } from '../models/StudentProfile';
@@ -9,12 +8,6 @@ import { NotFoundError } from '../errors/AppError';
 interface StudentProfileUpdateInput {
   basicInfo?: Partial<IStudentProfile['basicInfo']>;
   preferences?: Partial<IStudentProfile['preferences']>;
-}
-
-interface CreateDocumentInput {
-  type: string;
-  fileUrl: string;
-  status?: string;
 }
 
 const buildDefaultProfile = (user: {
@@ -51,7 +44,6 @@ const buildDefaultProfile = (user: {
     totalCredits: 0,
     semesters: [],
   },
-  documents: [],
 });
 
 export interface ProfileCompletionResult {
@@ -85,8 +77,6 @@ const ensureProfileShape = (profile: IStudentProfile) => {
     totalCredits: transcript?.totalCredits ?? 0,
     semesters: transcript?.semesters ?? [],
   };
-
-  profile.documents = Array.isArray(profile.documents) ? profile.documents : [];
 };
 
 const syncProfileWithLegacyFields = (profile: IStudentProfile) => {
@@ -113,7 +103,6 @@ export const checkProfileCompletion = (profile: IStudentProfile): ProfileComplet
   if (!profile.preferences.preferredCountries.length) missingFields.push('preferred countries');
   if (!profile.transcript.fileUrl.trim()) missingFields.push('transcript');
   if ((profile.transcript.cgpa || 0) <= 0) missingFields.push('CGPA');
-  if (!profile.documents.length) missingFields.push('documents');
 
   return {
     isComplete: missingFields.length === 0,
@@ -201,45 +190,4 @@ export const saveTranscript = async (userId: string, transcriptData: IStudentTra
 export const getTranscript = async (userId: string) => {
   const profile = await ensureStudentProfile(userId);
   return profile.transcript;
-};
-
-export const addDocument = async (userId: string, documentData: CreateDocumentInput) => {
-  const profile = await ensureStudentProfile(userId);
-  profile.documents.unshift({
-    type: documentData.type,
-    fileUrl: documentData.fileUrl,
-    status: documentData.status || 'pending',
-    uploadedAt: new Date(),
-  } as IStudentDocumentItem);
-  applyProfileCompletion(profile);
-  await profile.save();
-  return profile.documents;
-};
-
-export const getDocuments = async (userId: string) => {
-  const profile = await ensureStudentProfile(userId);
-  return profile.documents.sort(
-    (left, right) => new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime()
-  );
-};
-
-export const removeDocument = async (userId: string, documentId: string) => {
-  const profile = await ensureStudentProfile(userId);
-  const documentIndex = profile.documents.findIndex(
-    (document) => document._id?.toString() === documentId
-  );
-
-  if (documentIndex === -1) {
-    throw new NotFoundError(
-      'Document not found.',
-      'The requested student document does not exist.',
-      'Refresh the page and try again.',
-      'DOCUMENT_NOT_FOUND'
-    );
-  }
-
-  profile.documents.splice(documentIndex, 1);
-  applyProfileCompletion(profile);
-  await profile.save();
-  return profile.documents;
 };

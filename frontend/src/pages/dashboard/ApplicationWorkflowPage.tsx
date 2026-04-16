@@ -173,7 +173,7 @@ export default function ApplicationWorkflowPage() {
     }
 
     if (currentStep === 3 && !draft.program.trim()) {
-      return 'Enter a program name.';
+      return 'Select a program.';
     }
 
     if (currentStep === 4) {

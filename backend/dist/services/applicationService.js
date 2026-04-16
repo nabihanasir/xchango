@@ -58,6 +58,18 @@ const accessibleStatusesForCourseWork = [
     Application_1.ApplicationStatus.READY_FOR_SUBMISSION,
 ];
 const normalizeText = (value) => value?.trim().toLowerCase() || '';
+const getReferencedId = (value) => {
+    if (!value) {
+        return '';
+    }
+    if (typeof value === 'string') {
+        return value;
+    }
+    if (typeof value === 'object' && '_id' in value && value._id != null) {
+        return String(value._id);
+    }
+    return String(value);
+};
 const ensureObjectId = (value, message) => {
     if (!mongoose_1.default.Types.ObjectId.isValid(value)) {
         throw new AppError_1.ValidationError('Invalid identifier.', message, 'Provide a valid identifier and try again.', 'INVALID_IDENTIFIER');
@@ -67,7 +79,7 @@ const ensureApplicationAccess = (application, studentId) => {
     if (!application) {
         throw new AppError_1.NotFoundError('Application not found.', 'No application exists for the provided identifier.', 'Verify the application id and try again.', 'APPLICATION_NOT_FOUND');
     }
-    if (application.studentId.toString() !== studentId) {
+    if (getReferencedId(application.studentId) !== studentId) {
         throw new AppError_1.ForbiddenError('You are not authorized to access this application.', 'The application belongs to a different student.', 'Access the application using the correct student account.', 'APPLICATION_ACCESS_DENIED');
     }
     return application;
@@ -79,7 +91,7 @@ const ensureApplicationExists = (application) => {
     return application;
 };
 const ensureAdvisorOwnsApplication = (application, advisorId) => {
-    if (!application.advisorId || application.advisorId.toString() !== advisorId) {
+    if (!application.advisorId || getReferencedId(application.advisorId) !== advisorId) {
         throw new AppError_1.ForbiddenError('You are not authorized to access this application.', 'This application is not assigned to the current advisor.', 'Open an application assigned to you or contact an administrator.', 'ADVISOR_ACCESS_DENIED');
     }
     return application;
@@ -218,7 +230,7 @@ const buildSubmissionWarnings = (application) => {
     return warnings;
 };
 const buildRecommendationStudentProfile = async (application) => {
-    const profile = await (0, studentService_1.ensureStudentProfile)(application.studentId.toString());
+    const profile = await (0, studentService_1.ensureStudentProfile)(getReferencedId(application.studentId));
     const transcriptCourseNames = profile.transcript.semesters.flatMap((semester) => semester.courses.map((course) => course.courseName));
     return {
         degreeLevel: profile.preferences.degreeLevel,

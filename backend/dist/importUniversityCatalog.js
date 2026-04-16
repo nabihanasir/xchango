@@ -169,6 +169,7 @@ const upsertCatalog = async (blocks) => {
             const code = `${block.universityShortCode}-${slugify(course.title)}`;
             await Course_1.default.findOneAndUpdate({ universityId: university._id, code, type: Course_1.CourseType.HOST }, {
                 $set: {
+                    title: course.title,
                     name: course.title,
                     code,
                     description: course.description,
@@ -177,6 +178,7 @@ const upsertCatalog = async (blocks) => {
                     creditHours: course.creditHours,
                     universityId: university._id,
                     type: Course_1.CourseType.HOST,
+                    isHomeCourse: false,
                 },
             }, { returnDocument: 'after', upsert: true });
             coursesUpserted += 1;

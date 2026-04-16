@@ -1,6 +1,7 @@
 import Application, { ApplicationStatus } from '../models/Application';
 import AdvisorProfile from '../models/AdvisorProfile';
 import StudentProfile from '../models/StudentProfile';
+import * as applicationService from './applicationService';
 
 export const getAssignedApplications = async (advisorId: string) => {
   return await Application.find({
@@ -17,12 +18,12 @@ export const getAssignedStudents = async (advisorId: string) => {
   return StudentProfile.find({ userId: { $in: studentIds } }).sort({ updatedAt: -1 });
 };
 
-export const reviewApplication = async (applicationId: string, status: ApplicationStatus) => {
-  return await Application.findByIdAndUpdate(
-    applicationId,
-    { status },
-    { new: true }
-  );
+export const reviewApplication = async (
+  applicationId: string,
+  advisorId: string,
+  status: ApplicationStatus
+) => {
+  return applicationService.updateStatus(applicationId, advisorId, status);
 };
 
 export const getAdvisorProfile = async (userId: string) => {

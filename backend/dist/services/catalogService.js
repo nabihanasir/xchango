@@ -30,6 +30,6 @@ const listCourses = async (filters) => {
             select: 'name code',
         },
     })
-        .sort({ name: 1 });
+        .sort({ title: 1, name: 1 });
 };
 exports.listCourses = listCourses;

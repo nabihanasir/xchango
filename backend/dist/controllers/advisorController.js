@@ -48,7 +48,7 @@ const getAssignedStudents = async (req, res) => {
 exports.getAssignedStudents = getAssignedStudents;
 const updateApplicationStatus = async (req, res) => {
     const { status } = req.body;
-    const application = await advisorService.reviewApplication(req.params.id, status);
+    const application = await advisorService.reviewApplication(req.params.id, req.user._id.toString(), status);
     (0, response_1.sendResponse)(res, 200, 'Application status updated', application);
 };
 exports.updateApplicationStatus = updateApplicationStatus;

@@ -7,6 +7,7 @@ exports.notFound = exports.errorHandler = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const AppError_1 = require("../errors/AppError");
 const logger_1 = require("../utils/logger");
+const multer_1 = __importDefault(require("multer"));
 const buildError = (err) => {
     if (err instanceof AppError_1.AppError) {
         return err;
@@ -26,6 +27,12 @@ const buildError = (err) => {
     }
     if (err instanceof mongoose_1.default.Error) {
         return new AppError_1.DatabaseError('Database operation failed', 'The database could not complete the requested operation.', 'Please try again shortly. If the issue continues, contact support.');
+    }
+    if (err instanceof multer_1.default.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return new AppError_1.ValidationError('Uploaded file is too large.', 'The uploaded file exceeds the maximum allowed size.', 'Choose a smaller file and try again.', 'FILE_TOO_LARGE');
+        }
+        return new AppError_1.ValidationError('Upload failed.', err.message, 'Review the uploaded file and try again.', 'FILE_UPLOAD_ERROR');
     }
     if (err instanceof Error && err.name === 'JsonWebTokenError') {
         return new AppError_1.AuthenticationError('Authentication failed', 'The provided token is invalid or malformed.', 'Please sign in again to continue.', 'INVALID_TOKEN');

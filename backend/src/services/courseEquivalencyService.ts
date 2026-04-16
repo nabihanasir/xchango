@@ -44,7 +44,7 @@ const computeRequestStatus = (items: ICourseRequestItem[]): CourseRequestStatus 
 };
 
 const findSuggestedHomeCourse = async (hostCourse: ICourse): Promise<ICourse | null> => {
-  const homeCourses = await Course.find({ type: CourseType.HOME });
+  const homeCourses = await Course.find({ $or: [{ isHomeCourse: true }, { type: CourseType.HOME }] });
   if (!homeCourses.length) {
     return null;
   }
@@ -167,7 +167,9 @@ export const listHostCourses = async () =>
   Course.find({ type: CourseType.HOST }).populate('universityId', 'name').sort({ code: 1 });
 
 export const listHomeCourses = async () =>
-  Course.find({ type: CourseType.HOME }).populate('universityId', 'name').sort({ code: 1 });
+  Course.find({ $or: [{ isHomeCourse: true }, { type: CourseType.HOME }] })
+    .populate('createdBy', 'name email role')
+    .sort({ title: 1, name: 1 });
 
 export const createCourseRequest = async (studentId: string, hostCourseIds: string[]) => {
   if (!hostCourseIds.length) {
@@ -251,7 +253,10 @@ export const updatePairedHomeCourse = async (requestId: string, itemId: string, 
     throw new Error('Course request item not found.');
   }
 
-  const homeCourse = await Course.findOne({ _id: homeCourseId, type: CourseType.HOME });
+  const homeCourse = await Course.findOne({
+    _id: homeCourseId,
+    $or: [{ isHomeCourse: true }, { type: CourseType.HOME }],
+  });
   if (!homeCourse) {
     throw new Error('Selected home course could not be found.');
   }

@@ -47,7 +47,7 @@ const addUniversity = async (req, res) => {
 };
 exports.addUniversity = addUniversity;
 const addCourse = async (req, res) => {
-    const course = await adminService.createCourse(req.body);
+    const course = await adminService.createCourse(req.user._id.toString(), req.body);
     (0, response_1.sendResponse)(res, 201, 'Course added successfully', course);
 };
 exports.addCourse = addCourse;

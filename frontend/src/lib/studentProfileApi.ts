@@ -1,9 +1,5 @@
 import { apiClient } from './httpClient';
-import type {
-  StudentDocument,
-  StudentProfile,
-  StudentTranscript,
-} from '../types/studentProfile';
+import type { StudentProfile, StudentTranscript } from '../types/studentProfile';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
@@ -53,22 +49,4 @@ export const studentProfileApi = {
   },
   getTranscript: (studentId: string) =>
     unwrap<StudentTranscript>(apiClient.get(`/transcript/${studentId}`)),
-  uploadDocument: async (studentId: string, type: string, file: File) => {
-    const formData = new FormData();
-    formData.append('studentId', studentId);
-    formData.append('type', type);
-    formData.append('file', file);
-
-    return unwrap<StudentDocument[]>(
-      apiClient.post('/documents/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-    );
-  },
-  getDocuments: (studentId: string) =>
-    unwrap<StudentDocument[]>(apiClient.get(`/documents/${studentId}`)),
-  deleteDocument: (documentId: string) =>
-    unwrap<StudentDocument[]>(apiClient.delete(`/documents/${documentId}`)),
 };

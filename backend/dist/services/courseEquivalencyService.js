@@ -64,7 +64,7 @@ const computeRequestStatus = (items) => {
     return CourseRequest_1.CourseRequestStatus.REJECTED;
 };
 const findSuggestedHomeCourse = async (hostCourse) => {
-    const homeCourses = await Course_1.default.find({ type: Course_1.CourseType.HOME });
+    const homeCourses = await Course_1.default.find({ $or: [{ isHomeCourse: true }, { type: Course_1.CourseType.HOME }] });
     if (!homeCourses.length) {
         return null;
     }
@@ -163,7 +163,9 @@ const createStudentNotification = async (request) => {
 };
 const listHostCourses = async () => Course_1.default.find({ type: Course_1.CourseType.HOST }).populate('universityId', 'name').sort({ code: 1 });
 exports.listHostCourses = listHostCourses;
-const listHomeCourses = async () => Course_1.default.find({ type: Course_1.CourseType.HOME }).populate('universityId', 'name').sort({ code: 1 });
+const listHomeCourses = async () => Course_1.default.find({ $or: [{ isHomeCourse: true }, { type: Course_1.CourseType.HOME }] })
+    .populate('createdBy', 'name email role')
+    .sort({ title: 1, name: 1 });
 exports.listHomeCourses = listHomeCourses;
 const createCourseRequest = async (studentId, hostCourseIds) => {
     if (!hostCourseIds.length) {
@@ -233,7 +235,10 @@ const updatePairedHomeCourse = async (requestId, itemId, homeCourseId) => {
     if (!item) {
         throw new Error('Course request item not found.');
     }
-    const homeCourse = await Course_1.default.findOne({ _id: homeCourseId, type: Course_1.CourseType.HOME });
+    const homeCourse = await Course_1.default.findOne({
+        _id: homeCourseId,
+        $or: [{ isHomeCourse: true }, { type: Course_1.CourseType.HOME }],
+    });
     if (!homeCourse) {
         throw new Error('Selected home course could not be found.');
     }

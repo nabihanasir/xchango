@@ -3,6 +3,7 @@ import type {
   ApplicationCourseSummary,
   WorkflowApplication,
 } from '../types/application';
+import type { CourseInput } from '../types/course';
 
 interface ApiEnvelope<T> {
   success: boolean;
@@ -84,8 +85,12 @@ export const adminApi = {
   getUniversities: () => unwrap<UniversityRecord[]>(apiClient.get('/catalog/universities')),
   createUniversity: (payload: Record<string, unknown>) =>
     unwrap<UniversityRecord>(apiClient.post('/admin/universities', payload)),
-  getCourses: (params?: { universityId?: string; type?: string }) =>
-    unwrap<ApplicationCourseSummary[]>(apiClient.get('/catalog/courses', { params })),
-  createCourse: (payload: Record<string, unknown>) =>
-    unwrap<ApplicationCourseSummary>(apiClient.post('/admin/courses', payload)),
+  getCourses: () =>
+    unwrap<ApplicationCourseSummary[]>(apiClient.get('/courses')),
+  createCourse: (payload: CourseInput) =>
+    unwrap<ApplicationCourseSummary>(apiClient.post('/courses', payload)),
+  updateCourse: (courseId: string, payload: CourseInput) =>
+    unwrap<ApplicationCourseSummary>(apiClient.put(`/courses/${courseId}`, payload)),
+  deleteCourse: (courseId: string) =>
+    unwrap<Record<string, unknown>>(apiClient.delete(`/courses/${courseId}`)),
 };

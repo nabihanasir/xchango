@@ -46,6 +46,7 @@ const CourseMapping_1 = __importDefault(require("../models/CourseMapping"));
 const AdvisorProfile_1 = __importDefault(require("../models/AdvisorProfile"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const crypto_1 = __importDefault(require("crypto"));
+const courseService = __importStar(require("./courseService"));
 const populateApplications = (query) => query
     .populate('studentId', 'name email sapId phone role')
     .populate('advisorId', 'name email role')
@@ -97,8 +98,8 @@ const createUniversity = async (universityData) => {
     return await University_1.default.create(universityData);
 };
 exports.createUniversity = createUniversity;
-const createCourse = async (courseData) => {
-    return await Course_1.default.create(courseData);
+const createCourse = async (adminId, courseData) => {
+    return courseService.createHomeCourse(adminId, courseData);
 };
 exports.createCourse = createCourse;
 const getAllUsers = async () => {

@@ -36,14 +36,6 @@ export interface IStudentTranscript {
   semesters: ITranscriptSemester[];
 }
 
-export interface IStudentDocumentItem {
-  _id?: mongoose.Types.ObjectId;
-  type: string;
-  fileUrl: string;
-  status: string;
-  uploadedAt: Date;
-}
-
 export interface IStudentProfile extends Document {
   userId: mongoose.Types.ObjectId;
   registrationNumber: string;
@@ -55,7 +47,6 @@ export interface IStudentProfile extends Document {
   basicInfo: IStudentBasicInfo;
   preferences: IStudentPreferences;
   transcript: IStudentTranscript;
-  documents: IStudentDocumentItem[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,16 +68,6 @@ const TranscriptSemesterSchema = new Schema<ITranscriptSemester>(
     courses: { type: [TranscriptCourseSchema], default: [] },
   },
   { _id: false }
-);
-
-const StudentDocumentSchema = new Schema<IStudentDocumentItem>(
-  {
-    type: { type: String, required: true, trim: true },
-    fileUrl: { type: String, required: true, trim: true },
-    status: { type: String, default: 'pending', trim: true },
-    uploadedAt: { type: Date, default: Date.now },
-  },
-  { _id: true }
 );
 
 const StudentProfileSchema: Schema<IStudentProfile> = new Schema(
@@ -118,7 +99,6 @@ const StudentProfileSchema: Schema<IStudentProfile> = new Schema(
       totalCredits: { type: Number, default: 0, min: 0 },
       semesters: { type: [TranscriptSemesterSchema], default: [] },
     },
-    documents: { type: [StudentDocumentSchema], default: [] },
   },
   { timestamps: true }
 );
