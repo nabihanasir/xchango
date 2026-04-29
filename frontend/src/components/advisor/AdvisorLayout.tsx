@@ -11,7 +11,6 @@ const AdvisorLayout = () => {
     { name: 'My Students',  path: '/advisor/students',     icon: Users },
     { name: 'Applications', path: '/advisor/applications', icon: FileText },
     { name: 'Equivalency Requests', path: '/advisor/requests', icon: ClipboardCheck },
-    { name: 'Messages',     path: '/advisor/communicate',  icon: MessageSquare },
     { name: 'Profile',      path: '/advisor/profile',      icon: UserIcon },
   ];
 

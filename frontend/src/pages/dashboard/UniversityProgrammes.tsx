@@ -21,7 +21,7 @@ const COUNTRY_DATA = [
     id: 'malaysia',
     name: 'Malaysia',
     flag: '🇲🇾',
-    image: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f0a?q=80&w=800&auto=format&fit=crop',
+    image: 'https://cdn.britannica.com/49/102749-050-B4874C95/Kuala-Lumpur-Malaysia.jpg?w=300',
     universities: [
       {
         name: 'Universiti Telekom Sdn Bhd (Multimedia University)',

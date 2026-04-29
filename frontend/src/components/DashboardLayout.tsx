@@ -14,7 +14,6 @@ const DashboardLayout = () => {
     { name: 'Your Application',        path: '/dashboard/applications', icon: FileText },
     { name: 'Browse Equivalency',      path: '/dashboard/equivalency/courses', icon: BookOpenCheck },
     { name: 'My Equivalency Requests', path: '/dashboard/equivalency/requests', icon: ListChecks },
-    { name: 'Communicate',             path: '/dashboard/communicate',  icon: MessageSquare },
   ];
 
   const initials = (user?.name || 'Student Name')
