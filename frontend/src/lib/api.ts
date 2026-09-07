@@ -1,4 +1,5 @@
 import type { AdvisorDecisionPayload, CourseRequest, CourseSummary } from '../types/equivalency';
+import type { GradableItem, ResultFormPayload, StudentResult } from '../types/result';
 import { parseApiError } from './errorUtils';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -18,6 +19,28 @@ const apiRequest = async <T>(path: string, token: string, init?: RequestInit): P
         Authorization: `Bearer ${token}`,
         ...(init?.headers || {}),
       },
+    });
+
+    const payload = (await response.json()) as ApiEnvelope<T> & { error?: unknown };
+
+    if (!response.ok || !payload.success) {
+      throw parseApiError(payload);
+    }
+
+    return payload.data;
+  } catch (error) {
+    throw parseApiError(error);
+  }
+};
+
+const apiFormRequest = async <T>(path: string, token: string, formData: FormData, method = 'PUT'): Promise<T> => {
+  try {
+    const response = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
     });
 
     const payload = (await response.json()) as ApiEnvelope<T> & { error?: unknown };
@@ -62,4 +85,24 @@ export const equivalencyApi = {
       method: 'PUT',
       body: JSON.stringify(payload),
     }),
+};
+
+export const resultsApi = {
+  getStudentResults: (token: string) => apiRequest<StudentResult[]>('/results/student', token),
+  getAdvisorGradableItems: (token: string) => apiRequest<GradableItem[]>('/results/advisor/gradable', token),
+  getAdminResults: (token: string) => apiRequest<StudentResult[]>('/results/admin', token),
+  upsertResult: (token: string, courseRequestItemId: string, payload: ResultFormPayload) => {
+    const formData = new FormData();
+    formData.append('grade', payload.grade);
+    if (payload.marks !== undefined && payload.marks !== null) {
+      formData.append('marks', String(payload.marks));
+    }
+    formData.append('remarks', payload.remarks || '');
+    formData.append('status', payload.status);
+    if (payload.file) {
+      formData.append('file', payload.file);
+    }
+
+    return apiFormRequest<StudentResult>(`/results/advisor/${courseRequestItemId}`, token, formData);
+  },
 };

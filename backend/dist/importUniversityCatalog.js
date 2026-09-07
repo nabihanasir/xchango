@@ -40,6 +40,7 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const dns_1 = __importDefault(require("./config/dns"));
 const pdf_parse_1 = require("pdf-parse");
 const Country_1 = __importDefault(require("./models/Country"));
 const University_1 = __importDefault(require("./models/University"));
@@ -197,6 +198,7 @@ const main = async () => {
     if (!fs_1.default.existsSync(pdfPath)) {
         throw new Error(`PDF file not found at ${pdfPath}`);
     }
+    (0, dns_1.default)();
     await mongoose_1.default.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/xchango');
     const parser = new pdf_parse_1.PDFParse({ data: fs_1.default.readFileSync(pdfPath) });
     try {

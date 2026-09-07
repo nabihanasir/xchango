@@ -44,4 +44,6 @@ const User_1 = require("../models/User");
 const router = express_1.default.Router();
 router.use(authMiddleware_1.protect);
 router.get('/', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT, User_1.UserRole.ADVISOR, User_1.UserRole.ADMIN), onlineClassController.getOnlineClasses);
+router.post('/:id/start', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR, User_1.UserRole.ADMIN), onlineClassController.startOnlineClass);
+router.post('/:id/end', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR, User_1.UserRole.ADMIN), onlineClassController.endOnlineClass);
 exports.default = router;
