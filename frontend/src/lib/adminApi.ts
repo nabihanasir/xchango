@@ -65,6 +65,27 @@ export interface UniversityRecord {
   updatedAt?: string;
 }
 
+export type AiProvider = 'openrouter' | 'gemini' | 'groq' | 'openai-compatible';
+
+export interface AiModelConfigRecord {
+  _id: string;
+  provider: AiProvider;
+  baseUrl: string;
+  model: string;
+  isEnabled: boolean;
+  apiKeySet: boolean;
+  apiKeyPreview: string | null;
+  updatedAt?: string;
+}
+
+export interface AiModelConfigInput {
+  provider: AiProvider;
+  baseUrl: string;
+  model: string;
+  isEnabled: boolean;
+  apiKey?: string;
+}
+
 const unwrap = async <T>(request: Promise<{ data: ApiEnvelope<T> }>) => {
   const response = await request;
   return response.data.data;
@@ -93,4 +114,8 @@ export const adminApi = {
     unwrap<ApplicationCourseSummary>(apiClient.put(`/courses/${courseId}`, payload)),
   deleteCourse: (courseId: string) =>
     unwrap<Record<string, unknown>>(apiClient.delete(`/courses/${courseId}`)),
+  getAiModelConfig: () =>
+    unwrap<AiModelConfigRecord | null>(apiClient.get('/admin/ai-model-config')),
+  updateAiModelConfig: (payload: AiModelConfigInput) =>
+    unwrap<AiModelConfigRecord>(apiClient.put('/admin/ai-model-config', payload)),
 };

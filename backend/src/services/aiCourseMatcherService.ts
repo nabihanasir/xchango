@@ -1,6 +1,7 @@
 import { ICourse } from '../models/Course';
 import { ICourseMatchReasoning } from '../models/CourseMatchResult';
 import { calculateSimilarity } from '../utils/similarity';
+import { getAiModelConfigRaw } from './adminService';
 
 interface MatchResponse {
   matchScore: number;
@@ -119,13 +120,16 @@ const buildHeuristicMatch = (hostCourse: ICourse, homeCourse: ICourse): MatchRes
 };
 
 const callConfiguredLLM = async (hostCourse: ICourse, homeCourse: ICourse): Promise<MatchResponse | null> => {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const dbConfig = await getAiModelConfigRaw();
+  const useDbConfig = Boolean(dbConfig?.isEnabled && dbConfig.apiKey && dbConfig.baseUrl && dbConfig.modelName);
+
+  const apiKey = useDbConfig ? dbConfig!.apiKey : process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return null;
   }
 
-  const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
-  const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
+  const baseUrl = useDbConfig ? dbConfig!.baseUrl : (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1');
+  const model = useDbConfig ? dbConfig!.modelName : (process.env.OPENAI_MODEL || 'gpt-4.1-mini');
   const prompt = buildPrompt(hostCourse, homeCourse);
 
   const response = await fetch(`${baseUrl}/chat/completions`, {
