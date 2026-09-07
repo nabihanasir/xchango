@@ -37,6 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+const dns_1 = __importDefault(require("./config/dns"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const User_1 = __importStar(require("./models/User"));
@@ -48,6 +49,7 @@ const ADMIN_PHONE = '+92-300-0000001';
 const ADMIN_SAP_ID = 'ADM0001';
 const ensureAdmin = async () => {
     try {
+        (0, dns_1.default)();
         await mongoose_1.default.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/xchango');
         const salt = await bcryptjs_1.default.genSalt(10);
         const hashedPassword = await bcryptjs_1.default.hash(ADMIN_PASSWORD, salt);

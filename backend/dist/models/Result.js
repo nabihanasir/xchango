@@ -32,18 +32,28 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const onlineClassController = __importStar(require("../controllers/onlineClassController"));
-const authMiddleware_1 = require("../middleware/authMiddleware");
-const authorize_1 = require("../middleware/authorize");
-const User_1 = require("../models/User");
-const router = express_1.default.Router();
-router.use(authMiddleware_1.protect);
-router.get('/', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT, User_1.UserRole.ADVISOR, User_1.UserRole.ADMIN), onlineClassController.getOnlineClasses);
-router.post('/:id/start', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR, User_1.UserRole.ADMIN), onlineClassController.startOnlineClass);
-router.post('/:id/end', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR, User_1.UserRole.ADMIN), onlineClassController.endOnlineClass);
-exports.default = router;
+exports.ResultStatus = void 0;
+const mongoose_1 = __importStar(require("mongoose"));
+var ResultStatus;
+(function (ResultStatus) {
+    ResultStatus["DRAFT"] = "draft";
+    ResultStatus["PUBLISHED"] = "published";
+})(ResultStatus || (exports.ResultStatus = ResultStatus = {}));
+const ResultSchema = new mongoose_1.Schema({
+    studentId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    courseRequestItemId: { type: mongoose_1.Schema.Types.ObjectId, required: true, unique: true },
+    hostCourseId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course', required: true },
+    advisorId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
+    grade: { type: String, required: true, trim: true },
+    marks: { type: Number, min: 0, max: 100, default: null },
+    remarks: { type: String, default: '', trim: true },
+    status: {
+        type: String,
+        enum: Object.values(ResultStatus),
+        default: ResultStatus.DRAFT,
+    },
+    resultFileUrl: { type: String, default: '' },
+    publishedAt: { type: Date, default: null },
+}, { timestamps: true });
+exports.default = mongoose_1.default.model('Result', ResultSchema);

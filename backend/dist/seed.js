@@ -37,6 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+const dns_1 = __importDefault(require("./config/dns"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const User_1 = __importStar(require("./models/User"));
 const Country_1 = __importDefault(require("./models/Country"));
@@ -50,6 +51,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 dotenv_1.default.config();
 const seed = async () => {
     try {
+        (0, dns_1.default)();
         await mongoose_1.default.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/xchango');
         console.log('Connected to MongoDB for seeding...');
         // Clear existing data

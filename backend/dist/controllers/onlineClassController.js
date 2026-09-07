@@ -33,11 +33,37 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOnlineClasses = void 0;
+exports.endOnlineClass = exports.startOnlineClass = exports.getOnlineClasses = void 0;
 const onlineClassService = __importStar(require("../services/onlineClassService"));
 const response_1 = require("../utils/response");
 const getOnlineClasses = async (req, res) => {
     const classes = onlineClassService.listOnlineClasses(req.user?.name);
-    (0, response_1.sendResponse)(res, 200, 'Online classes fetched successfully', classes);
+    (0, response_1.sendResponse)(res, 200, 'Online classes fetched successfully', {
+        classes,
+        provider: 'Jitsi Meet',
+        roomPassword: onlineClassService.getRoomPasswordHint(),
+    });
 };
 exports.getOnlineClasses = getOnlineClasses;
+const startOnlineClass = async (req, res) => {
+    try {
+        const classItem = onlineClassService.startOnlineClass(req.params.id, req.user?.name || 'Host');
+        (0, response_1.sendResponse)(res, 200, 'Class started successfully', classItem);
+    }
+    catch (error) {
+        const statusCode = error?.statusCode || 500;
+        (0, response_1.sendResponse)(res, statusCode, error?.message || 'Unable to start class');
+    }
+};
+exports.startOnlineClass = startOnlineClass;
+const endOnlineClass = async (req, res) => {
+    try {
+        const classItem = onlineClassService.endOnlineClass(req.params.id, req.user?.name);
+        (0, response_1.sendResponse)(res, 200, 'Class ended successfully', classItem);
+    }
+    catch (error) {
+        const statusCode = error?.statusCode || 500;
+        (0, response_1.sendResponse)(res, statusCode, error?.message || 'Unable to end class');
+    }
+};
+exports.endOnlineClass = endOnlineClass;

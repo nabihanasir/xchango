@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.documentUpload = exports.transcriptUpload = exports.toPublicFileUrl = exports.createUploader = exports.uploadsRoot = void 0;
+exports.resultUpload = exports.documentUpload = exports.transcriptUpload = exports.toPublicFileUrl = exports.createUploader = exports.uploadsRoot = void 0;
 const fs_1 = __importDefault(require("fs"));
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
@@ -51,6 +51,9 @@ exports.toPublicFileUrl = toPublicFileUrl;
 const upload = (0, exports.createUploader)('documents');
 exports.transcriptUpload = (0, exports.createUploader)('transcripts', ['.xlsx', '.xls', '.csv']);
 exports.documentUpload = (0, exports.createUploader)('documents', ['.pdf', '.jpg', '.jpeg', '.png'], {
+    fileSize: 5 * 1024 * 1024,
+});
+exports.resultUpload = (0, exports.createUploader)('results', ['.pdf', '.jpg', '.jpeg', '.png'], {
     fileSize: 5 * 1024 * 1024,
 });
 exports.default = upload;
