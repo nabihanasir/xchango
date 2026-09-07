@@ -1,4 +1,4 @@
-import { Globe2, Mail, MapPin, Phone } from 'lucide-react';
+import { Facebook, Globe2, Instagram, Linkedin, Mail, MapPin, Phone, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface FooterLink {
@@ -17,6 +17,7 @@ const columns: { heading: string; links: FooterLink[] }[] = [
       { label: 'Equivalency and Recognition', href: '#equivalency' },
       { label: 'Student Exchange Programs', href: '#exchange' },
       { label: 'Global Education Vision', href: '#vision' },
+      { label: 'Frequently Asked Questions', href: '#faq' },
     ],
   },
   {
@@ -94,10 +95,16 @@ export default function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-16 flex flex-col gap-6 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-white/35">
             © {new Date().getFullYear()} Riphah International Office. All rights reserved.
           </p>
+          <div className="flex items-center gap-4 text-white/35">
+            <Facebook className="h-4 w-4" aria-hidden="true" />
+            <Instagram className="h-4 w-4" aria-hidden="true" />
+            <Linkedin className="h-4 w-4" aria-hidden="true" />
+            <Youtube className="h-4 w-4" aria-hidden="true" />
+          </div>
           <p className="text-xs text-white/35">Xchango — student mobility platform</p>
         </div>
       </div>

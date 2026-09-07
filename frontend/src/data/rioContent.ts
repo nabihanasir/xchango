@@ -56,3 +56,21 @@ export const rioStats = [
   { label: 'Focus Areas', value: 'Tech & Mobility' },
   { label: 'Student Pathways', value: 'Exchange & Progression' },
 ];
+
+export const rioFaqs = [
+  {
+    question: 'Who can apply for a student exchange?',
+    answer:
+      'Any currently enrolled Riphah student in good academic standing can apply. Eligibility for a specific partner university depends on that programme’s course prerequisites and available seats.',
+  },
+  {
+    question: 'How is my credit recognised when I come back?',
+    answer:
+      'Before you travel, an advisor maps each partner course to its Riphah equivalent. On your return, the approved mapping is what gets recorded on your transcript — no separate re-evaluation needed.',
+  },
+  {
+    question: 'When should I start the application process?',
+    answer:
+      'Begin at least one full semester ahead. Placement confirmation, transcript review and visa paperwork with the partner university all take time to clear before travel.',
+  },
+];
