@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom';
 
 const navItems = [
   { label: 'About', href: '#about' },
-  { label: 'Partners', href: '#partners' },
-  { label: 'Features', href: '#features' },
+  { label: 'Equivalency', href: '#equivalency' },
+  { label: 'Exchange Programs', href: '#exchange' },
+  { label: 'Vision', href: '#vision' },
   { label: 'Contact', href: '#cta' },
 ];
 

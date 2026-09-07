@@ -32,6 +32,7 @@ const AdminLayout = () => {
   return (
     <GlobalLayout 
       panelName="Admin Panel"
+      role="admin"
       navItems={navItems}
       userProfile={userProfile}
     />

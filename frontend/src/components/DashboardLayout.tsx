@@ -1,5 +1,5 @@
 import {
-  Home, School, FileText, MessageSquare, BookOpenCheck, ListChecks, UserRoundCog
+  Home, School, FileText, BookOpenCheck, ListChecks, UserRoundCog, Video
 } from 'lucide-react';
 import GlobalLayout from './GlobalLayout';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,7 @@ const DashboardLayout = () => {
     { name: 'Documents',               path: '/dashboard/documents',    icon: FileText },
     { name: 'University & Programmes', path: '/dashboard/programmes',   icon: School },
     { name: 'Your Application',        path: '/dashboard/applications', icon: FileText },
+    { name: 'Online Classes',          path: '/dashboard/online-classes', icon: Video },
     { name: 'Browse Equivalency',      path: '/dashboard/equivalency/courses', icon: BookOpenCheck },
     { name: 'My Equivalency Requests', path: '/dashboard/equivalency/requests', icon: ListChecks },
   ];
@@ -32,6 +33,7 @@ const DashboardLayout = () => {
   return (
     <GlobalLayout 
       panelName="Student Panel"
+      role="student"
       navItems={navItems}
       userProfile={userProfile}
     />
@@ -39,3 +41,5 @@ const DashboardLayout = () => {
 };
 
 export default DashboardLayout;
+
+
