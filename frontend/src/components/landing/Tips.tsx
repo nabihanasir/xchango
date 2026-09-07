@@ -33,16 +33,24 @@ export default function Tips() {
         </SectionHeading>
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {tips.map(({ icon: Icon, title, body }) => (
+          {tips.map(({ icon: Icon, title, body }, index) => (
             <article
               key={title}
-              className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-soft transition duration-300 hover:-translate-y-1"
+              className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-soft transition duration-300 hover:-translate-y-1"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-dark-blue text-accent-yellow">
-                <Icon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-6 text-base font-black text-dark-blue">{title}</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{body}</p>
+              <span aria-hidden="true" className="block h-1.5 w-full bg-accent-yellow" />
+              <div className="p-7">
+                <div className="flex items-center justify-between">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-dark-blue text-accent-yellow">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <span className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-300">
+                    Tip 0{index + 1}
+                  </span>
+                </div>
+                <h3 className="mt-6 text-base font-black text-dark-blue">{title}</h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600">{body}</p>
+              </div>
             </article>
           ))}
         </div>

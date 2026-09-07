@@ -1,5 +1,5 @@
 import {
-  Home, School, FileText, BookOpenCheck, ListChecks, UserRoundCog, Video
+  Home, School, FileText, BookOpenCheck, ListChecks, UserRoundCog, Video, GraduationCap
 } from 'lucide-react';
 import GlobalLayout from './GlobalLayout';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +15,7 @@ const DashboardLayout = () => {
     { name: 'Online Classes',          path: '/dashboard/online-classes', icon: Video },
     { name: 'Browse Equivalency',      path: '/dashboard/equivalency/courses', icon: BookOpenCheck },
     { name: 'My Equivalency Requests', path: '/dashboard/equivalency/requests', icon: ListChecks },
+    { name: 'Results',                 path: '/dashboard/results', icon: GraduationCap },
   ];
 
   const initials = (user?.name || 'Student Name')
