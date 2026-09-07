@@ -5,6 +5,7 @@ import User, { UserRole } from '../models/User';
 import Country from '../models/Country';
 import CourseMapping from '../models/CourseMapping';
 import AdvisorProfile from '../models/AdvisorProfile';
+import AiModelConfig, { AiProvider, IAiModelConfig } from '../models/AiModelConfig';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import * as courseService from './courseService';
@@ -207,4 +208,64 @@ export const createMapping = async (homeCourseId: string, hostCourseId: string, 
 
 export const getAllMappings = async () => {
   return await CourseMapping.find().populate('homeCourseId hostCourseId');
+};
+
+const toSafeAiModelConfig = (config: IAiModelConfig | null) => {
+  if (!config) return null;
+
+  return {
+    _id: config._id,
+    provider: config.provider,
+    baseUrl: config.baseUrl,
+    model: config.modelName,
+    isEnabled: config.isEnabled,
+    apiKeySet: Boolean(config.apiKey),
+    apiKeyPreview: config.apiKey ? `••••${config.apiKey.slice(-4)}` : null,
+    updatedAt: config.updatedAt,
+  };
+};
+
+// Raw config (including plaintext apiKey) for internal use by the course matcher only.
+export const getAiModelConfigRaw = async () => {
+  return await AiModelConfig.findOne();
+};
+
+export const getAiModelConfig = async () => {
+  const config = await getAiModelConfigRaw();
+  return toSafeAiModelConfig(config);
+};
+
+export const upsertAiModelConfig = async (adminId: string, payload: any) => {
+  const { provider, baseUrl, apiKey, model, isEnabled } = payload;
+
+  if (!provider || !Object.values(AiProvider).includes(provider)) {
+    throw new Error('A valid provider is required.');
+  }
+  if (!baseUrl?.trim()) {
+    throw new Error('Base URL is required.');
+  }
+  if (!model?.trim()) {
+    throw new Error('Model name is required.');
+  }
+
+  const existing = await AiModelConfig.findOne();
+
+  if (!existing && !apiKey?.trim()) {
+    throw new Error('API key is required.');
+  }
+
+  const update = {
+    provider,
+    baseUrl: baseUrl.trim(),
+    modelName: model.trim(),
+    isEnabled: isEnabled !== false,
+    updatedBy: adminId,
+    ...(apiKey?.trim() ? { apiKey: apiKey.trim() } : {}),
+  };
+
+  const saved = existing
+    ? await AiModelConfig.findByIdAndUpdate(existing._id, update, { new: true })
+    : await AiModelConfig.create(update);
+
+  return toSafeAiModelConfig(saved);
 };

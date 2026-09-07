@@ -33,7 +33,7 @@ import AdvisorStudents from './pages/advisor/AdvisorStudents';
 
 import AdminUniversities from './pages/admin/AdminUniversities';
 import AdminCourses from './pages/admin/AdminCourses';
-import { AdminSettings } from './pages/admin/StubPages';
+import AdminAiModelConfig from './pages/admin/AdminAiModelConfig';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import {
   RequireInterviewCompleted,
@@ -77,7 +77,7 @@ function App() {
             <Route path="applications" element={<AdminApplications />} />
             <Route path="universities" element={<AdminUniversities />} />
             <Route path="courses" element={<AdminCourses />} />
-            <Route path="settings" element={<AdminSettings />} />
+            <Route path="settings" element={<AdminAiModelConfig />} />
           </Route>
         </Route>
 

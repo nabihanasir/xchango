@@ -19,5 +19,7 @@ router.get('/mappings', adminController.getCourseMappings);
 router.post('/mappings', adminController.addCourseMapping);
 router.post('/universities', adminController.addUniversity);
 router.post('/courses', adminController.addCourse);
+router.get('/ai-model-config', adminController.getAiModelConfig);
+router.put('/ai-model-config', adminController.updateAiModelConfig);
 
 export default router;
