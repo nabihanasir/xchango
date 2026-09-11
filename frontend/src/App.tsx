@@ -11,8 +11,10 @@ import UniversityProgrammes from './pages/dashboard/UniversityProgrammes';
 import StudentApplicationsPage from './pages/dashboard/StudentApplicationsPage';
 import StudentDocuments from './pages/dashboard/StudentDocuments';
 import Communicate from './pages/dashboard/Communicate';
+import OnlineClasses from './pages/dashboard/OnlineClasses';
 import CourseEquivalencyBrowse from './pages/dashboard/CourseEquivalencyBrowse';
 import CourseEquivalencyRequests from './pages/dashboard/CourseEquivalencyRequests';
+import StudentResults from './pages/dashboard/StudentResults';
 import StudentProfile from './pages/dashboard/StudentProfile';
 import ApplicationWorkflowPage from './pages/dashboard/ApplicationWorkflowPage';
 
@@ -29,10 +31,12 @@ import AdvisorProfile from './pages/advisor/AdvisorProfile';
 import AdvisorEquivalencyRequests from './pages/advisor/AdvisorEquivalencyRequests';
 import AdvisorEquivalencyRequestDetail from './pages/advisor/AdvisorEquivalencyRequestDetail';
 import AdvisorStudents from './pages/advisor/AdvisorStudents';
+import AdvisorResults from './pages/advisor/AdvisorResults';
 
 import AdminUniversities from './pages/admin/AdminUniversities';
 import AdminCourses from './pages/admin/AdminCourses';
-import { AdminSettings } from './pages/admin/StubPages';
+import AdminAiModelConfig from './pages/admin/AdminAiModelConfig';
+import AdminResults from './pages/admin/AdminResults';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import {
   RequireInterviewCompleted,
@@ -61,10 +65,12 @@ function App() {
             </Route>
             <Route path="applications/:id" element={<ApplicationWorkflowPage />} />
             <Route path="communicate" element={<Communicate />} />
+            <Route path="online-classes" element={<OnlineClasses />} />
             <Route element={<RequireInterviewCompleted />}>
               <Route path="equivalency/courses" element={<CourseEquivalencyBrowse />} />
               <Route path="equivalency/requests" element={<CourseEquivalencyRequests />} />
             </Route>
+            <Route path="results" element={<StudentResults />} />
           </Route>
         </Route>
 
@@ -75,7 +81,8 @@ function App() {
             <Route path="applications" element={<AdminApplications />} />
             <Route path="universities" element={<AdminUniversities />} />
             <Route path="courses" element={<AdminCourses />} />
-            <Route path="settings" element={<AdminSettings />} />
+            <Route path="results" element={<AdminResults />} />
+            <Route path="settings" element={<AdminAiModelConfig />} />
           </Route>
         </Route>
 
@@ -85,8 +92,10 @@ function App() {
             <Route path="applications" element={<AdvisorApplications />} />
             <Route path="requests" element={<AdvisorEquivalencyRequests />} />
             <Route path="requests/:id" element={<AdvisorEquivalencyRequestDetail />} />
+            <Route path="results" element={<AdvisorResults />} />
             <Route path="profile" element={<AdvisorProfile />} />
             <Route path="students" element={<AdvisorStudents />} />
+            <Route path="online-classes" element={<OnlineClasses />} />
             <Route path="communicate" element={<Communicate />} />
           </Route>
           <Route path="/student/documents" element={<Navigate to="/dashboard/documents" replace />} />
@@ -100,3 +109,6 @@ function App() {
 }
 
 export default App;
+
+
+

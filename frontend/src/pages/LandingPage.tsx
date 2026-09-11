@@ -1,21 +1,35 @@
-import About from '../components/About';
-import CTA from '../components/CTA';
-import Features from '../components/Features';
-import Hero from '../components/Hero';
 import Navbar from '../components/Navbar';
+import HeroBanner from '../components/landing/HeroBanner';
+import PillarNav from '../components/landing/PillarNav';
+import StatsBand from '../components/landing/StatsBand';
+import About from '../components/About';
+import Equivalency from '../components/landing/Equivalency';
 import Partners from '../components/Partners';
+import GlobalVision from '../components/landing/GlobalVision';
+import Tips from '../components/landing/Tips';
+import Faq from '../components/landing/Faq';
+import CTA from '../components/CTA';
+import SiteFooter from '../components/landing/SiteFooter';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,210,19,0.12),_transparent_24%),linear-gradient(180deg,_#f8fafc_0%,_#ffffff_45%,_#f8fafc_100%)]">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <main>
-        <Hero />
+        <HeroBanner />
+        {/* Highlight cards overlap the hero, then the page settles into the stats band */}
+        <PillarNav />
+        <StatsBand />
         <About />
+        <Equivalency />
+        {/* Student Exchange Programs — search is surfaced high, mirroring a program-finder */}
         <Partners />
-        <Features />
+        <GlobalVision />
+        <Tips />
+        <Faq />
         <CTA />
       </main>
+      <SiteFooter />
     </div>
   );
 }

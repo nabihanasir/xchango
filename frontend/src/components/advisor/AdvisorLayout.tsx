@@ -1,5 +1,5 @@
 import {
-  Home, FileText, User as UserIcon, ClipboardCheck, Users, MessageSquare
+  Home, FileText, User as UserIcon, ClipboardCheck, Users, MessageSquare, Video, GraduationCap
 } from 'lucide-react';
 import GlobalLayout from '../GlobalLayout';
 import { useAuth } from '../../context/AuthContext';
@@ -11,6 +11,9 @@ const AdvisorLayout = () => {
     { name: 'My Students',  path: '/advisor/students',     icon: Users },
     { name: 'Applications', path: '/advisor/applications', icon: FileText },
     { name: 'Equivalency Requests', path: '/advisor/requests', icon: ClipboardCheck },
+    { name: 'Results', path: '/advisor/results', icon: GraduationCap },
+    { name: 'Online Classes', path: '/advisor/online-classes', icon: Video },
+    { name: 'Messages', path: '/advisor/communicate', icon: MessageSquare },
     { name: 'Profile',      path: '/advisor/profile',      icon: UserIcon },
   ];
 
@@ -31,6 +34,7 @@ const AdvisorLayout = () => {
   return (
     <GlobalLayout 
       panelName="Advisor Panel"
+      role="advisor"
       navItems={navItems}
       userProfile={userProfile}
     />

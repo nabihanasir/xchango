@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import ensureDnsResolvers from './config/dns';
 import dotenv from 'dotenv';
 import User, { UserRole } from './models/User';
 import Country from './models/Country';
@@ -14,6 +15,7 @@ dotenv.config();
 
 const seed = async () => {
   try {
+    ensureDnsResolvers();
     await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/xchango');
     console.log('Connected to MongoDB for seeding...');
 
