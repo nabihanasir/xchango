@@ -294,137 +294,78 @@ export default function AdvisorEquivalencyRequestDetail() {
           const score = item.matchResult?.matchScore ?? 0;
 
           return (
-            <article key={item._id} className="glass-card rounded-[2rem] p-6 md:p-7">
-              <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-                <div className="flex-1 space-y-5">
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Host course</p>
-                      <h2 className="mt-3 text-xl font-black text-slate-800">
-                        {item.hostCourseId.code} · {getCourseTitle(item.hostCourseId)}
-                      </h2>
-                      <p className="mt-3 text-sm font-medium text-slate-500">
-                        {item.hostCourseId.creditHours} credit hours
-                      </p>
-                      <p className="mt-4 text-sm font-medium leading-7 text-slate-600">
-                        {item.hostCourseId.description || 'No description provided for this host course.'}
-                      </p>
-                    </div>
-
-                    <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Paired home course</p>
-                      <div className="mt-3 space-y-3">
-                        <input
-                          type="text"
-                          value={courseSearch}
-                          onChange={(event) => setCourseSearch(event.target.value)}
-                          placeholder="Search home courses..."
-                          className="w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
-                        />
-
-                        <select
-                          value={item.homeCourseId?._id || ''}
-                          onChange={(event) => void handleHomeCourseChange(item._id, event.target.value)}
-                          className="w-full rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
-                          disabled={!filteredHomeCourses.length}
-                        >
-                          <option value="" disabled>
-                            {filteredHomeCourses.length ? 'Select a home course' : 'No home courses available'}
-                          </option>
-                          {filteredHomeCourses.map((course) => (
-                            <option key={course._id} value={course._id}>
-                              {getCourseTitle(course)} · {course.creditHours} CH
-                            </option>
-                          ))}
-                        </select>
-
-                        {courseLoadError ? (
-                          <div className="rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                            {courseLoadError}
-                          </div>
-                        ) : null}
-
-                        {!filteredHomeCourses.length && !courseLoadError ? (
-                          <div className="rounded-[1.25rem] border border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-500">
-                            No home courses available. Contact admin.
-                          </div>
-                        ) : null}
-
-                        <div className="rounded-[1.25rem] bg-slate-50 p-4 text-sm font-medium text-slate-600">
-                          {item.homeCourseId ? (
-                            <div className="space-y-3">
-                              <div>
-                                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Selected course</p>
-                                <p className="mt-1 font-bold text-slate-700">{getCourseTitle(item.homeCourseId)}</p>
-                              </div>
-                              <div className="grid gap-3 md:grid-cols-2">
-                                <div>
-                                  <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Credit Hours</label>
-                                  <input
-                                    type="text"
-                                    readOnly
-                                    value={`${item.homeCourseId.creditHours}`}
-                                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Description</label>
-                                  <textarea
-                                    readOnly
-                                    value={item.homeCourseId.description || 'No description provided.'}
-                                    className="mt-2 min-h-[96px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium leading-6 text-slate-600"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            'Choose the equivalent home course before running the AI review.'
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)]">
-                    <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Course decision</p>
-                      <div className="mt-4 grid gap-2">
-                        {(['approved', 'rejected', 'pending'] as ItemStatus[]).map((status) => (
-                          <button
-                            key={status}
-                            type="button"
-                            onClick={() => setStatusDrafts((current) => ({ ...current, [item._id]: status }))}
-                            className={`rounded-[1rem] px-4 py-3 text-left text-sm font-bold capitalize transition ${
-                              statusDrafts[item._id] === status
-                                ? getItemStatusClasses(status)
-                                : 'border border-slate-200 bg-white text-slate-500 hover:border-slate-300'
-                            }`}
-                          >
-                            {status}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                      <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Per-course advisor comment</label>
-                      <textarea
-                        value={commentDrafts[item._id] || ''}
-                        onChange={(event) => setCommentDrafts((current) => ({ ...current, [item._id]: event.target.value }))}
-                        rows={3}
-                        className="mt-3 w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
-                        placeholder="Optional feedback for this specific course pair."
-                      />
-                    </div>
-                  </div>
+            <article key={item._id} className="glass-card rounded-[2rem] p-6 md:p-7 space-y-5">
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Host course</p>
+                  <h2 className="mt-3 text-xl font-black text-slate-800">
+                    {item.hostCourseId.code} · {getCourseTitle(item.hostCourseId)}
+                  </h2>
+                  <p className="mt-3 text-sm font-medium text-slate-500">
+                    {item.hostCourseId.creditHours} credit hours
+                  </p>
+                  <p className="mt-4 text-sm font-medium leading-7 text-slate-600">
+                    {item.hostCourseId.description || 'No description provided for this host course.'}
+                  </p>
                 </div>
 
-                <div className="w-full max-w-[260px] space-y-4">
-                  <div className={`rounded-[1.5rem] px-5 py-4 ${item.matchResult ? getScoreBadgeClasses(score) : 'border border-dashed border-slate-300 bg-white text-slate-500'}`}>
+                <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Paired home course</p>
+                  <div className="mt-3 space-y-3">
+                    <input
+                      type="text"
+                      value={courseSearch}
+                      onChange={(event) => setCourseSearch(event.target.value)}
+                      placeholder="Search home courses..."
+                      className="w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
+                    />
+
+                    <select
+                      value={item.homeCourseId?._id || ''}
+                      onChange={(event) => void handleHomeCourseChange(item._id, event.target.value)}
+                      className="w-full rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
+                      disabled={!filteredHomeCourses.length}
+                    >
+                      <option value="" disabled>
+                        {filteredHomeCourses.length ? 'Select a home course' : 'No home courses available'}
+                      </option>
+                      {filteredHomeCourses.map((course) => (
+                        <option key={course._id} value={course._id}>
+                          {getCourseTitle(course)} · {course.creditHours} CH
+                        </option>
+                      ))}
+                    </select>
+
+                    {courseLoadError ? (
+                      <div className="rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                        {courseLoadError}
+                      </div>
+                    ) : null}
+
+                    {!filteredHomeCourses.length && !courseLoadError ? (
+                      <div className="rounded-[1.25rem] border border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-500">
+                        No home courses available. Contact admin.
+                      </div>
+                    ) : null}
+
+                    {item.homeCourseId ? (
+                      <p className="text-sm font-medium leading-6 text-slate-500">
+                        {item.homeCourseId.creditHours} credit hours · {item.homeCourseId.description || 'No description provided.'}
+                      </p>
+                    ) : (
+                      <p className="text-sm font-medium text-slate-400">Choose the equivalent home course before running the AI review.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+                <div className={`flex flex-col gap-4 rounded-[1.5rem] px-5 py-4 ${item.matchResult ? getScoreBadgeClasses(score) : 'border border-dashed border-slate-300 bg-white text-slate-500'}`}>
+                  <div>
                     <p className="text-[11px] font-bold uppercase tracking-[0.25em]">AI Match Score</p>
-                    <p className="mt-3 text-4xl font-black">{item.matchResult ? `${score}/100` : '--'}</p>
+                    <p className="mt-2 text-3xl font-black">{item.matchResult ? `${score}/100` : '--'}</p>
                     {item.matchResult ? (
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/60">
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/60">
                         <div className={`h-full rounded-full ${getScoreTrackClasses(score)}`} style={{ width: `${score}%` }} />
                       </div>
                     ) : null}
@@ -441,20 +382,53 @@ export default function AdvisorEquivalencyRequestDetail() {
                   </Button>
 
                   {item.aiMatchStatus === 'failed' ? (
-                    <div className="rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+                    <div className="rounded-[1.25rem] border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
                       <div className="flex items-start gap-2">
-                        <AlertCircle className="mt-0.5 h-4 w-4" />
+                        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                         <div>
                           <p className="font-bold">AI match failed</p>
                           <p className="mt-1">{item.aiMatchError || 'Unknown matching error.'}</p>
-                          <button type="button" onClick={() => void handleRunMatch(item._id)} className="mt-3 inline-flex items-center text-sm font-bold text-red-700 underline">
-                            <RefreshCcw className="mr-2 h-4 w-4" />
+                          <button type="button" onClick={() => void handleRunMatch(item._id)} className="mt-2 inline-flex items-center font-bold text-red-700 underline">
+                            <RefreshCcw className="mr-1.5 h-3.5 w-3.5" />
                             Retry
                           </button>
                         </div>
                       </div>
                     </div>
                   ) : null}
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Course decision</p>
+                    <div className="mt-3 flex gap-2">
+                      {(['approved', 'rejected', 'pending'] as ItemStatus[]).map((status) => (
+                        <button
+                          key={status}
+                          type="button"
+                          onClick={() => setStatusDrafts((current) => ({ ...current, [item._id]: status }))}
+                          className={`flex-1 rounded-[1rem] px-3 py-2.5 text-center text-sm font-bold capitalize transition ${
+                            statusDrafts[item._id] === status
+                              ? getItemStatusClasses(status)
+                              : 'border border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                          }`}
+                        >
+                          {status}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                    <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Per-course advisor comment</label>
+                    <textarea
+                      value={commentDrafts[item._id] || ''}
+                      onChange={(event) => setCommentDrafts((current) => ({ ...current, [item._id]: event.target.value }))}
+                      rows={2}
+                      className="mt-3 w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
+                      placeholder="Optional feedback for this specific course pair."
+                    />
+                  </div>
                 </div>
               </div>
 
