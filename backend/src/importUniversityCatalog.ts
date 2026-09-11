@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import ensureDnsResolvers from './config/dns';
 import { PDFParse } from 'pdf-parse';
 import Country from './models/Country';
 import University from './models/University';
@@ -219,6 +220,8 @@ const main = async () => {
   if (!fs.existsSync(pdfPath)) {
     throw new Error(`PDF file not found at ${pdfPath}`);
   }
+
+  ensureDnsResolvers();
 
   await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/xchango');
 

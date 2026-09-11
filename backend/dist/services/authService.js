@@ -42,6 +42,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const crypto_1 = __importDefault(require("crypto"));
 const User_1 = __importStar(require("../models/User"));
 const AppError_1 = require("../errors/AppError");
+const logger_1 = require("../utils/logger");
 const generateToken = (id, role) => {
     return jsonwebtoken_1.default.sign({ id, role }, process.env.JWT_SECRET || 'secret', {
         expiresIn: '30d',
@@ -66,15 +67,26 @@ const registerUser = async (userData) => {
         throw new AppError_1.ValidationError('Password is too short', 'The password must be at least 8 characters long.', 'Please choose a stronger password with at least 8 characters.', 'PASSWORD_TOO_SHORT');
     }
     const normalizedEmail = email.trim().toLowerCase();
-    let userExists;
+    const normalizedSapId = sapId.trim();
+    let existingUser;
     try {
-        userExists = await User_1.default.findOne({ email: normalizedEmail });
+        existingUser = await User_1.default.findOne({
+            $or: [{ email: normalizedEmail }, { sapId: normalizedSapId }],
+        });
     }
-    catch {
+    catch (error) {
+        logger_1.logger.error('Registration lookup failed', {
+            code: 'USER_LOOKUP_FAILED',
+            email: normalizedEmail,
+            cause: error instanceof Error ? error.message : String(error),
+        });
         throw new AppError_1.DatabaseError('Unable to check existing account', 'The system could not verify whether the email is already registered.', 'Please try again in a moment.', 'USER_LOOKUP_FAILED');
     }
-    if (userExists) {
+    if (existingUser?.email === normalizedEmail) {
         throw new AppError_1.ValidationError('Account already exists', 'A user is already registered with the provided email address.', 'Please log in with that account or use a different email address.', 'USER_ALREADY_EXISTS');
+    }
+    if (existingUser) {
+        throw new AppError_1.ValidationError('SAP ID already registered', 'Another account is already using the provided SAP ID.', 'Please double-check your SAP ID, or contact support if you believe this is an error.', 'SAP_ID_ALREADY_EXISTS');
     }
     const salt = await bcryptjs_1.default.genSalt(10);
     const hashedPassword = await bcryptjs_1.default.hash(password, salt);
@@ -86,11 +98,19 @@ const registerUser = async (userData) => {
             password: hashedPassword,
             role: normalizedRole,
             phone: phone.trim(),
-            sapId: sapId.trim(),
+            sapId: normalizedSapId,
         });
     }
-    catch {
-        throw new AppError_1.DatabaseError('Unable to create account', 'The database could not save the new user record.', 'Please try again shortly. If the issue persists, contact support.', 'USER_CREATION_FAILED');
+    catch (error) {
+        // Surface the underlying failure so errorMiddleware can classify it (duplicate
+        // keys, schema validation, cast errors). Collapsing everything into a generic
+        // DatabaseError here hid the real cause and masked recoverable 400s as 500s.
+        logger_1.logger.error('Registration insert failed', {
+            code: 'USER_CREATION_FAILED',
+            email: normalizedEmail,
+            cause: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
     }
     return {
         _id: user._id,

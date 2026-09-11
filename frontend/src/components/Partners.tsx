@@ -1,6 +1,7 @@
 import { ChevronDown, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { partnerUniversities } from '../data/rioContent';
+import SectionHeading from './landing/SectionHeading';
 
 export default function Partners() {
   const [expandedId, setExpandedId] = useState<string | null>(partnerUniversities[0]?.id ?? null);
@@ -23,21 +24,15 @@ export default function Partners() {
   const selectedPartner = partnerUniversities.find((partner) => partner.id === selectedId) ?? null;
 
   return (
-    <section id="partners" className="bg-slate-950/[0.02] px-4 py-20 sm:px-6 lg:px-8">
+    <section id="exchange" className="scroll-mt-24 bg-light-color px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.32em] text-yellow-default">Partner Universities</p>
-            <h2 className="mt-4 text-3xl font-black tracking-tight text-head-text sm:text-4xl">
-              Explore international partner pathways curated for Riphah students
-            </h2>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600">
-              These featured universities reflect the partner and program data provided for the collaboration experience,
-              with expandable course lists and quick discovery tools for students exploring the best-fit pathway.
-            </p>
-          </div>
+        <SectionHeading eyebrow="Mobility" title="Student Exchange Programs">
+          Each partner university below has a standing agreement with Riphah covering recognised credit and
+          named academic contacts on both sides. Search the catalogue to find a best-fit pathway.
+        </SectionHeading>
 
-          <label className="relative block w-full max-w-md">
+        <div className="mt-12 flex justify-center">
+          <label className="relative block w-full max-w-xl">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -49,7 +44,7 @@ export default function Partners() {
           </label>
         </div>
 
-        <div className="mt-10 grid gap-6 xl:grid-cols-3">
+        <div className="mt-12 grid gap-6 xl:grid-cols-3">
           {filteredPartners.map((partner) => {
             const expanded = expandedId === partner.id;
 

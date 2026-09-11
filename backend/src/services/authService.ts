@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import User, { IUser, UserRole } from '../models/User';
 import { AuthenticationError, DatabaseError, ValidationError } from '../errors/AppError';
+import { logger } from '../utils/logger';
 
 const generateToken = (id: string, role: string) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET || 'secret', {
@@ -60,11 +61,20 @@ export const registerUser = async (userData: any) => {
   }
 
   const normalizedEmail = email.trim().toLowerCase();
+  const normalizedSapId = sapId.trim();
 
-  let userExists;
+  let existingUser;
   try {
-    userExists = await User.findOne({ email: normalizedEmail });
-  } catch {
+    existingUser = await User.findOne({
+      $or: [{ email: normalizedEmail }, { sapId: normalizedSapId }],
+    });
+  } catch (error) {
+    logger.error('Registration lookup failed', {
+      code: 'USER_LOOKUP_FAILED',
+      email: normalizedEmail,
+      cause: error instanceof Error ? error.message : String(error),
+    });
+
     throw new DatabaseError(
       'Unable to check existing account',
       'The system could not verify whether the email is already registered.',
@@ -73,12 +83,21 @@ export const registerUser = async (userData: any) => {
     );
   }
 
-  if (userExists) {
+  if (existingUser?.email === normalizedEmail) {
     throw new ValidationError(
       'Account already exists',
       'A user is already registered with the provided email address.',
       'Please log in with that account or use a different email address.',
       'USER_ALREADY_EXISTS',
+    );
+  }
+
+  if (existingUser) {
+    throw new ValidationError(
+      'SAP ID already registered',
+      'Another account is already using the provided SAP ID.',
+      'Please double-check your SAP ID, or contact support if you believe this is an error.',
+      'SAP_ID_ALREADY_EXISTS',
     );
   }
 
@@ -93,15 +112,19 @@ export const registerUser = async (userData: any) => {
       password: hashedPassword,
       role: normalizedRole,
       phone: phone.trim(),
-      sapId: sapId.trim(),
+      sapId: normalizedSapId,
     });
-  } catch {
-    throw new DatabaseError(
-      'Unable to create account',
-      'The database could not save the new user record.',
-      'Please try again shortly. If the issue persists, contact support.',
-      'USER_CREATION_FAILED',
-    );
+  } catch (error) {
+    // Surface the underlying failure so errorMiddleware can classify it (duplicate
+    // keys, schema validation, cast errors). Collapsing everything into a generic
+    // DatabaseError here hid the real cause and masked recoverable 400s as 500s.
+    logger.error('Registration insert failed', {
+      code: 'USER_CREATION_FAILED',
+      email: normalizedEmail,
+      cause: error instanceof Error ? error.message : String(error),
+    });
+
+    throw error;
   }
 
   return {

@@ -4,6 +4,7 @@ import {
   Menu, X, Bell, ChevronRight, LogOut
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { roleThemes, type RoleThemeKey } from '../lib/roleTheme';
 
 interface NavItem {
   name: string;
@@ -21,9 +22,12 @@ interface GlobalLayoutProps {
   panelName: string;
   navItems: NavItem[];
   userProfile: UserProfile;
+  /** Drives the shell's accent colour. Passed by each role's layout. */
+  role: RoleThemeKey;
 }
 
-const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) => {
+const GlobalLayout = ({ panelName, navItems, userProfile, role }: GlobalLayoutProps) => {
+  const theme = roleThemes[role];
   const location = useLocation();
   const { logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
@@ -33,7 +37,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) =
     <div className="flex h-screen w-screen overflow-hidden font-sans relative bg-slate-100/50">
       {/* Dynamic Background Mesh */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent-yellow/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+        <div className={`absolute top-0 right-0 w-[800px] h-[800px] ${theme.mesh} rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2`} />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-dark-blue/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3" />
       </div>
 
@@ -51,7 +55,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) =
                 <span className="text-white font-black text-2xl tracking-tight leading-tight">
                   Xchango
                 </span>
-                <span className="text-accent-yellow/80 text-[11px] uppercase font-bold tracking-widest mt-1">
+                <span className={`${theme.panelLabel} text-[11px] uppercase font-bold tracking-widest mt-1`}>
                   {panelName}
                 </span>
               </div>
@@ -76,16 +80,16 @@ const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) =
                 to={item.path}
                 className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 relative group ${
                   isActive
-                    ? 'bg-accent-yellow/10 text-accent-yellow shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
+                    ? theme.navActive
                     : 'text-white/50 hover:text-white hover:bg-white/5'
                 } ${collapsed ? 'justify-center' : ''}`}
                 title={collapsed ? item.name : undefined}
               >
                 {isActive && (
-                  <div className="absolute left-0 w-1.5 h-8 bg-accent-yellow rounded-r-full shadow-[0_0_10px_rgba(251,210,19,0.5)]" />
+                  <div className={`absolute left-0 w-1.5 h-8 rounded-r-full ${theme.navIndicator}`} />
                 )}
                 
-                <Icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(251,210,19,0.3)]' : 'group-hover:scale-110'}`} />
+                <Icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-300 ${isActive ? `scale-110 ${theme.navActiveIconGlow}` : 'group-hover:scale-110'}`} />
                 
                 {!collapsed && (
                   <span className={`font-semibold text-[15px] ${isActive ? 'text-white' : ''}`}>
@@ -94,7 +98,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) =
                 )}
                 
                 {!collapsed && isActive && (
-                  <ChevronRight className="h-4 w-4 ml-auto text-accent-yellow transition-transform" />
+                  <ChevronRight className={`h-4 w-4 ml-auto ${theme.navChevron} transition-transform`} />
                 )}
               </Link>
             );
@@ -137,7 +141,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) =
            <Link to={navItems[0]?.path || '/'} className="flex items-center gap-4">
             <div className="flex flex-col">
               <span className="text-white font-black text-xl tracking-tight leading-tight">Xchango</span>
-              <span className="text-accent-yellow/80 text-[10px] uppercase font-bold tracking-widest">{panelName}</span>
+              <span className={`${theme.panelLabel} text-[10px] uppercase font-bold tracking-widest`}>{panelName}</span>
             </div>
           </Link>
           <button onClick={() => setIsMobileMenuOpen(false)} className="text-white/50 hover:text-white p-2 bg-white/5 rounded-xl transition-colors">
@@ -154,11 +158,11 @@ const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) =
                  to={item.path}
                  onClick={() => setIsMobileMenuOpen(false)}
                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl font-semibold transition-all ${
-                   isActive ? 'bg-accent-yellow/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]' : 'text-white/50 hover:text-white hover:bg-white/5'
+                   isActive ? theme.navActiveMobile : 'text-white/50 hover:text-white hover:bg-white/5'
                  }`}
                >
-                 {isActive && <div className="absolute left-0 w-1.5 h-8 bg-accent-yellow rounded-r-full shadow-[0_0_10px_rgba(251,210,19,0.5)]" />}
-                 <Icon className={`h-5 w-5 ${isActive ? 'text-accent-yellow drop-shadow-[0_0_8px_rgba(251,210,19,0.3)]' : ''}`} />
+                 {isActive && <div className={`absolute left-0 w-1.5 h-8 rounded-r-full ${theme.navIndicator}`} />}
+                 <Icon className={`h-5 w-5 ${isActive ? theme.navActiveIconMobile : ''}`} />
                  <span>{item.name}</span>
                </Link>
              );
@@ -195,12 +199,12 @@ const GlobalLayout = ({ panelName, navItems, userProfile }: GlobalLayoutProps) =
             <div className="h-8 w-px bg-slate-200 hidden sm:block" />
             
             <div className="flex items-center gap-3 bg-white border border-slate-100 py-1.5 pl-1.5 pr-5 rounded-full shadow-sm hover:shadow-soft transition-all cursor-pointer select-none group">
-              <div className="bg-gradient-to-br from-dark-blue to-[#1A1558] h-11 w-11 rounded-full flex items-center justify-center font-bold text-white text-[13px] ring-2 ring-white shadow-md group-hover:scale-105 transition-transform">
+              <div className={`bg-gradient-to-br ${theme.avatar} h-11 w-11 rounded-full flex items-center justify-center font-bold text-white text-[13px] ring-2 ring-white shadow-md group-hover:scale-105 transition-transform`}>
                 {userProfile.initials}
               </div>
               <div className="hidden sm:block">
                 <p className="text-[14px] font-bold text-slate-800 leading-none group-hover:text-dark-blue transition-colors">{userProfile.name}</p>
-                <p className="text-[11px] font-bold text-accent-yellow uppercase tracking-widest mt-1.5 leading-none">{userProfile.role}</p>
+                <p className={`text-[11px] font-bold ${theme.roleCaption} uppercase tracking-widest mt-1.5 leading-none`}>{userProfile.role}</p>
               </div>
             </div>
           </div>

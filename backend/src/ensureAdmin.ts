@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import ensureDnsResolvers from './config/dns';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import User, { UserRole } from './models/User';
@@ -13,6 +14,7 @@ const ADMIN_SAP_ID = 'ADM0001';
 
 const ensureAdmin = async () => {
   try {
+    ensureDnsResolvers();
     await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/xchango');
 
     const salt = await bcrypt.genSalt(10);

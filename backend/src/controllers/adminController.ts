@@ -53,3 +53,13 @@ export const getCourseMappings = async (req: Request, res: Response) => {
   const mappings = await adminService.getAllMappings();
   sendResponse(res, 200, 'Course mappings fetched', mappings);
 };
+
+export const getAiModelConfig = async (_req: Request, res: Response) => {
+  const config = await adminService.getAiModelConfig();
+  sendResponse(res, 200, 'AI model configuration fetched', config);
+};
+
+export const updateAiModelConfig = async (req: any, res: Response) => {
+  const config = await adminService.upsertAiModelConfig(req.user._id.toString(), req.body);
+  sendResponse(res, 200, 'AI model configuration saved', config);
+};
