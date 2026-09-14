@@ -44,7 +44,7 @@ export default function AdvisorEquivalencyRequests() {
 
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#060424] via-[#0b0a4a] to-[#1A1558] p-8 text-white shadow-2xl shadow-dark-blue/20">
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-700 p-8 text-white shadow-2xl shadow-emerald-950/20">
         <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-accent-yellow/10 blur-[90px]" />
         <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -124,7 +124,7 @@ export default function AdvisorEquivalencyRequests() {
 
                   <Link
                     to={`/advisor/requests/${request._id}`}
-                    className="inline-flex items-center rounded-[1.25rem] bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#120d52]"
+                    className="inline-flex items-center rounded-[1.25rem] bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800"
                   >
                     Open request
                     <ArrowRight className="ml-2 h-4 w-4" />

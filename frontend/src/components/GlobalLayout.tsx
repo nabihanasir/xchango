@@ -43,7 +43,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role }: GlobalLayoutPr
 
       {/* ── Desktop Sidebar ── */}
       <aside
-        className={`hidden lg:flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-30 m-4 rounded-[2rem] glass-sidebar ${
+        className={`hidden lg:flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-30 m-4 rounded-[2rem] glass-sidebar ${theme.sidebarBg} ${
           collapsed ? 'w-24' : 'w-72'
         }`}
       >
@@ -133,9 +133,9 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role }: GlobalLayoutPr
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 w-80 bg-[#060424] z-[101] lg:hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
+        className={`fixed inset-y-0 left-0 w-80 ${theme.sidebarBg} z-[101] lg:hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        } border-r border-white/10 shadow-2xl shadow-dark-blue`}
+        } border-r border-white/10 shadow-2xl ${theme.sidebarShadow}`}
       >
         <div className="h-28 flex items-center justify-between px-8 border-b border-white/10">
            <Link to={navItems[0]?.path || '/'} className="flex items-center gap-4">

@@ -51,8 +51,8 @@ export default function AdvisorStudents() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#081028] via-[#102b52] to-[#19648b] p-8 text-white shadow-2xl shadow-sky-950/10 md:p-10">
-        <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-cyan-300/15 blur-[80px]" />
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-600 p-8 text-white shadow-2xl shadow-emerald-950/10 md:p-10">
+        <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-emerald-300/15 blur-[80px]" />
         <div className="relative z-10 max-w-4xl">
           <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">
             My Students
@@ -82,7 +82,7 @@ export default function AdvisorStudents() {
           </div>
         ) : students.length === 0 ? (
           <div className="glass-card rounded-[2rem] px-6 py-16 text-center text-slate-500">
-            <h3 className="text-xl font-bold text-dark-blue mb-2">No Students Assigned</h3>
+            <h3 className="text-xl font-bold text-emerald-700 mb-2">No Students Assigned</h3>
             <p>You have not been assigned any students yet. They will appear here once assigned by administrators.</p>
           </div>
         ) : (
@@ -93,7 +93,7 @@ export default function AdvisorStudents() {
                 className="glass-card flex border border-light-color/40 flex-col overflow-hidden rounded-[2rem] transition-shadow hover:shadow-lg dark:hover:shadow-white/5"
               >
                 <div className="border-b border-light-color/30 bg-slate-50/50 p-6">
-                  <h3 className="text-xl font-bold text-dark-blue truncate">
+                  <h3 className="text-xl font-bold text-emerald-700 truncate">
                     {student.basicInfo?.fullName || 'Unnamed Student'}
                   </h3>
                   <p className="mt-1 text-sm font-medium text-body-text truncate">
@@ -126,7 +126,7 @@ export default function AdvisorStudents() {
                     <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Interests</p>
                     <div className="flex flex-wrap gap-2">
                       {student.preferences?.preferredCountries?.slice(0, 3).map((country) => (
-                        <span key={country} className="rounded-full bg-dark-blue/5 border border-dark-blue/10 px-3 py-1 text-xs font-semibold text-dark-blue">
+                        <span key={country} className="rounded-full bg-emerald-700/5 border border-emerald-700/10 px-3 py-1 text-xs font-semibold text-emerald-700">
                           {country}
                         </span>
                       ))}

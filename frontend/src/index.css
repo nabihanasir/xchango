@@ -47,7 +47,7 @@
     @apply bg-white border border-slate-200/60 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300;
   }
   .glass-sidebar {
-    @apply bg-[#060424]/95 backdrop-blur-2xl border-r border-white/10 shadow-[4px_0_24px_rgba(4,2,20,0.2)];
+    @apply backdrop-blur-2xl border-r border-white/10 shadow-[4px_0_24px_rgba(4,2,20,0.2)];
   }
   .text-gradient {
     @apply text-transparent bg-clip-text bg-gradient-to-r from-accent-yellow to-yellow-default;

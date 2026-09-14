@@ -232,7 +232,7 @@ export default function AdvisorEquivalencyRequestDetail() {
 
   return (
     <div className="space-y-8">
-      <Link to="/advisor/requests" className="inline-flex items-center text-sm font-bold text-dark-blue transition hover:text-[#120d52]">
+      <Link to="/advisor/requests" className="inline-flex items-center text-sm font-bold text-emerald-700 transition hover:text-emerald-900">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to advisor queue
       </Link>
@@ -295,10 +295,10 @@ export default function AdvisorEquivalencyRequestDetail() {
 
           return (
             <article key={item._id} className="glass-card rounded-[2rem] p-6 md:p-7 space-y-5">
-              <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Host course</p>
-                  <h2 className="mt-3 text-xl font-black text-slate-800">
+                  <h2 className="mt-3 text-xs font-bold text-slate-800">
                     {item.hostCourseId.code} · {getCourseTitle(item.hostCourseId)}
                   </h2>
                   <p className="mt-3 text-sm font-medium text-slate-500">
@@ -309,21 +309,22 @@ export default function AdvisorEquivalencyRequestDetail() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Paired home course</p>
-                  <div className="mt-3 space-y-3">
+                <div className="flex flex-col rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Paired home course</p>
+
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                     <input
                       type="text"
                       value={courseSearch}
                       onChange={(event) => setCourseSearch(event.target.value)}
                       placeholder="Search home courses..."
-                      className="w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
+                      className="w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10 sm:w-2/5"
                     />
 
                     <select
                       value={item.homeCourseId?._id || ''}
                       onChange={(event) => void handleHomeCourseChange(item._id, event.target.value)}
-                      className="w-full rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
+                      className="w-full rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10 sm:flex-1"
                       disabled={!filteredHomeCourses.length}
                     >
                       <option value="" disabled>
@@ -335,27 +336,33 @@ export default function AdvisorEquivalencyRequestDetail() {
                         </option>
                       ))}
                     </select>
-
-                    {courseLoadError ? (
-                      <div className="rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                        {courseLoadError}
-                      </div>
-                    ) : null}
-
-                    {!filteredHomeCourses.length && !courseLoadError ? (
-                      <div className="rounded-[1.25rem] border border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-500">
-                        No home courses available. Contact admin.
-                      </div>
-                    ) : null}
-
-                    {item.homeCourseId ? (
-                      <p className="text-sm font-medium leading-6 text-slate-500">
-                        {item.homeCourseId.creditHours} credit hours · {item.homeCourseId.description || 'No description provided.'}
-                      </p>
-                    ) : (
-                      <p className="text-sm font-medium text-slate-400">Choose the equivalent home course before running the AI review.</p>
-                    )}
                   </div>
+
+                  {courseLoadError ? (
+                    <div className="mt-2 rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                      {courseLoadError}
+                    </div>
+                  ) : null}
+
+                  {!filteredHomeCourses.length && !courseLoadError ? (
+                    <div className="mt-2 rounded-[1.25rem] border border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-500">
+                      No home courses available. Contact admin.
+                    </div>
+                  ) : null}
+
+                  {item.homeCourseId ? (
+                    <>
+                      <h2 className="mt-3 text-xs font-bold text-slate-800">{getCourseTitle(item.homeCourseId)}</h2>
+                      <p className="mt-3 text-sm font-medium text-slate-500">
+                        {item.homeCourseId.creditHours} credit hours
+                      </p>
+                      <p className="mt-4 text-sm font-medium leading-7 text-slate-600">
+                        {item.homeCourseId.description || 'No description provided for this home course.'}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-4 text-sm font-medium text-slate-400">Choose the equivalent home course before running the AI review.</p>
+                  )}
                 </div>
               </div>
 
@@ -440,8 +447,8 @@ export default function AdvisorEquivalencyRequestDetail() {
                     className="flex w-full items-center justify-between gap-4 text-left"
                   >
                     <div>
-                      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">AI Reasoning</p>
-                      <p className="mt-2 text-base font-black text-slate-800">{item.matchResult.reasoning.summary}</p>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">AI Reasoning</p>
+                      <p className="mt-2 text-sm font-medium leading-6 text-slate-800">{item.matchResult.reasoning.summary}</p>
                     </div>
                     <ChevronDown className={`h-5 w-5 text-slate-500 transition ${isExpanded ? 'rotate-180' : ''}`} />
                   </button>
@@ -517,7 +524,7 @@ export default function AdvisorEquivalencyRequestDetail() {
               type="button"
               onClick={() => void handleSubmitItemDecisions()}
               disabled={isSaving}
-              className="inline-flex items-center rounded-[1.25rem] bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#120d52] disabled:opacity-60"
+              className="inline-flex items-center rounded-[1.25rem] bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60"
             >
               {isSaving ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               Save per-course decisions
