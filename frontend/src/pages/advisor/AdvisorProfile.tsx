@@ -47,16 +47,16 @@ export default function AdvisorProfile() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
       <div className="glass-card rounded-[2rem] p-8 shadow-md">
-        <h2 className="mb-8 text-2xl font-black text-dark-blue">My Profile</h2>
+        <h2 className="mb-8 text-2xl font-black text-emerald-700">My Profile</h2>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-dark-blue text-white">
+              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-emerald-700 text-white">
                 <User className="h-10 w-10" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-dark-blue">{profile?.userId.name || user?.name || 'Advisor'}</h3>
+                <h3 className="text-xl font-bold text-emerald-700">{profile?.userId.name || user?.name || 'Advisor'}</h3>
                 <p className="text-body-text">{profile?.designation || 'Advisor'}</p>
               </div>
             </div>
@@ -78,7 +78,7 @@ export default function AdvisorProfile() {
           </div>
 
           <div className="rounded-2xl border border-light-color/50 bg-slate-50 p-6">
-            <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-dark-blue">Advisor scope</h4>
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-emerald-700">Advisor scope</h4>
             <p className="text-sm leading-relaxed text-body-text">
               Your account can review only applications assigned by an admin and can access only the student profiles connected to those assigned applications.
             </p>

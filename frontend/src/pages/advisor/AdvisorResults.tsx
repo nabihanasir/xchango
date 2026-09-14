@@ -183,7 +183,7 @@ export default function AdvisorResults() {
                         href={resolveUploadUrl(item.result.resultFileUrl)}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-dark-blue"
+                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700"
                       >
                         <FileDown className="h-3.5 w-3.5" />
                         View current file
@@ -217,7 +217,7 @@ export default function AdvisorResults() {
                     type="button"
                     onClick={() => void handleSubmit(item.courseRequestItemId, 'published')}
                     disabled={isSavingDraft || isPublishing}
-                    className="inline-flex items-center rounded-[1.25rem] bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#120d52] disabled:opacity-60"
+                    className="inline-flex items-center rounded-[1.25rem] bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60"
                   >
                     {isPublishing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                     Publish to student

@@ -12,6 +12,10 @@
 export type RoleThemeKey = 'student' | 'advisor' | 'admin';
 
 export interface RoleTheme {
+  /** Sidebar panel background (desktop + mobile drawer). */
+  sidebarBg: string;
+  /** Shadow tint cast by the mobile drawer. */
+  sidebarShadow: string;
   /** Ambient blurred blob behind the shell. */
   mesh: string;
   /** "Student Panel" / "Advisor Panel" label under the wordmark. */
@@ -36,6 +40,8 @@ export interface RoleTheme {
 
 export const roleThemes: Record<RoleThemeKey, RoleTheme> = {
   student: {
+    sidebarBg: 'bg-[#060424]/95',
+    sidebarShadow: 'shadow-dark-blue',
     mesh: 'bg-accent-yellow/5',
     panelLabel: 'text-accent-yellow/80',
     navActive: 'bg-accent-yellow/10 text-accent-yellow shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
@@ -48,6 +54,8 @@ export const roleThemes: Record<RoleThemeKey, RoleTheme> = {
     avatar: 'from-dark-blue to-[#1A1558]',
   },
   advisor: {
+    sidebarBg: 'bg-[#03110c]/95',
+    sidebarShadow: 'shadow-emerald-950',
     mesh: 'bg-emerald-400/5',
     panelLabel: 'text-emerald-300/80',
     navActive: 'bg-emerald-400/10 text-emerald-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
@@ -60,6 +68,8 @@ export const roleThemes: Record<RoleThemeKey, RoleTheme> = {
     avatar: 'from-emerald-600 to-emerald-900',
   },
   admin: {
+    sidebarBg: 'bg-[#060424]/95',
+    sidebarShadow: 'shadow-dark-blue',
     mesh: 'bg-violet-400/5',
     panelLabel: 'text-violet-300/80',
     navActive: 'bg-violet-400/10 text-violet-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
