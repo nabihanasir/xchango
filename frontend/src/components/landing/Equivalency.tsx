@@ -6,16 +6,19 @@ const points = [
     icon: Scale,
     title: 'Credit transfer',
     body: 'Courses completed at a partner university are weighed against their Riphah counterparts so study abroad counts toward your degree.',
+    bg: '/illustrations/credit-transfer-bg.jpg',
   },
   {
     icon: FileCheck2,
     title: 'Transcript review',
     body: 'Upload a transcript and an advisor reviews each course against the home catalogue, recording the decision on your record.',
+    bg: '/illustrations/transcript-review-bg.jpg',
   },
   {
     icon: BadgeCheck,
     title: 'Formal recognition',
     body: 'Approved equivalencies are issued as a documented outcome you can carry into further study or employment.',
+    bg: '/illustrations/equivalency-recognition.jpg',
   },
 ];
 
@@ -37,19 +40,28 @@ export default function Equivalency() {
 
         {/* Three-up cards — what equivalency covers, read left to right */}
         <div className="mt-16 grid gap-6 md:grid-cols-3">
-          {points.map(({ icon: Icon, title, body }, index) => (
+          {points.map(({ icon: Icon, title, body, bg }, index) => (
             <article
               key={title}
-              className="group relative flex flex-col rounded-[2rem] border border-slate-200 bg-white p-7 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70"
+              className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-7 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70"
             >
-              <span className="text-[11px] font-black uppercase tracking-[0.28em] text-slate-300">
-                Step 0{index + 1}
-              </span>
-              <span className="mt-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-yellow/15 text-dark-blue transition group-hover:scale-105">
-                <Icon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-6 text-lg font-black text-dark-blue">{title}</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{body}</p>
+              <img
+                src={bg}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover object-top opacity-[0.09] transition duration-300 group-hover:opacity-[0.16]"
+              />
+              <div className="relative">
+                <span className="text-[11px] font-black uppercase tracking-[0.28em] text-black">
+                  Step 0{index + 1}
+                </span>
+                <span className="mt-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-yellow/15 text-dark-blue transition group-hover:scale-105">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <h3 className="mt-6 text-lg font-black text-dark-blue">{title}</h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600">{body}</p>
+              </div>
             </article>
           ))}
         </div>
