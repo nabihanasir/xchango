@@ -22,7 +22,20 @@ export const updateApplicationStatus = async (req: any, res: Response) => {
   sendResponse(res, 200, 'Application status updated', application);
 };
 
-export const getProfile = async (req: any, res: Response) => {
+export const updateProfile = async (req: any, res: Response) => {
+  const { name, designation, department, phone, bio, officeHours } = req.body ?? {};
+  const profile = await advisorService.updateAdvisorProfile(req.user._id, {
+    name,
+    designation,
+    department,
+    phone,
+    bio,
+    officeHours,
+  });
+  sendResponse(res, 200, 'Advisor profile updated', profile);
+};
+
+export const getProfile =async (req: any, res: Response) => {
   const profile = await advisorService.getAdvisorProfile(req.user._id);
   sendResponse(res, 200, 'Advisor profile fetched', profile);
 };

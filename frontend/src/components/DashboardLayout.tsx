@@ -19,10 +19,10 @@ const DashboardLayout = () => {
   }, []);
   const navItems = [
     { name: 'Dashboard',               path: '/dashboard',              icon: Home },
-    { name: 'Student Profile',         path: '/dashboard/profile',      icon: UserRoundCog },
-    { name: 'Documents',               path: '/dashboard/documents',    icon: FileText },
     { name: 'University & Programmes', path: '/dashboard/programmes',   icon: School },
+    { name: 'Student Profile',         path: '/dashboard/profile',      icon: UserRoundCog },
     { name: 'Your Application',        path: '/dashboard/applications', icon: FileText },
+    { name: 'Documents',               path: '/dashboard/documents',    icon: FileText },
     { name: 'Online Classes',          path: '/dashboard/online-classes', icon: Video },
     { name: 'Browse Equivalency',      path: '/dashboard/equivalency/courses', icon: BookOpenCheck },
     { name: 'My Equivalency Requests', path: '/dashboard/equivalency/requests', icon: ListChecks },
