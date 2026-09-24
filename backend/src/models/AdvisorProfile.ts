@@ -6,6 +6,9 @@ export interface IAdvisorProfile extends Document {
   department: string;
   assignedStudents: mongoose.Types.ObjectId[];
   experience: number;
+  phone?: string;
+  bio?: string;
+  officeHours?: string;
 }
 
 const AdvisorProfileSchema: Schema = new Schema(
@@ -15,6 +18,9 @@ const AdvisorProfileSchema: Schema = new Schema(
     department: { type: String, required: true },
     assignedStudents: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     experience: { type: Number },
+    phone: { type: String, trim: true, maxlength: 30 },
+    bio: { type: String, trim: true, maxlength: 1000 },
+    officeHours: { type: String, trim: true, maxlength: 200 },
   },
   { timestamps: true }
 );

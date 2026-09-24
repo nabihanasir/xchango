@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { MapPin, School, BookOpen, ChevronRight, Globe, Star, Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MapPin, School, BookOpen, ChevronRight, Globe, Star, Search, ArrowRight } from 'lucide-react';
 
 // Required static data based on requirements
 const COUNTRY_DATA = [
@@ -189,6 +190,16 @@ export default function UniversityProgrammes() {
                               </div>
                             ))}
                           </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                          <Link
+                            to="/dashboard/applications/new"
+                            className="inline-flex items-center gap-2 rounded-xl bg-dark-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5"
+                          >
+                            Start Application
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
                         </div>
                       </div>
                     </div>
