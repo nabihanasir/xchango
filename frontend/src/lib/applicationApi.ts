@@ -57,6 +57,8 @@ export const applicationApi = {
   ) => unwrap<WorkflowApplication>(apiClient.patch(`/applications/${applicationId}/schedule-interview`, payload)),
   completeInterview: (applicationId: string) =>
     unwrap<WorkflowApplication>(apiClient.patch(`/applications/${applicationId}/complete-interview`)),
+  recordInterviewDecision: (applicationId: string, payload: { recommended: boolean; notes?: string }) =>
+    unwrap<WorkflowApplication>(apiClient.patch(`/applications/${applicationId}/interview-decision`, payload)),
   uploadDocuments: async (applicationId: string, type: string, files: File[]) => {
     const formData = new FormData();
     formData.append('type', type);

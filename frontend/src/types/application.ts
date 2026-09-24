@@ -72,6 +72,12 @@ export interface WorkflowApplicationInterview {
   stakeholders: string[];
 }
 
+export interface WorkflowInterviewDecision {
+  recommended: boolean;
+  notes: string;
+  decidedAt: string;
+}
+
 export interface WorkflowApplication {
   _id: string;
   studentId: string | ApplicationUserSummary;
@@ -95,6 +101,7 @@ export interface WorkflowApplication {
   status: ApplicationStatus;
   interviewDate?: string;
   interview?: WorkflowApplicationInterview;
+  interviewDecision?: WorkflowInterviewDecision;
   documents: WorkflowApplicationDocument[];
   selectedCourses: WorkflowApplicationCourse[];
   aiRecommendations: WorkflowApplicationAIRecommendation[];
@@ -142,6 +149,51 @@ export const applicationStatusTone: Record<ApplicationStatus, string> = {
   COURSE_SELECTION_PENDING: 'bg-cyan-100 text-cyan-700',
   READY_FOR_SUBMISSION: 'bg-green-100 text-green-700',
 };
+
+/** Statuses in which the advisor has recommended the student, so the application may proceed. */
+export const recommendedApplicationStatuses: ApplicationStatus[] = [
+  'COURSE_REQUEST_ENABLED',
+  'SHORTLISTED',
+  'DOCUMENT_PENDING',
+  'COURSE_SELECTION_PENDING',
+  'READY_FOR_SUBMISSION',
+];
+
+type DecisionAwareApplication = Pick<WorkflowApplication, 'status' | 'interviewDecision'>;
+
+export const isAwaitingAdvisorDecision = (application: DecisionAwareApplication) =>
+  application.status === 'INTERVIEW_COMPLETED';
+
+export const isNotRecommended = (application: DecisionAwareApplication) =>
+  application.status === 'REJECTED' && application.interviewDecision?.recommended === false;
+
+const titleCaseStatus = (status: string) =>
+  status
+    .toLowerCase()
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+
+export const getApplicationStatusLabel = (application: DecisionAwareApplication) => {
+  if (isNotRecommended(application)) {
+    return 'Not recommended';
+  }
+
+  if (application.status === 'SHORTLISTED' && application.interviewDecision?.recommended) {
+    return 'Recommended';
+  }
+
+  if (isAwaitingAdvisorDecision(application)) {
+    return 'Awaiting advisor decision';
+  }
+
+  return titleCaseStatus(application.status);
+};
+
+export const getApplicationStatusTone = (application: DecisionAwareApplication) =>
+  isAwaitingAdvisorDecision(application)
+    ? 'bg-amber-100 text-amber-700'
+    : applicationStatusTone[application.status];
 
 export const getApplicationUserId = (
   user: string | ApplicationUserSummary | null | undefined
