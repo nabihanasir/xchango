@@ -2,41 +2,63 @@ import { useEffect, useState } from 'react';
 import { BookOpen, Globe2, Mail, Phone, UserRound } from 'lucide-react';
 import type { StudentBasicInfo, StudentPreferences } from '../../types/studentProfile';
 
+// The submit button lives at the bottom of the page (after the transcript) and targets this form by id.
+export const STUDENT_PROFILE_FORM_ID = 'student-profile-form';
+
+const MAX_SEMESTER = 8;
+
+const clampSemester = (value: number | string) => Math.min(MAX_SEMESTER, Math.max(0, Math.floor(Number(value)) || 0));
+
+const INTAKE_SEASONS = ['Spring', 'Fall'];
+const MIN_INTAKE_YEAR = 2023;
+
+const defaultIntakeYear = () => Math.max(MIN_INTAKE_YEAR, new Date().getFullYear());
+
+// The intake is stored as one string ("Fall 2026") but edited as a season plus a year.
+const parseIntake = (intake: string) => {
+  const match = intake.trim().match(/^(spring|fall)\s+(\d{4})$/i);
+  if (!match) {
+    return { intakeSeason: '', intakeYear: '' };
+  }
+  const season = INTAKE_SEASONS.find((option) => option.toLowerCase() === match[1].toLowerCase()) ?? '';
+  return { intakeSeason: season, intakeYear: match[2] };
+};
+
+const buildIntake = (season: string, year: string) => {
+  const numericYear = Math.floor(Number(year));
+  if (!season || !numericYear) {
+    return '';
+  }
+  return `${season} ${Math.max(MIN_INTAKE_YEAR, numericYear)}`;
+};
+
+const buildFormState = (basicInfo: StudentBasicInfo, preferences: StudentPreferences) => ({
+  basicInfo,
+  preferences: {
+    ...preferences,
+    preferredCountriesText: preferences.preferredCountries.join(', '),
+    ...parseIntake(preferences.intake),
+  },
+});
+
 interface StudentProfileFormProps {
   basicInfo: StudentBasicInfo;
   preferences: StudentPreferences;
-  saving: boolean;
-  errorMessage?: string;
   onSubmit: (payload: { basicInfo: StudentBasicInfo; preferences: StudentPreferences }) => Promise<void>;
 }
 
 const inputClassName =
   'w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-dark-blue focus:ring-4 focus:ring-dark-blue/10';
 
-export default function StudentProfileForm({
-  basicInfo,
-  preferences,
-  saving,
-  errorMessage,
-  onSubmit,
-}: StudentProfileFormProps) {
-  const [formState, setFormState] = useState({
-    basicInfo,
-    preferences: {
-      ...preferences,
-      preferredCountriesText: preferences.preferredCountries.join(', '),
-    },
-  });
+export default function StudentProfileForm({ basicInfo, preferences, onSubmit }: StudentProfileFormProps) {
+  const [formState, setFormState] = useState(() => buildFormState(basicInfo, preferences));
 
   useEffect(() => {
-    setFormState({
-      basicInfo,
-      preferences: {
-        ...preferences,
-        preferredCountriesText: preferences.preferredCountries.join(', '),
-      },
-    });
+    setFormState(buildFormState(basicInfo, preferences));
   }, [basicInfo, preferences]);
+
+  const intakeIncomplete =
+    Boolean(formState.preferences.intakeSeason) !== Boolean(formState.preferences.intakeYear);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,7 +66,7 @@ export default function StudentProfileForm({
     await onSubmit({
       basicInfo: {
         ...formState.basicInfo,
-        semester: Number(formState.basicInfo.semester) || 0,
+        semester: clampSemester(formState.basicInfo.semester),
       },
       preferences: {
         preferredCountries: formState.preferences.preferredCountriesText
@@ -53,7 +75,7 @@ export default function StudentProfileForm({
           .filter(Boolean),
         degreeLevel: formState.preferences.degreeLevel,
         fieldOfInterest: formState.preferences.fieldOfInterest,
-        intake: formState.preferences.intake,
+        intake: buildIntake(formState.preferences.intakeSeason, formState.preferences.intakeYear),
       },
     });
   };
@@ -70,7 +92,7 @@ export default function StudentProfileForm({
         </div>
       </div>
 
-      <form className="mt-8 space-y-8" onSubmit={handleSubmit}>
+      <form id={STUDENT_PROFILE_FORM_ID} className="mt-8 space-y-8" onSubmit={handleSubmit}>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <label className="space-y-2">
             <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
@@ -166,11 +188,12 @@ export default function StudentProfileForm({
               className={inputClassName}
               type="number"
               min={1}
+              max={MAX_SEMESTER}
               value={formState.basicInfo.semester}
               onChange={(event) =>
                 setFormState((current) => ({
                   ...current,
-                  basicInfo: { ...current.basicInfo, semester: Number(event.target.value) || 0 },
+                  basicInfo: { ...current.basicInfo, semester: clampSemester(event.target.value) },
                 }))
               }
               placeholder="Current semester"
@@ -239,38 +262,57 @@ export default function StudentProfileForm({
               />
             </label>
 
-            <label className="space-y-2">
+            <div className="space-y-2">
               <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Intake</span>
-              <input
-                className={inputClassName}
-                value={formState.preferences.intake}
-                onChange={(event) =>
-                  setFormState((current) => ({
-                    ...current,
-                    preferences: { ...current.preferences, intake: event.target.value },
-                  }))
-                }
-                placeholder="Fall 2026"
-              />
-            </label>
+              <div className="grid grid-cols-2 gap-3">
+                <select
+                  aria-label="Intake season"
+                  className={inputClassName}
+                  value={formState.preferences.intakeSeason}
+                  onChange={(event) =>
+                    setFormState((current) => ({
+                      ...current,
+                      preferences: {
+                        ...current.preferences,
+                        intakeSeason: event.target.value,
+                        // Picking a season with no year yet defaults the year so both halves are set.
+                        intakeYear: current.preferences.intakeYear || String(defaultIntakeYear()),
+                      },
+                    }))
+                  }
+                >
+                  <option value="">Season</option>
+                  {INTAKE_SEASONS.map((season) => (
+                    <option key={season} value={season}>
+                      {season}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  aria-label="Intake year"
+                  className={inputClassName}
+                  type="number"
+                  step={1}
+                  min={MIN_INTAKE_YEAR}
+                  value={formState.preferences.intakeYear}
+                  onChange={(event) =>
+                    setFormState((current) => ({
+                      ...current,
+                      preferences: { ...current.preferences, intakeYear: event.target.value },
+                    }))
+                  }
+                  placeholder="Year"
+                />
+              </div>
+              {intakeIncomplete ? (
+                <p className="text-xs font-semibold text-amber-600">
+                  Select both a season and a year, otherwise the intake will not be saved.
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
 
-        {errorMessage ? (
-          <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-            {errorMessage}
-          </p>
-        ) : null}
-
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={saving}
-            className="rounded-2xl bg-dark-blue px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0e1550] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {saving ? 'Saving profile...' : 'Save profile'}
-          </button>
-        </div>
       </form>
     </section>
   );

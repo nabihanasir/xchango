@@ -3,7 +3,9 @@ import StudentProfile, {
   IStudentTranscript,
 } from '../models/StudentProfile';
 import User from '../models/User';
-import { NotFoundError } from '../errors/AppError';
+import { NotFoundError, ValidationError } from '../errors/AppError';
+
+const MAX_SEMESTER = 8;
 
 interface StudentProfileUpdateInput {
   basicInfo?: Partial<IStudentProfile['basicInfo']>;
@@ -156,6 +158,19 @@ export const ensureStudentProfile = async (userId: string) => {
 export const getStudentProfile = async (userId: string) => ensureStudentProfile(userId);
 
 export const updateStudentProfile = async (userId: string, profileData: StudentProfileUpdateInput) => {
+  const requestedSemester = profileData.basicInfo?.semester;
+  if (
+    requestedSemester !== undefined &&
+    (!Number.isInteger(requestedSemester) || requestedSemester < 0 || requestedSemester > MAX_SEMESTER)
+  ) {
+    throw new ValidationError(
+      `Semester must be a whole number between 1 and ${MAX_SEMESTER}.`,
+      `The submitted semester (${requestedSemester}) is outside the allowed range.`,
+      `Enter a semester from 1 to ${MAX_SEMESTER}.`,
+      'INVALID_SEMESTER'
+    );
+  }
+
   const profile = await ensureStudentProfile(userId);
 
   if (profileData.basicInfo) {

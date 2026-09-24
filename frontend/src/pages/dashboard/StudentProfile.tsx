@@ -1,6 +1,7 @@
 import { startTransition, useEffect, useState } from 'react';
-import { FileText, GraduationCap } from 'lucide-react';
-import StudentProfileForm from '../../components/student/StudentProfileForm';
+import { createPortal } from 'react-dom';
+import { CheckCircle2, FileText, GraduationCap } from 'lucide-react';
+import StudentProfileForm, { STUDENT_PROFILE_FORM_ID } from '../../components/student/StudentProfileForm';
 import TranscriptUpload from '../../components/student/TranscriptUpload';
 import TranscriptViewer from '../../components/student/TranscriptViewer';
 import { useAuth } from '../../context/AuthContext';
@@ -23,6 +24,7 @@ export default function StudentProfile() {
   const [profileError, setProfileError] = useState('');
   const [transcriptError, setTranscriptError] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
+  const [showSavedPopup, setShowSavedPopup] = useState(false);
   const [uploadingTranscript, setUploadingTranscript] = useState(false);
 
   useEffect(() => {
@@ -85,6 +87,7 @@ export default function StudentProfile() {
     try {
       const updatedProfile = await studentProfileApi.updateStudentProfile(studentId, payload);
       setProfile(updatedProfile);
+      setShowSavedPopup(true);
     } catch (error) {
       setProfileError(error instanceof Error ? error.message : 'Unable to save profile.');
     } finally {
@@ -226,8 +229,6 @@ export default function StudentProfile() {
       <StudentProfileForm
         basicInfo={profile.basicInfo}
         preferences={profile.preferences}
-        saving={savingProfile}
-        errorMessage={profileError}
         onSubmit={handleProfileSave}
       />
 
@@ -239,6 +240,57 @@ export default function StudentProfile() {
       />
 
       <TranscriptViewer transcript={transcript} />
+
+      <section className="glass-card rounded-[2rem] p-6 md:p-7">
+        {profileError ? (
+          <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {profileError}
+          </p>
+        ) : null}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-500">
+            Saves your basic info and preferences. The transcript is stored as soon as you upload it.
+          </p>
+          <button
+            type="submit"
+            form={STUDENT_PROFILE_FORM_ID}
+            disabled={savingProfile}
+            className="rounded-2xl bg-dark-blue px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0e1550] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {savingProfile ? 'Saving profile...' : 'Save profile'}
+          </button>
+        </div>
+      </section>
+
+      {showSavedPopup
+        ? createPortal(
+            <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm">
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="profile-saved-title"
+                className="w-full max-w-sm rounded-[2rem] bg-white p-8 text-center shadow-2xl shadow-slate-950/20"
+              >
+                <div className="mx-auto inline-flex rounded-full bg-emerald-100 p-3 text-emerald-700">
+                  <CheckCircle2 className="h-8 w-8" />
+                </div>
+                <h3 id="profile-saved-title" className="mt-4 text-2xl font-black text-slate-900">
+                  Profile saved
+                </h3>
+                <p className="mt-2 text-sm text-slate-500">Your profile has been saved successfully.</p>
+                <button
+                  type="button"
+                  autoFocus
+                  onClick={() => setShowSavedPopup(false)}
+                  className="mt-6 rounded-2xl bg-dark-blue px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0e1550]"
+                >
+                  OK
+                </button>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }
