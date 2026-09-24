@@ -47,15 +47,7 @@ export default function DetailsStep({ draft, onChange }: DetailsStepProps) {
 
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6">
         <h3 className="text-lg font-black text-slate-900">Section B: Eligibility</h3>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-4 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              checked={draft.passportValid}
-              onChange={(event) => onChange({ passportValid: event.target.checked })}
-            />
-            Passport valid
-          </label>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-4 text-sm text-slate-700">
             <input
               type="checkbox"

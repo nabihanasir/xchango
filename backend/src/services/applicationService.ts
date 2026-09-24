@@ -356,15 +356,6 @@ const validateSubmission = (application: IApplication) => {
       'REGISTRATION_NUMBER_REQUIRED'
     );
   }
-
-  if (!application.passportValid) {
-    throw new ValidationError(
-      'A valid passport is required before submission.',
-      'Passport validity was not confirmed for this application.',
-      'Confirm passport validity before submitting.',
-      'PASSPORT_REQUIRED'
-    );
-  }
 };
 
 const buildSubmissionWarnings = (application: IApplication) => {

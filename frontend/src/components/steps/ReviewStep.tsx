@@ -28,10 +28,6 @@ export default function ReviewStep({ draft }: ReviewStepProps) {
         </span>
       </div>
       <div className={reviewRowClassName}>
-        <span className="text-sm font-bold text-slate-500">Passport Valid</span>
-        <span className="text-sm font-semibold text-slate-900">{draft.passportValid ? 'Yes' : 'No'}</span>
-      </div>
-      <div className={reviewRowClassName}>
         <span className="text-sm font-bold text-slate-500">Financial Eligibility</span>
         <span className="text-sm font-semibold text-slate-900">{draft.financialEligible ? 'Yes' : 'Flag for review'}</span>
       </div>
