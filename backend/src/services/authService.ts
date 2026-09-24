@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import User, { IUser, UserRole } from '../models/User';
 import { AuthenticationError, DatabaseError, ValidationError } from '../errors/AppError';
 import { logger } from '../utils/logger';
+import { offboardDueStudents } from './offboardingService';
 
 const generateToken = (id: string, role: string) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET || 'secret', {
@@ -170,11 +171,17 @@ export const loginUser = async (credentials: any) => {
   }
 
   if (user && (await bcrypt.compare(password, user.password))) {
+    if (user.role === UserRole.STUDENT && !user.offboardedAt) {
+      await offboardDueStudents(user._id.toString());
+      user = (await User.findById(user._id)) ?? user;
+    }
+
     return {
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
+      offboarded: Boolean(user.offboardedAt),
       token: generateToken(user._id.toString(), user.role),
     };
   }

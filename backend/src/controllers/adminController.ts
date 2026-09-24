@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as adminService from '../services/adminService';
+import * as offboardingService from '../services/offboardingService';
 import { sendResponse } from '../utils/response';
 
 export const getDashboardStats = async (req: Request, res: Response) => {
@@ -62,4 +63,14 @@ export const getAiModelConfig = async (_req: Request, res: Response) => {
 export const updateAiModelConfig = async (req: any, res: Response) => {
   const config = await adminService.upsertAiModelConfig(req.user._id.toString(), req.body);
   sendResponse(res, 200, 'AI model configuration saved', config);
+};
+
+export const setSemesterEndDate = async (req: Request, res: Response) => {
+  const application = await offboardingService.setSemesterEndDate(String(req.params.id), req.body?.semesterEndDate ?? null);
+  sendResponse(res, 200, 'Semester end date updated', application);
+};
+
+export const reactivateStudent = async (req: Request, res: Response) => {
+  const user = await offboardingService.reactivateStudent(String(req.params.id));
+  sendResponse(res, 200, 'Student account re-activated', user);
 };

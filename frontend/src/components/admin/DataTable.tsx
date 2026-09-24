@@ -10,9 +10,10 @@ interface Column {
 interface DataTableProps {
   columns: Column[];
   data: any[];
+  onRowClick?: (row: any) => void;
 }
 
-export default function DataTable({ columns, data }: DataTableProps) {
+export default function DataTable({ columns, data, onRowClick }: DataTableProps) {
   return (
     <div className="w-full overflow-x-auto bg-white rounded-2xl border border-light-color/50 shadow-sm">
       <table className="w-full text-left border-collapse">
@@ -27,7 +28,11 @@ export default function DataTable({ columns, data }: DataTableProps) {
         </thead>
         <tbody className="divide-y divide-light-color/30">
           {data.map((row, rowIdx) => (
-            <tr key={rowIdx} className="hover:bg-light-color/10 transition-colors">
+            <tr
+              key={rowIdx}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+              className={`hover:bg-light-color/10 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+            >
               {columns.map((col, colIdx) => (
                 <td key={colIdx} className="px-6 py-4 text-sm text-body-text">
                   {col.render ? col.render(row[col.accessor], row) : (

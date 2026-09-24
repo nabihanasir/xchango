@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DataTable from '../../components/admin/DataTable';
 import SearchFilter from '../../components/admin/SearchFilter';
 import ApplicationDetailModal from '../../components/admin/ApplicationDetailModal';
@@ -10,7 +10,8 @@ import type { AdminUserRecord } from '../../lib/adminApi';
 
 export default function AdminApplications() {
   const [data, setData] = useState<WorkflowApplication[]>([]);
-  const [filteredData, setFilteredData] = useState<WorkflowApplication[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedApp, setSelectedApp] = useState<WorkflowApplication | null>(null);
   const [advisors, setAdvisors] = useState<AdminUserRecord[]>([]);
   const [advisorSelections, setAdvisorSelections] = useState<Record<string, string>>({});
@@ -24,12 +25,11 @@ export default function AdminApplications() {
     try {
       setLoadError('');
       const [apps, users] = await Promise.all([
-        adminApi.getPendingApplications(),
+        adminApi.getApplications(),
         adminApi.getUsers(),
       ]);
       const advisorUsers = users.filter((user) => user.role === 'advisor');
       setData(apps);
-      setFilteredData(apps);
       setAdvisors(advisorUsers);
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Failed to load applications');
@@ -83,7 +83,7 @@ export default function AdminApplications() {
       header: 'Action',
       accessor: '_id',
       render: (_: any, row: any) => (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2" onClick={(event) => event.stopPropagation()}>
           <button
             type="button"
             onClick={() => setSelectedApp(row)}
@@ -123,29 +123,24 @@ export default function AdminApplications() {
     },
   ];
 
-  const handleSearch = (query: string) => {
-    const q = query.toLowerCase();
-    const filtered = data.filter(app => {
-      const studentName = typeof app.studentId === 'object' && app.studentId?.name 
-        ? app.studentId.name.toLowerCase() 
+  const filteredData = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return data.filter((app) => {
+      const studentName = typeof app.studentId === 'object' && app.studentId?.name
+        ? app.studentId.name.toLowerCase()
         : '';
-      return studentName.includes(q) || app.university.toLowerCase().includes(q);
+      const matchesSearch = studentName.includes(q) || app.university.toLowerCase().includes(q);
+      const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
+      return matchesSearch && matchesStatus;
     });
-    setFilteredData(filtered);
-  };
+  }, [data, searchQuery, statusFilter]);
 
-  const handleFilter = (status: string) => {
-    if (status === 'all') {
-      setFilteredData(data);
-    } else {
-      setFilteredData(data.filter(app => app.status.toLowerCase() === status.toLowerCase()));
-    }
-  };
-
-  // Group statuses correctly for the filter dropdown based on actual enum values used in data
   const statusOptions = [
     { label: 'All Status', value: 'all' },
-    { label: 'Pending', value: 'pending' },
+    ...Array.from(new Set(data.map((app) => app.status))).map((status) => ({
+      label: status.replace(/_/g, ' '),
+      value: status,
+    })),
   ];
 
   return (
@@ -153,7 +148,7 @@ export default function AdminApplications() {
        <div className="flex items-center justify-between border-b border-light-color/50 pb-6 glass-card p-6 md:p-8 rounded-[2rem] bg-white">
         <div>
           <h2 className="text-3xl font-black text-dark-blue mb-2">Live Applications</h2>
-          <p className="text-body-text font-medium mt-1 md:text-lg">Review pending applications and assign advisors.</p>
+          <p className="text-body-text font-medium mt-1 md:text-lg">Review applications, assign advisors and set semester end dates.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
            <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-light-color hover:bg-slate-50 text-dark-blue font-bold rounded-xl transition-all">
@@ -180,8 +175,8 @@ export default function AdminApplications() {
       <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">
         <div className="mb-6">
           <SearchFilter 
-            onSearch={handleSearch} 
-            onFilterChange={handleFilter} 
+            onSearch={setSearchQuery} 
+            onFilterChange={setStatusFilter} 
             filterOptions={statusOptions} 
             placeholder="Search by student or university..."
           />
@@ -200,7 +195,7 @@ export default function AdminApplications() {
           </div>
         ) : (
           <div className="overflow-hidden rounded-2xl border border-light-color/50">
-            <DataTable columns={columns} data={filteredData} />
+            <DataTable columns={columns} data={filteredData} onRowClick={setSelectedApp} />
           </div>
         )}
       </div>

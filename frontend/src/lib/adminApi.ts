@@ -43,6 +43,7 @@ export interface AdminUserRecord {
   phone?: string;
   sapId?: string;
   isActive?: boolean;
+  offboardedAt?: string;
   createdAt?: string;
   designation?: string;
   department?: string;
@@ -100,6 +101,10 @@ export const adminApi = {
     unwrap<WorkflowApplication[]>(apiClient.get('/admin/applications')),
   getPendingApplications: () =>
     unwrap<WorkflowApplication[]>(apiClient.get('/admin/applications/pending')),
+  setSemesterEndDate: (applicationId: string, semesterEndDate: string | null) =>
+    unwrap<WorkflowApplication>(apiClient.put(`/admin/applications/${applicationId}/semester-end`, { semesterEndDate })),
+  reactivateStudent: (userId: string) =>
+    unwrap<AdminUserRecord>(apiClient.post(`/admin/users/${userId}/reactivate`)),
   uploadOfferLetter: (payload: { applicationId: string; offerLetterUrl: string }) =>
     unwrap<Record<string, unknown>>(apiClient.post('/admin/offer-letter', payload)),
   getCountries: () => unwrap<CountryRecord[]>(apiClient.get('/catalog/countries')),

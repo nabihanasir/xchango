@@ -1,6 +1,7 @@
 import app from './app';
 import connectDB from './config/db';
 import { seedDemoHomeCoursesIfNeeded } from './services/courseService';
+import { offboardDueStudents } from './services/offboardingService';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
@@ -32,6 +33,11 @@ io.on('connection', (socket: any) => {
 
 connectDB().then(async () => {
   await seedDemoHomeCoursesIfNeeded();
+
+  const sweepOffboarding = () =>
+    offboardDueStudents().catch((error) => console.error('Off-boarding sweep failed:', error));
+  void sweepOffboarding();
+  setInterval(sweepOffboarding, 60 * 60 * 1000);
 
   httpServer.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);

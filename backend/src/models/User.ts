@@ -15,6 +15,7 @@ export interface IUser extends Document {
   phone?: string;
   sapId?: string;
   isActive: boolean;
+  offboardedAt?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   createdAt: Date;
@@ -30,6 +31,8 @@ const UserSchema: Schema = new Schema(
     sapId: { type: String, trim: true },
     role: { type: String, enum: Object.values(UserRole), required: true },
     isActive: { type: Boolean, default: true },
+    // Set once the student's exchange semester is over; the account stays but is read-only.
+    offboardedAt: { type: Date },
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },
   },

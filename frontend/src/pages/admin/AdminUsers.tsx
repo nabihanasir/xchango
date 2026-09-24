@@ -72,7 +72,20 @@ export default function AdminUsers() {
     {
       header: 'Status',
       accessor: 'status',
-      render: (_value: string, row: AdminUserRecord) => (row.isActive ? 'active' : 'inactive'),
+      render: (_value: string, row: AdminUserRecord) => (row.offboardedAt ? 'off-boarded' : row.isActive ? 'active' : 'inactive'),
+    },
+    {
+      header: 'Actions',
+      accessor: 'actions',
+      render: (_value: string, row: AdminUserRecord) =>
+        row.offboardedAt ? (
+          <button
+            onClick={() => void handleReactivate(row._id)}
+            className="px-4 py-2 bg-dark-blue text-white text-xs font-bold rounded-lg hover:bg-navy-hover transition-all"
+          >
+            Re-activate
+          </button>
+        ) : null,
     },
     {
       header: 'Joined Date',
@@ -87,6 +100,15 @@ export default function AdminUsers() {
     { label: 'Admin', value: 'admin' },
     { label: 'Student', value: 'student' },
   ];
+
+  const handleReactivate = async (userId: string) => {
+    try {
+      const updated = await adminApi.reactivateStudent(userId);
+      setUsers((current) => current.map((record) => (record._id === userId ? { ...record, ...updated, offboardedAt: undefined } : record)));
+    } catch (reactivateError) {
+      setError(reactivateError instanceof Error ? reactivateError.message : 'Unable to re-activate student.');
+    }
+  };
 
   const handleCreateUser = async () => {
     setSubmitting(true);

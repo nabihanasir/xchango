@@ -14,7 +14,8 @@ export type ApplicationStatus =
   | 'REJECTED'
   | 'DOCUMENT_PENDING'
   | 'COURSE_SELECTION_PENDING'
-  | 'READY_FOR_SUBMISSION';
+  | 'READY_FOR_SUBMISSION'
+  | 'COMPLETED';
 
 export type SelectedCourseStatus = 'pending' | 'approved' | 'rejected';
 
@@ -93,6 +94,7 @@ export interface WorkflowApplication {
   registrationNumber: string;
   accommodationPreference: AccommodationPreference;
   status: ApplicationStatus;
+  semesterEndDate?: string;
   interviewDate?: string;
   interview?: WorkflowApplicationInterview;
   documents: WorkflowApplicationDocument[];
@@ -141,6 +143,7 @@ export const applicationStatusTone: Record<ApplicationStatus, string> = {
   DOCUMENT_PENDING: 'bg-orange-100 text-orange-700',
   COURSE_SELECTION_PENDING: 'bg-cyan-100 text-cyan-700',
   READY_FOR_SUBMISSION: 'bg-green-100 text-green-700',
+  COMPLETED: 'bg-slate-200 text-slate-700',
 };
 
 export const getApplicationUserId = (

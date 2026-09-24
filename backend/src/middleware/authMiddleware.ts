@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
-import { AuthenticationError } from '../errors/AppError';
+import { AuthenticationError, ForbiddenError } from '../errors/AppError';
 import { asyncHandler } from './asyncHandler';
+import { offboardDueStudents } from '../services/offboardingService';
+
+const READ_ONLY_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
 interface DecodedToken {
   id: string;
@@ -24,6 +27,23 @@ export const protect = asyncHandler(async (req: any, _res: Response, next: NextF
         'Please log in again with a valid account.',
         'AUTH_USER_NOT_FOUND',
       );
+    }
+
+    if (req.user.role === 'student') {
+      if (!req.user.offboardedAt) {
+        await offboardDueStudents(req.user._id.toString());
+        req.user = await User.findById(decoded.id).select('-password');
+      }
+
+      // Off-boarded students keep read-only access to their records.
+      if (req.user.offboardedAt && !READ_ONLY_METHODS.includes(req.method)) {
+        throw new ForbiddenError(
+          'Account off-boarded',
+          'Your exchange semester is complete, so this account is now read-only.',
+          'Contact the International Office if you need access restored.',
+          'ACCOUNT_OFFBOARDED',
+        );
+      }
     }
 
     next();
