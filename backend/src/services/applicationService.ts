@@ -205,6 +205,28 @@ const validateUniversitySelection = (country: ApplicationCountry, university: st
   }
 };
 
+const assertNoDuplicateUniversityApplication = async (
+  studentId: string,
+  university: string,
+  excludeApplicationId?: string
+) => {
+  const existing = await Application.exists({
+    studentId,
+    university,
+    status: { $ne: ApplicationStatus.REJECTED },
+    ...(excludeApplicationId ? { _id: { $ne: excludeApplicationId } } : {}),
+  });
+
+  if (existing) {
+    throw new ValidationError(
+      `You already have an application for ${university}.`,
+      'Only one active application per university is allowed for each student.',
+      'Continue your existing application or choose a different university.',
+      'DUPLICATE_UNIVERSITY_APPLICATION'
+    );
+  }
+};
+
 const validateMedicalCondition = (input?: ApplicationStepInput['medicalCondition']) => {
   if (input?.hasCondition && !input.details?.trim()) {
     throw new ValidationError(
@@ -429,6 +451,7 @@ export const createApplication = async (studentId: string, payload: ApplicationS
   validateUniversitySelection(payload.country, payload.university);
   validateTravelHistory(payload.travelHistory);
   validateMedicalCondition(payload.medicalCondition);
+  await assertNoDuplicateUniversityApplication(studentId, payload.university);
 
   return Application.create({
     studentId,
@@ -470,6 +493,10 @@ export const updateApplicationStep = async (
       'Create a new application if the student needs to reapply.',
       'APPLICATION_LOCKED'
     );
+  }
+
+  if (payload.university && payload.university !== application.university) {
+    await assertNoDuplicateUniversityApplication(studentId, payload.university, applicationId);
   }
 
   applyStepInput(application, payload);
