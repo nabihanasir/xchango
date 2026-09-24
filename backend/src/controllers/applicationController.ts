@@ -81,6 +81,15 @@ export const completeInterview = async (req: any, res: Response) => {
   sendResponse(res, 200, 'Interview marked as completed successfully', application);
 };
 
+export const recordInterviewDecision = async (req: any, res: Response) => {
+  const application = await applicationService.recordInterviewDecision(
+    req.params.id,
+    req.user._id.toString(),
+    { recommended: req.body.recommended, notes: req.body.notes }
+  );
+  sendResponse(res, 200, 'Interview decision recorded successfully', application);
+};
+
 export const updateStatus = async (req: any, res: Response) => {
   const application = await applicationService.updateStatus(
     req.params.id,

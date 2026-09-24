@@ -5,7 +5,7 @@ import { applicationApi } from '../../lib/applicationApi';
 import { studentProfileApi } from '../../lib/studentProfileApi';
 import ProfileCompletionBlock from '../student/ProfileCompletionBlock';
 import type { StudentProfile } from '../../types/studentProfile';
-import type { WorkflowApplication } from '../../types/application';
+import { recommendedApplicationStatuses, type WorkflowApplication } from '../../types/application';
 
 const loadingCard = (
   <div className="glass-card h-56 rounded-[2rem] animate-pulse" />
@@ -132,15 +132,15 @@ export function RequireInterviewCompleted() {
     );
   }
 
-  const hasInterviewCompleted = applications.some((application) =>
-    ['INTERVIEW_COMPLETED', 'COURSE_REQUEST_ENABLED'].includes(application.status)
+  const hasAdvisorRecommendation = applications.some((application) =>
+    recommendedApplicationStatuses.includes(application.status)
   );
 
-  if (!hasInterviewCompleted) {
+  if (!hasAdvisorRecommendation) {
     return (
       <ProfileCompletionBlock
-        title="Advisor interview required"
-        message="You must complete your advisor interview before requesting course approval."
+        title="Advisor recommendation required"
+        message="You can request course approval once your advisor has recommended you after the interview."
         actionLabel="Go to Applications"
         actionTo="/dashboard/applications"
       />
