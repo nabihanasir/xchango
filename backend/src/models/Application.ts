@@ -54,6 +54,13 @@ export interface IApplicationInterview {
   stakeholders: string[];
 }
 
+export interface IInterviewDecision {
+  recommended: boolean;
+  notes: string;
+  decidedAt: Date;
+  decidedBy: mongoose.Types.ObjectId;
+}
+
 export interface IApplication extends Document {
   studentId: mongoose.Types.ObjectId;
   advisorId?: mongoose.Types.ObjectId;
@@ -77,6 +84,7 @@ export interface IApplication extends Document {
   semesterEndDate?: Date;
   interviewDate?: Date;
   interview?: IApplicationInterview;
+  interviewDecision?: IInterviewDecision;
   documents: IApplicationDocument[];
   selectedCourses: ISelectedCourse[];
   aiRecommendations: IAIRecommendation[];
@@ -123,6 +131,16 @@ const ApplicationInterviewSchema = new Schema<IApplicationInterview>(
   { _id: false }
 );
 
+const InterviewDecisionSchema = new Schema<IInterviewDecision>(
+  {
+    recommended: { type: Boolean, required: true },
+    notes: { type: String, default: '', trim: true },
+    decidedAt: { type: Date, required: true },
+    decidedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  },
+  { _id: false }
+);
+
 const ApplicationSchema = new Schema<IApplication>(
   {
     studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -159,6 +177,7 @@ const ApplicationSchema = new Schema<IApplication>(
     semesterEndDate: { type: Date, required: false },
     interviewDate: { type: Date, required: false },
     interview: { type: ApplicationInterviewSchema, required: false },
+    interviewDecision: { type: InterviewDecisionSchema, required: false },
     documents: { type: [ApplicationDocumentSchema], default: [] },
     selectedCourses: { type: [SelectedCourseSchema], default: [] },
     aiRecommendations: { type: [AIRecommendationSchema], default: [] },

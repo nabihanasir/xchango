@@ -3,21 +3,21 @@ import { ArrowRight, CalendarClock, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
-import { applicationStatusTone, type WorkflowApplication } from '../../types/application';
+import InterviewDecisionBanner from '../../components/InterviewDecisionBanner';
+import {
+  getApplicationStatusLabel,
+  getApplicationStatusTone,
+  recommendedApplicationStatuses,
+  type WorkflowApplication,
+} from '../../types/application';
 
 const workflowStages = [
   { label: 'Profile', statuses: [] as string[] },
   { label: 'Application', statuses: ['PENDING'] },
   { label: 'Advisor Assigned', statuses: ['ASSIGNED'] },
-  { label: 'Interview', statuses: ['INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED'] },
-  { label: 'Course Approval', statuses: ['COURSE_REQUEST_ENABLED'] },
+  { label: 'Interview', statuses: ['INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED', 'REJECTED'] },
+  { label: 'Recommended', statuses: recommendedApplicationStatuses as string[] },
 ];
-
-const formatStatus = (status: string) =>
-  status
-    .replaceAll('_', ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
 
 export default function StudentApplicationsPage() {
   const { user } = useAuth();
@@ -137,8 +137,8 @@ export default function StudentApplicationsPage() {
               </div>
 
               <div className="flex flex-col items-start gap-3 lg:items-end">
-                <div className={`rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.2em] ${applicationStatusTone[application.status]}`}>
-                  {formatStatus(application.status)}
+                <div className={`rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.2em] ${getApplicationStatusTone(application)}`}>
+                  {getApplicationStatusLabel(application)}
                 </div>
                 <Link
                   to={`/dashboard/applications/${application._id}`}
@@ -148,6 +148,10 @@ export default function StudentApplicationsPage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
+            </div>
+
+            <div className="mt-5 empty:hidden">
+              <InterviewDecisionBanner application={application} />
             </div>
           </article>
         ))}

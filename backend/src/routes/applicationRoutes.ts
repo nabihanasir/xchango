@@ -41,6 +41,11 @@ router.post('/:id/submit', authorizeRoles(UserRole.STUDENT), applicationControll
 router.patch('/:id/assign-advisor', authorizeRoles(UserRole.ADMIN), applicationController.assignAdvisor);
 router.patch('/:id/schedule-interview', authorizeRoles(UserRole.ADVISOR), applicationController.scheduleInterview);
 router.patch('/:id/complete-interview', authorizeRoles(UserRole.ADVISOR), applicationController.completeInterview);
+router.patch(
+  '/:id/interview-decision',
+  authorizeRoles(UserRole.ADVISOR),
+  applicationController.recordInterviewDecision
+);
 router.post('/:id/interview', authorizeRoles(UserRole.ADVISOR), applicationController.scheduleInterview);
 router.patch('/:id/status', authorizeRoles(UserRole.ADVISOR), applicationController.updateStatus);
 router.post(

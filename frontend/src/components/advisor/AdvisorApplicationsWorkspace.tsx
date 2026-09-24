@@ -14,25 +14,20 @@ import { applicationApi } from '../../lib/applicationApi';
 import { resolveUploadUrl, studentProfileApi } from '../../lib/studentProfileApi';
 import { documentApi } from '../../lib/documentApi';
 import {
-  applicationStatusTone,
   getApplicationCourseId,
   getApplicationCourseLabel,
   getApplicationCourseSummary,
   getApplicationCourseUniversity,
+  getApplicationStatusLabel,
+  getApplicationStatusTone,
   getApplicationUserId,
   getApplicationUserSummary,
+  isAwaitingAdvisorDecision,
   type SelectedCourseStatus,
   type WorkflowApplication,
 } from '../../types/application';
 import type { StudentProfile } from '../../types/studentProfile';
 import type { StudentDocument } from '../../types/document';
-
-const formatStatus = (status: string) =>
-  status
-    .toLowerCase()
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
 
 const SummaryCard = ({ title, value }: { title: string; value: string }) => (
   <div className="glass-card rounded-[2rem] p-6">
@@ -74,6 +69,8 @@ export default function AdvisorApplicationsWorkspace({
   const [interviewForm, setInterviewForm] = useState({ date: '', location: 'Advisor Office' });
   const [schedulingInterview, setSchedulingInterview] = useState(false);
   const [completingInterview, setCompletingInterview] = useState(false);
+  const [decisionNotes, setDecisionNotes] = useState('');
+  const [submittingDecision, setSubmittingDecision] = useState<'recommend' | 'not-recommend' | ''>('');
 
   const stats = useMemo(() => {
     const pending = applications.filter((item) =>
@@ -233,6 +230,10 @@ export default function AdvisorApplicationsWorkspace({
     });
   }, [selectedApplication]);
 
+  useEffect(() => {
+    setDecisionNotes('');
+  }, [selectedApplicationId]);
+
   const syncApplication = (updatedApplication: WorkflowApplication) => {
     setApplications((current) =>
       current.map((application) =>
@@ -337,6 +338,41 @@ export default function AdvisorApplicationsWorkspace({
       setActionError(error instanceof Error ? error.message : 'Unable to schedule interview.');
     } finally {
       setSchedulingInterview(false);
+    }
+  };
+
+  const handleInterviewDecision = async (recommended: boolean) => {
+    if (!selectedApplicationId) {
+      return;
+    }
+
+    const notes = decisionNotes.trim();
+
+    if (!recommended) {
+      if (!notes) {
+        setActionError('Add a short reason so the student knows why they are not recommended.');
+        return;
+      }
+
+      if (!window.confirm('Not recommending this student stops their application and cannot be undone. Continue?')) {
+        return;
+      }
+    }
+
+    setSubmittingDecision(recommended ? 'recommend' : 'not-recommend');
+    setActionError('');
+
+    try {
+      const updatedApplication = await applicationApi.recordInterviewDecision(selectedApplicationId, {
+        recommended,
+        notes,
+      });
+      syncApplication(updatedApplication);
+      setDecisionNotes('');
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to record the interview decision.');
+    } finally {
+      setSubmittingDecision('');
     }
   };
 
@@ -454,9 +490,9 @@ export default function AdvisorApplicationsWorkspace({
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${applicationStatusTone[application.status]}`}
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${getApplicationStatusTone(application)}`}
                         >
-                          {formatStatus(application.status)}
+                          {getApplicationStatusLabel(application)}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -505,7 +541,7 @@ export default function AdvisorApplicationsWorkspace({
           <div>
             <h2 className="text-2xl font-black text-slate-900">Application Details</h2>
             <p className="mt-1 text-sm font-medium text-slate-500">
-              Review assigned students, schedule interviews, and unlock course approval after completion.
+              Review assigned students, schedule interviews, and record a recommendation after each interview.
             </p>
           </div>
           {selectedApplication ? (
@@ -543,7 +579,7 @@ export default function AdvisorApplicationsWorkspace({
 
               <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
                 <div className="inline-flex rounded-full bg-emerald-700 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white">
-                  {formatStatus(selectedApplication.status)}
+                  {getApplicationStatusLabel(selectedApplication)}
                 </div>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Student:</span> {selectedStudent?.name || 'Student record'}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Email:</span> {selectedStudent?.email || 'Email unavailable'}</p>
@@ -613,12 +649,76 @@ export default function AdvisorApplicationsWorkspace({
                       </span>
                     </button>
                   </div>
-                  {selectedApplication.status === 'INTERVIEW_COMPLETED' ? (
-                    <p className="text-sm font-semibold text-emerald-700">
-                      Interview completed. The student can now request course approval.
-                    </p>
-                  ) : null}
                 </div>
+
+                {isAwaitingAdvisorDecision(selectedApplication) ? (
+                  <div className="space-y-3 rounded-[1.5rem] border border-amber-200 bg-amber-50/70 p-4">
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-700">
+                      Interview Decision
+                    </p>
+                    <p className="text-sm text-slate-600">
+                      Recommend the student to let them continue the application, or decline to stop it. The
+                      student is told the outcome, and the decision cannot be changed afterwards.
+                    </p>
+                    <label className="block space-y-2 text-sm font-semibold text-slate-700">
+                      <span>Note to student (required if not recommending)</span>
+                      <textarea
+                        value={decisionNotes}
+                        onChange={(event) => setDecisionNotes(event.target.value)}
+                        maxLength={1000}
+                        rows={3}
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
+                        placeholder="Add feedback from the interview"
+                      />
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => void handleInterviewDecision(true)}
+                        disabled={Boolean(submittingDecision)}
+                        className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <Check className="h-4 w-4" />
+                        <span>{submittingDecision === 'recommend' ? 'Saving...' : 'Recommend'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleInterviewDecision(false)}
+                        disabled={Boolean(submittingDecision)}
+                        className="inline-flex items-center gap-2 rounded-full border border-rose-300 bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <X className="h-4 w-4" />
+                        <span>{submittingDecision === 'not-recommend' ? 'Saving...' : 'Not Recommend'}</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {selectedApplication.interviewDecision ? (
+                  <div
+                    className={`rounded-[1.5rem] border p-4 ${
+                      selectedApplication.interviewDecision.recommended
+                        ? 'border-emerald-200 bg-emerald-50/70'
+                        : 'border-rose-200 bg-rose-50/70'
+                    }`}
+                  >
+                    <p
+                      className={`text-xs font-black uppercase tracking-[0.2em] ${
+                        selectedApplication.interviewDecision.recommended ? 'text-emerald-700' : 'text-rose-700'
+                      }`}
+                    >
+                      {selectedApplication.interviewDecision.recommended
+                        ? 'Recommended - student can proceed'
+                        : 'Not recommended - application stopped'}
+                    </p>
+                    {selectedApplication.interviewDecision.notes ? (
+                      <p className="mt-2 text-sm text-slate-700">{selectedApplication.interviewDecision.notes}</p>
+                    ) : null}
+                    <p className="mt-2 text-xs font-medium text-slate-500">
+                      Recorded {new Date(selectedApplication.interviewDecision.decidedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ) : null}
               </div>
             </div>
 
