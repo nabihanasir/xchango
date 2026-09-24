@@ -69,6 +69,7 @@ export default function ApplicationWorkflowPage() {
   const [savingCourses, setSavingCourses] = useState(false);
   const [availableCourses, setAvailableCourses] = useState<ApplicationCourseSummary[]>([]);
   const [loadingAvailableCourses, setLoadingAvailableCourses] = useState(false);
+  const [appliedUniversities, setAppliedUniversities] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const applicationLocked = application?.status === 'REJECTED';
@@ -158,6 +159,35 @@ export default function ApplicationWorkflowPage() {
       cancelled = true;
     };
   }, [application?._id, application?.status]);
+
+  useEffect(() => {
+    if (!studentId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    applicationApi
+      .getStudentApplications(studentId)
+      .then((applications) => {
+        if (cancelled) {
+          return;
+        }
+
+        setAppliedUniversities(
+          applications
+            .filter((item) => item.status !== 'REJECTED' && item._id !== id)
+            .map((item) => item.university)
+        );
+      })
+      .catch(() => {
+        // The backend still enforces the restriction if this lookup fails.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [studentId, id]);
 
   const universityOptions = useMemo(() => {
     if (!draft.country) {
@@ -336,6 +366,7 @@ export default function ApplicationWorkflowPage() {
             country={draft.country}
             universities={universityOptions}
             university={draft.university}
+            appliedUniversities={appliedUniversities}
             onChange={(university) => setDraft((current) => ({ ...current, university }))}
           />
         );
