@@ -7,6 +7,7 @@ interface User {
   email: string;
   role: string;
   token: string;
+  offboarded?: boolean;
 }
 
 interface AuthContextType {

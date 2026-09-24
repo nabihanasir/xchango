@@ -14,6 +14,8 @@ router.get('/applications', adminController.getApplications);
 router.get('/applications/pending', adminController.getPendingApplications);
 router.get('/users', adminController.getUsers);
 router.post('/users', adminController.createUser);
+router.put('/applications/:id/semester-end', adminController.setSemesterEndDate);
+router.post('/users/:id/reactivate', adminController.reactivateStudent);
 router.post('/offer-letter', adminController.uploadOfferLetter);
 router.get('/mappings', adminController.getCourseMappings);
 router.post('/mappings', adminController.addCourseMapping);

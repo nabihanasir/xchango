@@ -25,6 +25,7 @@ export enum ApplicationStatus {
   DOCUMENT_PENDING = 'DOCUMENT_PENDING',
   COURSE_SELECTION_PENDING = 'COURSE_SELECTION_PENDING',
   READY_FOR_SUBMISSION = 'READY_FOR_SUBMISSION',
+  COMPLETED = 'COMPLETED',
 }
 
 export interface IApplicationDocument {
@@ -73,6 +74,7 @@ export interface IApplication extends Document {
   registrationNumber: string;
   accommodationPreference: AccommodationPreference;
   status: ApplicationStatus;
+  semesterEndDate?: Date;
   interviewDate?: Date;
   interview?: IApplicationInterview;
   documents: IApplicationDocument[];
@@ -154,6 +156,7 @@ const ApplicationSchema = new Schema<IApplication>(
       enum: Object.values(ApplicationStatus),
       default: ApplicationStatus.DRAFT,
     },
+    semesterEndDate: { type: Date, required: false },
     interviewDate: { type: Date, required: false },
     interview: { type: ApplicationInterviewSchema, required: false },
     documents: { type: [ApplicationDocumentSchema], default: [] },

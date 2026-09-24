@@ -51,6 +51,22 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
       return 'Unknown Course';
   }) || [];
 
+  const canSetEndDate = !['DRAFT', 'REJECTED', 'COMPLETED'].includes(app.status);
+  const [endDate, setEndDate] = useState(app.semesterEndDate ? app.semesterEndDate.slice(0, 10) : '');
+
+  const handleSaveEndDate = async () => {
+    setSubmitting(true);
+    try {
+      await adminApi.setSemesterEndDate(app._id, endDate || null);
+      onApplicationUpdate?.();
+      onClose();
+    } catch (err: any) {
+      alert(`Failed to save semester end date: ${err.message}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleIssueOfferLetter = async () => {
     const url = prompt('Enter Offer Letter URL (e.g., Google Drive link):');
     if (!url) return;
@@ -74,7 +90,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 lg:p-10 animate-fade-in relative text-slate-800">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 lg:p-10 animate-fade-in text-slate-800">
       <div className="absolute inset-0 bg-dark-blue/80 backdrop-blur-md" onClick={onClose} />
 
       <div
@@ -137,6 +153,34 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4">
+                <h4 className="text-xs font-black text-dark-blue/40 uppercase tracking-[0.2em]">Semester End Date</h4>
+                {app.status === 'COMPLETED' ? (
+                  <p className="text-sm font-bold text-dark-blue">Completed. The student account is off-boarded (read-only).</p>
+                ) : canSetEndDate ? (
+                  <>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(event) => setEndDate(event.target.value)}
+                      className="w-full rounded-xl border border-light-color px-4 py-2 text-sm font-bold text-dark-blue"
+                    />
+                    <p className="text-xs font-medium text-body-text">
+                      Once this date passes the application is completed and the student is off-boarded to read-only access.
+                    </p>
+                    <button
+                      onClick={() => void handleSaveEndDate()}
+                      disabled={submitting}
+                      className="px-4 py-2 bg-dark-blue text-white text-xs font-bold rounded-lg hover:bg-navy-hover transition-all disabled:opacity-50"
+                    >
+                      Save end date
+                    </button>
+                  </>
+                ) : (
+                  <p className="text-xs font-medium text-body-text">Available once the application is submitted.</p>
+                )}
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-6">

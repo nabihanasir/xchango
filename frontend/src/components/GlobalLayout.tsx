@@ -24,9 +24,11 @@ interface GlobalLayoutProps {
   userProfile: UserProfile;
   /** Drives the shell's accent colour. Passed by each role's layout. */
   role: RoleThemeKey;
+  /** Optional banner shown above the page content. */
+  notice?: string;
 }
 
-const GlobalLayout = ({ panelName, navItems, userProfile, role }: GlobalLayoutProps) => {
+const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: GlobalLayoutProps) => {
   const theme = roleThemes[role];
   const location = useLocation();
   const { logout } = useAuth();
@@ -213,6 +215,11 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role }: GlobalLayoutPr
         {/* Main Content Scrollable Area */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 lg:px-8 pb-8 custom-scrollbar">
           <div className="max-w-[1400px] mx-auto w-full animate-fade-in-up">
+            {notice ? (
+              <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm font-medium text-amber-800">
+                {notice}
+              </div>
+            ) : null}
             <Outlet />
           </div>
         </main>
