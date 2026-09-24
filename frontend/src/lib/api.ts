@@ -1,5 +1,6 @@
 import type { AdvisorDecisionPayload, CourseRequest, CourseSummary } from '../types/equivalency';
 import type { GradableItem, ResultFormPayload, StudentResult } from '../types/result';
+import type { AdminVisaRow, StudentVisaProcess, VisaUpdatePayload } from '../types/visa';
 import { parseApiError } from './errorUtils';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -105,4 +106,15 @@ export const resultsApi = {
 
     return apiFormRequest<StudentResult>(`/results/advisor/${courseRequestItemId}`, token, formData);
   },
+};
+
+export const visaApi = {
+  /** `null` when the office has not started this student's visa process yet. */
+  getStudentVisa: (token: string) => apiRequest<StudentVisaProcess | null>('/visa/student', token),
+  getAdminOverview: (token: string) => apiRequest<AdminVisaRow[]>('/visa/admin', token),
+  updateVisaStatus: (token: string, studentId: string, payload: VisaUpdatePayload) =>
+    apiRequest<StudentVisaProcess>(`/visa/admin/${studentId}`, token, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
 };

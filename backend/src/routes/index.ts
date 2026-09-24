@@ -14,6 +14,7 @@ import catalogRoutes from './catalogRoutes';
 import errorDemoRoutes from './errorDemoRoutes';
 import onlineClassRoutes from './onlineClassRoutes';
 import resultRoutes from './resultRoutes';
+import visaRoutes from './visaRoutes';
 import documentRoutes from '../modules/documents/document.routes';
 
 const router = express.Router();
@@ -33,6 +34,7 @@ router.use('/notifications', notificationRoutes);
 router.use('/online-classes', onlineClassRoutes);
 router.use('/equivalency', courseEquivalencyRoutes);
 router.use('/results', resultRoutes);
+router.use('/visa', visaRoutes);
 router.use('/errors', errorDemoRoutes);
 
 export default router;

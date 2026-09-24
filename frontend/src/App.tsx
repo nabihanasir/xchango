@@ -15,6 +15,7 @@ import OnlineClasses from './pages/dashboard/OnlineClasses';
 import CourseEquivalencyBrowse from './pages/dashboard/CourseEquivalencyBrowse';
 import CourseEquivalencyRequests from './pages/dashboard/CourseEquivalencyRequests';
 import StudentResults from './pages/dashboard/StudentResults';
+import StudentVisa from './pages/dashboard/StudentVisa';
 import StudentProfile from './pages/dashboard/StudentProfile';
 import ApplicationWorkflowPage from './pages/dashboard/ApplicationWorkflowPage';
 
@@ -37,6 +38,7 @@ import AdminUniversities from './pages/admin/AdminUniversities';
 import AdminCourses from './pages/admin/AdminCourses';
 import AdminAiModelConfig from './pages/admin/AdminAiModelConfig';
 import AdminResults from './pages/admin/AdminResults';
+import AdminVisa from './pages/admin/AdminVisa';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import {
   RequireInterviewCompleted,
@@ -71,6 +73,7 @@ function App() {
               <Route path="equivalency/requests" element={<CourseEquivalencyRequests />} />
             </Route>
             <Route path="results" element={<StudentResults />} />
+            <Route path="visa" element={<StudentVisa />} />
           </Route>
         </Route>
 
@@ -82,6 +85,7 @@ function App() {
             <Route path="universities" element={<AdminUniversities />} />
             <Route path="courses" element={<AdminCourses />} />
             <Route path="results" element={<AdminResults />} />
+            <Route path="visa" element={<AdminVisa />} />
             <Route path="settings" element={<AdminAiModelConfig />} />
           </Route>
         </Route>
