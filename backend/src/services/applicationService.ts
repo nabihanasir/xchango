@@ -9,6 +9,7 @@ import User, { UserRole } from '../models/User';
 import AdvisorProfile from '../models/AdvisorProfile';
 import Course, { CourseType, ICourse } from '../models/Course';
 import University from '../models/University';
+import Notification from '../models/Notification';
 import { ensureStudentProfile } from './studentService';
 import {
   getCourseRecommendations,
@@ -57,6 +58,19 @@ const accessibleStatusesForCourseWork = [
   ApplicationStatus.COURSE_SELECTION_PENDING,
   ApplicationStatus.READY_FOR_SUBMISSION,
 ] as const;
+
+/** Statuses in which the advisor has recommended the student, so the application may proceed. */
+const statusesCleared = [
+  ApplicationStatus.COURSE_REQUEST_ENABLED,
+  ...accessibleStatusesForCourseWork,
+] as const;
+
+const MAX_DECISION_NOTES_LENGTH = 1000;
+
+interface InterviewDecisionInput {
+  recommended: boolean;
+  notes?: string;
+}
 
 const normalizeText = (value?: string) => value?.trim().toLowerCase() || '';
 
@@ -527,6 +541,16 @@ export const getAdvisorApplications = async (advisorId: string) =>
 export const submitApplication = async (applicationId: string, studentId: string) => {
   await assertProfileComplete(studentId);
   const application = ensureApplicationAccess(await Application.findById(applicationId), studentId);
+
+  if (application.status !== ApplicationStatus.DRAFT) {
+    throw new ValidationError(
+      'Application already submitted.',
+      `Applications in status ${application.status} cannot be submitted again.`,
+      'Only draft applications can be submitted.',
+      'APPLICATION_ALREADY_SUBMITTED'
+    );
+  }
+
   validateSubmission(application);
   application.status = ApplicationStatus.PENDING;
   await application.save();
@@ -638,6 +662,82 @@ export const completeInterview = async (applicationId: string, advisorId: string
   return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
 };
 
+export const recordInterviewDecision = async (
+  applicationId: string,
+  advisorId: string,
+  input: InterviewDecisionInput
+) => {
+  const application = ensureAdvisorOwnsApplication(
+    ensureApplicationExists(await Application.findById(applicationId)),
+    advisorId
+  );
+
+  if (typeof input.recommended !== 'boolean') {
+    throw new ValidationError(
+      'A decision is required.',
+      'The request must state whether the student is recommended or not.',
+      'Choose recommend or not recommend and try again.',
+      'INTERVIEW_DECISION_REQUIRED'
+    );
+  }
+
+  if (application.status !== ApplicationStatus.INTERVIEW_COMPLETED) {
+    throw new ValidationError(
+      'The interview decision cannot be recorded yet.',
+      'A recommendation can only be recorded once the interview is marked completed, and only once.',
+      'Mark the interview as completed first. A recorded decision cannot be changed.',
+      'INTERVIEW_DECISION_NOT_ALLOWED'
+    );
+  }
+
+  const notes = input.notes?.trim() ?? '';
+
+  if (!input.recommended && !notes) {
+    throw new ValidationError(
+      'A reason is required.',
+      'A not-recommended decision must explain the reason to the student.',
+      'Add a short note explaining why the student is not recommended.',
+      'INTERVIEW_DECISION_NOTES_REQUIRED'
+    );
+  }
+
+  if (notes.length > MAX_DECISION_NOTES_LENGTH) {
+    throw new ValidationError(
+      'The note is too long.',
+      `Decision notes are limited to ${MAX_DECISION_NOTES_LENGTH} characters.`,
+      'Shorten the note and try again.',
+      'INTERVIEW_DECISION_NOTES_TOO_LONG'
+    );
+  }
+
+  application.interviewDecision = {
+    recommended: input.recommended,
+    notes,
+    decidedAt: new Date(),
+    decidedBy: new mongoose.Types.ObjectId(advisorId),
+  };
+  application.status = input.recommended ? ApplicationStatus.SHORTLISTED : ApplicationStatus.REJECTED;
+  await application.save();
+
+  try {
+    await Notification.create({
+      userId: application.studentId,
+      subject: 'Interview outcome',
+      type: 'interview_decision',
+      message: input.recommended
+        ? 'Your advisor has recommended you after the interview. You can now continue your application.'
+        : `Your advisor has not recommended your application, so it cannot proceed. Reason: ${notes}`,
+      channels: { inApp: true, email: false },
+      emailStatus: 'not_requested',
+      metadata: { applicationId: application._id, recommended: input.recommended },
+    });
+  } catch (error) {
+    console.error('Failed to notify student of interview decision', error);
+  }
+
+  return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
+};
+
 export const updateStatus = async (
   applicationId: string,
   advisorId: string,
@@ -688,17 +788,11 @@ export const listAvailableCourses = async (
   actor: { _id: string; role: UserRole }
 ) => {
   const application = await getApplicationById(applicationId, actor);
-  if (
-    ![
-      ApplicationStatus.INTERVIEW_COMPLETED,
-      ApplicationStatus.COURSE_REQUEST_ENABLED,
-      ...accessibleStatusesForCourseWork,
-    ].includes(application.status as ApplicationStatus)
-  ) {
+  if (!(statusesCleared as readonly ApplicationStatus[]).includes(application.status)) {
     throw new ValidationError(
-      'Interview not completed yet.',
-      'Course approval can only be requested after the advisor interview is completed.',
-      'Complete the advisor interview before requesting course approval.',
+      'Advisor recommendation required.',
+      'Course approval can only be requested once your advisor has recommended you after the interview.',
+      'Complete the advisor interview and wait for a recommendation before requesting course approval.',
       'INTERVIEW_NOT_COMPLETED'
     );
   }
@@ -712,11 +806,11 @@ export const selectCourses = async (
   courseIds: string[]
 ) => {
   const application = ensureApplicationAccess(await Application.findById(applicationId), studentId);
-  if (![ApplicationStatus.INTERVIEW_COMPLETED, ApplicationStatus.COURSE_REQUEST_ENABLED].includes(application.status)) {
+  if (!(statusesCleared as readonly ApplicationStatus[]).includes(application.status)) {
     throw new ValidationError(
-      'Interview not completed yet.',
-      'You must complete your advisor interview before requesting course approval.',
-      'Wait until the interview is marked completed, then submit course requests.',
+      'Advisor recommendation required.',
+      'You can only request courses once your advisor has recommended you after the interview.',
+      'Wait for your advisor to record a recommendation, then submit course requests.',
       'INTERVIEW_NOT_COMPLETED'
     );
   }
@@ -750,7 +844,7 @@ export const selectCourses = async (
     status: 'pending',
     advisorComment: '',
   })) as IApplication['selectedCourses'];
-  application.status = ApplicationStatus.COURSE_REQUEST_ENABLED;
+  application.status = calculatePostShortlistStatus(application);
   await application.save();
   return getApplicationById(applicationId, { _id: studentId, role: UserRole.STUDENT });
 };
@@ -832,9 +926,7 @@ export const advisorCanAccessStudent = async (advisorId: string, studentId: stri
 export const studentCanRequestCourseApproval = async (studentId: string) => {
   const application = await Application.findOne({
     studentId,
-    status: {
-      $in: [ApplicationStatus.INTERVIEW_COMPLETED, ApplicationStatus.COURSE_REQUEST_ENABLED],
-    },
+    status: { $in: [...statusesCleared] },
   }).sort({ updatedAt: -1 });
 
   return Boolean(application);

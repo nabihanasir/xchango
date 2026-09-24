@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import ApplicationStepper from '../../components/ApplicationStepper';
 import DocumentUpload from '../../components/DocumentUpload';
 import CourseSelection from '../../components/CourseSelection';
+import InterviewDecisionBanner from '../../components/InterviewDecisionBanner';
 import CountryStep from '../../components/steps/CountryStep';
 import UniversityStep from '../../components/steps/UniversityStep';
 import ProgramStep from '../../components/steps/ProgramStep';
@@ -13,8 +14,10 @@ import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
 import {
   type ApplicationCourseSummary,
-  applicationStatusTone,
   countryOptions,
+  getApplicationStatusLabel,
+  getApplicationStatusTone,
+  isNotRecommended,
   type ApplicationCountry,
   type ApplicationDraftPayload,
   type WorkflowApplication,
@@ -69,6 +72,7 @@ export default function ApplicationWorkflowPage() {
   const [appliedUniversities, setAppliedUniversities] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const applicationLocked = application?.status === 'REJECTED';
 
   useEffect(() => {
     if (!id) {
@@ -405,9 +409,12 @@ export default function ApplicationWorkflowPage() {
               <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">Workflow Status</p>
               <p className="mt-2 text-lg font-black text-slate-900">{application.program}</p>
             </div>
-            <div className={`rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.2em] ${applicationStatusTone[application.status]}`}>
-              {application.status.replaceAll('_', ' ')}
+            <div className={`rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.2em] ${getApplicationStatusTone(application)}`}>
+              {getApplicationStatusLabel(application)}
             </div>
+          </div>
+          <div className="mt-4 empty:hidden">
+            <InterviewDecisionBanner application={application} />
           </div>
         </div>
       ) : null}
@@ -448,7 +455,7 @@ export default function ApplicationWorkflowPage() {
             <button
               type="button"
               onClick={() => void handleNext()}
-              disabled={saving}
+              disabled={saving || applicationLocked}
               className="inline-flex items-center gap-2 rounded-2xl bg-dark-blue px-5 py-3 text-sm font-bold text-white disabled:opacity-60"
             >
               {saving ? 'Saving...' : 'Next'}
@@ -462,7 +469,13 @@ export default function ApplicationWorkflowPage() {
               className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-5 py-3 text-sm font-black text-dark-blue disabled:opacity-60"
             >
               <CheckCircle2 className="h-4 w-4" />
-              {submitting ? 'Submitting...' : application?.status === 'DRAFT' ? 'Submit Application' : 'Submitted'}
+              {submitting
+                ? 'Submitting...'
+                : application?.status === 'DRAFT'
+                  ? 'Submit Application'
+                  : application && isNotRecommended(application)
+                    ? 'Cannot proceed'
+                    : 'Submitted'}
             </button>
           )}
         </div>
