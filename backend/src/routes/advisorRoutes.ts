@@ -10,6 +10,7 @@ router.use(protect);
 router.use(authorizeRoles(UserRole.ADVISOR));
 
 router.get('/profile', advisorController.getProfile);
+router.put('/profile', advisorController.updateProfile);
 router.get('/applications', advisorController.getAssignedApps);
 router.get('/students', advisorController.getAssignedStudents);
 router.put('/applications/:id', advisorController.updateApplicationStatus);

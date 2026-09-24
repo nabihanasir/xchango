@@ -19,6 +19,18 @@ export interface AdvisorProfileData {
     email: string;
   };
   assignedStudents?: string[];
+  phone?: string;
+  bio?: string;
+  officeHours?: string;
+}
+
+export interface AdvisorProfileInput {
+  name: string;
+  designation: string;
+  department: string;
+  phone: string;
+  bio: string;
+  officeHours: string;
 }
 
 const unwrap = async <T>(request: Promise<{ data: ApiEnvelope<T> }>) => {
@@ -28,6 +40,8 @@ const unwrap = async <T>(request: Promise<{ data: ApiEnvelope<T> }>) => {
 
 export const advisorApi = {
   getProfile: () => unwrap<AdvisorProfileData>(apiClient.get('/advisors/profile')),
+  updateProfile: (input: AdvisorProfileInput) =>
+    unwrap<AdvisorProfileData>(apiClient.put('/advisors/profile', input)),
   getAssignedApplications: () =>
     unwrap<WorkflowApplication[]>(apiClient.get('/advisors/applications')),
   getStudents: () => unwrap<StudentProfile[]>(apiClient.get('/advisors/students')),
