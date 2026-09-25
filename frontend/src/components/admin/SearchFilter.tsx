@@ -17,14 +17,14 @@ export default function SearchFilter({ onSearch, onFilterChange, filterOptions, 
           type="text"
           placeholder={placeholder}
           onChange={(e) => onSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-xl border border-light-color/50 bg-white focus:outline-none focus:border-dark-blue/20 transition-all font-medium text-dark-blue placeholder:text-body-text placeholder:opacity-40"
+          className="w-full pl-11 pr-4 py-3 rounded-xl border border-light-color/50 bg-white focus:outline-none focus:border-maroon/20 transition-all font-medium text-maroon placeholder:text-body-text placeholder:opacity-40"
         />
       </div>
       <div className="relative min-w-[180px]">
         <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-body-text opacity-40" />
         <select
           onChange={(e) => onFilterChange(e.target.value)}
-          className="w-full pl-11 pr-8 py-3 rounded-xl border border-light-color/50 bg-white focus:outline-none focus:border-dark-blue/20 transition-all font-medium text-dark-blue appearance-none cursor-pointer"
+          className="w-full pl-11 pr-8 py-3 rounded-xl border border-light-color/50 bg-white focus:outline-none focus:border-maroon/20 transition-all font-medium text-maroon appearance-none cursor-pointer"
         >
           {filterOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>

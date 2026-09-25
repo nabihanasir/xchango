@@ -20,7 +20,7 @@ export default function DataTable({ columns, data, onRowClick }: DataTableProps)
         <thead className="bg-light-color/20 border-b border-light-color/50">
           <tr>
             {columns.map((col, idx) => (
-              <th key={idx} className="px-6 py-4 text-xs font-bold text-dark-blue uppercase tracking-wider">
+              <th key={idx} className="px-6 py-4 text-xs font-bold text-maroon uppercase tracking-wider">
                 {col.header}
               </th>
             ))}

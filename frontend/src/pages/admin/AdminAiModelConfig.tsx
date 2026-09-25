@@ -117,11 +117,11 @@ export default function AdminAiModelConfig() {
     <div className="space-y-6 animate-fade-in relative z-0">
       <div className="border-b border-light-color/50 pb-6 glass-card p-6 md:p-8 rounded-[2rem] bg-white">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-dark-blue">
+          <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-maroon">
             <Bot className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-3xl font-black text-dark-blue mb-1">AI Model Configuration</h2>
+            <h2 className="text-3xl font-black text-maroon mb-1">AI Model Configuration</h2>
             <p className="text-body-text font-medium md:text-lg">
               Choose which LLM powers AI course matching and manage its credentials.
             </p>
@@ -146,7 +146,7 @@ export default function AdminAiModelConfig() {
       <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
           <div>
-            <label className="block text-xs font-black text-dark-blue/60 uppercase tracking-widest mb-2">Provider</label>
+            <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">Provider</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {(Object.keys(PROVIDER_PRESETS) as AiProvider[]).map((key) => (
                 <button
@@ -155,8 +155,8 @@ export default function AdminAiModelConfig() {
                   onClick={() => handleProviderChange(key)}
                   className={`px-4 py-3 rounded-xl border font-bold text-sm transition-all ${
                     form.provider === key
-                      ? 'bg-dark-blue text-white border-dark-blue shadow-lg shadow-dark-blue/20'
-                      : 'bg-slate-50 border-light-color text-dark-blue hover:border-dark-blue/40'
+                      ? 'bg-maroon-gradient text-white border-maroon shadow-lg shadow-maroon/20'
+                      : 'bg-slate-50 border-light-color text-maroon hover:border-maroon/40'
                   }`}
                 >
                   {PROVIDER_PRESETS[key].label}
@@ -167,38 +167,38 @@ export default function AdminAiModelConfig() {
           </div>
 
           <div>
-            <label className="block text-xs font-black text-dark-blue/60 uppercase tracking-widest mb-2">Base URL</label>
+            <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">Base URL</label>
             <input
               type="url"
               required
               value={form.baseUrl}
               onChange={(e) => setForm({ ...form, baseUrl: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-dark-blue"
+              className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-maroon"
               placeholder={preset.baseUrl}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-black text-dark-blue/60 uppercase tracking-widest mb-2">Model Name</label>
+            <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">Model Name</label>
             <input
               type="text"
               required
               value={form.model}
               onChange={(e) => setForm({ ...form, model: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-dark-blue"
+              className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-maroon"
               placeholder={preset.modelPlaceholder}
             />
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-xs font-black text-dark-blue/60 uppercase tracking-widest mb-2">
+            <label className="flex items-center gap-2 text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">
               <KeyRound className="h-3.5 w-3.5" /> API Key
             </label>
             <input
               type="password"
               value={form.apiKey}
               onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-dark-blue"
+              className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-maroon"
               placeholder={existing?.apiKeySet ? `Currently set (${existing.apiKeyPreview}) — leave blank to keep` : 'sk-...'}
               autoComplete="off"
             />
@@ -213,9 +213,9 @@ export default function AdminAiModelConfig() {
                 type="checkbox"
                 checked={form.isEnabled}
                 onChange={(e) => setForm({ ...form, isEnabled: e.target.checked })}
-                className="h-5 w-5 rounded border-light-color text-dark-blue focus:ring-accent-yellow/50"
+                className="h-5 w-5 rounded border-light-color text-maroon focus:ring-accent-yellow/50"
               />
-              <span className="font-bold text-dark-blue">Use this configuration for AI course matching</span>
+              <span className="font-bold text-maroon">Use this configuration for AI course matching</span>
             </label>
             <p className="text-xs text-body-text font-medium mt-2 ml-8">
               When disabled, the system falls back to the built-in keyword-overlap heuristic.
@@ -226,7 +226,7 @@ export default function AdminAiModelConfig() {
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-accent-yellow text-dark-blue font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-2.5 bg-accent-yellow text-maroon font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               {saving ? 'Saving...' : 'Save Configuration'}

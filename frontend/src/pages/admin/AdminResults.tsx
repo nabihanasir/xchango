@@ -81,7 +81,7 @@ export default function AdminResults() {
       accessor: 'resultFileUrl',
       render: (val: string) =>
         val ? (
-          <a href={resolveUploadUrl(val)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-dark-blue">
+          <a href={resolveUploadUrl(val)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-maroon">
             <FileDown className="h-3.5 w-3.5" />
             View
           </a>
@@ -101,7 +101,7 @@ export default function AdminResults() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between border-b border-light-color/50 pb-6 glass-card p-6 md:p-8 rounded-[2rem] bg-white">
         <div>
-          <h2 className="text-3xl font-black text-dark-blue mb-2">Student Results</h2>
+          <h2 className="text-3xl font-black text-maroon mb-2">Student Results</h2>
           <p className="text-body-text font-medium mt-1 md:text-lg">
             View every result advisors have entered for enrolled host courses.
           </p>
@@ -127,7 +127,7 @@ export default function AdminResults() {
           </div>
         ) : data.length === 0 ? (
           <div className="text-center py-12 px-6 border-2 border-dashed border-light-color rounded-2xl bg-slate-50">
-            <h3 className="text-xl font-bold text-dark-blue">No Results Found</h3>
+            <h3 className="text-xl font-bold text-maroon">No Results Found</h3>
             <p className="text-body-text mt-2">No results have been entered yet.</p>
           </div>
         ) : (

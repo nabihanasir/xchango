@@ -58,8 +58,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-[2rem] p-8 lg:p-10 glass-card">
-        <div className="absolute right-0 top-0 h-[400px] w-[400px] -translate-y-1/2 translate-x-1/4 rounded-full bg-accent-yellow/5 blur-[80px] pointer-events-none" />
+      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#A81E27] to-[#6E1017] p-8 shadow-2xl shadow-maroon/20 lg:p-10">
+        <div className="absolute right-0 top-0 h-[400px] w-[400px] -translate-y-1/2 translate-x-1/4 rounded-full bg-accent-yellow/10 blur-[80px] pointer-events-none" />
 
         <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -67,17 +67,17 @@ export default function AdminDashboard() {
               <Sparkles className="h-3.5 w-3.5" />
               <span>Overview Report</span>
             </div>
-            <h2 className="mb-2 text-[2.5rem] font-black leading-none tracking-tight text-slate-800">
+            <h2 className="mb-2 text-[2.5rem] font-black leading-none tracking-tight text-white">
               Welcome Back, Admin!
             </h2>
-            <p className="text-[15px] font-medium text-slate-500">
+            <p className="text-[15px] font-medium text-red-100/80">
               Live metrics from the current backend state.
             </p>
           </div>
-          <div className="relative z-10 hidden items-center gap-4 rounded-[1.25rem] border border-slate-200 bg-slate-50 p-5 shadow-sm md:flex">
+          <div className="relative z-10 hidden items-center gap-4 rounded-[1.25rem] border border-white/10 bg-white/10 p-5 backdrop-blur-sm md:flex">
             <div className="text-right">
-              <p className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">System Status</p>
-              <p className="text-[15px] font-bold text-emerald-500">Admin API Connected</p>
+              <p className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-red-100/60">System Status</p>
+              <p className="text-[15px] font-bold text-emerald-300">Admin API Connected</p>
             </div>
             <div className="h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
           </div>
@@ -105,8 +105,8 @@ export default function AdminDashboard() {
         <div className="glass-card relative overflow-hidden rounded-[2rem] p-6 lg:p-8">
           <div className="mb-8 flex items-center justify-between">
             <h3 className="flex items-center gap-3 text-xl font-black text-slate-800">
-              <div className="rounded-xl bg-blue-500/10 p-2">
-                <TrendingUp className="h-5 w-5 text-blue-500" />
+              <div className="rounded-xl bg-maroon/10 p-2">
+                <TrendingUp className="h-5 w-5 text-maroon" />
               </div>
               Monthly Trend
             </h3>
@@ -119,8 +119,8 @@ export default function AdminDashboard() {
                 <AreaChart data={metrics.monthlyTrend}>
                   <defs>
                     <linearGradient id="colorApps" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#090638" stopOpacity={0.1} />
-                      <stop offset="95%" stopColor="#090638" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#B3202A" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#B3202A" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="#F1F5F9" strokeDasharray="3 3" vertical={false} />
@@ -128,9 +128,9 @@ export default function AdminDashboard() {
                   <YAxis axisLine={false} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} tickLine={false} />
                   <Tooltip
                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                    itemStyle={{ color: '#090638', fontWeight: 800 }}
+                    itemStyle={{ color: '#B3202A', fontWeight: 800 }}
                   />
-                  <Area type="monotone" dataKey="apps" stroke="#090638" strokeWidth={4} fill="url(#colorApps)" fillOpacity={1} />
+                  <Area type="monotone" dataKey="apps" stroke="#B3202A" strokeWidth={4} fill="url(#colorApps)" fillOpacity={1} />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
                   <YAxis
                     axisLine={false}
                     dataKey="name"
-                    tick={{ fill: '#090638', fontSize: 11, fontWeight: 800 }}
+                    tick={{ fill: '#B3202A', fontSize: 11, fontWeight: 800 }}
                     tickLine={false}
                     type="category"
                   />
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
           </div>
           <Link
             to="/admin/courses"
-            className="inline-flex items-center gap-2 rounded-[1.25rem] bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#120d52]"
+            className="inline-flex items-center gap-2 rounded-[1.25rem] bg-maroon-gradient px-5 py-3 text-sm font-bold text-white transition hover:brightness-110"
           >
             Open Home Courses
             <ArrowRight className="h-4 w-4" />

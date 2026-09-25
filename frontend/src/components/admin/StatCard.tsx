@@ -20,7 +20,7 @@ export default function StatCard({ title, value, icon, trend, color }: StatCardP
   const Icon = iconMap[icon] || TrendingUp;
   
   const colorMap: Record<string, string> = {
-    blue: 'from-blue-500 to-cyan-400 text-blue-500',
+    blue: 'from-red-600 to-rose-400 text-red-600',
     yellow: 'from-accent-yellow to-yellow-500 text-accent-yellow',
     green: 'from-green-500 to-emerald-400 text-green-500',
     purple: 'from-purple-500 to-pink-400 text-purple-500',
@@ -36,7 +36,7 @@ export default function StatCard({ title, value, icon, trend, color }: StatCardP
       <div className="flex items-start justify-between relative z-10">
         <div>
           <p className="text-body-text text-xs font-semibold mb-1 uppercase tracking-wider">{title}</p>
-          <h3 className="text-3xl font-bold text-dark-blue">{value}</h3>
+          <h3 className="text-3xl font-bold text-maroon">{value}</h3>
           <div className="mt-2 flex items-center gap-1">
             <TrendingUp className={`h-3 w-3 ${trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`} />
             <span className={`text-xs font-bold ${trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>

@@ -40,7 +40,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
       {/* Dynamic Background Mesh */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className={`absolute top-0 right-0 w-[800px] h-[800px] ${theme.mesh} rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2`} />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-dark-blue/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3" />
+        <div className={`absolute bottom-0 left-0 w-[600px] h-[600px] ${theme.meshSecondary} rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3`} />
       </div>
 
       {/* ── Desktop Sidebar ── */}
@@ -83,7 +83,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
                 className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 relative group ${
                   isActive
                     ? theme.navActive
-                    : 'text-white/50 hover:text-white hover:bg-white/5'
+                    : theme.navInactive
                 } ${collapsed ? 'justify-center' : ''}`}
                 title={collapsed ? item.name : undefined}
               >
@@ -111,7 +111,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
         <div className="p-4 border-t border-white/10 space-y-2 shrink-0 mb-2">
           <button 
             onClick={() => setCollapsed(!collapsed)}
-            className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none"
+            className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl ${theme.footerButton} transition-all outline-none`}
           >
             <Menu className={`h-5 w-5 transition-transform duration-500 ${collapsed ? 'rotate-180' : ''}`} />
             {!collapsed && <span className="text-sm font-semibold">Collapse Nav</span>}
@@ -119,7 +119,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
           <Link
             to="/login"
             onClick={logout}
-            className="flex items-center gap-4 px-4 py-4 rounded-2xl text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
+            className={`flex items-center gap-4 px-4 py-4 rounded-2xl ${theme.signOut} transition-all`}
           >
             <LogOut className="h-5 w-5" />
             {!collapsed && <span className="text-sm font-semibold">Sign Out</span>}
@@ -130,7 +130,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
       {/* ── Mobile Sidebar Overlay ── */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-dark-blue/80 backdrop-blur-md z-[100] lg:hidden animate-fade-in"
+          className={`fixed inset-0 ${theme.backdrop} backdrop-blur-md z-[100] lg:hidden animate-fade-in`}
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -160,7 +160,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
                  to={item.path}
                  onClick={() => setIsMobileMenuOpen(false)}
                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl font-semibold transition-all ${
-                   isActive ? theme.navActiveMobile : 'text-white/50 hover:text-white hover:bg-white/5'
+                   isActive ? theme.navActiveMobile : theme.navInactive
                  }`}
                >
                  {isActive && <div className={`absolute left-0 w-1.5 h-8 rounded-r-full ${theme.navIndicator}`} />}
@@ -178,7 +178,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
         <header className="h-24 m-4 lg:ml-0 rounded-[2rem] glass-panel flex items-center justify-between px-6 lg:px-8 shrink-0 transition-all z-20">
           <div className="flex items-center gap-4 lg:gap-8">
             <button 
-              className="lg:hidden p-3 text-dark-blue bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors"
+              className={`lg:hidden p-3 ${theme.chromeText} bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors`}
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -193,7 +193,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
           </div>
 
           <div className="flex items-center gap-3 lg:gap-6">
-            <button className="relative p-3.5 text-slate-500 hover:text-dark-blue bg-slate-100/50 hover:bg-slate-100 rounded-[1.25rem] transition-all">
+            <button className={`relative p-3.5 text-slate-500 ${theme.chromeHoverText} bg-slate-100/50 hover:bg-slate-100 rounded-[1.25rem] transition-all`}>
               <Bell className="h-5 w-5" />
               <span className="absolute top-3 right-3 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white" />
             </button>
@@ -205,7 +205,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
                 {userProfile.initials}
               </div>
               <div className="hidden sm:block">
-                <p className="text-[14px] font-bold text-slate-800 leading-none group-hover:text-dark-blue transition-colors">{userProfile.name}</p>
+                <p className={`text-[14px] font-bold text-slate-800 leading-none ${theme.groupHoverText} transition-colors`}>{userProfile.name}</p>
                 <p className={`text-[11px] font-bold ${theme.roleCaption} uppercase tracking-widest mt-1.5 leading-none`}>{userProfile.role}</p>
               </div>
             </div>

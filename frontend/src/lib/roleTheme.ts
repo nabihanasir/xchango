@@ -18,8 +18,24 @@ export interface RoleTheme {
   sidebarShadow: string;
   /** Ambient blurred blob behind the shell. */
   mesh: string;
+  /** Second ambient blob, bottom-left of the shell. */
+  meshSecondary: string;
+  /** Dimmed overlay behind the mobile drawer. */
+  backdrop: string;
+  /** Header icon/text colour (mobile menu button). */
+  chromeText: string;
+  /** Header icon hover colour (notifications button). */
+  chromeHoverText: string;
+  /** Header name hover colour, applied through the profile `group`. */
+  groupHoverText: string;
   /** "Student Panel" / "Advisor Panel" label under the wordmark. */
   panelLabel: string;
+  /** Inactive nav row text + hover (desktop sidebar and mobile drawer). */
+  navInactive: string;
+  /** Sidebar footer buttons ("Collapse Nav") text + hover. */
+  footerButton: string;
+  /** Sidebar "Sign Out" text + hover. */
+  signOut: string;
   /** Active nav row background + text (desktop sidebar). */
   navActive: string;
   /** Active nav row in the mobile drawer, where the label stays white. */
@@ -43,6 +59,14 @@ export const roleThemes: Record<RoleThemeKey, RoleTheme> = {
     sidebarBg: 'bg-[#060424]/95',
     sidebarShadow: 'shadow-dark-blue',
     mesh: 'bg-accent-yellow/5',
+    meshSecondary: 'bg-dark-blue/5',
+    backdrop: 'bg-dark-blue/80',
+    chromeText: 'text-dark-blue',
+    chromeHoverText: 'hover:text-dark-blue',
+    groupHoverText: 'group-hover:text-dark-blue',
+    navInactive: 'text-white/50 hover:text-white hover:bg-white/5',
+    footerButton: 'text-white/40 hover:text-white hover:bg-white/5',
+    signOut: 'text-white/40 hover:text-red-400 hover:bg-red-500/10',
     panelLabel: 'text-accent-yellow/80',
     navActive: 'bg-accent-yellow/10 text-accent-yellow shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
     navActiveMobile: 'bg-accent-yellow/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
@@ -57,6 +81,14 @@ export const roleThemes: Record<RoleThemeKey, RoleTheme> = {
     sidebarBg: 'bg-[#03110c]/95',
     sidebarShadow: 'shadow-emerald-950',
     mesh: 'bg-emerald-400/5',
+    meshSecondary: 'bg-dark-blue/5',
+    backdrop: 'bg-dark-blue/80',
+    chromeText: 'text-dark-blue',
+    chromeHoverText: 'hover:text-dark-blue',
+    groupHoverText: 'group-hover:text-dark-blue',
+    navInactive: 'text-white/50 hover:text-white hover:bg-white/5',
+    footerButton: 'text-white/40 hover:text-white hover:bg-white/5',
+    signOut: 'text-white/40 hover:text-red-400 hover:bg-red-500/10',
     panelLabel: 'text-emerald-300/80',
     navActive: 'bg-emerald-400/10 text-emerald-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
     navActiveMobile: 'bg-emerald-400/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
@@ -68,17 +100,25 @@ export const roleThemes: Record<RoleThemeKey, RoleTheme> = {
     avatar: 'from-emerald-600 to-emerald-900',
   },
   admin: {
-    sidebarBg: 'bg-[#060424]/95',
-    sidebarShadow: 'shadow-dark-blue',
-    mesh: 'bg-violet-400/5',
-    panelLabel: 'text-violet-300/80',
-    navActive: 'bg-violet-400/10 text-violet-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
-    navActiveMobile: 'bg-violet-400/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
-    navIndicator: 'bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.5)]',
-    navActiveIconGlow: 'drop-shadow-[0_0_8px_rgba(167,139,250,0.35)]',
-    navChevron: 'text-violet-300',
-    navActiveIconMobile: 'text-violet-300 drop-shadow-[0_0_8px_rgba(167,139,250,0.35)]',
-    roleCaption: 'text-violet-600',
-    avatar: 'from-violet-600 to-violet-900',
+    sidebarBg: 'bg-gradient-to-b from-[#A81E27] to-[#6E1017]',
+    sidebarShadow: 'shadow-maroon-deep',
+    mesh: 'bg-red-400/5',
+    meshSecondary: 'bg-maroon/5',
+    backdrop: 'bg-maroon/80',
+    chromeText: 'text-maroon',
+    chromeHoverText: 'hover:text-maroon',
+    groupHoverText: 'group-hover:text-maroon',
+    navInactive: 'text-white/80 hover:text-white hover:bg-white/10',
+    footerButton: 'text-white/70 hover:text-white hover:bg-white/10',
+    signOut: 'text-white/70 hover:text-white hover:bg-white/15',
+    panelLabel: 'text-white/80',
+    navActive: 'bg-white/20 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
+    navActiveMobile: 'bg-white/20 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
+    navIndicator: 'bg-accent-yellow shadow-[0_0_10px_rgba(251,210,19,0.5)]',
+    navActiveIconGlow: 'drop-shadow-[0_0_8px_rgba(251,210,19,0.4)]',
+    navChevron: 'text-accent-yellow',
+    navActiveIconMobile: 'text-accent-yellow drop-shadow-[0_0_8px_rgba(251,210,19,0.4)]',
+    roleCaption: 'text-maroon',
+    avatar: 'from-maroon to-maroon-deep',
   },
 };

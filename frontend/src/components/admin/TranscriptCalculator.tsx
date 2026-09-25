@@ -24,7 +24,7 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
   return (
     <div className="bg-white rounded-3xl border border-light-color/60 shadow-xl overflow-hidden font-sans">
       {/* Header */}
-      <div className="bg-dark-blue p-6 text-white flex justify-between items-center relative">
+      <div className="bg-maroon-gradient p-6 text-white flex justify-between items-center relative">
         <div className="absolute top-0 right-0 w-32 h-full bg-accent-yellow/10 -skew-x-12 transform translate-x-8" />
         <div className="relative z-10">
           <h3 className="text-xl font-black uppercase tracking-tighter">Transcript Calculator</h3>
@@ -44,16 +44,16 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
         <div className="flex gap-8">
           <div>
             <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest block">Student Name</span>
-            <span className="font-bold text-dark-blue">{studentName}</span>
+            <span className="font-bold text-maroon">{studentName}</span>
           </div>
           <div>
             <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest block">SAP ID</span>
-            <span className="font-bold text-dark-blue">{sapId}</span>
+            <span className="font-bold text-maroon">{sapId}</span>
           </div>
         </div>
         <div className="text-right">
           <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest block">Last Synchronized</span>
-          <span className="font-bold text-dark-blue italic opacity-60">March 18, 2024</span>
+          <span className="font-bold text-maroon italic opacity-60">March 18, 2024</span>
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
             <div key={sem.semester} className="space-y-3">
               <div className="flex items-center gap-4">
                 <div className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border ${
-                  sem.semester % 2 === 0 ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-100 text-dark-blue border-slate-200'
+                  sem.semester % 2 === 0 ? 'bg-maroon/5 text-maroon border-maroon/10' : 'bg-slate-100 text-maroon border-slate-200'
                 }`}>
                   Semester {sem.semester}
                 </div>
@@ -87,7 +87,7 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
                       <th className="px-5 py-3 text-right">Grade</th>
                     </tr>
                   </thead>
-                  <tbody className="text-sm font-bold text-dark-blue/80">
+                  <tbody className="text-sm font-bold text-maroon/80">
                     {sem.courses.map((course, idx) => (
                       <tr key={idx} className="border-t border-slate-50 hover:bg-slate-50/30 transition-colors">
                         <td className="px-5 py-3.5">{course.name}</td>
@@ -106,8 +106,8 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
                 <div className="bg-slate-100/50 px-5 py-3 flex justify-between items-center border-t border-slate-100">
                   <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest">Semester Performance</span>
                   <div className="flex gap-4">
-                    <span className="text-xs font-bold">Total Credits: <span className="text-dark-blue">{sem.credits}</span></span>
-                    <span className="text-xs font-black bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm text-dark-blue">
+                    <span className="text-xs font-bold">Total Credits: <span className="text-maroon">{sem.credits}</span></span>
+                    <span className="text-xs font-black bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm text-maroon">
                       SGPA: {sem.sgpa.toFixed(2)}
                     </span>
                   </div>
