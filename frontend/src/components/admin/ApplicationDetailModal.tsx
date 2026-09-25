@@ -91,7 +91,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
 
   return createPortal(
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 lg:p-10 animate-fade-in text-slate-800">
-      <div className="absolute inset-0 bg-dark-blue/80 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-maroon/80 backdrop-blur-md" onClick={onClose} />
 
       <div
         className="bg-slate-50 w-full max-w-6xl h-full max-h-[90vh] rounded-[40px] shadow-2xl relative z-10 overflow-hidden flex flex-col animate-fade-in-up border border-white/20"
@@ -99,22 +99,22 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
       >
         <header className="bg-white px-8 py-6 border-b border-light-color/60 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-5">
-            <div className="bg-dark-blue h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg shadow-dark-blue/10">
+            <div className="bg-maroon-gradient h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg shadow-maroon/10">
               <span className="text-white font-black text-xl italic leading-none">{studentName.charAt(0)}</span>
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-black text-dark-blue">{studentName}</h2>
+                <h2 className="text-2xl font-black text-maroon">{studentName}</h2>
                 <StatusBadge status={app.status.toLowerCase()} />
               </div>
               <p className="text-body-text font-bold text-sm opacity-60 mt-1">
-                Application ID: <span className="text-dark-blue">#{app._id.slice(-6).toUpperCase()}</span> · Created {new Date(app.createdAt).toLocaleDateString()}
+                Application ID: <span className="text-maroon">#{app._id.slice(-6).toUpperCase()}</span> · Created {new Date(app.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-dark-blue/40 hover:text-dark-blue border border-transparent hover:border-light-color"
+            className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-maroon/40 hover:text-maroon border border-transparent hover:border-light-color"
           >
             <X className="h-6 w-6" />
           </button>
@@ -124,7 +124,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="space-y-8">
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-6">
-                <h4 className="text-xs font-black text-dark-blue/40 uppercase tracking-[0.2em]">Student Information</h4>
+                <h4 className="text-xs font-black text-maroon/40 uppercase tracking-[0.2em]">Student Information</h4>
                 
                 <div className="grid grid-cols-1 gap-4">
                   <ProfileItem icon={Hash} label="SAP ID" value={sapId} />
@@ -136,19 +136,19 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-6">
-                <h4 className="text-xs font-black text-dark-blue/40 uppercase tracking-[0.2em]">Preferences</h4>
+                <h4 className="text-xs font-black text-maroon/40 uppercase tracking-[0.2em]">Preferences</h4>
                 <div className="space-y-4">
                   <div>
                     <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest block mb-1">Country of Choice</span>
-                    <div className="flex items-center gap-2 text-sm font-bold text-dark-blue">
+                    <div className="flex items-center gap-2 text-sm font-bold text-maroon">
                       <MapPin className="h-4 w-4 text-accent-yellow" />
                       {app.country || 'N/A'}
                     </div>
                   </div>
                   <div>
                     <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest block mb-1">University of Choice</span>
-                    <div className="flex items-center gap-2 text-sm font-bold text-dark-blue">
-                      <GraduationCap className="h-4 w-4 text-blue-500" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-maroon">
+                      <GraduationCap className="h-4 w-4 text-maroon" />
                       {app.university || 'N/A'}
                     </div>
                   </div>
@@ -156,16 +156,16 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4">
-                <h4 className="text-xs font-black text-dark-blue/40 uppercase tracking-[0.2em]">Semester End Date</h4>
+                <h4 className="text-xs font-black text-maroon/40 uppercase tracking-[0.2em]">Semester End Date</h4>
                 {app.status === 'COMPLETED' ? (
-                  <p className="text-sm font-bold text-dark-blue">Completed. The student account is off-boarded (read-only).</p>
+                  <p className="text-sm font-bold text-maroon">Completed. The student account is off-boarded (read-only).</p>
                 ) : canSetEndDate ? (
                   <>
                     <input
                       type="date"
                       value={endDate}
                       onChange={(event) => setEndDate(event.target.value)}
-                      className="w-full rounded-xl border border-light-color px-4 py-2 text-sm font-bold text-dark-blue"
+                      className="w-full rounded-xl border border-light-color px-4 py-2 text-sm font-bold text-maroon"
                     />
                     <p className="text-xs font-medium text-body-text">
                       Once this date passes the application is completed and the student is off-boarded to read-only access.
@@ -173,7 +173,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                     <button
                       onClick={() => void handleSaveEndDate()}
                       disabled={submitting}
-                      className="px-4 py-2 bg-dark-blue text-white text-xs font-bold rounded-lg hover:bg-navy-hover transition-all disabled:opacity-50"
+                      className="px-4 py-2 bg-maroon-gradient text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
                     >
                       Save end date
                     </button>
@@ -184,12 +184,12 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-6">
-                <h4 className="text-xs font-black text-dark-blue/40 uppercase tracking-[0.2em]">Application Stage</h4>
+                <h4 className="text-xs font-black text-maroon/40 uppercase tracking-[0.2em]">Application Stage</h4>
                 <div className="space-y-6">
                   <div className="flex justify-between items-end">
                     <div className="flex flex-col">
                         <span className="text-xs font-bold text-body-text opacity-60">Status Mapped Level</span>
-                        <span className="text-2xl font-black text-dark-blue">{Math.round(progressPercent)}%</span>
+                        <span className="text-2xl font-black text-maroon">{Math.round(progressPercent)}%</span>
                     </div>
                     <span className="text-xs font-bold text-body-text opacity-60">Level {currentStage} of 5</span>
                   </div>
@@ -213,7 +213,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
             </div>
 
             <div className="lg:col-span-2 space-y-8">
-              <div className="bg-dark-blue p-8 rounded-[32px] text-white relative overflow-hidden shadow-2xl shadow-dark-blue/20">
+              <div className="bg-maroon-gradient p-8 rounded-[32px] text-white relative overflow-hidden shadow-2xl shadow-maroon/20">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-accent-yellow/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
                 <div className="relative z-10 flex justify-between items-center">
                   <div>
@@ -228,11 +228,11 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4">
-                <h4 className="text-xs font-black text-dark-blue/40 uppercase tracking-[0.2em]">Selected Courses</h4>
+                <h4 className="text-xs font-black text-maroon/40 uppercase tracking-[0.2em]">Selected Courses</h4>
                 {selectedCourseNames.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                     {selectedCourseNames.map((course, i) => (
-                        <span key={i} className="px-3 py-1.5 bg-blue-50 text-blue-600 font-bold text-xs rounded-lg border border-blue-100 italic">
+                        <span key={i} className="px-3 py-1.5 bg-maroon/5 text-maroon font-bold text-xs rounded-lg border border-maroon/10 italic">
                         {course}
                         </span>
                     ))}
@@ -245,7 +245,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4 opacity-75">
-                <h4 className="text-xs font-black text-dark-blue/40 uppercase tracking-[0.2em]">Transcript Calculator</h4>
+                <h4 className="text-xs font-black text-maroon/40 uppercase tracking-[0.2em]">Transcript Calculator</h4>
                 <div className="py-8 text-center rounded-xl bg-slate-50 border border-dashed border-light-color space-y-2">
                     <Calendar className="h-8 w-8 text-slate-300 mx-auto" />
                     <p className="text-sm font-bold text-slate-500">Transcript data is not linked to this application format natively.</p>
@@ -268,12 +268,12 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
             <button 
               onClick={handleIssueOfferLetter}
               disabled={submitting}
-              className="px-6 py-3 bg-accent-yellow text-dark-blue font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 disabled:opacity-50"
+              className="px-6 py-3 bg-accent-yellow text-maroon font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 disabled:opacity-50"
             >
               {submitting ? 'Issuing...' : 'Issue Offer Letter'}
             </button>
           )}
-          <button className="px-8 py-3 bg-dark-blue hover:bg-navy-hover text-white font-bold rounded-xl transition-all shadow-lg shadow-dark-blue/20 flex items-center gap-2">
+          <button className="px-8 py-3 bg-maroon-gradient hover:brightness-110 text-white font-bold rounded-xl transition-all shadow-lg shadow-maroon/20 flex items-center gap-2">
             Download Full Report
             <Hash className="h-4 w-4 opacity-40 rotate-12" />
           </button>
@@ -295,13 +295,13 @@ function ProfileItem({ icon: Icon, label, value, highlighted = false }: any) {
   return (
     <div className="flex items-center gap-4 group">
       <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-colors ${
-        highlighted ? 'bg-accent-yellow text-dark-blue' : 'bg-slate-50 text-dark-blue/40 group-hover:bg-slate-100'
+        highlighted ? 'bg-accent-yellow text-maroon' : 'bg-slate-50 text-maroon/40 group-hover:bg-slate-100'
       }`}>
         <Icon className="h-4 w-4" />
       </div>
       <div>
         <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest block">{label}</span>
-        <span className={`text-sm font-bold ${highlighted ? 'text-dark-blue' : 'text-body-text'}`}>{value}</span>
+        <span className={`text-sm font-bold ${highlighted ? 'text-maroon' : 'text-body-text'}`}>{value}</span>
       </div>
     </div>
   );

@@ -25,6 +25,12 @@ export default {
         'dark-blue-deep': '#060424',
         'dark-blue-light': '#1A1558',
         'accent-yellow': '#FBD213',
+        // Admin portal brand red, toned down from the Riphah logo red (#E31E24) to a softer, slightly dark red (taken from the Riphah Healthcare Services logo)
+        maroon: {
+          DEFAULT: '#B3202A',
+          hover: '#8F1820',
+          deep: '#5E0F15',
+        },
         'head-text': '#090638',
         'body-text': '#64748B', // Softer, more modern slate
         'light-color': '#F8FAFC', // Crisp background accent
@@ -34,6 +40,9 @@ export default {
         'blue-faded': '#8B8BA7',
         'yellow-default': '#FFB84D',
         'yellow-faded': '#FFD699',
+      },
+      backgroundImage: {
+        'maroon-gradient': 'linear-gradient(135deg, #C2262F 0%, #B3202A 55%, #94181F 100%)',
       },
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',

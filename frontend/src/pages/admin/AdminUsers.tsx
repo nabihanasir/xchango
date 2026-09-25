@@ -81,7 +81,7 @@ export default function AdminUsers() {
         row.offboardedAt ? (
           <button
             onClick={() => void handleReactivate(row._id)}
-            className="px-4 py-2 bg-dark-blue text-white text-xs font-bold rounded-lg hover:bg-navy-hover transition-all"
+            className="px-4 py-2 bg-maroon-gradient text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all"
           >
             Re-activate
           </button>
@@ -140,7 +140,7 @@ export default function AdminUsers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between border-b border-light-color/50 pb-6">
         <div>
-          <h2 className="text-3xl font-black text-dark-blue">Users Management</h2>
+          <h2 className="text-3xl font-black text-maroon">Users Management</h2>
           <p className="text-body-text font-medium mt-1">Create advisor accounts and manage platform users.</p>
         </div>
         <button
@@ -148,7 +148,7 @@ export default function AdminUsers() {
             setCreateError('');
             setShowAddModal(true);
           }}
-          className="px-6 py-3 bg-dark-blue text-white font-bold rounded-xl hover:bg-navy-hover transition-all shadow-lg shadow-dark-blue/20"
+          className="px-6 py-3 bg-maroon-gradient text-white font-bold rounded-xl hover:brightness-110 transition-all shadow-lg shadow-maroon/20"
         >
           Add New User
         </button>
@@ -167,12 +167,12 @@ export default function AdminUsers() {
       ) : null}
 
       {showAddModal ? (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-dark-blue/40 p-4 py-6 backdrop-blur-sm sm:items-center">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-maroon/40 p-4 py-6 backdrop-blur-sm sm:items-center">
           <div className="max-h-[calc(100vh-3rem)] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl animate-fade-in-up">
-            <h3 className="text-2xl font-black text-dark-blue mb-6">Create New User</h3>
+            <h3 className="text-2xl font-black text-maroon mb-6">Create New User</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-dark-blue/60 uppercase mb-2">Full Name</label>
+                <label className="block text-xs font-bold text-maroon/60 uppercase mb-2">Full Name</label>
                 <input
                   type="text"
                   value={form.name}
@@ -182,7 +182,7 @@ export default function AdminUsers() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-dark-blue/60 uppercase mb-2">Email</label>
+                <label className="block text-xs font-bold text-maroon/60 uppercase mb-2">Email</label>
                 <input
                   type="email"
                   value={form.email}
@@ -192,7 +192,7 @@ export default function AdminUsers() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-dark-blue/60 uppercase mb-2">Role</label>
+                <label className="block text-xs font-bold text-maroon/60 uppercase mb-2">Role</label>
                 <select
                   value={form.role}
                   onChange={(event) => setForm({ ...form, role: event.target.value as CreateUserFormState['role'] })}
@@ -205,7 +205,7 @@ export default function AdminUsers() {
               {form.role === 'advisor' ? (
                 <>
                   <div>
-                    <label className="block text-xs font-bold text-dark-blue/60 uppercase mb-2">Designation</label>
+                    <label className="block text-xs font-bold text-maroon/60 uppercase mb-2">Designation</label>
                     <input
                       type="text"
                       value={form.designation}
@@ -215,7 +215,7 @@ export default function AdminUsers() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-dark-blue/60 uppercase mb-2">Department</label>
+                    <label className="block text-xs font-bold text-maroon/60 uppercase mb-2">Department</label>
                     <input
                       type="text"
                       value={form.department}
@@ -227,7 +227,7 @@ export default function AdminUsers() {
                 </>
               ) : null}
               <div>
-                <label className="block text-xs font-bold text-dark-blue/60 uppercase mb-2">Password</label>
+                <label className="block text-xs font-bold text-maroon/60 uppercase mb-2">Password</label>
                 <input
                   type="text"
                   value={form.password}
@@ -247,14 +247,14 @@ export default function AdminUsers() {
             <div className="flex gap-4 mt-8">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="flex-1 px-6 py-3 bg-slate-100 text-dark-blue font-bold rounded-xl hover:bg-slate-200 transition-all text-sm"
+                className="flex-1 px-6 py-3 bg-slate-100 text-maroon font-bold rounded-xl hover:bg-slate-200 transition-all text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={() => void handleCreateUser()}
                 disabled={submitting}
-                className="flex-1 px-6 py-3 bg-accent-yellow text-dark-blue font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex-1 px-6 py-3 bg-accent-yellow text-maroon font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 text-sm disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? 'Creating...' : 'Create User'}
               </button>

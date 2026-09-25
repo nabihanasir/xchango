@@ -87,7 +87,7 @@ export default function AdminApplications() {
           <button
             type="button"
             onClick={() => setSelectedApp(row)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-dark-blue hover:text-white text-dark-blue font-bold rounded-lg transition-all text-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-maroon hover:text-white text-maroon font-bold rounded-lg transition-all text-xs"
           >
             <Eye className="h-3.5 w-3.5" />
             View Details
@@ -147,14 +147,14 @@ export default function AdminApplications() {
     <div className="space-y-6 animate-fade-in">
        <div className="flex items-center justify-between border-b border-light-color/50 pb-6 glass-card p-6 md:p-8 rounded-[2rem] bg-white">
         <div>
-          <h2 className="text-3xl font-black text-dark-blue mb-2">Live Applications</h2>
+          <h2 className="text-3xl font-black text-maroon mb-2">Live Applications</h2>
           <p className="text-body-text font-medium mt-1 md:text-lg">Review applications, assign advisors and set semester end dates.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-           <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-light-color hover:bg-slate-50 text-dark-blue font-bold rounded-xl transition-all">
+           <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-light-color hover:bg-slate-50 text-maroon font-bold rounded-xl transition-all">
              <FileDown className="w-5 h-5" /> Export Data
            </button>
-           <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-dark-blue text-white font-bold rounded-xl hover:bg-navy-hover transition-all shadow-lg shadow-dark-blue/20">
+           <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-maroon-gradient text-white font-bold rounded-xl hover:brightness-110 transition-all shadow-lg shadow-maroon/20">
              <CheckSquare className="w-5 h-5" /> Review All
            </button>
         </div>
@@ -190,7 +190,7 @@ export default function AdminApplications() {
           </div>
         ) : data.length === 0 ? (
           <div className="text-center py-12 px-6 border-2 border-dashed border-light-color rounded-2xl bg-slate-50">
-            <h3 className="text-xl font-bold text-dark-blue">No Applications Found</h3>
+            <h3 className="text-xl font-bold text-maroon">No Applications Found</h3>
             <p className="text-body-text mt-2">There are currently no pending applications waiting for advisor assignment.</p>
           </div>
         ) : (
