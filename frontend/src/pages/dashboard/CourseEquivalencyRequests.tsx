@@ -141,7 +141,9 @@ export default function CourseEquivalencyRequests() {
                             <p className="mt-2 text-sm font-bold text-slate-700">
                               {item.homeCourseId
                                 ? item.homeCourseId.title || item.homeCourseId.name || item.homeCourseId.code
-                                : 'Pending advisor pairing'}
+                                : item.aiMatchStatus === 'in_progress'
+                                  ? 'Matching course outlines…'
+                                  : 'Pending advisor pairing'}
                             </p>
                           </div>
                           <div className="rounded-[1.25rem] bg-slate-50 p-4">

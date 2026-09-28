@@ -29,6 +29,7 @@ router.get('/advisor/requests', authorizeRoles(UserRole.ADVISOR), courseEquivale
 router.get('/advisor/requests/:id', authorizeRoles(UserRole.ADVISOR), courseEquivalencyController.getAdvisorRequestById);
 router.put('/advisor/requests/:id/items/:itemId/home-course', authorizeRoles(UserRole.ADVISOR), courseEquivalencyController.updateHomeCourseSelection);
 router.post('/advisor/requests/:id/items/:itemId/run-match', authorizeRoles(UserRole.ADVISOR), courseEquivalencyController.runMatch);
+router.post('/advisor/requests/:id/items/:itemId/auto-match', authorizeRoles(UserRole.ADVISOR), courseEquivalencyController.rerunAutoMatch);
 router.put('/advisor/requests/:id/decision', authorizeRoles(UserRole.ADVISOR), courseEquivalencyController.submitAdvisorDecision);
 
 export default router;

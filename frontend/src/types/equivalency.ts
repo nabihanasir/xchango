@@ -1,6 +1,7 @@
 export type RequestStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
 export type ItemStatus = 'pending' | 'approved' | 'rejected';
-export type AIMatchStatus = 'not_started' | 'completed' | 'failed';
+export type AIMatchStatus = 'not_started' | 'in_progress' | 'completed' | 'failed';
+export type MatchSource = 'llm' | 'heuristic';
 
 export interface UniversitySummary {
   _id: string;
@@ -30,6 +31,12 @@ export interface MatchReasoning {
   summary: string;
 }
 
+export interface CourseMatchCandidate {
+  homeCourseId: CourseSummary;
+  matchScore: number;
+  reasoning: MatchReasoning;
+}
+
 export interface CourseMatchResult {
   _id: string;
   courseRequestId: string;
@@ -38,6 +45,8 @@ export interface CourseMatchResult {
   homeCourseId: CourseSummary;
   matchScore: number;
   reasoning: MatchReasoning;
+  matchedBy?: MatchSource;
+  candidates?: CourseMatchCandidate[];
   createdAt: string;
   updatedAt: string;
 }

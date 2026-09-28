@@ -50,6 +50,11 @@ export const runMatch = async (req: any, res: Response) => {
   sendResponse(res, 200, 'AI course match completed successfully', request);
 };
 
+export const rerunAutoMatch = async (req: any, res: Response) => {
+  const request = await courseEquivalencyService.rerunAutoMatch(req.params.id, req.params.itemId);
+  sendResponse(res, 200, 'Automatic course match completed', request);
+};
+
 export const submitAdvisorDecision = async (req: any, res: Response) => {
   const wholeRequestDecision = req.body.wholeRequestDecision as CourseRequestItemStatus | undefined;
   const request = await courseEquivalencyService.submitAdvisorDecision(
