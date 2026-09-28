@@ -81,6 +81,10 @@ export const equivalencyApi = {
     apiRequest<CourseRequest>(`/equivalency/advisor/requests/${requestId}/items/${itemId}/run-match`, token, {
       method: 'POST',
     }),
+  rerunAutoMatch: (token: string, requestId: string, itemId: string) =>
+    apiRequest<CourseRequest>(`/equivalency/advisor/requests/${requestId}/items/${itemId}/auto-match`, token, {
+      method: 'POST',
+    }),
   submitAdvisorDecision: (token: string, requestId: string, payload: AdvisorDecisionPayload) =>
     apiRequest<CourseRequest>(`/equivalency/advisor/requests/${requestId}/decision`, token, {
       method: 'PUT',

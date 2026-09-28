@@ -1,12 +1,25 @@
 import { ICourse } from '../models/Course';
-import { ICourseMatchReasoning } from '../models/CourseMatchResult';
+import { ICourseMatchReasoning, MatchSource } from '../models/CourseMatchResult';
 import { calculateSimilarity } from '../utils/similarity';
+import { logger } from '../utils/logger';
 import { getAiModelConfigRaw } from './adminService';
 
-interface MatchResponse {
+export interface MatchResponse {
   matchScore: number;
   reasoning: ICourseMatchReasoning;
 }
+
+export interface RankedHomeCourse extends MatchResponse {
+  homeCourse: ICourse;
+}
+
+export interface HomeCourseRanking {
+  matchedBy: MatchSource;
+  candidates: RankedHomeCourse[];
+}
+
+/** How many home courses survive the cheap pre-filter and are sent to the LLM. */
+export const MAX_LLM_CANDIDATES = 5;
 
 const STOP_WORDS = new Set([
   'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'how', 'in', 'into', 'is', 'it',
@@ -119,7 +132,19 @@ const buildHeuristicMatch = (hostCourse: ICourse, homeCourse: ICourse): MatchRes
   };
 };
 
-const callConfiguredLLM = async (hostCourse: ICourse, homeCourse: ICourse): Promise<MatchResponse | null> => {
+const normalizeMatch = (parsed: Partial<MatchResponse> | undefined): MatchResponse => ({
+  matchScore: Math.max(0, Math.min(100, Math.round(Number(parsed?.matchScore) || 0))),
+  reasoning: {
+    overlappingTopics: parsed?.reasoning?.overlappingTopics || [],
+    missingTopics: parsed?.reasoning?.missingTopics || [],
+    additionalTopics: parsed?.reasoning?.additionalTopics || [],
+    creditHourAssessment: parsed?.reasoning?.creditHourAssessment || 'Not assessed.',
+    summary: parsed?.reasoning?.summary || 'No summary provided.',
+  },
+});
+
+/** Sends a prompt to the configured LLM and returns the parsed JSON, or null when no LLM is configured. */
+const requestLlmJson = async <T>(prompt: string): Promise<T | null> => {
   const dbConfig = await getAiModelConfigRaw();
   const useDbConfig = Boolean(dbConfig?.isEnabled && dbConfig.apiKey && dbConfig.baseUrl && dbConfig.modelName);
 
@@ -130,7 +155,6 @@ const callConfiguredLLM = async (hostCourse: ICourse, homeCourse: ICourse): Prom
 
   const baseUrl = useDbConfig ? dbConfig!.baseUrl : (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1');
   const model = useDbConfig ? dbConfig!.modelName : (process.env.OPENAI_MODEL || 'gpt-4.1-mini');
-  const prompt = buildPrompt(hostCourse, homeCourse);
 
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
@@ -162,28 +186,155 @@ const callConfiguredLLM = async (hostCourse: ICourse, homeCourse: ICourse): Prom
     throw new Error('LLM response was empty.');
   }
 
-  const parsed = JSON.parse(extractJsonObject(rawContent)) as MatchResponse;
-  return {
-    matchScore: Math.max(0, Math.min(100, Math.round(parsed.matchScore))),
-    reasoning: {
-      overlappingTopics: parsed.reasoning?.overlappingTopics || [],
-      missingTopics: parsed.reasoning?.missingTopics || [],
-      additionalTopics: parsed.reasoning?.additionalTopics || [],
-      creditHourAssessment: parsed.reasoning?.creditHourAssessment || '',
-      summary: parsed.reasoning?.summary || '',
-    },
-  };
+  return JSON.parse(extractJsonObject(rawContent)) as T;
 };
 
-export const evaluateCourseMatch = async (hostCourse: ICourse, homeCourse: ICourse): Promise<MatchResponse> => {
+const callConfiguredLLM = async (hostCourse: ICourse, homeCourse: ICourse): Promise<MatchResponse | null> => {
+  const parsed = await requestLlmJson<MatchResponse>(buildPrompt(hostCourse, homeCourse));
+  return parsed ? normalizeMatch(parsed) : null;
+};
+
+export const evaluateCourseMatch = async (
+  hostCourse: ICourse,
+  homeCourse: ICourse
+): Promise<MatchResponse & { matchedBy: MatchSource }> => {
   if (!hostCourse.outlineText?.trim() || !homeCourse.outlineText?.trim()) {
     throw new Error('Both host and home course outlines are required to run the AI match.');
   }
 
   const llmResult = await callConfiguredLLM(hostCourse, homeCourse);
   if (llmResult) {
-    return llmResult;
+    return { ...llmResult, matchedBy: MatchSource.LLM };
   }
 
-  return buildHeuristicMatch(hostCourse, homeCourse);
+  return { ...buildHeuristicMatch(hostCourse, homeCourse), matchedBy: MatchSource.HEURISTIC };
+};
+
+const toTopicSet = (text: string) => new Set(tokenize(text));
+
+const jaccard = (left: Set<string>, right: Set<string>): number => {
+  if (!left.size || !right.size) {
+    return 0;
+  }
+
+  const overlap = [...left].filter((token) => right.has(token)).length;
+  return overlap / (left.size + right.size - overlap);
+};
+
+/** Cheap keyword similarity used to shortlist home courses before asking the LLM. */
+export const prefilterHomeCourses = (hostCourse: ICourse, homeCourses: ICourse[], limit = MAX_LLM_CANDIDATES): ICourse[] => {
+  const hostName = toTopicSet(hostCourse.name || hostCourse.title || '');
+  const hostContent = toTopicSet(`${hostCourse.description || ''} ${hostCourse.outlineText || ''}`);
+
+  return homeCourses
+    .map((homeCourse) => ({
+      homeCourse,
+      score:
+        jaccard(hostName, toTopicSet(homeCourse.name || homeCourse.title || '')) * 0.3 +
+        jaccard(hostContent, toTopicSet(`${homeCourse.description || ''} ${homeCourse.outlineText || ''}`)) * 0.7,
+    }))
+    .sort((left, right) => right.score - left.score)
+    .slice(0, limit)
+    .map(({ homeCourse }) => homeCourse);
+};
+
+const buildRankingPrompt = (hostCourse: ICourse, candidates: ICourse[]) => `You are an academic course equivalency evaluator.
+
+A student will take the HOST UNIVERSITY COURSE below while on exchange. Decide which of the
+candidate HOME UNIVERSITY COURSES it can replace. For every candidate, judge how well the host
+course outline covers the material of that home course outline.
+
+HOST UNIVERSITY COURSE:
+Name: ${hostCourse.name}
+Code: ${hostCourse.code}
+Credit Hours: ${hostCourse.creditHours}
+Outline: ${hostCourse.outlineText}
+
+CANDIDATE HOME UNIVERSITY COURSES:
+${candidates
+  .map(
+    (candidate, index) => `[C${index + 1}]
+Name: ${candidate.name}
+Code: ${candidate.code}
+Credit Hours: ${candidate.creditHours}
+Outline: ${candidate.outlineText}`
+  )
+  .join('\n\n')}
+
+Return a JSON response in this exact format, with one entry per candidate:
+{
+  "candidates": [
+    {
+      "id": "C1",
+      "matchScore": <integer 0-100>,
+      "reasoning": {
+        "overlappingTopics": ["..."],
+        "missingTopics": ["..."],
+        "additionalTopics": ["..."],
+        "creditHourAssessment": "...",
+        "summary": "..."
+      }
+    }
+  ]
+}`;
+
+const rankWithLlm = async (hostCourse: ICourse, candidates: ICourse[]): Promise<RankedHomeCourse[] | null> => {
+  const parsed = await requestLlmJson<{ candidates?: Array<Partial<MatchResponse> & { id?: string }> }>(
+    buildRankingPrompt(hostCourse, candidates)
+  );
+  if (!parsed) {
+    return null;
+  }
+
+  const seen = new Set<number>();
+  const ranked = (parsed.candidates || []).flatMap((entry) => {
+    const index = Number(String(entry.id || '').replace(/\D/g, '')) - 1;
+    if (!candidates[index] || seen.has(index)) {
+      return [];
+    }
+
+    seen.add(index);
+    return [{ homeCourse: candidates[index], ...normalizeMatch(entry) }];
+  });
+
+  if (!ranked.length) {
+    throw new Error('LLM response did not score any of the candidate home courses.');
+  }
+
+  return ranked;
+};
+
+/**
+ * Finds the home courses whose outlines best match the host course.
+ * Shortlists with keyword similarity, then asks the LLM to score the shortlist.
+ * Falls back to the keyword heuristic when no LLM is configured or the LLM call fails.
+ */
+export const rankHomeCourseMatches = async (hostCourse: ICourse, homeCourses: ICourse[]): Promise<HomeCourseRanking> => {
+  if (!hostCourse.outlineText?.trim()) {
+    throw new Error('The host course has no outline, so it cannot be matched automatically.');
+  }
+
+  const eligible = homeCourses.filter((homeCourse) => homeCourse.outlineText?.trim());
+  if (!eligible.length) {
+    throw new Error('No home courses with outlines are available to match against.');
+  }
+
+  const shortlist = prefilterHomeCourses(hostCourse, eligible);
+  const byScore = (left: RankedHomeCourse, right: RankedHomeCourse) => right.matchScore - left.matchScore;
+
+  try {
+    const llmRanking = await rankWithLlm(hostCourse, shortlist);
+    if (llmRanking) {
+      return { matchedBy: MatchSource.LLM, candidates: llmRanking.sort(byScore) };
+    }
+  } catch (error: any) {
+    logger.warn('LLM course ranking failed; falling back to keyword matching', { error: error.message });
+  }
+
+  return {
+    matchedBy: MatchSource.HEURISTIC,
+    candidates: shortlist
+      .map((homeCourse) => ({ homeCourse, ...buildHeuristicMatch(hostCourse, homeCourse) }))
+      .sort(byScore),
+  };
 };
