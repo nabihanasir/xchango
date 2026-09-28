@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import Application from '../models/Application';
 import CourseRequest, { CourseRequestItemStatus } from '../models/CourseRequest';
-import Notification from '../models/Notification';
+import { appUrl, notifyUser } from './notificationService';
 import Result, { IResult, ResultStatus } from '../models/Result';
 import { advisorCanAccessStudent } from './applicationService';
 
@@ -20,21 +20,17 @@ const ensureValidObjectId = (value: string, message: string) => {
 };
 
 const createStudentNotification = async (result: IResult) => {
-  await Notification.create({
+  await notifyUser({
     userId: result.studentId,
     message: `Your result has been published. Grade: ${result.grade}${result.marks != null ? ` (${result.marks}/100)` : ''}.`,
     subject: 'Result published',
     type: 'result_published',
-    channels: {
-      inApp: true,
-      email: true,
-    },
-    emailStatus: 'queued',
     metadata: {
       resultId: result._id,
       courseRequestItemId: result.courseRequestItemId,
       publishedAt: result.publishedAt,
     },
+    action: { label: 'View results', url: appUrl('/dashboard/results') },
   });
 };
 

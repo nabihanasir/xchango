@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Mail, Phone, Calendar, Hash, GraduationCap, MapPin, CheckCircle2, Calculator } from 'lucide-react';
+import { X, Mail, Phone, Calendar, Hash, GraduationCap, MapPin, CheckCircle2, Calculator, PlaneLanding } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import { adminApi } from '../../lib/adminApi';
+import MarkArrivalModal from '../MarkArrivalModal';
+import { canMarkArrival } from '../../utils/arrival';
 import type { WorkflowApplication } from '../../types/application';
 
 interface ApplicationDetailModalProps {
@@ -21,6 +23,9 @@ const WIZARD_STEPS = [
 
 export default function ApplicationDetailModal({ app, onClose, onApplicationUpdate }: ApplicationDetailModalProps) {
   const [submitting, setSubmitting] = useState(false);
+  const [arrivalModalOpen, setArrivalModalOpen] = useState(false);
+  // Keeps the arrival visible right after it is recorded, before the parent list reloads.
+  const [arrival, setArrival] = useState(app.arrival);
 
   if (!app) return null;
 
@@ -183,6 +188,16 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                 )}
               </div>
 
+              {arrival?.arrivedAt ? (
+                <div className="bg-white p-6 rounded-3xl border border-emerald-200 shadow-sm space-y-2">
+                  <h4 className="text-xs font-black text-emerald-700 uppercase tracking-[0.2em]">Arrived</h4>
+                  <p className="text-sm font-bold text-maroon">{new Date(arrival.arrivedAt).toLocaleDateString()}</p>
+                  <p className="text-xs font-medium text-body-text">
+                    {arrival.notices.filter((notice) => notice.sent).length} of {arrival.notices.length} instructor email(s) sent
+                  </p>
+                </div>
+              ) : null}
+
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-6">
                 <h4 className="text-xs font-black text-maroon/40 uppercase tracking-[0.2em]">Application Stage</h4>
                 <div className="space-y-6">
@@ -257,13 +272,22 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
           </div>
         </div>
 
-        <footer className="bg-white px-8 py-6 border-t border-light-color/60 flex justify-end gap-3 shrink-0">
+        <footer className="bg-white px-8 py-6 border-t border-light-color/60 flex flex-wrap justify-end gap-3 shrink-0">
           <button 
             onClick={onClose}
             className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-body-text font-bold rounded-xl transition-all"
           >
              Close View
           </button>
+          {canMarkArrival({ ...app, arrival }) && (
+            <button
+              onClick={() => setArrivalModalOpen(true)}
+              className="px-6 py-3 bg-white border border-maroon/20 text-maroon font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
+            >
+              <PlaneLanding className="h-4 w-4" />
+              Mark Arrived
+            </button>
+          )}
           {app.status === 'SHORTLISTED' && (
             <button 
               onClick={handleIssueOfferLetter}
@@ -279,6 +303,17 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
           </button>
         </footer>
       </div>
+
+      {arrivalModalOpen ? (
+        <MarkArrivalModal
+          application={app}
+          onClose={() => setArrivalModalOpen(false)}
+          onRecorded={(result) => {
+            setArrival(result.application.arrival);
+            onApplicationUpdate?.();
+          }}
+        />
+      ) : null}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }

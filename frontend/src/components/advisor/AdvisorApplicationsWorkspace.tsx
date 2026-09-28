@@ -4,11 +4,14 @@ import {
   Eye,
   FileText,
   GraduationCap,
+  PlaneLanding,
   Sparkles,
   UserRound,
   X,
 } from 'lucide-react';
 import DocumentList from '../../components/DocumentList';
+import MarkArrivalModal from '../../components/MarkArrivalModal';
+import { canMarkArrival } from '../../utils/arrival';
 import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
 import { resolveUploadUrl, studentProfileApi } from '../../lib/studentProfileApi';
@@ -71,6 +74,7 @@ export default function AdvisorApplicationsWorkspace({
   const [completingInterview, setCompletingInterview] = useState(false);
   const [decisionNotes, setDecisionNotes] = useState('');
   const [submittingDecision, setSubmittingDecision] = useState<'recommend' | 'not-recommend' | ''>('');
+  const [arrivalModalOpen, setArrivalModalOpen] = useState(false);
 
   const stats = useMemo(() => {
     const pending = applications.filter((item) =>
@@ -719,6 +723,25 @@ export default function AdvisorApplicationsWorkspace({
                     </p>
                   </div>
                 ) : null}
+
+                {selectedApplication.arrival?.arrivedAt ? (
+                  <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/70 p-4">
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700">Arrived at host university</p>
+                    <p className="mt-2 text-sm text-slate-700">
+                      {new Date(selectedApplication.arrival.arrivedAt).toLocaleDateString()} ·{' '}
+                      {selectedApplication.arrival.notices.filter((notice) => notice.sent).length} instructor email(s) sent
+                    </p>
+                  </div>
+                ) : canMarkArrival(selectedApplication) ? (
+                  <button
+                    type="button"
+                    onClick={() => setArrivalModalOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-slate-700"
+                  >
+                    <PlaneLanding className="h-4 w-4" />
+                    Mark student arrived
+                  </button>
+                ) : null}
               </div>
             </div>
 
@@ -1006,6 +1029,13 @@ export default function AdvisorApplicationsWorkspace({
           </div>
         )}
       </section>
+      {arrivalModalOpen && selectedApplication ? (
+        <MarkArrivalModal
+          application={selectedApplication}
+          onClose={() => setArrivalModalOpen(false)}
+          onRecorded={(result) => syncApplication(result.application)}
+        />
+      ) : null}
     </div>
   );
 }

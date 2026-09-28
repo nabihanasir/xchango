@@ -7,7 +7,16 @@ export interface CourseInput {
   title: string;
   description?: string;
   creditHours: number;
+  instructorName?: string;
+  instructorEmail?: string;
 }
+
+export interface InstructorInput {
+  instructorName?: string;
+  instructorEmail?: string;
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const DEMO_ADMIN_EMAIL = 'admin@xchango.com';
 const DEMO_ADMIN_PASSWORD = 'Admin@123';
@@ -77,6 +86,22 @@ const validateCourseInput = (payload: CourseInput) => {
   return { title, creditHours };
 };
 
+const validateInstructorInput = (payload: InstructorInput) => {
+  const instructorName = payload.instructorName?.trim() || '';
+  const instructorEmail = payload.instructorEmail?.trim().toLowerCase() || '';
+
+  if (instructorEmail && !EMAIL_PATTERN.test(instructorEmail)) {
+    throw new ValidationError(
+      'Instructor email is invalid.',
+      'The instructor email address is not in a valid format.',
+      'Enter an address like name@university.edu or leave it empty.',
+      'COURSE_INSTRUCTOR_EMAIL_INVALID'
+    );
+  }
+
+  return { instructorName, instructorEmail };
+};
+
 const populateCourse = <T>(query: T) =>
   (query as any).populate('createdBy', 'name email role');
 
@@ -131,12 +156,14 @@ export const createHomeCourse = async (adminId: string, payload: CourseInput) =>
   }
 
   const { title, creditHours } = validateCourseInput(payload);
+  const instructor = validateInstructorInput(payload);
 
   const course = await Course.create({
     title,
     name: title,
     description: payload.description?.trim() || '',
     creditHours,
+    ...instructor,
     code: '',
     universityId: null,
     type: CourseType.HOME,
@@ -149,6 +176,7 @@ export const createHomeCourse = async (adminId: string, payload: CourseInput) =>
 
 export const updateHomeCourse = async (courseId: string, payload: CourseInput) => {
   const { title, creditHours } = validateCourseInput(payload);
+  const instructor = validateInstructorInput(payload);
   const course = await Course.findOne({
     _id: courseId,
     $or: [{ isHomeCourse: true }, { type: CourseType.HOME }],
@@ -167,11 +195,37 @@ export const updateHomeCourse = async (courseId: string, payload: CourseInput) =
   course.name = title;
   course.description = payload.description?.trim() || '';
   course.creditHours = creditHours;
+  course.instructorName = instructor.instructorName;
+  course.instructorEmail = instructor.instructorEmail;
   course.isHomeCourse = true;
   course.type = CourseType.HOME;
   await course.save();
 
   return getCourseById(courseId);
+};
+
+export const listHostCourses = async () =>
+  Course.find({ type: CourseType.HOST }).populate('universityId', 'name').sort({ code: 1, title: 1 });
+
+/** Sets who teaches a course (home or host). Empty values clear the instructor. */
+export const updateCourseInstructor = async (courseId: string, payload: InstructorInput) => {
+  const instructor = validateInstructorInput(payload);
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    throw new NotFoundError(
+      'Course not found.',
+      'No course exists for the provided identifier.',
+      'Refresh the list and try again.',
+      'COURSE_NOT_FOUND'
+    );
+  }
+
+  course.instructorName = instructor.instructorName;
+  course.instructorEmail = instructor.instructorEmail;
+  await course.save();
+
+  return course.populate('universityId', 'name');
 };
 
 export const deleteHomeCourse = async (courseId: string) => {

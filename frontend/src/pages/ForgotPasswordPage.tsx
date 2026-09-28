@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
       setResult(response);
       showToast({
         tone: 'success',
-        title: 'Reset link prepared',
+        title: 'Reset link sent',
         description: response.message,
       });
     } catch (caughtError) {
@@ -61,8 +61,8 @@ export default function ForgotPasswordPage() {
   return (
     <AuthLayout title="Reset Password" subtitle="Request a secure reset link for your account">
       <div className="mb-6 rounded-2xl border border-dark-blue/10 bg-dark-blue/5 px-4 py-3 text-sm font-medium text-dark-blue">
-        Enter the email address linked to your Xchango account. If it exists, we&apos;ll prepare a password reset
-        link for you.
+        Enter the email address linked to your Xchango account. If it exists, we&apos;ll email you a password reset
+        link.
       </div>
 
       <form className="w-full space-y-6" onSubmit={handleSubmit}>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
         />
 
         <Button type="submit" variant="primary" className="mt-6 py-4 text-lg" disabled={submitting}>
-          {submitting ? 'Preparing Reset Link...' : 'Send Reset Link'}
+          {submitting ? 'Sending Reset Link...' : 'Send Reset Link'}
           <KeyRound className="ml-2 h-5 w-5" />
         </Button>
 
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
 
       {result ? (
         <div className="mt-6 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/90 p-5 text-emerald-950 shadow-soft">
-          <p className="text-lg font-black">Check your email flow</p>
+          <p className="text-lg font-black">Check your inbox</p>
           <p className="mt-2 text-sm leading-6">{result.message}</p>
           {result.resetUrl ? (
             <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4">
