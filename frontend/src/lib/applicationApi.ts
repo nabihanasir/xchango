@@ -1,6 +1,7 @@
 import { apiClient } from './httpClient';
 import type {
   ApplicationCourseSummary,
+  ArrivalResult,
   ApplicationDraftPayload,
   ApplicationStatus,
   SelectedCourseStatus,
@@ -86,4 +87,6 @@ export const applicationApi = {
     applicationId: string,
     payload: { courseId: string; status: Exclude<SelectedCourseStatus, 'pending'>; advisorComment?: string }
   ) => unwrap<WorkflowApplication>(apiClient.put(`/applications/${applicationId}/course-decision`, payload)),
+  recordArrival: (applicationId: string, payload: { arrivedAt: string; onlineHomeCourseIds: string[] }) =>
+    unwrap<ArrivalResult>(apiClient.post(`/applications/${applicationId}/arrival`, payload)),
 };

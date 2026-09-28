@@ -3,7 +3,7 @@ import type {
   ApplicationCourseSummary,
   WorkflowApplication,
 } from '../types/application';
-import type { CourseInput } from '../types/course';
+import type { CourseInput, CourseInstructorInput } from '../types/course';
 
 interface ApiEnvelope<T> {
   success: boolean;
@@ -119,6 +119,10 @@ export const adminApi = {
     unwrap<ApplicationCourseSummary>(apiClient.put(`/courses/${courseId}`, payload)),
   deleteCourse: (courseId: string) =>
     unwrap<Record<string, unknown>>(apiClient.delete(`/courses/${courseId}`)),
+  getHostCourses: () =>
+    unwrap<ApplicationCourseSummary[]>(apiClient.get('/courses/host')),
+  updateCourseInstructor: (courseId: string, payload: CourseInstructorInput) =>
+    unwrap<ApplicationCourseSummary>(apiClient.patch(`/courses/${courseId}/instructor`, payload)),
   getAiModelConfig: () =>
     unwrap<AiModelConfigRecord | null>(apiClient.get('/admin/ai-model-config')),
   updateAiModelConfig: (payload: AiModelConfigInput) =>

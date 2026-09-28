@@ -9,7 +9,7 @@ import CourseRequest, {
   ICourseRequestItem,
 } from '../models/CourseRequest';
 import StudentProfile from '../models/StudentProfile';
-import Notification from '../models/Notification';
+import { appUrl, notifyUser } from './notificationService';
 import { evaluateCourseMatch } from './aiCourseMatcherService';
 
 interface DecisionInput {
@@ -145,21 +145,17 @@ const createDecisionMessage = (request: Record<string, any>) => {
 };
 
 const createStudentNotification = async (request: Record<string, any>) => {
-  await Notification.create({
+  await notifyUser({
     userId: request.studentId._id || request.studentId,
     message: createDecisionMessage(request),
     subject: 'Course equivalency decision',
     type: 'course_equivalency',
-    channels: {
-      inApp: true,
-      email: true,
-    },
-    emailStatus: 'queued',
     metadata: {
       courseRequestId: request._id,
       status: request.status,
       decidedAt: new Date().toISOString(),
     },
+    action: { label: 'View decision', url: appUrl('/dashboard/equivalency/requests') },
   });
 };
 

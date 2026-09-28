@@ -9,7 +9,7 @@ import User, { UserRole } from '../models/User';
 import AdvisorProfile from '../models/AdvisorProfile';
 import Course, { CourseType, ICourse } from '../models/Course';
 import University from '../models/University';
-import Notification from '../models/Notification';
+import { appUrl, formatDateTime, notifyUserSafely } from './notificationService';
 import { ensureStudentProfile } from './studentService';
 import {
   getCourseRecommendations,
@@ -161,6 +161,21 @@ const ensureCourseWorkStatus = (application: IApplication) => {
 
   return application;
 };
+
+const notifyStudentAboutApplication = (
+  application: IApplication,
+  subject: string,
+  message: string,
+  type = 'application_status'
+) =>
+  notifyUserSafely({
+    userId: application.studentId,
+    subject,
+    type,
+    message,
+    metadata: { applicationId: application._id, status: application.status },
+    action: { label: 'View application', url: appUrl(`/dashboard/applications/${application._id}`) },
+  });
 
 const populateApplication = <T>(query: T) => {
   return (query as any)
@@ -546,6 +561,12 @@ export const submitApplication = async (applicationId: string, studentId: string
   application.status = ApplicationStatus.PENDING;
   await application.save();
 
+  await notifyStudentAboutApplication(
+    application,
+    'Application submitted',
+    `Your exchange application to ${application.university} has been submitted. We will let you know once an advisor is assigned.`
+  );
+
   return {
     application,
     warnings: buildSubmissionWarnings(application),
@@ -585,6 +606,20 @@ export const assignAdvisor = async (applicationId: string, advisorId: string) =>
   application.status = ApplicationStatus.ASSIGNED;
   await application.save();
 
+  await notifyStudentAboutApplication(
+    application,
+    'Advisor assigned',
+    `${advisor.name} has been assigned as your advisor for your application to ${application.university}. They will contact you to schedule your interview.`
+  );
+  await notifyUserSafely({
+    userId: advisor._id as mongoose.Types.ObjectId,
+    subject: 'New student assigned to you',
+    type: 'advisor_assigned',
+    message: `A new exchange application for ${application.university} (${application.program}) has been assigned to you. Please review it and schedule an interview.`,
+    metadata: { applicationId: application._id },
+    action: { label: 'Open applications', url: appUrl('/advisor/applications') },
+  });
+
   const assignedStudentIds = await Application.distinct('studentId', { advisorId });
   await AdvisorProfile.findOneAndUpdate(
     { userId: advisorId },
@@ -621,6 +656,13 @@ export const scheduleInterview = async (
   application.interview = interview;
   application.status = ApplicationStatus.INTERVIEW_SCHEDULED;
   await application.save();
+
+  await notifyStudentAboutApplication(
+    application,
+    'Interview scheduled',
+    `Your exchange interview has been scheduled for ${formatDateTime(interview.date)} at ${interview.location}. Please be on time and bring any documents your advisor asked for.`,
+    'interview_scheduled'
+  );
   return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
 };
 
@@ -710,21 +752,14 @@ export const recordInterviewDecision = async (
   application.status = input.recommended ? ApplicationStatus.SHORTLISTED : ApplicationStatus.REJECTED;
   await application.save();
 
-  try {
-    await Notification.create({
-      userId: application.studentId,
-      subject: 'Interview outcome',
-      type: 'interview_decision',
-      message: input.recommended
-        ? 'Your advisor has recommended you after the interview. You can now continue your application.'
-        : `Your advisor has not recommended your application, so it cannot proceed. Reason: ${notes}`,
-      channels: { inApp: true, email: false },
-      emailStatus: 'not_requested',
-      metadata: { applicationId: application._id, recommended: input.recommended },
-    });
-  } catch (error) {
-    console.error('Failed to notify student of interview decision', error);
-  }
+  await notifyStudentAboutApplication(
+    application,
+    'Interview outcome',
+    input.recommended
+      ? 'Your advisor has recommended you after the interview. You can now continue your application.'
+      : `Your advisor has not recommended your application, so it cannot proceed. Reason: ${notes}`,
+    'interview_decision'
+  );
 
   return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
 };
@@ -749,6 +784,15 @@ export const updateStatus = async (
 
   application.status = status;
   await application.save();
+
+  await notifyStudentAboutApplication(
+    application,
+    status === ApplicationStatus.SHORTLISTED ? 'You have been shortlisted' : 'Application update',
+    status === ApplicationStatus.SHORTLISTED
+      ? `Good news! You have been shortlisted for ${application.university}. Log in to continue with your documents and course selection.`
+      : `Unfortunately your application to ${application.university} was not selected this time.`
+  );
+
   return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
 };
 

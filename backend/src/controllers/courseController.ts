@@ -21,3 +21,13 @@ export const deleteCourse = async (req: any, res: Response) => {
   await courseService.deleteHomeCourse(req.params.id);
   sendResponse(res, 200, 'Course deleted successfully', null);
 };
+
+export const getHostCourses = async (_req: any, res: Response) => {
+  const courses = await courseService.listHostCourses();
+  sendResponse(res, 200, 'Host courses fetched successfully', courses);
+};
+
+export const updateCourseInstructor = async (req: any, res: Response) => {
+  const course = await courseService.updateCourseInstructor(req.params.id, req.body);
+  sendResponse(res, 200, 'Course instructor updated successfully', course);
+};

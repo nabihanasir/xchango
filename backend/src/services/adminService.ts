@@ -9,6 +9,7 @@ import AiModelConfig, { AiProvider, IAiModelConfig } from '../models/AiModelConf
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import * as courseService from './courseService';
+import { appUrl, notifyUserSafely } from './notificationService';
 
 const populateApplications = <T>(query: T) =>
   (query as any)
@@ -186,6 +187,15 @@ export const updateApplicationOfferLetter = async (applicationId: string, offerL
   });
 
   await Application.findByIdAndUpdate(applicationId, { status: ApplicationStatus.READY_FOR_SUBMISSION });
+
+  await notifyUserSafely({
+    userId: application.studentId,
+    subject: 'Offer letter issued',
+    type: 'offer_letter',
+    message: `Your offer letter for ${application.university} has been issued. Log in to download it.`,
+    metadata: { applicationId: application._id, offerLetterId: offerLetter._id },
+    action: { label: 'View application', url: appUrl(`/dashboard/applications/${application._id}`) },
+  });
   
   return offerLetter;
 };

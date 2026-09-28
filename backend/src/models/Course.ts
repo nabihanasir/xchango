@@ -17,6 +17,9 @@ export interface ICourse extends Document {
   universityId?: mongoose.Types.ObjectId | null;
   type: CourseType;
   isHomeCourse: boolean;
+  /** Who teaches the course; emailed when an enrolled exchange student arrives. */
+  instructorName?: string;
+  instructorEmail?: string;
   createdBy?: mongoose.Types.ObjectId | null;
 }
 
@@ -32,6 +35,8 @@ const CourseSchema: Schema = new Schema(
     universityId: { type: Schema.Types.ObjectId, ref: 'University', default: null },
     type: { type: String, enum: Object.values(CourseType), required: true },
     isHomeCourse: { type: Boolean, default: true },
+    instructorName: { type: String, default: '', trim: true },
+    instructorEmail: { type: String, default: '', trim: true, lowercase: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   },
   { timestamps: true }
