@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   ChevronDown,
+  FileText,
   LoaderCircle,
   RefreshCcw,
   Save,
@@ -14,9 +15,22 @@ import { Link, useParams } from 'react-router-dom';
 import Button from '../../components/Button';
 import { useAuth } from '../../context/AuthContext';
 import { equivalencyApi } from '../../lib/api';
-import type { CourseRequest, CourseRequestItem, CourseSummary, ItemStatus } from '../../types/equivalency';
+import { resolveUploadUrl } from '../../lib/studentProfileApi';
+import type {
+  AIMatchStatus,
+  CourseRequest,
+  CourseRequestItem,
+  CourseSummary,
+  ItemStatus,
+  MatchSnapshot,
+} from '../../types/equivalency';
 import {
   formatDisplayDate,
+  getActiveBasis,
+  getActiveCandidates,
+  getActiveMatch,
+  getDescriptionMatch,
+  getOutlineMatch,
   getItemStatusClasses,
   getRequestStatusClasses,
   getScoreBadgeClasses,
@@ -43,19 +57,53 @@ const getCourseTitle = (course?: CourseSummary | null) => course?.title || cours
 const MATCH_POLL_INTERVAL_MS = 4000;
 const MAX_ALTERNATIVES = 3;
 
-/** The stored match only describes the item when it is for the currently paired home course. */
-const getActiveMatch = (item: CourseRequestItem) =>
-  item.matchResult && item.homeCourseId && item.matchResult.homeCourseId?._id === item.homeCourseId._id ? item.matchResult : null;
-
 const getAlternatives = (item: CourseRequestItem) =>
-  (item.matchResult?.candidates || [])
+  getActiveCandidates(item)
     .filter((candidate) => candidate.homeCourseId?._id && candidate.homeCourseId._id !== item.homeCourseId?._id)
     .slice(0, MAX_ALTERNATIVES);
 
 const isAdvisorOverride = (item: CourseRequestItem) => {
-  const topCandidate = item.matchResult?.candidates?.[0];
+  const topCandidate = getActiveCandidates(item)[0];
   return Boolean(topCandidate && item.homeCourseId && topCandidate.homeCourseId?._id !== item.homeCourseId._id);
 };
+
+interface MatchScoreTileProps {
+  label: string;
+  match: MatchSnapshot | null;
+  status?: AIMatchStatus;
+  isActive: boolean;
+  emptyText: string;
+}
+
+/** One of the two match scores: from the catalogue description (preliminary) or the uploaded outline (final). */
+function MatchScoreTile({ label, match, status, isActive, emptyText }: MatchScoreTileProps) {
+  const score = match?.matchScore ?? 0;
+
+  return (
+    <div
+      className={`rounded-[1.25rem] px-4 py-3 ${
+        match ? getScoreBadgeClasses(score) : 'border border-dashed border-slate-300 bg-white text-slate-500'
+      } ${isActive ? 'ring-2 ring-accent-yellow/40' : 'opacity-80'}`}
+    >
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em]">{label}</p>
+      {status === 'in_progress' ? (
+        <p className="mt-2 flex items-center gap-2 text-sm font-bold">
+          <LoaderCircle className="h-4 w-4 animate-spin" />
+          Matching…
+        </p>
+      ) : match ? (
+        <>
+          <p className="mt-1 text-2xl font-black">{score}/100</p>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/60">
+            <div className={`h-full rounded-full ${getScoreTrackClasses(score)}`} style={{ width: `${score}%` }} />
+          </div>
+        </>
+      ) : (
+        <p className="mt-2 text-xs font-medium">{status === 'failed' ? 'Match failed' : emptyText}</p>
+      )}
+    </div>
+  );
+}
 
 export default function AdvisorEquivalencyRequestDetail() {
   const { user } = useAuth();
@@ -116,7 +164,9 @@ export default function AdvisorEquivalencyRequestDetail() {
     void loadData();
   }, [id, user?.token]);
 
-  const hasPendingMatches = Boolean(request?.items.some((item) => item.aiMatchStatus === 'in_progress'));
+  const hasPendingMatches = Boolean(
+    request?.items.some((item) => item.aiMatchStatus === 'in_progress' || item.outlineMatchStatus === 'in_progress')
+  );
 
   // Matching runs in the background after the student submits, so poll until every course has a result.
   useEffect(() => {
@@ -190,24 +240,6 @@ export default function AdvisorEquivalencyRequestDetail() {
     }
   };
 
-  const handleRunMatch = async (itemId: string) => {
-    if (!user?.token || !request) {
-      return;
-    }
-
-    try {
-      setLoadingActionId(`match-${itemId}`);
-      setError('');
-      const response = await equivalencyApi.runCourseMatch(user.token, request._id, itemId);
-      syncRequestState(response);
-      setExpandedItemIds((current) => (current.includes(itemId) ? current : [...current, itemId]));
-    } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : 'Unable to complete the AI match.');
-    } finally {
-      setLoadingActionId('');
-    }
-  };
-
   const handleRerunAutoMatch = async (itemId: string) => {
     if (!user?.token || !request) {
       return;
@@ -221,6 +253,24 @@ export default function AdvisorEquivalencyRequestDetail() {
       setExpandedItemIds((current) => (current.includes(itemId) ? current : [...current, itemId]));
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : 'Unable to re-run the automatic match.');
+    } finally {
+      setLoadingActionId('');
+    }
+  };
+
+  const handleRerunOutlineMatch = async (itemId: string) => {
+    if (!user?.token || !request) {
+      return;
+    }
+
+    try {
+      setLoadingActionId(`outline-${itemId}`);
+      setError('');
+      const response = await equivalencyApi.rerunOutlineMatch(user.token, request._id, itemId);
+      syncRequestState(response);
+      setExpandedItemIds((current) => (current.includes(itemId) ? current : [...current, itemId]));
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : 'Unable to re-run the outline match.');
     } finally {
       setLoadingActionId('');
     }
@@ -353,10 +403,19 @@ export default function AdvisorEquivalencyRequestDetail() {
       <div className="space-y-6">
         {request.items.map((item) => {
           const isExpanded = expandedItemIds.includes(item._id);
+          const basis = getActiveBasis(item);
           const activeMatch = getActiveMatch(item);
-          const score = activeMatch?.matchScore ?? 0;
           const alternatives = getAlternatives(item);
-          const isMatching = item.aiMatchStatus === 'in_progress';
+          const activeStatus = basis === 'outline' ? item.outlineMatchStatus : item.aiMatchStatus;
+          const isMatching = activeStatus === 'in_progress';
+          const failures = [
+            item.aiMatchStatus === 'failed'
+              ? { key: 'description', label: 'Description match failed', error: item.aiMatchError, retry: handleRerunAutoMatch }
+              : null,
+            item.outlineMatchStatus === 'failed'
+              ? { key: 'outline', label: 'Outline match failed', error: item.outlineMatchError, retry: handleRerunOutlineMatch }
+              : null,
+          ].filter((failure) => failure !== null);
           const isOverrideOpen = overrideItemIds.includes(item._id);
           const isBusy = loadingActionId.endsWith(`-${item._id}`);
 
@@ -374,12 +433,52 @@ export default function AdvisorEquivalencyRequestDetail() {
                   <p className="mt-4 text-sm font-medium leading-7 text-slate-600">
                     {item.hostCourseId.description || 'No description provided for this host course.'}
                   </p>
+
+                  <div className="mt-4 rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3">
+                    <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">
+                      <FileText className="h-4 w-4" />
+                      Student's course outline
+                    </p>
+                    {item.uploadedOutline ? (
+                      <>
+                        <p className="mt-2 text-sm font-medium text-slate-600">
+                          {item.uploadedOutline.fileUrl ? (
+                            <a
+                              href={resolveUploadUrl(item.uploadedOutline.fileUrl)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="font-bold text-emerald-700 underline"
+                            >
+                              {item.uploadedOutline.fileName || 'View uploaded file'}
+                            </a>
+                          ) : (
+                            'Pasted text'
+                          )}{' '}
+                          · uploaded {formatDisplayDate(item.uploadedOutline.uploadedAt)}
+                        </p>
+                        <details className="mt-2 text-sm">
+                          <summary className="cursor-pointer text-xs font-bold text-slate-500">Show outline text</summary>
+                          <p className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-[1rem] bg-white p-3 text-xs font-medium leading-6 text-slate-600">
+                            {item.uploadedOutline.text}
+                          </p>
+                        </details>
+                      </>
+                    ) : (
+                      <p className="mt-2 text-sm font-medium text-slate-400">
+                        Not uploaded yet. The student can upload it once their arrival at the host university is recorded.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex flex-col rounded-[1.5rem] border border-slate-200 bg-white/80 p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">
-                      {isAdvisorOverride(item) ? 'Advisor-selected home course' : 'AI-matched home course'}
+                      {isAdvisorOverride(item)
+                        ? 'Advisor-selected home course'
+                        : basis === 'outline'
+                          ? 'Matched from uploaded outline'
+                          : 'AI-matched home course · preliminary'}
                     </p>
                     {activeMatch?.matchedBy === 'heuristic' ? (
                       <span className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-amber-700">
@@ -391,7 +490,9 @@ export default function AdvisorEquivalencyRequestDetail() {
                   {isMatching ? (
                     <div className="mt-3 flex items-center gap-3 rounded-[1.25rem] border border-dashed border-slate-300 bg-white px-4 py-4 text-sm font-medium text-slate-500">
                       <LoaderCircle className="h-5 w-5 shrink-0 animate-spin text-accent-yellow" />
-                      Comparing this outline with the home course catalogue…
+                      {basis === 'outline'
+                        ? "Comparing the student's uploaded outline with the home course catalogue…"
+                        : 'Comparing the catalogue description with the home course catalogue…'}
                     </div>
                   ) : item.homeCourseId ? (
                     <>
@@ -405,7 +506,7 @@ export default function AdvisorEquivalencyRequestDetail() {
                     </>
                   ) : (
                     <p className="mt-4 text-sm font-medium text-slate-400">
-                      {item.aiMatchStatus === 'failed'
+                      {activeStatus === 'failed'
                         ? 'No home course could be matched automatically. Re-run the match or choose one below.'
                         : 'No home course has been matched yet.'}
                     </p>
@@ -500,41 +601,46 @@ export default function AdvisorEquivalencyRequestDetail() {
               </div>
 
               <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-                <div className={`flex flex-col gap-4 rounded-[1.5rem] px-5 py-4 ${activeMatch ? getScoreBadgeClasses(score) : 'border border-dashed border-slate-300 bg-white text-slate-500'}`}>
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.25em]">AI Match Score</p>
-                    <p className="mt-2 text-3xl font-black">{activeMatch ? `${score}/100` : '--'}</p>
-                    {activeMatch ? (
-                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/60">
-                        <div className={`h-full rounded-full ${getScoreTrackClasses(score)}`} style={{ width: `${score}%` }} />
-                      </div>
-                    ) : null}
-                  </div>
+                <div className="flex flex-col gap-3">
+                  <MatchScoreTile
+                    label="Description match · preliminary"
+                    match={getDescriptionMatch(item)}
+                    status={item.aiMatchStatus}
+                    isActive={basis === 'description'}
+                    emptyText="Not matched yet"
+                  />
+                  <MatchScoreTile
+                    label="Outline match · final"
+                    match={getOutlineMatch(item)}
+                    status={item.outlineMatchStatus}
+                    isActive={basis === 'outline'}
+                    emptyText="Waiting for the student's outline"
+                  />
 
                   <Button
                     type="button"
                     variant="secondary"
-                    onClick={() => void handleRerunAutoMatch(item._id)}
+                    onClick={() => void (basis === 'outline' ? handleRerunOutlineMatch(item._id) : handleRerunAutoMatch(item._id))}
                     disabled={isBusy || isMatching}
                   >
-                    {loadingActionId === `auto-${item._id}` || isMatching ? (
+                    {isBusy || isMatching ? (
                       <LoaderCircle className="mr-2 h-5 w-5 animate-spin" />
                     ) : (
                       <Sparkles className="mr-2 h-5 w-5" />
                     )}
-                    {isMatching ? 'Matching…' : 'Re-run auto-match'}
+                    {isMatching ? 'Matching…' : basis === 'outline' ? 'Re-run outline match' : 'Re-run auto-match'}
                   </Button>
 
-                  {item.aiMatchStatus === 'failed' ? (
-                    <div className="rounded-[1.25rem] border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
+                  {failures.map((failure) => (
+                    <div key={failure.key} className="rounded-[1.25rem] border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
                       <div className="flex items-start gap-2">
                         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                         <div>
-                          <p className="font-bold">AI match failed</p>
-                          <p className="mt-1">{item.aiMatchError || 'Unknown matching error.'}</p>
+                          <p className="font-bold">{failure.label}</p>
+                          <p className="mt-1">{failure.error || 'Unknown matching error.'}</p>
                           <button
                             type="button"
-                            onClick={() => void (item.homeCourseId ? handleRunMatch(item._id) : handleRerunAutoMatch(item._id))}
+                            onClick={() => void failure.retry(item._id)}
                             disabled={isBusy}
                             className="mt-2 inline-flex items-center font-bold text-red-700 underline"
                           >
@@ -544,7 +650,7 @@ export default function AdvisorEquivalencyRequestDetail() {
                         </div>
                       </div>
                     </div>
-                  ) : null}
+                  ))}
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -581,7 +687,7 @@ export default function AdvisorEquivalencyRequestDetail() {
                 </div>
               </div>
 
-              {activeMatch ? (
+              {activeMatch?.reasoning ? (
                 <div className="mt-6 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
                   <button
                     type="button"
@@ -589,7 +695,9 @@ export default function AdvisorEquivalencyRequestDetail() {
                     className="flex w-full items-center justify-between gap-4 text-left"
                   >
                     <div>
-                      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">AI Reasoning</p>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">
+                        AI Reasoning · {basis === 'outline' ? 'from uploaded outline' : 'from catalogue description'}
+                      </p>
                       <p className="mt-2 text-sm font-medium leading-6 text-slate-800">{activeMatch.reasoning.summary}</p>
                     </div>
                     <ChevronDown className={`h-5 w-5 text-slate-500 transition ${isExpanded ? 'rotate-180' : ''}`} />

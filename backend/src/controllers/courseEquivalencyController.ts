@@ -55,6 +55,21 @@ export const rerunAutoMatch = async (req: any, res: Response) => {
   sendResponse(res, 200, 'Automatic course match completed', request);
 };
 
+export const rerunOutlineMatch = async (req: any, res: Response) => {
+  const request = await courseEquivalencyService.rerunAutoMatch(req.params.id, req.params.itemId, 'outline');
+  sendResponse(res, 200, 'Outline course match completed', request);
+};
+
+export const uploadCourseOutline = async (req: any, res: Response) => {
+  const request = await courseEquivalencyService.uploadCourseOutline(
+    req.user._id.toString(),
+    req.params.id,
+    req.params.itemId,
+    { file: req.file, pastedText: typeof req.body?.text === 'string' ? req.body.text : undefined }
+  );
+  sendResponse(res, 200, 'Course outline uploaded. Matching has started.', request);
+};
+
 export const submitAdvisorDecision = async (req: any, res: Response) => {
   const wholeRequestDecision = req.body.wholeRequestDecision as CourseRequestItemStatus | undefined;
   const request = await courseEquivalencyService.submitAdvisorDecision(
