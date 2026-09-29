@@ -1,6 +1,8 @@
+import fs from 'fs/promises';
 import mongoose from 'mongoose';
+import Application from '../models/Application';
 import Course, { CourseType, ICourse } from '../models/Course';
-import CourseMatchResult, { ICourseMatchResult } from '../models/CourseMatchResult';
+import CourseMatchResult, { ICourseMatchCandidate, ICourseMatchResult, MatchSource } from '../models/CourseMatchResult';
 import CourseRequest, {
   AIMatchStatus,
   CourseRequestItemStatus,
@@ -11,7 +13,15 @@ import CourseRequest, {
 import StudentProfile from '../models/StudentProfile';
 import { appUrl, notifyUser } from './notificationService';
 import { logger } from '../utils/logger';
-import { evaluateCourseMatch, rankHomeCourseMatches } from './aiCourseMatcherService';
+import { toPublicFileUrl } from '../utils/upload';
+import {
+  HomeCourseRanking,
+  MatchBasis,
+  MatchResponse,
+  evaluateCourseMatch,
+  rankHomeCourseMatches,
+} from './aiCourseMatcherService';
+import { extractOutlineText } from './outlineTextService';
 
 interface DecisionInput {
   itemId: string;
@@ -53,11 +63,50 @@ const hydrateById = async (requestId: string) => {
   return hydrateRequest(hydratedRequest);
 };
 
+const STATUS_FIELDS = {
+  description: { status: 'aiMatchStatus', error: 'aiMatchError' },
+  outline: { status: 'outlineMatchStatus', error: 'outlineMatchError' },
+} as const;
+
+/** The final match is based on the uploaded outline once the student has provided one. */
+const getActiveBasis = (item: ICourseRequestItem): MatchBasis => (item.uploadedOutline?.text ? 'outline' : 'description');
+
+const setMatchStatus = (item: ICourseRequestItem, basis: MatchBasis, status: AIMatchStatus, error: string | null = null) => {
+  item[STATUS_FIELDS[basis].status] = status;
+  item[STATUS_FIELDS[basis].error] = error;
+};
+
+interface MatchSnapshotInput extends MatchResponse {
+  homeCourseId: mongoose.Types.ObjectId;
+  matchedBy: MatchSource;
+  candidates: ICourseMatchCandidate[];
+}
+
+/** Description matches live in the result's top-level fields; outline matches live in `outlineMatch`. */
+const toSnapshotUpdate = (basis: MatchBasis, snapshot: MatchSnapshotInput) =>
+  basis === 'outline' ? { outlineMatch: snapshot } : snapshot;
+
+const rankingToSnapshot = (ranking: HomeCourseRanking): MatchSnapshotInput => {
+  const [best] = ranking.candidates;
+  return {
+    homeCourseId: best.homeCourse._id as mongoose.Types.ObjectId,
+    matchScore: best.matchScore,
+    reasoning: best.reasoning,
+    matchedBy: ranking.matchedBy,
+    candidates: ranking.candidates.map((candidate) => ({
+      homeCourseId: candidate.homeCourse._id as mongoose.Types.ObjectId,
+      matchScore: candidate.matchScore,
+      reasoning: candidate.reasoning,
+    })),
+  };
+};
+
 /** Finds the best home course for one request item and records the ranked candidates. Never throws. */
-const autoMatchItem = async (requestId: string, itemId: string, homeCourses: ICourse[]) => {
+const autoMatchItem = async (requestId: string, itemId: string, homeCourses: ICourse[], basis: MatchBasis) => {
+  const fields = STATUS_FIELDS[basis];
   const inProgressItem = {
     _id: requestId,
-    items: { $elemMatch: { _id: itemId, aiMatchStatus: AIMatchStatus.IN_PROGRESS } },
+    items: { $elemMatch: { _id: itemId, [fields.status]: AIMatchStatus.IN_PROGRESS } },
   };
 
   try {
@@ -68,17 +117,34 @@ const autoMatchItem = async (requestId: string, itemId: string, homeCourses: ICo
       throw new Error('The host course for this request item could not be loaded.');
     }
 
-    const ranking = await rankHomeCourseMatches(hostCourse, homeCourses);
-    const [best] = ranking.candidates;
+    const ranking = await rankHomeCourseMatches(hostCourse, homeCourses, {
+      basis,
+      uploadedOutline: item.uploadedOutline?.text,
+    });
+    const snapshot = rankingToSnapshot(ranking);
+
+    const itemUpdate: Record<string, unknown> = {
+      [`items.$.${fields.status}`]: AIMatchStatus.COMPLETED,
+      [`items.$.${fields.error}`]: null,
+    };
+    const requestUpdate: Record<string, unknown> = {};
+
+    if (basis === 'outline') {
+      // The outline match is final: pair its best course, and send a decided item back for review if it changed.
+      itemUpdate['items.$.homeCourseId'] = snapshot.homeCourseId;
+      const pairingChanged = !item.homeCourseId || !snapshot.homeCourseId.equals(item.homeCourseId);
+      if (pairingChanged && item.status !== CourseRequestItemStatus.PENDING) {
+        itemUpdate['items.$.status'] = CourseRequestItemStatus.PENDING;
+        itemUpdate['items.$.decidedAt'] = null;
+        requestUpdate.status = CourseRequestStatus.UNDER_REVIEW;
+      }
+    } else if (!item.uploadedOutline?.text) {
+      // A description match never replaces the pairing chosen from an uploaded outline.
+      itemUpdate['items.$.homeCourseId'] = snapshot.homeCourseId;
+    }
 
     // Only apply the result if the advisor has not re-paired the item while the match was running.
-    const update = await CourseRequest.updateOne(inProgressItem, {
-      $set: {
-        'items.$.homeCourseId': best.homeCourse._id,
-        'items.$.aiMatchStatus': AIMatchStatus.COMPLETED,
-        'items.$.aiMatchError': null,
-      },
-    });
+    const update = await CourseRequest.updateOne(inProgressItem, { $set: { ...itemUpdate, ...requestUpdate } });
     if (!update.matchedCount) {
       return;
     }
@@ -89,28 +155,20 @@ const autoMatchItem = async (requestId: string, itemId: string, homeCourses: ICo
         courseRequestId: request._id,
         courseRequestItemId: item._id,
         hostCourseId: hostCourse._id,
-        homeCourseId: best.homeCourse._id,
-        matchScore: best.matchScore,
-        reasoning: best.reasoning,
-        matchedBy: ranking.matchedBy,
-        candidates: ranking.candidates.map((candidate) => ({
-          homeCourseId: candidate.homeCourse._id,
-          matchScore: candidate.matchScore,
-          reasoning: candidate.reasoning,
-        })),
+        ...toSnapshotUpdate(basis, snapshot),
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
   } catch (error: any) {
-    logger.warn('Automatic course match failed', { requestId, itemId, error: error.message });
+    logger.warn('Automatic course match failed', { requestId, itemId, basis, error: error.message });
     await CourseRequest.updateOne(inProgressItem, {
-      $set: { 'items.$.aiMatchStatus': AIMatchStatus.FAILED, 'items.$.aiMatchError': error.message },
+      $set: { [`items.$.${fields.status}`]: AIMatchStatus.FAILED, [`items.$.${fields.error}`]: error.message },
     });
   }
 };
 
 /** Auto-matches every in-progress item on a request, one at a time to stay within LLM rate limits. */
-export const autoMatchRequestItems = async (requestId: string, itemIds?: string[]) => {
+export const autoMatchRequestItems = async (requestId: string, itemIds?: string[], basis: MatchBasis = 'description') => {
   const request = await CourseRequest.findById(requestId);
   if (!request) {
     return;
@@ -118,7 +176,8 @@ export const autoMatchRequestItems = async (requestId: string, itemIds?: string[
 
   const items = request.items.filter(
     (item) =>
-      item.aiMatchStatus === AIMatchStatus.IN_PROGRESS && (!itemIds || itemIds.includes(String(item._id)))
+      item[STATUS_FIELDS[basis].status] === AIMatchStatus.IN_PROGRESS &&
+      (!itemIds || itemIds.includes(String(item._id)))
   );
   if (!items.length) {
     return;
@@ -126,8 +185,14 @@ export const autoMatchRequestItems = async (requestId: string, itemIds?: string[
 
   const homeCourses = await Course.find(homeCourseFilter);
   for (const item of items) {
-    await autoMatchItem(requestId, String(item._id), homeCourses);
+    await autoMatchItem(requestId, String(item._id), homeCourses, basis);
   }
+};
+
+const runInBackground = (requestId: string, itemIds: string[] | undefined, basis: MatchBasis) => {
+  void autoMatchRequestItems(requestId, itemIds, basis).catch((error) =>
+    logger.error('Automatic course matching crashed', { requestId, basis, error: error.message })
+  );
 };
 
 const attachStudentProfiles = async (requests: Array<Record<string, any>>): Promise<Array<Record<string, any>>> => {
@@ -161,6 +226,8 @@ const hydrateRequest = async (request: ICourseRequest | null): Promise<Record<st
     .populate('hostCourseId')
     .populate('homeCourseId')
     .populate('candidates.homeCourseId')
+    .populate('outlineMatch.homeCourseId')
+    .populate('outlineMatch.candidates.homeCourseId')
     .lean();
 
   const resultByItemId = new Map(
@@ -243,21 +310,75 @@ export const createCourseRequest = async (studentId: string, hostCourseIds: stri
   });
 
   // Matching calls the LLM once per course, so it runs in the background; the advisor UI polls for results.
-  void autoMatchRequestItems(request._id.toString()).catch((error) =>
-    logger.error('Automatic course matching crashed', { requestId: request._id.toString(), error: error.message })
-  );
+  runInBackground(request._id.toString(), undefined, 'description');
 
   const hydratedRequest = await CourseRequest.findById(request._id).populate(coursePopulate).populate('studentId', 'name email');
   return hydrateRequest(hydratedRequest);
 };
 
-export const getStudentRequests = async (studentId: string) => {
-  const requests = await CourseRequest.find({ studentId })
-    .populate(coursePopulate)
-    .populate('studentId', 'name email')
-    .sort({ submittedAt: -1 });
+/** Students can upload real outlines once their arrival at the host university has been recorded. */
+const hasArrivedAtHostUniversity = async (studentId: string) =>
+  Boolean(await Application.exists({ studentId, 'arrival.arrivedAt': { $exists: true, $ne: null } }));
 
-  return Promise.all(requests.map((request) => hydrateRequest(request)));
+export const getStudentRequests = async (studentId: string) => {
+  const [requests, outlineUploadOpen] = await Promise.all([
+    CourseRequest.find({ studentId })
+      .populate(coursePopulate)
+      .populate('studentId', 'name email')
+      .sort({ submittedAt: -1 }),
+    hasArrivedAtHostUniversity(studentId),
+  ]);
+
+  const hydrated = await Promise.all(requests.map((request) => hydrateRequest(request)));
+  return hydrated.map((request) => request && { ...request, outlineUploadOpen });
+};
+
+/**
+ * Stores the real outline a student uploaded (PDF/DOCX) or pasted for one course in their request,
+ * then runs the outline-based match in the background.
+ */
+export const uploadCourseOutline = async (
+  studentId: string,
+  requestId: string,
+  itemId: string,
+  { file, pastedText }: { file?: Express.Multer.File; pastedText?: string }
+) => {
+  const discardFile = () => (file ? fs.unlink(file.path).catch(() => undefined) : undefined);
+
+  try {
+    const { request, item } = await loadRequestItem(requestId, itemId);
+    if (String(request.studentId) !== studentId) {
+      throw new Error('Course request not found.');
+    }
+
+    if (!(await hasArrivedAtHostUniversity(studentId))) {
+      throw new Error('You can upload course outlines once your arrival at the host university has been recorded.');
+    }
+
+    if (item.outlineMatchStatus === AIMatchStatus.IN_PROGRESS) {
+      throw new Error('Your previous outline for this course is still being matched. Try again in a moment.');
+    }
+
+    const text = await extractOutlineText({ filePath: file?.path, pastedText });
+
+    item.uploadedOutline = {
+      text,
+      fileUrl: file ? toPublicFileUrl(file.path) : '',
+      fileName: file?.originalname || '',
+      uploadedAt: new Date(),
+    };
+    setMatchStatus(item, 'outline', AIMatchStatus.IN_PROGRESS);
+    request.status = CourseRequestStatus.UNDER_REVIEW;
+    await request.save();
+  } catch (error) {
+    await discardFile();
+    throw error;
+  }
+
+  runInBackground(requestId, [itemId], 'outline');
+
+  const hydrated = await hydrateById(requestId);
+  return hydrated && { ...hydrated, outlineUploadOpen: true };
 };
 
 export const getAdvisorRequests = async () => {
@@ -300,12 +421,13 @@ const loadRequestItem = async (requestId: string, itemId: string) => {
   return { request, item };
 };
 
-/** Scores the item's currently paired course pair and stores it as the item's match, keeping earlier candidates. */
+/** Scores the item's currently paired course pair and stores it as the item's active match, keeping earlier candidates. */
 const scorePairedCourse = async (
   request: ICourseRequest,
   item: ICourseRequestItem,
   existingResult: ICourseMatchResult | null
 ) => {
+  const basis = getActiveBasis(item);
   const [hostCourse, homeCourse] = await Promise.all([
     Course.findById(item.hostCourseId),
     Course.findById(item.homeCourseId),
@@ -316,10 +438,12 @@ const scorePairedCourse = async (
   }
 
   try {
-    const result = await evaluateCourseMatch(hostCourse, homeCourse);
-    const otherCandidates = (existingResult?.candidates || []).filter(
-      (candidate) => !candidate.homeCourseId.equals(homeCourse._id)
-    );
+    const result = await evaluateCourseMatch(hostCourse, homeCourse, {
+      basis,
+      uploadedOutline: item.uploadedOutline?.text,
+    });
+    const previousCandidates = (basis === 'outline' ? existingResult?.outlineMatch?.candidates : existingResult?.candidates) || [];
+    const otherCandidates = previousCandidates.filter((candidate) => !candidate.homeCourseId.equals(homeCourse._id));
 
     await CourseMatchResult.findOneAndUpdate(
       { courseRequestItemId: item._id },
@@ -327,25 +451,25 @@ const scorePairedCourse = async (
         courseRequestId: request._id,
         courseRequestItemId: item._id,
         hostCourseId: hostCourse._id,
-        homeCourseId: homeCourse._id,
-        matchScore: result.matchScore,
-        reasoning: result.reasoning,
-        matchedBy: result.matchedBy,
-        candidates: [
-          ...otherCandidates,
-          { homeCourseId: homeCourse._id, matchScore: result.matchScore, reasoning: result.reasoning },
-        ].sort((left, right) => right.matchScore - left.matchScore),
+        ...toSnapshotUpdate(basis, {
+          homeCourseId: homeCourse._id as mongoose.Types.ObjectId,
+          matchScore: result.matchScore,
+          reasoning: result.reasoning,
+          matchedBy: result.matchedBy,
+          candidates: [
+            ...otherCandidates,
+            { homeCourseId: homeCourse._id as mongoose.Types.ObjectId, matchScore: result.matchScore, reasoning: result.reasoning },
+          ].sort((left, right) => right.matchScore - left.matchScore),
+        }),
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    item.aiMatchStatus = AIMatchStatus.COMPLETED;
-    item.aiMatchError = null;
+    setMatchStatus(item, basis, AIMatchStatus.COMPLETED);
     request.status = CourseRequestStatus.UNDER_REVIEW;
     await request.save();
   } catch (error: any) {
-    item.aiMatchStatus = AIMatchStatus.FAILED;
-    item.aiMatchError = error.message;
+    setMatchStatus(item, basis, AIMatchStatus.FAILED, error.message);
     request.status = CourseRequestStatus.UNDER_REVIEW;
     await request.save();
     throw error;
@@ -353,8 +477,8 @@ const scorePairedCourse = async (
 };
 
 /**
- * Advisor override: pairs a different home course with the item. If the matcher already scored that
- * course the stored reasoning is reused; otherwise the new pair is scored straight away.
+ * Advisor override: pairs a different home course with the item. If the active match (outline, or description
+ * before an outline is uploaded) already scored that course its reasoning is reused; otherwise it is scored now.
  */
 export const updatePairedHomeCourse = async (requestId: string, itemId: string, homeCourseId: string) => {
   ensureValidObjectId(homeCourseId, 'Invalid home course ID.');
@@ -365,27 +489,28 @@ export const updatePairedHomeCourse = async (requestId: string, itemId: string, 
     throw new Error('Selected home course could not be found.');
   }
 
+  const basis = getActiveBasis(item);
   item.homeCourseId = homeCourse._id;
-  item.aiMatchError = null;
   item.status = CourseRequestItemStatus.PENDING;
   item.advisorComment = '';
   item.decidedAt = null;
   request.status = CourseRequestStatus.UNDER_REVIEW;
 
   const existingResult = await CourseMatchResult.findOne({ courseRequestItemId: item._id });
-  const scoredCandidate = existingResult?.candidates.find((candidate) => candidate.homeCourseId.equals(homeCourse._id));
+  const activeSnapshot = basis === 'outline' ? existingResult?.outlineMatch : existingResult;
+  const scoredCandidate = activeSnapshot?.candidates?.find((candidate) => candidate.homeCourseId.equals(homeCourse._id));
 
-  if (existingResult && scoredCandidate) {
-    existingResult.homeCourseId = homeCourse._id;
-    existingResult.matchScore = scoredCandidate.matchScore;
-    existingResult.reasoning = scoredCandidate.reasoning;
+  if (existingResult && activeSnapshot && scoredCandidate) {
+    activeSnapshot.homeCourseId = homeCourse._id;
+    activeSnapshot.matchScore = scoredCandidate.matchScore;
+    activeSnapshot.reasoning = scoredCandidate.reasoning;
     await existingResult.save();
-    item.aiMatchStatus = AIMatchStatus.COMPLETED;
+    setMatchStatus(item, basis, AIMatchStatus.COMPLETED);
     await request.save();
   } else {
-    item.aiMatchStatus = AIMatchStatus.NOT_STARTED;
+    setMatchStatus(item, basis, AIMatchStatus.NOT_STARTED);
     await request.save();
-    // A failed score is recorded on the item (aiMatchStatus/aiMatchError), so the pairing itself still succeeds.
+    // A failed score is recorded on the item's match status and error, so the pairing itself still succeeds.
     await scorePairedCourse(request, item, existingResult).catch(() => undefined);
   }
 
@@ -404,18 +529,26 @@ export const runCourseMatch = async (requestId: string, itemId: string) => {
   return hydrateById(requestId);
 };
 
-/** Re-runs the automatic outline matching for one item, replacing its paired home course with the new best match. */
-export const rerunAutoMatch = async (requestId: string, itemId: string) => {
+/**
+ * Re-runs automatic matching for one item from its catalogue description or its uploaded outline.
+ * The outline match re-pairs the item; a description match only re-pairs it while no outline exists.
+ */
+export const rerunAutoMatch = async (requestId: string, itemId: string, basis: MatchBasis = 'description') => {
   const { request, item } = await loadRequestItem(requestId, itemId);
 
-  item.aiMatchStatus = AIMatchStatus.IN_PROGRESS;
-  item.aiMatchError = null;
-  item.status = CourseRequestItemStatus.PENDING;
-  item.decidedAt = null;
+  if (basis === 'outline' && !item.uploadedOutline?.text) {
+    throw new Error('The student has not uploaded an outline for this course yet.');
+  }
+
+  setMatchStatus(item, basis, AIMatchStatus.IN_PROGRESS);
+  if (basis === 'outline' || !item.uploadedOutline?.text) {
+    item.status = CourseRequestItemStatus.PENDING;
+    item.decidedAt = null;
+  }
   request.status = CourseRequestStatus.UNDER_REVIEW;
   await request.save();
 
-  await autoMatchRequestItems(requestId, [itemId]);
+  await autoMatchRequestItems(requestId, [itemId], basis);
   return hydrateById(requestId);
 };
 

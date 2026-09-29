@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BookOpenCheck, Clock3, LoaderCircle, MessageSquareText } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import OutlineUploadPanel from '../../components/equivalency/OutlineUploadPanel';
 import { useAuth } from '../../context/AuthContext';
 import { equivalencyApi } from '../../lib/api';
 import type { CourseRequest } from '../../types/equivalency';
 import {
   formatDisplayDate,
+  getDescriptionMatch,
   getItemStatusClasses,
+  getOutlineMatch,
   getRequestStatusClasses,
   getScoreBadgeClasses,
 } from '../../utils/equivalency';
+
+const MATCH_POLL_INTERVAL_MS = 4000;
 
 export default function CourseEquivalencyRequests() {
   const { user } = useAuth();
@@ -37,6 +42,36 @@ export default function CourseEquivalencyRequests() {
 
     void loadRequests();
   }, [user?.token]);
+
+  const hasPendingOutlineMatches = requests.some((request) =>
+    request.items.some((item) => item.outlineMatchStatus === 'in_progress')
+  );
+
+  // Outline matching runs in the background after an upload, so refresh until it finishes.
+  useEffect(() => {
+    if (!hasPendingOutlineMatches || !user?.token) {
+      return undefined;
+    }
+
+    const token = user.token;
+    const intervalId = window.setInterval(() => {
+      equivalencyApi
+        .getStudentRequests(token)
+        .then(setRequests)
+        .catch(() => undefined);
+    }, MATCH_POLL_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [hasPendingOutlineMatches, user?.token]);
+
+  const handleOutlineUpload = async (requestId: string, itemId: string, outline: { file?: File | null; text?: string }) => {
+    if (!user?.token) {
+      return;
+    }
+
+    const updated = await equivalencyApi.uploadCourseOutline(user.token, requestId, itemId, outline);
+    setRequests((current) => current.map((request) => (request._id === updated._id ? updated : request)));
+  };
 
   const requestSummary = useMemo(
     () => ({
@@ -123,6 +158,13 @@ export default function CourseEquivalencyRequests() {
                 ) : null}
               </div>
 
+              {!request.outlineUploadOpen ? (
+                <p className="mt-4 text-sm font-medium text-slate-500">
+                  Scores are a preliminary match based on course descriptions. Once your arrival at the host university is
+                  recorded, you can upload each course's real outline for a final match.
+                </p>
+              ) : null}
+
               <div className="mt-6 grid gap-4">
                 {request.items.map((item) => (
                   <article key={item._id} className="rounded-[1.75rem] border border-slate-200 bg-white/80 p-5">
@@ -156,15 +198,20 @@ export default function CourseEquivalencyRequests() {
                       </div>
 
                       <div className="flex min-w-[180px] flex-col gap-3">
-                        {item.matchResult ? (
-                          <div className={`rounded-[1.25rem] px-4 py-3 text-center ${getScoreBadgeClasses(item.matchResult.matchScore)}`}>
-                            <p className="text-[11px] font-bold uppercase tracking-[0.25em]">AI Match Score</p>
-                            <p className="mt-2 text-2xl font-black">{item.matchResult.matchScore}/100</p>
-                          </div>
-                        ) : (
-                          <div className="rounded-[1.25rem] border border-dashed border-slate-300 px-4 py-5 text-center text-sm font-medium text-slate-500">
-                            AI review not yet completed
-                          </div>
+                        {[
+                          { key: 'description', label: 'Description match', match: getDescriptionMatch(item) },
+                          { key: 'outline', label: 'Outline match', match: getOutlineMatch(item) },
+                        ].map(({ key, label, match }) =>
+                          match ? (
+                            <div key={key} className={`rounded-[1.25rem] px-4 py-3 text-center ${getScoreBadgeClasses(match.matchScore)}`}>
+                              <p className="text-[11px] font-bold uppercase tracking-[0.25em]">{label}</p>
+                              <p className="mt-2 text-2xl font-black">{match.matchScore}/100</p>
+                            </div>
+                          ) : key === 'description' ? (
+                            <div key={key} className="rounded-[1.25rem] border border-dashed border-slate-300 px-4 py-5 text-center text-sm font-medium text-slate-500">
+                              AI review not yet completed
+                            </div>
+                          ) : null
                         )}
 
                         <div className="rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">
@@ -175,6 +222,13 @@ export default function CourseEquivalencyRequests() {
                         </div>
                       </div>
                     </div>
+
+                    {request.outlineUploadOpen ? (
+                      <OutlineUploadPanel
+                        item={item}
+                        onUpload={(outline) => handleOutlineUpload(request._id, item._id, outline)}
+                      />
+                    ) : null}
 
                     {item.advisorComment ? (
                       <div className="mt-4 rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-600">

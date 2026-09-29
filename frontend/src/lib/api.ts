@@ -85,6 +85,20 @@ export const equivalencyApi = {
     apiRequest<CourseRequest>(`/equivalency/advisor/requests/${requestId}/items/${itemId}/auto-match`, token, {
       method: 'POST',
     }),
+  rerunOutlineMatch: (token: string, requestId: string, itemId: string) =>
+    apiRequest<CourseRequest>(`/equivalency/advisor/requests/${requestId}/items/${itemId}/outline-match`, token, {
+      method: 'POST',
+    }),
+  uploadCourseOutline: (token: string, requestId: string, itemId: string, outline: { file?: File | null; text?: string }) => {
+    const formData = new FormData();
+    if (outline.file) {
+      formData.append('file', outline.file);
+    }
+    if (outline.text) {
+      formData.append('text', outline.text);
+    }
+    return apiFormRequest<CourseRequest>(`/equivalency/student/requests/${requestId}/items/${itemId}/outline`, token, formData, 'POST');
+  },
   submitAdvisorDecision: (token: string, requestId: string, payload: AdvisorDecisionPayload) =>
     apiRequest<CourseRequest>(`/equivalency/advisor/requests/${requestId}/decision`, token, {
       method: 'PUT',

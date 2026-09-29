@@ -122,9 +122,39 @@ describe('rankHomeCourseMatches', () => {
     expect(ranking.candidates.map((candidate) => candidate.homeCourse)).toEqual([calculus]);
   });
 
-  it('rejects a host course without an outline', async () => {
+  it('rejects a host course without a description', async () => {
     await expect(rankHomeCourseMatches(course('h', 'Empty', ''), [dataStructures])).rejects.toThrow(
-      'The host course has no outline'
+      'The host course has no description'
+    );
+  });
+
+  it('matches on the catalogue description by default and says so in the prompt', async () => {
+    fetchMock.mockResolvedValue(llmReply({ candidates: [{ id: 'C1', matchScore: 60, reasoning: reasoning('ok') }] }));
+    const described = { ...host, description: 'Short blurb about trees and graphs.' } as unknown as ICourse;
+
+    await rankHomeCourseMatches(described, [dataStructures]);
+
+    const prompt = JSON.parse(fetchMock.mock.calls[0][1].body).messages[1].content as string;
+    expect(prompt).toContain('Catalogue description: Short blurb about trees and graphs.');
+    expect(prompt).toContain('short catalogue description');
+  });
+
+  it('matches on the uploaded outline for the outline basis', async () => {
+    fetchMock.mockResolvedValue(llmReply({ candidates: [{ id: 'C1', matchScore: 90, reasoning: reasoning('ok') }] }));
+
+    await rankHomeCourseMatches(host, [dataStructures], {
+      basis: 'outline',
+      uploadedOutline: 'Week 1 arrays. Week 2 linked lists. Week 3 trees.',
+    });
+
+    const prompt = JSON.parse(fetchMock.mock.calls[0][1].body).messages[1].content as string;
+    expect(prompt).toContain('Course outline: Week 1 arrays. Week 2 linked lists. Week 3 trees.');
+    expect(prompt).not.toContain(host.outlineText as string);
+  });
+
+  it('requires uploaded text for the outline basis', async () => {
+    await expect(rankHomeCourseMatches(host, [dataStructures], { basis: 'outline' })).rejects.toThrow(
+      'No uploaded outline'
     );
   });
 
