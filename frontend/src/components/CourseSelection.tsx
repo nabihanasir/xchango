@@ -51,7 +51,7 @@ export default function CourseSelection({
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 px-4 py-3 text-right">
-          <p className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">Selected</p>
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">Selected</p>
           <p className="mt-1 text-xl font-black text-slate-900">{selectedIds.length}</p>
         </div>
       </div>

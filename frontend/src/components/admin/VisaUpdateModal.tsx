@@ -107,7 +107,7 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
               placeholder="e.g. Please bring your original passport to the appointment on 12 March."
               className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 focus:border-maroon focus:outline-none"
             />
-            <span className="mt-1 block text-right text-[11px] font-medium text-slate-400">
+            <span className="mt-1 block text-right text-xs font-medium text-slate-500">
               {remarks.length}/{MAX_REMARKS}
             </span>
           </label>

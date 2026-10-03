@@ -95,7 +95,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
       <form id={STUDENT_PROFILE_FORM_ID} className="mt-8 space-y-8" onSubmit={handleSubmit}>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <label className="space-y-2">
-            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
               <UserRound className="h-4 w-4" />
               Full Name
             </span>
@@ -113,7 +113,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">CMS ID</span>
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">CMS ID</span>
             <input
               className={inputClassName}
               value={formState.basicInfo.cmsId}
@@ -128,7 +128,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
           </label>
 
           <label className="space-y-2">
-            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
               <Mail className="h-4 w-4" />
               Email
             </span>
@@ -147,7 +147,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
           </label>
 
           <label className="space-y-2">
-            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
               <Phone className="h-4 w-4" />
               Phone
             </span>
@@ -165,7 +165,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
           </label>
 
           <label className="space-y-2">
-            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+            <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
               <BookOpen className="h-4 w-4" />
               Department
             </span>
@@ -183,7 +183,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Semester</span>
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Semester</span>
             <input
               className={inputClassName}
               type="number"
@@ -214,7 +214,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 md:col-span-2">
-              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                 Preferred Countries
               </span>
               <input
@@ -231,7 +231,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
             </label>
 
             <label className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Degree Level</span>
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Degree Level</span>
               <input
                 className={inputClassName}
                 value={formState.preferences.degreeLevel}
@@ -246,7 +246,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
             </label>
 
             <label className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                 Field of Interest
               </span>
               <input
@@ -263,7 +263,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
             </label>
 
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Intake</span>
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Intake</span>
               <div className="grid grid-cols-2 gap-3">
                 <select
                   aria-label="Intake season"

@@ -105,7 +105,7 @@ export default function DetailsStep({ draft, onChange }: DetailsStepProps) {
         <h3 className="text-lg font-black text-slate-900">Section D: Logistics</h3>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">
+            <span className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">
               Registration Number
             </span>
             <input
@@ -117,7 +117,7 @@ export default function DetailsStep({ draft, onChange }: DetailsStepProps) {
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">
+            <span className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">
               Accommodation Preference
             </span>
             <select

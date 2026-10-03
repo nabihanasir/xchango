@@ -64,7 +64,7 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
              <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto">
                <Calculator className="h-8 w-8 text-slate-300" />
              </div>
-             <p className="text-body-text font-bold opacity-40">No transcript data available for this student.</p>
+             <p className="text-body-text font-bold">No transcript data available for this student.</p>
           </div>
         ) : (
           transcript.map((sem) => (

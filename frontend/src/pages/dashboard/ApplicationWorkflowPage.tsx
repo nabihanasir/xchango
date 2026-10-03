@@ -406,7 +406,7 @@ export default function ApplicationWorkflowPage() {
         <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">Workflow Status</p>
+              <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">Workflow Status</p>
               <p className="mt-2 text-lg font-black text-slate-900">{application.program}</p>
             </div>
             <div className={`rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.2em] ${getApplicationStatusTone(application)}`}>

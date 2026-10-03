@@ -121,7 +121,7 @@ export default function StudentDocuments() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="glass-card rounded-[2rem] p-6">
-          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">Uploaded Files</p>
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-600">Uploaded Files</p>
           <p className="mt-3 text-4xl font-black text-dark-blue">{documents.length}</p>
         </div>
         <div className="glass-card rounded-[2rem] p-6">

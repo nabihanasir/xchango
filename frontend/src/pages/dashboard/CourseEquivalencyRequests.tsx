@@ -102,7 +102,7 @@ export default function CourseEquivalencyRequests() {
                     <span className={`rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.25em] ${getRequestStatusClasses(request.status)}`}>
                       {request.status.replace('_', ' ')}
                     </span>
-                    <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                       Submitted {formatDisplayDate(request.submittedAt)}
                     </span>
                   </div>

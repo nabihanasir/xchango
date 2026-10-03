@@ -123,7 +123,7 @@ export default function AdvisorStudents() {
                   </div>
 
                   <div className="mt-6 pt-4 border-t border-light-color/30">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Interests</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-600 mb-2">Interests</p>
                     <div className="flex flex-wrap gap-2">
                       {student.preferences?.preferredCountries?.slice(0, 3).map((country) => (
                         <span key={country} className="rounded-full bg-emerald-700/5 border border-emerald-700/10 px-3 py-1 text-xs font-semibold text-emerald-700">
@@ -131,7 +131,7 @@ export default function AdvisorStudents() {
                         </span>
                       ))}
                       {(!student.preferences?.preferredCountries || student.preferences.preferredCountries.length === 0) && (
-                        <span className="text-xs text-slate-400 italic">None specified</span>
+                        <span className="text-xs text-slate-500 italic">None specified</span>
                       )}
                     </div>
                   </div>

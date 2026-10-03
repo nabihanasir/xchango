@@ -34,7 +34,7 @@ export default function DataTable({ columns, data, onRowClick }: DataTableProps)
               className={`hover:bg-light-color/10 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
             >
               {columns.map((col, colIdx) => (
-                <td key={colIdx} className="px-6 py-4 text-sm text-body-text">
+                <td key={colIdx} className="px-6 py-4 text-sm text-slate-900">
                   {col.render ? col.render(row[col.accessor], row) : (
                     col.accessor === 'status' ? <StatusBadge status={row[col.accessor]} /> : row[col.accessor]
                   )}

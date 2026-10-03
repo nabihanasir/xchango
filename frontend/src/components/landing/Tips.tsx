@@ -44,7 +44,7 @@ export default function Tips() {
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-dark-blue text-accent-yellow">
                     <Icon className="h-5 w-5" />
                   </span>
-                  <span className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-300">
+                  <span className="text-xs font-black uppercase tracking-[0.24em] text-slate-600">
                     Tip 0{index + 1}
                   </span>
                 </div>

@@ -244,7 +244,7 @@ export default function AdvisorEquivalencyRequestDetail() {
               <span className={`rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.25em] ${getRequestStatusClasses(request.status)}`}>
                 {request.status.replace('_', ' ')}
               </span>
-              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                 Submitted {formatDisplayDate(request.submittedAt)}
               </span>
             </div>
@@ -361,7 +361,7 @@ export default function AdvisorEquivalencyRequestDetail() {
                       </p>
                     </>
                   ) : (
-                    <p className="mt-4 text-sm font-medium text-slate-400">Choose the equivalent home course before running the AI review.</p>
+                    <p className="mt-4 text-sm font-medium text-slate-600">Choose the equivalent home course before running the AI review.</p>
                   )}
                 </div>
               </div>

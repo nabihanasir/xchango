@@ -22,7 +22,7 @@ export default function InputField({
   return (
     <div className={`space-y-1.5 ${className}`}>
       <div className="flex justify-between items-end px-1">
-        <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+        <label className="block text-xs font-bold text-slate-600 uppercase tracking-widest">
           {label}
         </label>
         {labelRight && <div>{labelRight}</div>}
@@ -34,7 +34,7 @@ export default function InputField({
         <input
           {...props}
           aria-invalid={Boolean(error)}
-          className={`block w-full pl-12 pr-12 py-3.5 bg-slate-50 hover:bg-slate-100/50 focus:bg-white border rounded-xl focus:outline-none transition-all text-slate-800 placeholder-slate-400 font-medium shadow-sm ${
+          className={`block w-full pl-12 pr-12 py-3.5 bg-slate-50 hover:bg-slate-100/50 focus:bg-white border rounded-xl focus:outline-none transition-all text-slate-800 placeholder-slate-500 font-medium shadow-sm ${
             error
               ? 'border-red-300 focus:border-red-300 focus:ring-4 focus:ring-red-100'
               : 'border-slate-200 focus:border-accent-yellow/50 focus:ring-4 focus:ring-accent-yellow/10'

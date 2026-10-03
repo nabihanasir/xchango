@@ -23,12 +23,12 @@ export default function ApplicationStepper({ currentStep }: ApplicationStepperPr
                     ? 'border-accent-yellow bg-accent-yellow text-dark-blue'
                     : isActive
                       ? 'border-dark-blue bg-dark-blue text-white'
-                      : 'border-slate-200 bg-white text-slate-400'
+                      : 'border-slate-200 bg-white text-slate-500'
                 }`}
               >
                 {stepNumber}
               </div>
-              <p className={`text-xs font-bold uppercase tracking-[0.2em] ${isActive ? 'text-dark-blue' : 'text-slate-400'}`}>
+              <p className={`text-xs font-bold uppercase tracking-[0.2em] ${isActive ? 'text-dark-blue' : 'text-slate-600'}`}>
                 {step}
               </p>
             </div>
