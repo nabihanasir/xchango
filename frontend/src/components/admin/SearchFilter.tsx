@@ -17,7 +17,7 @@ export default function SearchFilter({ onSearch, onFilterChange, filterOptions, 
           type="text"
           placeholder={placeholder}
           onChange={(e) => onSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-xl border border-light-color/50 bg-white focus:outline-none focus:border-maroon/20 transition-all font-medium text-maroon placeholder:text-body-text placeholder:opacity-40"
+          className="w-full pl-11 pr-4 py-3 rounded-xl border border-light-color/50 bg-white focus:outline-none focus:border-maroon/20 transition-all font-medium text-maroon placeholder:text-body-text"
         />
       </div>
       <div className="relative min-w-[180px]">

@@ -9,7 +9,7 @@ const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass, delay }
     <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${gradientClass} opacity-10 rounded-bl-[4rem] transition-transform duration-700 group-hover:scale-125`} />
     <div className="flex items-start justify-between relative z-10">
       <div>
-        <p className="text-slate-400 text-[11px] font-bold mb-1.5 uppercase tracking-widest">{title}</p>
+        <p className="text-slate-600 text-xs font-bold mb-1.5 uppercase tracking-widest">{title}</p>
         <h3 className="text-[2.5rem] font-black text-slate-800 tracking-tight leading-none">{value}</h3>
       </div>
       <div className={`p-4 rounded-[1.25rem] ${colorClass} bg-opacity-10 transition-colors duration-300 shadow-sm`}>

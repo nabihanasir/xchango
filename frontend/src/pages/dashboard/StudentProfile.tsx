@@ -195,7 +195,7 @@ export default function StudentProfile() {
           >
             <FileText className="h-5 w-5" />
           </div>
-          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-400">
+          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-600">
             Profile Status
           </p>
           <p className="mt-2 text-2xl font-black text-slate-900">
@@ -212,7 +212,7 @@ export default function StudentProfile() {
           <div className="inline-flex rounded-2xl bg-dark-blue p-3 text-white">
             <GraduationCap className="h-5 w-5" />
           </div>
-          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-400">CGPA</p>
+          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-600">CGPA</p>
           <p className="mt-2 text-4xl font-black text-dark-blue">{(transcript?.cgpa ?? 0).toFixed(2)}</p>
         </div>
 
@@ -220,7 +220,7 @@ export default function StudentProfile() {
           <div className="inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
             <FileText className="h-5 w-5" />
           </div>
-          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-400">Transcript Semesters</p>
+          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-600">Transcript Semesters</p>
           <p className="mt-2 text-4xl font-black text-slate-900">{transcript?.semesters.length ?? 0}</p>
         </div>
 

@@ -141,7 +141,7 @@ export default function Communicate() {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline mb-1">
                       <h4 className="text-base font-bold text-dark-blue truncate">{other.name}</h4>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-2">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 ml-2">
                         {other.role}
                       </span>
                     </div>
@@ -179,7 +179,7 @@ export default function Communicate() {
                   <div key={msg._id || i} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[70%] rounded-2xl px-6 py-4 shadow-sm relative ${isMe ? 'bg-dark-blue text-white rounded-tr-sm shadow-md' : 'bg-white border border-light-color/50 rounded-tl-sm'}`}>
                       <p className={`text-base leading-relaxed ${isMe ? 'text-white/90' : 'text-body-text'}`}>{msg.text}</p>
-                      <span className={`text-[10px] font-semibold absolute -bottom-6 ${isMe ? 'right-2' : 'left-2'} text-slate-400`}>
+                      <span className={`text-[11px] font-semibold absolute -bottom-6 ${isMe ? 'right-2' : 'left-2'} text-slate-500`}>
                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>

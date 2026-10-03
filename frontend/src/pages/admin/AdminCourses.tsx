@@ -162,7 +162,7 @@ export default function AdminCourses() {
       render: (_value: string, row: ApplicationCourseSummary) => (
         <div>
           <p className="font-black text-maroon">{getCourseDisplayTitle(row)}</p>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-slate-900">
             {row.isHomeCourse ? 'Home Course' : 'Course'}
           </p>
         </div>
@@ -172,7 +172,7 @@ export default function AdminCourses() {
       header: 'Description',
       accessor: 'description',
       render: (value: string) => (
-        <span className="max-w-[24rem] block text-sm leading-6 text-slate-600">
+        <span className="max-w-[24rem] block text-sm leading-6 text-slate-900">
           {value || 'No description provided.'}
         </span>
       ),
@@ -189,7 +189,7 @@ export default function AdminCourses() {
         typeof value === 'object' && value ? (
           <span className="font-semibold text-slate-700">{value.name}</span>
         ) : (
-          <span className="text-slate-400">System</span>
+          <span className="text-slate-900">System</span>
         ),
     },
     {
@@ -264,7 +264,7 @@ export default function AdminCourses() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by title or description"
-              className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-maroon placeholder:text-body-text placeholder:opacity-40 focus:border-maroon/20 focus:outline-none"
+              className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-maroon placeholder:text-body-text focus:border-maroon/20 focus:outline-none"
             />
           </div>
         </div>

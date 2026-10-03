@@ -132,7 +132,7 @@ export default function AdvisorResults() {
                         </span>
                       )}
                       {item.result ? (
-                        <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+                        <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                           Updated {formatDisplayDate(item.result.updatedAt)}
                         </span>
                       ) : null}

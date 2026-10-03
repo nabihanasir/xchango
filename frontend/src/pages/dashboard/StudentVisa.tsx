@@ -12,7 +12,7 @@ const STEP_CIRCLE: Record<StepState, string> = {
   done: 'bg-dark-blue text-accent-yellow',
   current: 'bg-accent-yellow text-dark-blue ring-4 ring-accent-yellow/30',
   stopped: 'bg-red-500 text-white ring-4 ring-red-500/20',
-  upcoming: 'bg-slate-100 text-slate-400',
+  upcoming: 'bg-slate-100 text-slate-600',
 };
 
 export default function StudentVisa() {
@@ -72,7 +72,7 @@ export default function StudentVisa() {
           <section className="glass-card rounded-[2.25rem] p-6 md:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-400">Current status</p>
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Current status</p>
                 <div className="mt-3">
                   <VisaStatusBadge status={status} />
                 </div>
@@ -81,7 +81,7 @@ export default function StudentVisa() {
                 </p>
               </div>
               {visa ? (
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
                   Updated {formatVisaDate(visa.updatedAt)}
                 </p>
               ) : null}
@@ -124,7 +124,7 @@ export default function StudentVisa() {
                       {state === 'done' ? <Check className="h-5 w-5" strokeWidth={3} /> : index + 1}
                     </span>
                     <span
-                      className={`text-sm font-bold leading-5 ${state === 'upcoming' ? 'text-slate-400' : 'text-slate-800'}`}
+                      className={`text-sm font-bold leading-5 ${state === 'upcoming' ? 'text-slate-600' : 'text-slate-800'}`}
                     >
                       {VISA_STATUS_META[stage].label}
                     </span>
@@ -144,7 +144,7 @@ export default function StudentVisa() {
                     <div>
                       <div className="flex flex-wrap items-center gap-3">
                         <VisaStatusBadge status={entry.status} />
-                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
                           {formatVisaDate(entry.updatedAt)}
                         </span>
                       </div>

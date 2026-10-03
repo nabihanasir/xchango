@@ -184,7 +184,7 @@ export default function OnlineClasses() {
 
       <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
         <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="bg-[#071133] p-7 text-white md:p-10">
+          <div className={`${isHost ? 'bg-emerald-950' : 'bg-[#071133]'} p-7 text-white md:p-10`}>
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-accent-yellow">
               <Video className="h-4 w-4" />
               {isHost ? 'Host Online Classes' : 'Online Classes'}
@@ -246,7 +246,7 @@ export default function OnlineClasses() {
           </div>
 
           <div className="bg-slate-50 p-7 md:p-10">
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-600">
               {isHost ? 'Host Session' : 'Live Session'}
             </p>
             <h3 className="mt-3 text-slate-900">{featuredClass.course}</h3>
@@ -276,14 +276,14 @@ export default function OnlineClasses() {
 
       <section className="grid gap-5 md:grid-cols-3">
         <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-          <MonitorUp className="h-6 w-6 text-dark-blue" />
+          <MonitorUp className={`h-6 w-6 ${isHost ? 'text-emerald-700' : 'text-dark-blue'}`} />
           <h4 className="mt-4 text-slate-900">100% Free Calling</h4>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             Uses public Jitsi Meet — no Zoom license, API keys, or paid video plan.
           </p>
         </div>
         <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-          <Headphones className="h-6 w-6 text-dark-blue" />
+          <Headphones className={`h-6 w-6 ${isHost ? 'text-emerald-700' : 'text-dark-blue'}`} />
           <h4 className="mt-4 text-slate-900">{isHost ? 'Host Controls' : 'Check Audio'}</h4>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             {isHost
@@ -292,7 +292,7 @@ export default function OnlineClasses() {
           </p>
         </div>
         <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-          <Wifi className="h-6 w-6 text-dark-blue" />
+          <Wifi className={`h-6 w-6 ${isHost ? 'text-emerald-700' : 'text-dark-blue'}`} />
           <h4 className="mt-4 text-slate-900">Stable Internet</h4>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             Use a reliable connection and keep your charger nearby for longer classes.
@@ -323,7 +323,7 @@ export default function OnlineClasses() {
                   <span className={`rounded-full border px-3 py-1 text-xs font-black ${statusStyles[classItem.status]}`}>
                     {classItem.status}
                   </span>
-                  <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
                     {classItem.day} at {classItem.time}
                   </span>
                 </div>
@@ -337,7 +337,7 @@ export default function OnlineClasses() {
                 <button
                   type="button"
                   onClick={() => void copyMeetingDetails(classItem)}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:border-dark-blue hover:text-dark-blue"
+                  className={`inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition ${isHost ? 'hover:border-emerald-700 hover:text-emerald-700' : 'hover:border-dark-blue hover:text-dark-blue'}`}
                 >
                   {copiedClassId === classItem.id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   {copiedClassId === classItem.id ? 'Copied' : 'Copy'}
@@ -349,7 +349,7 @@ export default function OnlineClasses() {
                       type="button"
                       onClick={() => void startClass(classItem)}
                       disabled={actionId === classItem.id}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-dark-blue px-5 py-3 text-sm font-black text-white transition hover:bg-[#11195a] disabled:opacity-60"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-black text-white transition hover:bg-emerald-800 disabled:opacity-60"
                     >
                       {actionId === classItem.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
                       {classItem.isHostSession ? 'Rejoin' : 'Start'}

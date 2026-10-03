@@ -63,7 +63,7 @@ export default function Partners() {
                 <div className="relative flex flex-1 flex-col">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.28em] text-slate-400">{partner.flag}</p>
+                      <p className="text-xs font-black uppercase tracking-[0.28em] text-slate-600">{partner.flag}</p>
                       <h3 className="mt-3 text-2xl font-black text-dark-blue">{partner.name}</h3>
                       <p className="mt-2 text-sm font-semibold text-yellow-default">{partner.country}</p>
                     </div>
@@ -157,7 +157,7 @@ export default function Partners() {
 
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               <div className="rounded-[1.75rem] bg-slate-50 p-5">
-                <p className="text-sm font-black uppercase tracking-[0.28em] text-slate-400">Programs</p>
+                <p className="text-sm font-black uppercase tracking-[0.28em] text-slate-600">Programs</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {selectedPartner.programs.map((program) => (
                     <span key={program} className="rounded-full bg-dark-blue px-3 py-2 text-xs font-bold text-white">
@@ -168,7 +168,7 @@ export default function Partners() {
               </div>
 
               <div className="rounded-[1.75rem] bg-slate-50 p-5">
-                <p className="text-sm font-black uppercase tracking-[0.28em] text-slate-400">Courses</p>
+                <p className="text-sm font-black uppercase tracking-[0.28em] text-slate-600">Courses</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {selectedPartner.courses.map((course) => (
                     <span key={course} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">

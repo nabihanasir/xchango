@@ -96,7 +96,7 @@ export default function LoginPage() {
           labelRight={
             <Link
               to="/forgot-password"
-              className="text-[11px] font-bold uppercase tracking-widest text-slate-400 transition-colors hover:text-dark-blue"
+              className="text-xs font-bold uppercase tracking-widest text-slate-600 transition-colors hover:text-dark-blue"
             >
               Forgot password?
             </Link>

@@ -31,7 +31,7 @@ import type { StudentDocument } from '../../types/document';
 
 const SummaryCard = ({ title, value }: { title: string; value: string }) => (
   <div className="glass-card rounded-[2rem] p-6">
-    <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">{title}</p>
+    <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-600">{title}</p>
     <p className="mt-3 text-4xl font-black text-emerald-700">{value}</p>
   </div>
 );
@@ -563,7 +563,7 @@ export default function AdvisorApplicationsWorkspace({
             <div className="grid gap-4 lg:grid-cols-2">
               <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">
+                  <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">
                     Application summary
                   </p>
                   <h3 className="mt-3 text-2xl font-black text-slate-900">{selectedApplication.university}</h3>

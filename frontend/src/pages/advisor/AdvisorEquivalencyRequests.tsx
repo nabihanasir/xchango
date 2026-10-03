@@ -60,15 +60,15 @@ export default function AdvisorEquivalencyRequests() {
 
           <div className="grid grid-cols-3 gap-4">
             <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-400">Incoming</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Incoming</p>
               <p className="mt-3 text-3xl font-black">{stats.incoming}</p>
             </div>
             <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-400">Reviewing</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Reviewing</p>
               <p className="mt-3 text-3xl font-black">{stats.reviewing}</p>
             </div>
             <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-400">Completed</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Completed</p>
               <p className="mt-3 text-3xl font-black">{stats.completed}</p>
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function AdvisorEquivalencyRequests() {
                     <span className={`rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.25em] ${getRequestStatusClasses(request.status)}`}>
                       {request.status.replace('_', ' ')}
                     </span>
-                    <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                       Updated {formatDisplayDate(request.updatedAt)}
                     </span>
                   </div>
