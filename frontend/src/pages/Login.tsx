@@ -50,7 +50,7 @@ export default function Login() {
         <InputField
           label="Password"
           labelRight={
-            <a href="#" className="text-[11px] text-accent-yellow hover:text-yellow-default font-bold transition-colors uppercase tracking-widest">
+            <a href="#" className="text-xs text-accent-yellow hover:text-yellow-default font-bold transition-colors uppercase tracking-widest">
               Forgot Password?
             </a>
           }

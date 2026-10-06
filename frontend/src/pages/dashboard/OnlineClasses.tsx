@@ -124,7 +124,7 @@ export default function OnlineClasses() {
   if (loading) {
     return (
       <div className="flex min-h-[420px] items-center justify-center rounded-[2rem] border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-slate-500">
+        <div className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-slate-500">
           <Loader2 className="h-5 w-5 animate-spin text-accent-yellow" />
           Loading online classes
         </div>
@@ -146,7 +146,7 @@ export default function OnlineClasses() {
           <button
             type="button"
             onClick={() => void loadClasses()}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-700 px-5 py-3 text-sm font-black text-white transition hover:bg-red-800"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-800"
           >
             <RefreshCw className="h-4 w-4" />
             Retry
@@ -185,7 +185,7 @@ export default function OnlineClasses() {
       <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
         <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
           <div className={`${isHost ? 'bg-emerald-950' : 'bg-[#071133]'} p-7 text-white md:p-10`}>
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-accent-yellow">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-widest text-accent-yellow">
               <Video className="h-4 w-4" />
               {isHost ? 'Host Online Classes' : 'Online Classes'}
             </div>
@@ -205,7 +205,7 @@ export default function OnlineClasses() {
                   type="button"
                   onClick={() => void startClass(featuredClass)}
                   disabled={actionId === featuredClass.id}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-yellow px-6 py-4 text-sm font-black text-dark-blue shadow-lg shadow-accent-yellow/20 transition hover:bg-yellow-default disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-yellow px-6 py-4 text-sm font-bold text-dark-blue shadow-lg shadow-accent-yellow/20 transition hover:bg-yellow-default disabled:opacity-60"
                 >
                   {actionId === featuredClass.id ? <Loader2 className="h-5 w-5 animate-spin" /> : <Video className="h-5 w-5" />}
                   {featuredClass.isHostSession ? 'Rejoin as Host' : 'Start Class'}
@@ -215,7 +215,7 @@ export default function OnlineClasses() {
                   href={featuredUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-yellow px-6 py-4 text-sm font-black text-dark-blue shadow-lg shadow-accent-yellow/20 transition hover:bg-yellow-default"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent-yellow px-6 py-4 text-sm font-bold text-dark-blue shadow-lg shadow-accent-yellow/20 transition hover:bg-yellow-default"
                 >
                   <Video className="h-5 w-5" />
                   Join Live Class
@@ -225,7 +225,7 @@ export default function OnlineClasses() {
               <button
                 type="button"
                 onClick={() => void copyMeetingDetails(featuredClass)}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-6 py-4 text-sm font-black text-white transition hover:bg-white/15"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-6 py-4 text-sm font-bold text-white transition hover:bg-white/15"
               >
                 {copiedClassId === featuredClass.id ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
                 {copiedClassId === featuredClass.id ? 'Copied' : 'Copy Details'}
@@ -236,7 +236,7 @@ export default function OnlineClasses() {
                   type="button"
                   onClick={() => void endClass(featuredClass)}
                   disabled={actionId === featuredClass.id}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-6 py-4 text-sm font-black text-white transition hover:bg-white/15 disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-6 py-4 text-sm font-bold text-white transition hover:bg-white/15 disabled:opacity-60"
                 >
                   <Square className="h-4 w-4" />
                   End Session
@@ -246,7 +246,7 @@ export default function OnlineClasses() {
           </div>
 
           <div className="bg-slate-50 p-7 md:p-10">
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-600">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-600">
               {isHost ? 'Host Session' : 'Live Session'}
             </p>
             <h3 className="mt-3 text-slate-900">{featuredClass.course}</h3>
@@ -303,7 +303,7 @@ export default function OnlineClasses() {
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
         <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-accent-yellow">Schedule</p>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">Schedule</p>
             <h3 className="mt-2 text-slate-900">{isHost ? 'Classes you can host' : 'Your class calls'}</h3>
           </div>
           <div className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-600">
@@ -320,7 +320,7 @@ export default function OnlineClasses() {
             >
               <div>
                 <div className="mb-3 flex flex-wrap items-center gap-3">
-                  <span className={`rounded-full border px-3 py-1 text-xs font-black ${statusStyles[classItem.status]}`}>
+                  <span className={`rounded-full border px-3 py-1 text-xs font-bold ${statusStyles[classItem.status]}`}>
                     {classItem.status}
                   </span>
                   <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
@@ -337,7 +337,7 @@ export default function OnlineClasses() {
                 <button
                   type="button"
                   onClick={() => void copyMeetingDetails(classItem)}
-                  className={`inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition ${isHost ? 'hover:border-emerald-700 hover:text-emerald-700' : 'hover:border-dark-blue hover:text-dark-blue'}`}
+                  className={`inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition ${isHost ? 'hover:border-emerald-700 hover:text-emerald-700' : 'hover:border-dark-blue hover:text-dark-blue'}`}
                 >
                   {copiedClassId === classItem.id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   {copiedClassId === classItem.id ? 'Copied' : 'Copy'}
@@ -349,7 +349,7 @@ export default function OnlineClasses() {
                       type="button"
                       onClick={() => void startClass(classItem)}
                       disabled={actionId === classItem.id}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-black text-white transition hover:bg-emerald-800 disabled:opacity-60"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60"
                     >
                       {actionId === classItem.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
                       {classItem.isHostSession ? 'Rejoin' : 'Start'}
@@ -359,7 +359,7 @@ export default function OnlineClasses() {
                         type="button"
                         onClick={() => void endClass(classItem)}
                         disabled={actionId === classItem.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:border-red-300 hover:text-red-700 disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-red-300 hover:text-red-700 disabled:opacity-60"
                       >
                         End
                       </button>
@@ -370,7 +370,7 @@ export default function OnlineClasses() {
                     href={classItem.joinUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-dark-blue px-5 py-3 text-sm font-black text-white transition hover:bg-[#11195a]"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#11195a]"
                   >
                     Join
                     <ExternalLink className="h-4 w-4" />

@@ -391,8 +391,8 @@ export default function ApplicationWorkflowPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">Application Module</p>
-          <h1 className="mt-2 text-3xl font-black text-slate-900">Workflow-Based Student Application</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Application Module</p>
+          <h1 className="mt-2 text-3xl font-bold text-slate-900">Workflow-Based Student Application</h1>
         </div>
         <Link to="/dashboard/applications" className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm">
           <ArrowLeft className="h-4 w-4" />
@@ -406,10 +406,10 @@ export default function ApplicationWorkflowPage() {
         <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">Workflow Status</p>
-              <p className="mt-2 text-lg font-black text-slate-900">{application.program}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Workflow Status</p>
+              <p className="mt-2 text-lg font-bold text-slate-900">{application.program}</p>
             </div>
-            <div className={`rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.2em] ${getApplicationStatusTone(application)}`}>
+            <div className={`rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] ${getApplicationStatusTone(application)}`}>
               {getApplicationStatusLabel(application)}
             </div>
           </div>
@@ -466,7 +466,7 @@ export default function ApplicationWorkflowPage() {
               type="button"
               onClick={() => void handleSubmit()}
               disabled={submitting || !application || application.status !== 'DRAFT'}
-              className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-5 py-3 text-sm font-black text-dark-blue disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-5 py-3 text-sm font-bold text-dark-blue disabled:opacity-60"
             >
               <CheckCircle2 className="h-4 w-4" />
               {submitting

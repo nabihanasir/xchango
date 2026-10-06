@@ -68,7 +68,7 @@ export default function AdminUniversities() {
     <div className="space-y-6 animate-fade-in relative z-0">
        <div className="flex items-center justify-between border-b border-light-color/50 pb-6 glass-card p-6 md:p-8 rounded-[2rem] bg-white">
         <div>
-          <h2 className="text-3xl font-black text-maroon mb-2">Universities Catalog</h2>
+          <h2 className="text-3xl font-bold text-maroon mb-2">Universities Catalog</h2>
           <p className="text-body-text font-medium mt-1 md:text-lg">Manage partner universities and their available capacity.</p>
         </div>
         <div className="flex gap-3">
@@ -116,7 +116,7 @@ export default function AdminUniversities() {
                 <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-maroon">
                    <GraduationCap className="h-6 w-6" />
                 </div>
-                <h2 className="text-2xl font-black text-maroon">New University</h2>
+                <h2 className="text-2xl font-bold text-maroon">New University</h2>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -129,7 +129,7 @@ export default function AdminUniversities() {
             
             <form onSubmit={handleCreate} className="p-8 space-y-5">
               <div>
-                <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">University Name</label>
+                <label className="block text-xs font-bold text-maroon/60 uppercase tracking-widest mb-2">University Name</label>
                 <input 
                   type="text" 
                   required
@@ -141,7 +141,7 @@ export default function AdminUniversities() {
               </div>
 
               <div>
-                <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">Country</label>
+                <label className="block text-xs font-bold text-maroon/60 uppercase tracking-widest mb-2">Country</label>
                 <select 
                   required
                   value={newUniversity.countryId}
@@ -156,7 +156,7 @@ export default function AdminUniversities() {
               </div>
 
               <div>
-                <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">Website URL (Optional)</label>
+                <label className="block text-xs font-bold text-maroon/60 uppercase tracking-widest mb-2">Website URL (Optional)</label>
                 <input 
                   type="url" 
                   value={newUniversity.website}
@@ -167,7 +167,7 @@ export default function AdminUniversities() {
               </div>
 
               <div>
-                <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">Seat Limit</label>
+                <label className="block text-xs font-bold text-maroon/60 uppercase tracking-widest mb-2">Seat Limit</label>
                 <input 
                   type="number" 
                   required min="0" step="1"

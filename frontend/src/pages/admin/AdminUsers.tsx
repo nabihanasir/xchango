@@ -140,7 +140,7 @@ export default function AdminUsers() {
     <div className="space-y-6">
       <div className="flex items-center justify-between border-b border-light-color/50 pb-6">
         <div>
-          <h2 className="text-3xl font-black text-maroon">Users Management</h2>
+          <h2 className="text-3xl font-bold text-maroon">Users Management</h2>
           <p className="text-body-text font-medium mt-1">Create advisor accounts and manage platform users.</p>
         </div>
         <button
@@ -156,7 +156,7 @@ export default function AdminUsers() {
 
       {generatedPassword ? (
         <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-6 py-5 text-sm font-medium text-emerald-800">
-          Auto-generated advisor password: <span className="font-black">{generatedPassword}</span>
+          Auto-generated advisor password: <span className="font-bold">{generatedPassword}</span>
         </div>
       ) : null}
 
@@ -169,7 +169,7 @@ export default function AdminUsers() {
       {showAddModal ? (
         <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-maroon/40 p-4 py-6 backdrop-blur-sm sm:items-center">
           <div className="max-h-[calc(100vh-3rem)] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl animate-fade-in-up">
-            <h3 className="text-2xl font-black text-maroon mb-6">Create New User</h3>
+            <h3 className="text-2xl font-bold text-maroon mb-6">Create New User</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-maroon/60 uppercase mb-2">Full Name</label>

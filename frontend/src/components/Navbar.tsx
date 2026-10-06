@@ -52,7 +52,7 @@ export default function Navbar() {
               +92 51 111 510 510
             </span>
           </div>
-          <a href="#exchange" className="flex items-center gap-1.5 font-black uppercase tracking-[0.18em] text-accent-yellow transition hover:text-yellow-default">
+          <a href="#exchange" className="flex items-center gap-1.5 font-bold uppercase tracking-[0.18em] text-accent-yellow transition hover:text-yellow-default">
             Explore Programmes
             <ArrowRight className="h-3.5 w-3.5" />
           </a>
@@ -69,7 +69,7 @@ export default function Navbar() {
             <Globe2 className="h-5 w-5" />
           </div>
           <div>
-            <p className={`text-sm font-black uppercase tracking-[0.24em] transition-colors duration-300 ${solid ? 'text-dark-blue' : 'text-white'}`}>
+            <p className={`text-sm font-bold uppercase tracking-[0.24em] transition-colors duration-300 ${solid ? 'text-dark-blue' : 'text-white'}`}>
               Riphah
             </p>
             <p className={`text-sm font-medium transition-colors duration-300 ${solid ? 'text-slate-500' : 'text-white/70'}`}>

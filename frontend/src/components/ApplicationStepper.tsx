@@ -18,7 +18,7 @@ export default function ApplicationStepper({ currentStep }: ApplicationStepperPr
           return (
             <div key={step} className="flex min-w-0 flex-1 flex-col items-center gap-2 text-center">
               <div
-                className={`flex h-11 w-11 items-center justify-center rounded-full border-2 text-sm font-black transition ${
+                className={`flex h-11 w-11 items-center justify-center rounded-full border-2 text-sm font-bold transition ${
                   isDone
                     ? 'border-accent-yellow bg-accent-yellow text-dark-blue'
                     : isActive

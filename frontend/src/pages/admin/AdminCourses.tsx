@@ -194,7 +194,7 @@ export default function AdminCourses() {
       accessor: 'title',
       render: (_value: string, row: ApplicationCourseSummary) => (
         <div>
-          <p className="font-black text-maroon">{getCourseDisplayTitle(row)}</p>
+          <p className="font-bold text-maroon">{getCourseDisplayTitle(row)}</p>
           <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-slate-900">
             {row.isHomeCourse ? 'Home Course' : 'Course'}
           </p>
@@ -213,7 +213,7 @@ export default function AdminCourses() {
     {
       header: 'Credit Hours',
       accessor: 'creditHours',
-      render: (value: number) => <span className="font-black text-maroon">{value}</span>,
+      render: (value: number) => <span className="font-bold text-maroon">{value}</span>,
     },
     {
       header: 'Instructor',
@@ -266,7 +266,7 @@ export default function AdminCourses() {
     <div className="relative z-0 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between rounded-[2rem] border-b border-light-color/50 bg-white p-6 md:p-8 glass-card">
         <div>
-          <h2 className="mb-2 text-3xl font-black text-maroon">Manage Home Courses</h2>
+          <h2 className="mb-2 text-3xl font-bold text-maroon">Manage Home Courses</h2>
           <p className="mt-1 text-body-text font-medium md:text-lg">
             Maintain the central list of home courses used by advisors during equivalency review.
           </p>
@@ -290,7 +290,7 @@ export default function AdminCourses() {
       <div className="glass-card rounded-[2rem] bg-white p-6 shadow-sm md:p-8">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h3 className="text-xl font-black text-maroon">Home Course Catalog</h3>
+            <h3 className="text-xl font-bold text-maroon">Home Course Catalog</h3>
             <p className="mt-1 text-sm font-medium text-body-text">
               Search, update, and remove home courses used by the advisor equivalency workflow.
             </p>
@@ -347,7 +347,7 @@ export default function AdminCourses() {
                   <BookOpen className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-maroon">
+                  <h2 className="text-2xl font-bold text-maroon">
                     {editingCourseId ? 'Edit Home Course' : 'New Home Course'}
                   </h2>
                   <p className="text-sm font-medium text-body-text">
@@ -367,7 +367,7 @@ export default function AdminCourses() {
 
             <form onSubmit={handleSubmit} className="space-y-5 p-8">
               <div>
-                <label className="mb-2 block text-xs font-black uppercase tracking-widest text-maroon/60">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
                   Title
                 </label>
                 <input
@@ -382,7 +382,7 @@ export default function AdminCourses() {
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-xs font-black uppercase tracking-widest text-maroon/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
                     Description
                   </label>
                   <textarea
@@ -395,7 +395,7 @@ export default function AdminCourses() {
                 </div>
 
                 <div className="md:col-span-1">
-                  <label className="mb-2 block text-xs font-black uppercase tracking-widest text-maroon/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
                     Credit Hours
                   </label>
                   <input
@@ -410,7 +410,7 @@ export default function AdminCourses() {
                 </div>
 
                 <div className="md:col-span-1">
-                  <label className="mb-2 block text-xs font-black uppercase tracking-widest text-maroon/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
                     Instructor Name
                   </label>
                   <input
@@ -423,7 +423,7 @@ export default function AdminCourses() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-xs font-black uppercase tracking-widest text-maroon/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
                     Instructor Email
                   </label>
                   <input

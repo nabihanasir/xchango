@@ -78,7 +78,7 @@ export default function HostCourseInstructors() {
     <div className="glass-card rounded-[2rem] bg-white p-6 shadow-sm md:p-8">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h3 className="text-xl font-black text-maroon">Host Course Instructors</h3>
+          <h3 className="text-xl font-bold text-maroon">Host Course Instructors</h3>
           <p className="mt-1 text-sm font-medium text-body-text">
             Instructors listed here are emailed when an exchange student enrolled in their course arrives.
             {missingCount ? ` ${missingCount} course${missingCount === 1 ? '' : 's'} still missing an email.` : ''}
@@ -126,7 +126,7 @@ export default function HostCourseInstructors() {
           {filtered.map((course) => (
             <li key={course._id} className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
               <div className="min-w-0">
-                <p className="font-black text-maroon">
+                <p className="font-bold text-maroon">
                   {course.code ? `${course.code} · ` : ''}
                   {getCourseDisplayTitle(course)}
                 </p>

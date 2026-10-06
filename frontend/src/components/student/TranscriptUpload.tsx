@@ -31,8 +31,8 @@ export default function TranscriptUpload({
     <section className="glass-card rounded-[2rem] p-7 md:p-8">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">Transcript</p>
-          <h2 className="mt-2 text-2xl font-black text-slate-900">Upload and Parse Transcript</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Transcript</p>
+          <h2 className="mt-2 text-2xl font-bold text-slate-900">Upload and Parse Transcript</h2>
           <p className="mt-2 text-sm text-slate-500">
             Upload an Excel, CSV or PDF transcript. Courses are grouped semester-wise, and different layouts are handled automatically.
           </p>
@@ -75,7 +75,7 @@ export default function TranscriptUpload({
         <button
           type="submit"
           disabled={!selectedFile || uploading}
-          className="rounded-[1.75rem] bg-accent-yellow px-6 py-4 text-sm font-black text-dark-blue transition hover:bg-yellow-default disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-[1.75rem] bg-accent-yellow px-6 py-4 text-sm font-bold text-dark-blue transition hover:bg-yellow-default disabled:cursor-not-allowed disabled:opacity-60"
         >
           {uploading ? 'Uploading...' : 'Upload transcript'}
         </button>

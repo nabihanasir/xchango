@@ -121,7 +121,7 @@ export default function AdminAiModelConfig() {
             <Bot className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-3xl font-black text-maroon mb-1">AI Model Configuration</h2>
+            <h2 className="text-3xl font-bold text-maroon mb-1">AI Model Configuration</h2>
             <p className="text-body-text font-medium md:text-lg">
               Choose which LLM powers AI course matching and manage its credentials.
             </p>
@@ -146,7 +146,7 @@ export default function AdminAiModelConfig() {
       <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
           <div>
-            <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">Provider</label>
+            <label className="block text-xs font-bold text-maroon/60 uppercase tracking-widest mb-2">Provider</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {(Object.keys(PROVIDER_PRESETS) as AiProvider[]).map((key) => (
                 <button
@@ -167,7 +167,7 @@ export default function AdminAiModelConfig() {
           </div>
 
           <div>
-            <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">Base URL</label>
+            <label className="block text-xs font-bold text-maroon/60 uppercase tracking-widest mb-2">Base URL</label>
             <input
               type="url"
               required
@@ -179,7 +179,7 @@ export default function AdminAiModelConfig() {
           </div>
 
           <div>
-            <label className="block text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">Model Name</label>
+            <label className="block text-xs font-bold text-maroon/60 uppercase tracking-widest mb-2">Model Name</label>
             <input
               type="text"
               required
@@ -191,7 +191,7 @@ export default function AdminAiModelConfig() {
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-xs font-black text-maroon/60 uppercase tracking-widest mb-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-maroon/60 uppercase tracking-widest mb-2">
               <KeyRound className="h-3.5 w-3.5" /> API Key
             </label>
             <input

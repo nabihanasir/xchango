@@ -54,10 +54,10 @@ export default function AdvisorStudents() {
       <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-600 p-8 text-white shadow-2xl shadow-emerald-950/10 md:p-10">
         <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-emerald-300/15 blur-[80px]" />
         <div className="relative z-10 max-w-4xl">
-          <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">
+          <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">
             My Students
           </p>
-          <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
+          <h1 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
             Assigned Student Portfolios
           </h1>
           <p className="mt-4 max-w-2xl text-base text-slate-200 md:text-lg">

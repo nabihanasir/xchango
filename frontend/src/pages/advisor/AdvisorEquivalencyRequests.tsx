@@ -48,11 +48,11 @@ export default function AdvisorEquivalencyRequests() {
         <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-accent-yellow/10 blur-[90px]" />
         <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.3em] text-accent-yellow">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">
               <Sparkles className="h-4 w-4" />
               Advisor Workflow
             </div>
-            <h1 className="mt-4 text-3xl font-black tracking-tight md:text-5xl">Course equivalency review queue</h1>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-5xl">Course equivalency review queue</h1>
             <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-slate-300">
               Open requests, inspect paired courses, run the AI match manually, and finalize approval or rejection with student-facing comments.
             </p>
@@ -60,16 +60,16 @@ export default function AdvisorEquivalencyRequests() {
 
           <div className="grid grid-cols-3 gap-4">
             <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Incoming</p>
-              <p className="mt-3 text-3xl font-black">{stats.incoming}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent-yellow">Incoming</p>
+              <p className="mt-3 text-3xl font-bold">{stats.incoming}</p>
             </div>
             <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Reviewing</p>
-              <p className="mt-3 text-3xl font-black">{stats.reviewing}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent-yellow">Reviewing</p>
+              <p className="mt-3 text-3xl font-bold">{stats.reviewing}</p>
             </div>
             <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-yellow">Completed</p>
-              <p className="mt-3 text-3xl font-black">{stats.completed}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent-yellow">Completed</p>
+              <p className="mt-3 text-3xl font-bold">{stats.completed}</p>
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@ export default function AdvisorEquivalencyRequests() {
               <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className={`rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.25em] ${getRequestStatusClasses(request.status)}`}>
+                    <span className={`rounded-full px-3 py-2 text-xs font-bold uppercase tracking-[0.25em] ${getRequestStatusClasses(request.status)}`}>
                       {request.status.replace('_', ' ')}
                     </span>
                     <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
@@ -101,13 +101,13 @@ export default function AdvisorEquivalencyRequests() {
                   </div>
 
                   <div>
-                    <h2 className="text-2xl font-black text-slate-800">{request.studentId.name}</h2>
+                    <h2 className="text-2xl font-bold text-slate-800">{request.studentId.name}</h2>
                     <p className="mt-2 text-sm font-medium text-slate-500">
                       {request.studentProfile?.program || 'Program not available'} · SAP {request.studentId.sapId || 'N/A'}
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">
+                  <div className="flex flex-wrap gap-3 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
                     <span className="rounded-full bg-slate-100 px-3 py-2">{request.courseCount} courses</span>
                     <span className="rounded-full bg-slate-100 px-3 py-2">{request.studentId.email}</span>
                   </div>
@@ -115,7 +115,7 @@ export default function AdvisorEquivalencyRequests() {
 
                 <div className="flex flex-col items-start gap-4 xl:items-end">
                   <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-medium text-slate-600">
-                    <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">
+                    <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
                       <ClipboardCheck className="h-4 w-4" />
                       Review snapshot
                     </div>
@@ -141,7 +141,7 @@ export default function AdvisorEquivalencyRequests() {
         </div>
       ) : (
         <div className="glass-card rounded-[2rem] px-6 py-12 text-center">
-          <h2 className="text-2xl font-black text-slate-800">No course equivalency requests yet</h2>
+          <h2 className="text-2xl font-bold text-slate-800">No course equivalency requests yet</h2>
           <p className="mt-3 text-sm font-medium text-slate-500">Requests will appear here as soon as students submit host-course selections.</p>
         </div>
       )}

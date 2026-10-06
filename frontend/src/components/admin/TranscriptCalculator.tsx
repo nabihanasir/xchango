@@ -27,13 +27,13 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
       <div className="bg-maroon-gradient p-6 text-white flex justify-between items-center relative">
         <div className="absolute top-0 right-0 w-32 h-full bg-accent-yellow/10 -skew-x-12 transform translate-x-8" />
         <div className="relative z-10">
-          <h3 className="text-xl font-black uppercase tracking-tighter">Transcript Calculator</h3>
+          <h3 className="text-xl font-bold uppercase tracking-tighter">Transcript Calculator</h3>
           <p className="text-white/60 text-xs font-bold mt-1">Institutional Record Summary</p>
         </div>
         <div className="relative z-10 text-right">
-          <p className="text-[10px] font-bold text-accent-yellow uppercase tracking-widest leading-none">Overall Status</p>
+          <p className="text-xs font-bold text-accent-yellow uppercase tracking-widest leading-none">Overall Status</p>
           <div className="flex items-center gap-2 mt-1 justify-end">
-            <span className="text-3xl font-black leading-none">CGPA: {cgpa.toFixed(2)}</span>
+            <span className="text-3xl font-bold leading-none">CGPA: {cgpa.toFixed(2)}</span>
             <Calculator className="h-5 w-5 text-accent-yellow" />
           </div>
         </div>
@@ -43,16 +43,16 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
       <div className="px-6 py-4 bg-slate-50 border-b border-light-color/80 flex justify-between items-center text-sm">
         <div className="flex gap-8">
           <div>
-            <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest block">Student Name</span>
+            <span className="text-xs font-bold text-body-text/40 uppercase tracking-widest block">Student Name</span>
             <span className="font-bold text-maroon">{studentName}</span>
           </div>
           <div>
-            <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest block">SAP ID</span>
+            <span className="text-xs font-bold text-body-text/40 uppercase tracking-widest block">SAP ID</span>
             <span className="font-bold text-maroon">{sapId}</span>
           </div>
         </div>
         <div className="text-right">
-          <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest block">Last Synchronized</span>
+          <span className="text-xs font-bold text-body-text/40 uppercase tracking-widest block">Last Synchronized</span>
           <span className="font-bold text-maroon italic opacity-60">March 18, 2024</span>
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
           transcript.map((sem) => (
             <div key={sem.semester} className="space-y-3">
               <div className="flex items-center gap-4">
-                <div className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border ${
+                <div className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest border ${
                   sem.semester % 2 === 0 ? 'bg-maroon/5 text-maroon border-maroon/10' : 'bg-slate-100 text-maroon border-slate-200'
                 }`}>
                   Semester {sem.semester}
@@ -80,7 +80,7 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
 
               <div className="rounded-2xl border border-light-color/40 overflow-hidden shadow-sm">
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50/50 text-[10px] font-black text-body-text/50 uppercase tracking-widest">
+                  <thead className="bg-slate-50/50 text-xs font-bold text-body-text/50 uppercase tracking-widest">
                     <tr>
                       <th className="px-5 py-3">Course Title</th>
                       <th className="px-5 py-3 text-center">Cr. Hrs</th>
@@ -93,7 +93,7 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
                         <td className="px-5 py-3.5">{course.name}</td>
                         <td className="px-5 py-3.5 text-center opacity-60">{course.credits}</td>
                         <td className="px-5 py-3.5 text-right">
-                          <span className={`px-2 py-0.5 rounded font-black text-xs ${
+                          <span className={`px-2 py-0.5 rounded font-bold text-xs ${
                             course.grade.startsWith('A') ? 'text-green-600' : 'text-orange-500'
                           }`}>
                             {course.grade}
@@ -104,10 +104,10 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
                   </tbody>
                 </table>
                 <div className="bg-slate-100/50 px-5 py-3 flex justify-between items-center border-t border-slate-100">
-                  <span className="text-[10px] font-black text-body-text/40 uppercase tracking-widest">Semester Performance</span>
+                  <span className="text-xs font-bold text-body-text/40 uppercase tracking-widest">Semester Performance</span>
                   <div className="flex gap-4">
                     <span className="text-xs font-bold">Total Credits: <span className="text-maroon">{sem.credits}</span></span>
-                    <span className="text-xs font-black bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm text-maroon">
+                    <span className="text-xs font-bold bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm text-maroon">
                       SGPA: {sem.sgpa.toFixed(2)}
                     </span>
                   </div>

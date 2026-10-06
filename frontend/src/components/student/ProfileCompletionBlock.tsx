@@ -21,7 +21,7 @@ export default function ProfileCompletionBlock({
           <div className="inline-flex rounded-full bg-amber-100 p-3 text-amber-700">
             <FileCheck2 className="h-5 w-5" />
           </div>
-          <h1 className="mt-4 text-3xl font-black text-slate-900">{title}</h1>
+          <h1 className="mt-4 text-3xl font-bold text-slate-900">{title}</h1>
           <p className="mt-3 text-base font-medium leading-7 text-slate-600">{message}</p>
           {issues.length ? (
             <p className="mt-3 text-sm font-semibold text-amber-700">
@@ -32,7 +32,7 @@ export default function ProfileCompletionBlock({
 
         <Link
           to={actionTo}
-          className="inline-flex items-center gap-2 rounded-2xl bg-dark-blue px-5 py-4 text-sm font-black text-white"
+          className="inline-flex items-center gap-2 rounded-2xl bg-dark-blue px-5 py-4 text-sm font-bold text-white"
         >
           {actionLabel}
           <ArrowRightCircle className="h-4 w-4" />

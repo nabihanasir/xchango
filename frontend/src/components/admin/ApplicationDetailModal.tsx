@@ -105,11 +105,11 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
         <header className="bg-white px-8 py-6 border-b border-light-color/60 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-5">
             <div className="bg-maroon-gradient h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg shadow-maroon/10">
-              <span className="text-white font-black text-xl italic leading-none">{studentName.charAt(0)}</span>
+              <span className="text-white font-bold text-xl italic leading-none">{studentName.charAt(0)}</span>
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-black text-maroon">{studentName}</h2>
+                <h2 className="text-2xl font-bold text-maroon">{studentName}</h2>
                 <StatusBadge status={app.status.toLowerCase()} />
               </div>
               <p className="text-body-text font-bold text-sm opacity-60 mt-1">
@@ -129,7 +129,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="space-y-8">
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-6">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Student Information</h4>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Student Information</h4>
                 
                 <div className="grid grid-cols-1 gap-4">
                   <ProfileItem icon={Hash} label="SAP ID" value={sapId} />
@@ -141,17 +141,17 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-6">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Preferences</h4>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Preferences</h4>
                 <div className="space-y-4">
                   <div>
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest block mb-1">Country of Choice</span>
+                    <span className="text-xs font-bold text-slate-900 uppercase tracking-widest block mb-1">Country of Choice</span>
                     <div className="flex items-center gap-2 text-sm font-bold text-maroon">
                       <MapPin className="h-4 w-4 text-accent-yellow" />
                       {app.country || 'N/A'}
                     </div>
                   </div>
                   <div>
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest block mb-1">University of Choice</span>
+                    <span className="text-xs font-bold text-slate-900 uppercase tracking-widest block mb-1">University of Choice</span>
                     <div className="flex items-center gap-2 text-sm font-bold text-maroon">
                       <GraduationCap className="h-4 w-4 text-maroon" />
                       {app.university || 'N/A'}
@@ -161,7 +161,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Semester End Date</h4>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Semester End Date</h4>
                 {app.status === 'COMPLETED' ? (
                   <p className="text-sm font-bold text-maroon">Completed. The student account is off-boarded (read-only).</p>
                 ) : canSetEndDate ? (
@@ -190,7 +190,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
 
               {arrival?.arrivedAt ? (
                 <div className="bg-white p-6 rounded-3xl border border-emerald-200 shadow-sm space-y-2">
-                  <h4 className="text-xs font-black text-emerald-700 uppercase tracking-[0.2em]">Arrived</h4>
+                  <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-[0.2em]">Arrived</h4>
                   <p className="text-sm font-bold text-maroon">{new Date(arrival.arrivedAt).toLocaleDateString()}</p>
                   <p className="text-xs font-medium text-body-text">
                     {arrival.notices.filter((notice) => notice.sent).length} of {arrival.notices.length} instructor email(s) sent
@@ -199,12 +199,12 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               ) : null}
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-6">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Application Stage</h4>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Application Stage</h4>
                 <div className="space-y-6">
                   <div className="flex justify-between items-end">
                     <div className="flex flex-col">
                         <span className="text-xs font-bold text-body-text opacity-60">Status Mapped Level</span>
-                        <span className="text-2xl font-black text-maroon">{Math.round(progressPercent)}%</span>
+                        <span className="text-2xl font-bold text-maroon">{Math.round(progressPercent)}%</span>
                     </div>
                     <span className="text-xs font-bold text-body-text opacity-60">Level {currentStage} of 5</span>
                   </div>
@@ -232,8 +232,8 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                 <div className="absolute top-0 right-0 w-64 h-64 bg-accent-yellow/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
                 <div className="relative z-10 flex justify-between items-center">
                   <div>
-                    <span className="text-xs font-black text-accent-yellow uppercase tracking-widest">Selected Program</span>
-                    <h3 className="text-3xl font-black mt-2 leading-tight">{app.program || 'General Program'}</h3>
+                    <span className="text-xs font-bold text-accent-yellow uppercase tracking-widest">Selected Program</span>
+                    <h3 className="text-3xl font-bold mt-2 leading-tight">{app.program || 'General Program'}</h3>
                     <p className="text-white/60 font-bold mt-1">{app.university || 'N/A'}</p>
                   </div>
                   <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md border border-white/10 hidden sm:block">
@@ -243,7 +243,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Selected Courses</h4>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Selected Courses</h4>
                 {selectedCourseNames.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                     {selectedCourseNames.map((course, i) => (
@@ -260,7 +260,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </div>
 
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4 opacity-75">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Transcript Calculator</h4>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Transcript Calculator</h4>
                 <div className="py-8 text-center rounded-xl bg-slate-50 border border-dashed border-light-color space-y-2">
                     <Calendar className="h-8 w-8 text-slate-300 mx-auto" />
                     <p className="text-sm font-bold text-slate-500">Transcript data is not linked to this application format natively.</p>
@@ -335,7 +335,7 @@ function ProfileItem({ icon: Icon, label, value, highlighted = false }: any) {
         <Icon className="h-4 w-4" />
       </div>
       <div>
-        <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest block">{label}</span>
+        <span className="text-xs font-bold text-slate-900 uppercase tracking-widest block">{label}</span>
         <span className={`text-sm font-bold ${highlighted ? 'text-maroon' : 'text-body-text'}`}>{value}</span>
       </div>
     </div>

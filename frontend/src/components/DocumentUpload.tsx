@@ -40,7 +40,7 @@ export default function DocumentUpload({
 
   return (
     <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-      <h3 className="text-xl font-black text-slate-900">Post-Shortlist Document Upload</h3>
+      <h3 className="text-xl font-bold text-slate-900">Post-Shortlist Document Upload</h3>
       <form className="mt-5 space-y-5" onSubmit={handleSubmit}>
         <DocumentTypePicker options={documentTypes} value={type} onChange={setType} />
 

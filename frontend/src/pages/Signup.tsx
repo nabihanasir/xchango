@@ -192,7 +192,7 @@ export default function Signup() {
           />
 
           <div className="space-y-1.5 md:col-span-2">
-            <label className="block pl-1 text-[11px] font-bold uppercase tracking-widest text-slate-500">Role</label>
+            <label className="block pl-1 text-xs font-bold uppercase tracking-widest text-slate-500">Role</label>
             <div className="relative group">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-dark-blue">
                 <Shield className="h-5 w-5" />

@@ -63,21 +63,21 @@ export default function AdminDashboard() {
 
         <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-yellow/20 bg-accent-yellow/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-accent-yellow">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-yellow/20 bg-accent-yellow/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-yellow">
               <Sparkles className="h-3.5 w-3.5" />
               <span>Overview Report</span>
             </div>
-            <h2 className="mb-2 text-[2.5rem] font-black leading-none tracking-tight text-white">
+            <h2 className="mb-2 text-[2.5rem] font-bold leading-none tracking-tight text-white">
               Welcome Back, Admin!
             </h2>
-            <p className="text-[15px] font-medium text-red-100/80">
+            <p className="text-base font-medium text-red-100/80">
               Live metrics from the current backend state.
             </p>
           </div>
           <div className="relative z-10 hidden items-center gap-4 rounded-[1.25rem] border border-white/10 bg-white/10 p-5 backdrop-blur-sm md:flex">
             <div className="text-right">
-              <p className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-red-100/60">System Status</p>
-              <p className="text-[15px] font-bold text-emerald-300">Admin API Connected</p>
+              <p className="mb-0.5 text-xs font-bold uppercase tracking-widest text-red-100/60">System Status</p>
+              <p className="text-base font-bold text-emerald-300">Admin API Connected</p>
             </div>
             <div className="h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
           </div>
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="glass-card relative overflow-hidden rounded-[2rem] p-6 lg:p-8">
           <div className="mb-8 flex items-center justify-between">
-            <h3 className="flex items-center gap-3 text-xl font-black text-slate-800">
+            <h3 className="flex items-center gap-3 text-xl font-bold text-slate-800">
               <div className="rounded-xl bg-maroon/10 p-2">
                 <TrendingUp className="h-5 w-5 text-maroon" />
               </div>
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
 
         <div className="glass-card relative overflow-hidden rounded-[2rem] p-6 lg:p-8">
           <div className="mb-8 flex items-center justify-between">
-            <h3 className="flex items-center gap-3 text-xl font-black text-slate-800">
+            <h3 className="flex items-center gap-3 text-xl font-bold text-slate-800">
               <div className="rounded-xl bg-accent-yellow/10 p-2">
                 <Globe className="h-5 w-5 text-yellow-default" />
               </div>
@@ -176,11 +176,11 @@ export default function AdminDashboard() {
       <section className="glass-card rounded-[2rem] border border-slate-200 bg-white p-6 lg:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-accent-yellow/20 bg-accent-yellow/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-accent-yellow">
+            <div className="inline-flex items-center gap-2 rounded-full border border-accent-yellow/20 bg-accent-yellow/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-yellow">
               <BookOpen className="h-3.5 w-3.5" />
               Home Course Catalog
             </div>
-            <h3 className="mt-4 text-2xl font-black text-slate-800">Manage the central home-course list</h3>
+            <h3 className="mt-4 text-2xl font-bold text-slate-800">Manage the central home-course list</h3>
             <p className="mt-2 text-sm font-medium leading-7 text-slate-500">
               Add, edit, and delete the home courses that advisors use while pairing student requests.
             </p>

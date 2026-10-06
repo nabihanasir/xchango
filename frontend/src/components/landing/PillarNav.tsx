@@ -39,9 +39,9 @@ export default function PillarNav() {
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-dark-blue text-accent-yellow transition group-hover:scale-105">
               <Icon className="h-6 w-6" />
             </span>
-            <h3 className="mt-6 text-lg font-black text-dark-blue">{title}</h3>
+            <h3 className="mt-6 text-lg font-bold text-dark-blue">{title}</h3>
             <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
-            <span className="mt-5 text-xs font-black uppercase tracking-[0.2em] text-yellow-default">
+            <span className="mt-5 text-xs font-bold uppercase tracking-[0.2em] text-yellow-default">
               Read more
             </span>
           </a>

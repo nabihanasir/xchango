@@ -158,10 +158,10 @@ export default function StudentProfile() {
         <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-1/4 translate-y-1/4 rounded-full bg-cyan-400/15 blur-3xl" />
         <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">
+            <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">
               Student Profile Hub
             </p>
-            <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
+            <h1 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
               Student Profile Module
             </h1>
             <p className="mt-4 max-w-2xl text-base text-slate-200 md:text-lg">
@@ -171,13 +171,13 @@ export default function StudentProfile() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-[1.75rem] border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-300">Student</p>
-              <p className="mt-2 text-xl font-black">{profile.basicInfo.fullName || user.name}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-300">Student</p>
+              <p className="mt-2 text-xl font-bold">{profile.basicInfo.fullName || user.name}</p>
               <p className="mt-1 text-sm text-slate-200">{profile.basicInfo.department || 'Department pending'}</p>
             </div>
             <div className="rounded-[1.75rem] border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-              <p className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-300">Current Semester</p>
-              <p className="mt-2 text-xl font-black">{profile.basicInfo.semester || 0}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-300">Current Semester</p>
+              <p className="mt-2 text-xl font-bold">{profile.basicInfo.semester || 0}</p>
               <p className="mt-1 text-sm text-slate-200">CMS ID {profile.basicInfo.cmsId || 'Not added'}</p>
             </div>
           </div>
@@ -195,10 +195,10 @@ export default function StudentProfile() {
           >
             <FileText className="h-5 w-5" />
           </div>
-          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-600">
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
             Profile Status
           </p>
-          <p className="mt-2 text-2xl font-black text-slate-900">
+          <p className="mt-2 text-2xl font-bold text-slate-900">
             {profile.isProfileComplete ? 'Complete' : 'Incomplete'}
           </p>
           <p className="mt-2 text-sm font-medium text-slate-500">
@@ -212,16 +212,16 @@ export default function StudentProfile() {
           <div className="inline-flex rounded-2xl bg-dark-blue p-3 text-white">
             <GraduationCap className="h-5 w-5" />
           </div>
-          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-600">CGPA</p>
-          <p className="mt-2 text-4xl font-black text-dark-blue">{(transcript?.cgpa ?? 0).toFixed(2)}</p>
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">CGPA</p>
+          <p className="mt-2 text-4xl font-bold text-dark-blue">{(transcript?.cgpa ?? 0).toFixed(2)}</p>
         </div>
 
         <div className={summaryCardClassName}>
           <div className="inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
             <FileText className="h-5 w-5" />
           </div>
-          <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-slate-600">Transcript Semesters</p>
-          <p className="mt-2 text-4xl font-black text-slate-900">{transcript?.semesters.length ?? 0}</p>
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Transcript Semesters</p>
+          <p className="mt-2 text-4xl font-bold text-slate-900">{transcript?.semesters.length ?? 0}</p>
         </div>
 
       </div>
@@ -274,7 +274,7 @@ export default function StudentProfile() {
                 <div className="mx-auto inline-flex rounded-full bg-emerald-100 p-3 text-emerald-700">
                   <CheckCircle2 className="h-8 w-8" />
                 </div>
-                <h3 id="profile-saved-title" className="mt-4 text-2xl font-black text-slate-900">
+                <h3 id="profile-saved-title" className="mt-4 text-2xl font-bold text-slate-900">
                   Profile saved
                 </h3>
                 <p className="mt-2 text-sm text-slate-500">Your profile has been saved successfully.</p>

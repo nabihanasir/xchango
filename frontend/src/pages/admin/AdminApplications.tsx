@@ -147,7 +147,7 @@ export default function AdminApplications() {
     <div className="space-y-6 animate-fade-in">
        <div className="flex items-center justify-between border-b border-light-color/50 pb-6 glass-card p-6 md:p-8 rounded-[2rem] bg-white">
         <div>
-          <h2 className="text-3xl font-black text-maroon mb-2">Live Applications</h2>
+          <h2 className="text-3xl font-bold text-maroon mb-2">Live Applications</h2>
           <p className="text-body-text font-medium mt-1 md:text-lg">Review applications, assign advisors and set semester end dates.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">

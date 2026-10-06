@@ -17,7 +17,7 @@ export default function Hero() {
             <Sparkles className="h-4 w-4 text-yellow-default" />
             International pathways powered by RIO
           </div>
-          <h1 className="mt-6 max-w-3xl text-5xl font-black leading-[1.02] tracking-tight text-head-text sm:text-6xl">
+          <h1 className="mt-6 max-w-3xl text-5xl font-bold leading-[1.02] tracking-tight text-head-text sm:text-6xl">
             Riphah International Office
           </h1>
           <p className="mt-4 max-w-2xl text-xl font-semibold text-dark-blue/80">
@@ -56,7 +56,7 @@ export default function Hero() {
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             {rioStats.map((stat) => (
               <div key={stat.label} className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-soft backdrop-blur">
-                <p className="text-2xl font-black text-dark-blue">{stat.value}</p>
+                <p className="text-2xl font-bold text-dark-blue">{stat.value}</p>
                 <p className="mt-1 text-sm font-medium text-slate-500">{stat.label}</p>
               </div>
             ))}
@@ -91,11 +91,11 @@ export default function Hero() {
               <div className="mt-6 grid grid-cols-2 gap-4">
                 <div className="rounded-2xl bg-white/10 p-4">
                   <p className="text-xs uppercase tracking-[0.26em] text-white/60">Countries</p>
-                  <p className="mt-2 text-3xl font-black">3</p>
+                  <p className="mt-2 text-3xl font-bold">3</p>
                 </div>
                 <div className="rounded-2xl bg-white/10 p-4">
                   <p className="text-xs uppercase tracking-[0.26em] text-white/60">Specializations</p>
-                  <p className="mt-2 text-3xl font-black">16+</p>
+                  <p className="mt-2 text-3xl font-bold">16+</p>
                 </div>
               </div>
             </div>

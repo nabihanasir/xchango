@@ -39,7 +39,7 @@ export default function DocumentList({
           className="flex flex-col gap-4 rounded-[1.75rem] border border-slate-200 bg-white px-5 py-4 md:flex-row md:items-center md:justify-between"
         >
           <div className="space-y-1">
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-dark-blue">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-dark-blue">
               {document.type}
             </p>
             <p className="text-sm text-slate-500">
@@ -49,7 +49,7 @@ export default function DocumentList({
 
           <div className="flex flex-wrap items-center gap-3">
             <span
-              className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${statusTone[document.status]}`}
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${statusTone[document.status]}`}
             >
               {document.status === 'pending' ? (
                 <Clock3 className="h-3.5 w-3.5" />

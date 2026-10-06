@@ -28,7 +28,7 @@ export default function StatsBand() {
                 index === 0 ? '' : 'sm:border-l sm:border-slate-200'
               } ${index === 2 ? 'lg:border-l' : ''} ${index % 2 === 0 ? 'border-l-0' : ''}`}
             >
-              <dd className="text-4xl font-black tracking-tight text-dark-blue sm:text-5xl">
+              <dd className="text-4xl font-bold tracking-tight text-dark-blue sm:text-5xl">
                 {stat.value}
               </dd>
               <dt className="mt-3 text-xs font-bold uppercase leading-5 tracking-[0.18em] text-slate-500">

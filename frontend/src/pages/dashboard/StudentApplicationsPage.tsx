@@ -71,8 +71,8 @@ export default function StudentApplicationsPage() {
       <section className="rounded-[2.5rem] bg-gradient-to-br from-[#060424] via-[#0c174f] to-[#17387b] p-8 text-white shadow-2xl shadow-dark-blue/20">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">Application Workflow</p>
-            <h1 className="mt-3 text-4xl font-black">University Applications</h1>
+            <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Application Workflow</p>
+            <h1 className="mt-3 text-4xl font-bold">University Applications</h1>
             <p className="mt-3 max-w-2xl text-slate-200">
               Start a new mobility application, continue drafts, and monitor workflow states after submission.
             </p>
@@ -80,7 +80,7 @@ export default function StudentApplicationsPage() {
 
           <Link
             to="/dashboard/applications/new"
-            className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-5 py-4 text-sm font-black text-dark-blue"
+            className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-5 py-4 text-sm font-bold text-dark-blue"
           >
             <PlusCircle className="h-4 w-4" />
             New Application
@@ -105,8 +105,8 @@ export default function StudentApplicationsPage() {
           <article key={application._id} className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">{application.country}</p>
-                <h2 className="mt-2 text-2xl font-black text-slate-900">{application.program}</h2>
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">{application.country}</p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900">{application.program}</h2>
                 <p className="mt-1 text-sm text-slate-500">{application.university}</p>
                 <div className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-600">
                   <CalendarClock className="h-4 w-4" />
@@ -123,7 +123,7 @@ export default function StudentApplicationsPage() {
                     return (
                       <div
                         key={stage.label}
-                        className={`rounded-2xl border px-3 py-3 text-center text-[11px] font-black uppercase tracking-[0.18em] ${
+                        className={`rounded-2xl border px-3 py-3 text-center text-xs font-bold uppercase tracking-[0.18em] ${
                           active
                             ? 'border-dark-blue bg-dark-blue text-white'
                             : 'border-slate-200 bg-slate-50 text-slate-600'
@@ -137,7 +137,7 @@ export default function StudentApplicationsPage() {
               </div>
 
               <div className="flex flex-col items-start gap-3 lg:items-end">
-                <div className={`rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.2em] ${getApplicationStatusTone(application)}`}>
+                <div className={`rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] ${getApplicationStatusTone(application)}`}>
                   {getApplicationStatusLabel(application)}
                 </div>
                 <Link
