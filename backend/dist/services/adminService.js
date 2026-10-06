@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllMappings = exports.createMapping = exports.updateApplicationOfferLetter = exports.createUser = exports.getPendingApplications = exports.getAllApplications = exports.getAllUsers = exports.createCourse = exports.createUniversity = exports.getAllStats = void 0;
+exports.upsertAiModelConfig = exports.getAiModelConfig = exports.getAiModelConfigRaw = exports.getAllMappings = exports.createMapping = exports.updateApplicationOfferLetter = exports.createUser = exports.getPendingApplications = exports.getAllApplications = exports.getAllUsers = exports.createCourse = exports.createUniversity = exports.getAllStats = void 0;
 const University_1 = __importDefault(require("../models/University"));
 const Course_1 = __importDefault(require("../models/Course"));
 const Application_1 = __importStar(require("../models/Application"));
@@ -44,9 +44,11 @@ const User_1 = __importStar(require("../models/User"));
 const Country_1 = __importDefault(require("../models/Country"));
 const CourseMapping_1 = __importDefault(require("../models/CourseMapping"));
 const AdvisorProfile_1 = __importDefault(require("../models/AdvisorProfile"));
+const AiModelConfig_1 = __importStar(require("../models/AiModelConfig"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const crypto_1 = __importDefault(require("crypto"));
 const courseService = __importStar(require("./courseService"));
+const notificationService_1 = require("./notificationService");
 const populateApplications = (query) => query
     .populate('studentId', 'name email sapId phone role')
     .populate('advisorId', 'name email role')
@@ -191,6 +193,14 @@ const updateApplicationOfferLetter = async (applicationId, offerLetterUrl) => {
         issuedBy: application.studentId, // Placeholder, usually an admin
     });
     await Application_1.default.findByIdAndUpdate(applicationId, { status: Application_1.ApplicationStatus.READY_FOR_SUBMISSION });
+    await (0, notificationService_1.notifyUserSafely)({
+        userId: application.studentId,
+        subject: 'Offer letter issued',
+        type: 'offer_letter',
+        message: `Your offer letter for ${application.university} has been issued. Log in to download it.`,
+        metadata: { applicationId: application._id, offerLetterId: offerLetter._id },
+        action: { label: 'View application', url: (0, notificationService_1.appUrl)(`/dashboard/applications/${application._id}`) },
+    });
     return offerLetter;
 };
 exports.updateApplicationOfferLetter = updateApplicationOfferLetter;
@@ -213,3 +223,56 @@ const getAllMappings = async () => {
     return await CourseMapping_1.default.find().populate('homeCourseId hostCourseId');
 };
 exports.getAllMappings = getAllMappings;
+const toSafeAiModelConfig = (config) => {
+    if (!config)
+        return null;
+    return {
+        _id: config._id,
+        provider: config.provider,
+        baseUrl: config.baseUrl,
+        model: config.modelName,
+        isEnabled: config.isEnabled,
+        apiKeySet: Boolean(config.apiKey),
+        apiKeyPreview: config.apiKey ? `••••${config.apiKey.slice(-4)}` : null,
+        updatedAt: config.updatedAt,
+    };
+};
+// Raw config (including plaintext apiKey) for internal use by the course matcher only.
+const getAiModelConfigRaw = async () => {
+    return await AiModelConfig_1.default.findOne();
+};
+exports.getAiModelConfigRaw = getAiModelConfigRaw;
+const getAiModelConfig = async () => {
+    const config = await (0, exports.getAiModelConfigRaw)();
+    return toSafeAiModelConfig(config);
+};
+exports.getAiModelConfig = getAiModelConfig;
+const upsertAiModelConfig = async (adminId, payload) => {
+    const { provider, baseUrl, apiKey, model, isEnabled } = payload;
+    if (!provider || !Object.values(AiModelConfig_1.AiProvider).includes(provider)) {
+        throw new Error('A valid provider is required.');
+    }
+    if (!baseUrl?.trim()) {
+        throw new Error('Base URL is required.');
+    }
+    if (!model?.trim()) {
+        throw new Error('Model name is required.');
+    }
+    const existing = await AiModelConfig_1.default.findOne();
+    if (!existing && !apiKey?.trim()) {
+        throw new Error('API key is required.');
+    }
+    const update = {
+        provider,
+        baseUrl: baseUrl.trim(),
+        modelName: model.trim(),
+        isEnabled: isEnabled !== false,
+        updatedBy: adminId,
+        ...(apiKey?.trim() ? { apiKey: apiKey.trim() } : {}),
+    };
+    const saved = existing
+        ? await AiModelConfig_1.default.findByIdAndUpdate(existing._id, update, { new: true })
+        : await AiModelConfig_1.default.create(update);
+    return toSafeAiModelConfig(saved);
+};
+exports.upsertAiModelConfig = upsertAiModelConfig;

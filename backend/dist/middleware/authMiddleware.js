@@ -8,6 +8,8 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const AppError_1 = require("../errors/AppError");
 const asyncHandler_1 = require("./asyncHandler");
+const offboardingService_1 = require("../services/offboardingService");
+const READ_ONLY_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 exports.protect = (0, asyncHandler_1.asyncHandler)(async (req, _res, next) => {
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -16,6 +18,16 @@ exports.protect = (0, asyncHandler_1.asyncHandler)(async (req, _res, next) => {
         req.user = await User_1.default.findById(decoded.id).select('-password');
         if (!req.user) {
             throw new AppError_1.AuthenticationError('Authentication failed', 'The token belongs to a user account that no longer exists.', 'Please log in again with a valid account.', 'AUTH_USER_NOT_FOUND');
+        }
+        if (req.user.role === 'student') {
+            if (!req.user.offboardedAt) {
+                await (0, offboardingService_1.offboardDueStudents)(req.user._id.toString());
+                req.user = await User_1.default.findById(decoded.id).select('-password');
+            }
+            // Off-boarded students keep read-only access to their records.
+            if (req.user.offboardedAt && !READ_ONLY_METHODS.includes(req.method)) {
+                throw new AppError_1.ForbiddenError('Account off-boarded', 'Your exchange semester is complete, so this account is now read-only.', 'Contact the International Office if you need access restored.', 'ACCOUNT_OFFBOARDED');
+            }
         }
         next();
         return;

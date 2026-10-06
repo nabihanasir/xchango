@@ -7,6 +7,7 @@ exports.io = void 0;
 const app_1 = __importDefault(require("./app"));
 const db_1 = __importDefault(require("./config/db"));
 const courseService_1 = require("./services/courseService");
+const offboardingService_1 = require("./services/offboardingService");
 const http_1 = require("http");
 const socket_io_1 = require("socket.io");
 const PORT = process.env.PORT || 5000;
@@ -33,6 +34,9 @@ io.on('connection', (socket) => {
 });
 (0, db_1.default)().then(async () => {
     await (0, courseService_1.seedDemoHomeCoursesIfNeeded)();
+    const sweepOffboarding = () => (0, offboardingService_1.offboardDueStudents)().catch((error) => console.error('Off-boarding sweep failed:', error));
+    void sweepOffboarding();
+    setInterval(sweepOffboarding, 60 * 60 * 1000);
     httpServer.listen(PORT, () => {
         console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
     });

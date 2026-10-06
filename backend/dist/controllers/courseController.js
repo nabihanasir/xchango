@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCourse = exports.updateCourse = exports.addCourse = exports.getCourses = void 0;
+exports.updateCourseInstructor = exports.getHostCourses = exports.deleteCourse = exports.updateCourse = exports.addCourse = exports.getCourses = void 0;
 const courseService = __importStar(require("../services/courseService"));
 const response_1 = require("../utils/response");
 const getCourses = async (_req, res) => {
@@ -56,3 +56,13 @@ const deleteCourse = async (req, res) => {
     (0, response_1.sendResponse)(res, 200, 'Course deleted successfully', null);
 };
 exports.deleteCourse = deleteCourse;
+const getHostCourses = async (_req, res) => {
+    const courses = await courseService.listHostCourses();
+    (0, response_1.sendResponse)(res, 200, 'Host courses fetched successfully', courses);
+};
+exports.getHostCourses = getHostCourses;
+const updateCourseInstructor = async (req, res) => {
+    const course = await courseService.updateCourseInstructor(req.params.id, req.body);
+    (0, response_1.sendResponse)(res, 200, 'Course instructor updated successfully', course);
+};
+exports.updateCourseInstructor = updateCourseInstructor;

@@ -33,7 +33,13 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MatchSource = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+var MatchSource;
+(function (MatchSource) {
+    MatchSource["LLM"] = "llm";
+    MatchSource["HEURISTIC"] = "heuristic";
+})(MatchSource || (exports.MatchSource = MatchSource = {}));
 const CourseMatchReasoningSchema = new mongoose_1.Schema({
     overlappingTopics: [{ type: String }],
     missingTopics: [{ type: String }],
@@ -41,12 +47,27 @@ const CourseMatchReasoningSchema = new mongoose_1.Schema({
     creditHourAssessment: { type: String, required: true },
     summary: { type: String, required: true },
 }, { _id: false });
+const CourseMatchCandidateSchema = new mongoose_1.Schema({
+    homeCourseId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course', required: true },
+    matchScore: { type: Number, required: true, min: 0, max: 100 },
+    reasoning: { type: CourseMatchReasoningSchema, required: true },
+}, { _id: false });
+const CourseMatchSnapshotSchema = new mongoose_1.Schema({
+    homeCourseId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course', required: true },
+    matchScore: { type: Number, required: true, min: 0, max: 100 },
+    reasoning: { type: CourseMatchReasoningSchema, required: true },
+    matchedBy: { type: String, enum: Object.values(MatchSource), required: true },
+    candidates: { type: [CourseMatchCandidateSchema], default: [] },
+}, { _id: false });
 const CourseMatchResultSchema = new mongoose_1.Schema({
     courseRequestId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'CourseRequest', required: true },
     courseRequestItemId: { type: mongoose_1.Schema.Types.ObjectId, required: true, unique: true },
     hostCourseId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course', required: true },
-    homeCourseId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course', required: true },
-    matchScore: { type: Number, required: true, min: 0, max: 100 },
-    reasoning: { type: CourseMatchReasoningSchema, required: true },
+    homeCourseId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course' },
+    matchScore: { type: Number, min: 0, max: 100 },
+    reasoning: { type: CourseMatchReasoningSchema },
+    matchedBy: { type: String, enum: Object.values(MatchSource), default: MatchSource.LLM },
+    candidates: { type: [CourseMatchCandidateSchema], default: [] },
+    outlineMatch: { type: CourseMatchSnapshotSchema, default: null },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('CourseMatchResult', CourseMatchResultSchema);

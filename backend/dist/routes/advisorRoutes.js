@@ -45,6 +45,7 @@ const router = express_1.default.Router();
 router.use(authMiddleware_1.protect);
 router.use((0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR));
 router.get('/profile', advisorController.getProfile);
+router.put('/profile', advisorController.updateProfile);
 router.get('/applications', advisorController.getAssignedApps);
 router.get('/students', advisorController.getAssignedStudents);
 router.put('/applications/:id', advisorController.updateApplicationStatus);

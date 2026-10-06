@@ -43,6 +43,8 @@ const crypto_1 = __importDefault(require("crypto"));
 const User_1 = __importStar(require("../models/User"));
 const AppError_1 = require("../errors/AppError");
 const logger_1 = require("../utils/logger");
+const offboardingService_1 = require("./offboardingService");
+const emailService_1 = require("./emailService");
 const generateToken = (id, role) => {
     return jsonwebtoken_1.default.sign({ id, role }, process.env.JWT_SECRET || 'secret', {
         expiresIn: '30d',
@@ -137,11 +139,16 @@ const loginUser = async (credentials) => {
         throw new AppError_1.DatabaseError('Unable to complete login', 'The system could not retrieve the user account from the database.', 'Please try again in a moment.', 'LOGIN_USER_LOOKUP_FAILED');
     }
     if (user && (await bcryptjs_1.default.compare(password, user.password))) {
+        if (user.role === User_1.UserRole.STUDENT && !user.offboardedAt) {
+            await (0, offboardingService_1.offboardDueStudents)(user._id.toString());
+            user = (await User_1.default.findById(user._id)) ?? user;
+        }
         return {
             _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
+            offboarded: Boolean(user.offboardedAt),
             token: generateToken(user._id.toString(), user.role),
         };
     }
@@ -165,7 +172,7 @@ const requestPasswordReset = async (payload) => {
         throw new AppError_1.DatabaseError('Unable to start password reset', 'The system could not look up the account for the provided email address.', 'Please try again in a moment.', 'PASSWORD_RESET_LOOKUP_FAILED');
     }
     const genericResponse = {
-        message: 'If an account exists for that email, a password reset link has been prepared.',
+        message: 'If an account exists for that email, a password reset link has been sent to it.',
     };
     if (!user) {
         return genericResponse;
@@ -180,9 +187,21 @@ const requestPasswordReset = async (payload) => {
     catch {
         throw new AppError_1.DatabaseError('Unable to save password reset request', 'The password reset token could not be stored for the account.', 'Please try again in a moment.', 'PASSWORD_RESET_SAVE_FAILED');
     }
+    const resetUrl = buildResetPasswordLink(resetToken);
+    if ((0, emailService_1.isEmailConfigured)()) {
+        // Sent in the background so response time does not reveal whether the account exists.
+        void (0, emailService_1.sendEmail)({
+            to: user.email,
+            subject: 'Reset your Xchango password',
+            text: `Hi ${user.name || 'there'},\n\nWe received a request to reset your Xchango password. The link below is valid for 15 minutes.\n\nIf you did not ask for this, you can ignore this email and your password will stay the same.`,
+            action: { label: 'Reset password', url: resetUrl },
+        });
+        return genericResponse;
+    }
+    // Without email set up, expose the link outside production so the flow can still be tested.
     return {
         ...genericResponse,
-        resetUrl: process.env.NODE_ENV === 'production' ? undefined : buildResetPasswordLink(resetToken),
+        resetUrl: process.env.NODE_ENV === 'production' ? undefined : resetUrl,
     };
 };
 exports.requestPasswordReset = requestPasswordReset;

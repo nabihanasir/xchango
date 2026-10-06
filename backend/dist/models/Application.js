@@ -61,6 +61,7 @@ var ApplicationStatus;
     ApplicationStatus["DOCUMENT_PENDING"] = "DOCUMENT_PENDING";
     ApplicationStatus["COURSE_SELECTION_PENDING"] = "COURSE_SELECTION_PENDING";
     ApplicationStatus["READY_FOR_SUBMISSION"] = "READY_FOR_SUBMISSION";
+    ApplicationStatus["COMPLETED"] = "COMPLETED";
 })(ApplicationStatus || (exports.ApplicationStatus = ApplicationStatus = {}));
 const ApplicationDocumentSchema = new mongoose_1.Schema({
     type: { type: String, required: true, trim: true },
@@ -84,6 +85,26 @@ const ApplicationInterviewSchema = new mongoose_1.Schema({
     date: { type: Date, required: true },
     location: { type: String, required: true, trim: true },
     stakeholders: { type: [String], default: [] },
+}, { _id: false });
+const InterviewDecisionSchema = new mongoose_1.Schema({
+    recommended: { type: Boolean, required: true },
+    notes: { type: String, default: '', trim: true },
+    decidedAt: { type: Date, required: true },
+    decidedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
+}, { _id: false });
+const ArrivalNoticeSchema = new mongoose_1.Schema({
+    email: { type: String, required: true, trim: true },
+    name: { type: String, default: '', trim: true },
+    courses: { type: [String], default: [] },
+    side: { type: String, enum: ['host', 'home'], required: true },
+    sent: { type: Boolean, default: false },
+}, { _id: false });
+const ArrivalSchema = new mongoose_1.Schema({
+    arrivedAt: { type: Date, required: true },
+    recordedAt: { type: Date, required: true },
+    recordedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
+    onlineHomeCourses: { type: [mongoose_1.Schema.Types.ObjectId], ref: 'Course', default: [] },
+    notices: { type: [ArrivalNoticeSchema], default: [] },
 }, { _id: false });
 const ApplicationSchema = new mongoose_1.Schema({
     studentId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -117,8 +138,11 @@ const ApplicationSchema = new mongoose_1.Schema({
         enum: Object.values(ApplicationStatus),
         default: ApplicationStatus.DRAFT,
     },
+    semesterEndDate: { type: Date, required: false },
     interviewDate: { type: Date, required: false },
     interview: { type: ApplicationInterviewSchema, required: false },
+    interviewDecision: { type: InterviewDecisionSchema, required: false },
+    arrival: { type: ArrivalSchema, required: false },
     documents: { type: [ApplicationDocumentSchema], default: [] },
     selectedCourses: { type: [SelectedCourseSchema], default: [] },
     aiRecommendations: { type: [AIRecommendationSchema], default: [] },

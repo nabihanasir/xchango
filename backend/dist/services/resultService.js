@@ -40,7 +40,7 @@ exports.getAllResultsForAdmin = exports.upsertResult = exports.getAdvisorGradabl
 const mongoose_1 = __importDefault(require("mongoose"));
 const Application_1 = __importDefault(require("../models/Application"));
 const CourseRequest_1 = __importStar(require("../models/CourseRequest"));
-const Notification_1 = __importDefault(require("../models/Notification"));
+const notificationService_1 = require("./notificationService");
 const Result_1 = __importStar(require("../models/Result"));
 const applicationService_1 = require("./applicationService");
 const ensureValidObjectId = (value, message) => {
@@ -49,21 +49,17 @@ const ensureValidObjectId = (value, message) => {
     }
 };
 const createStudentNotification = async (result) => {
-    await Notification_1.default.create({
+    await (0, notificationService_1.notifyUser)({
         userId: result.studentId,
         message: `Your result has been published. Grade: ${result.grade}${result.marks != null ? ` (${result.marks}/100)` : ''}.`,
         subject: 'Result published',
         type: 'result_published',
-        channels: {
-            inApp: true,
-            email: true,
-        },
-        emailStatus: 'queued',
         metadata: {
             resultId: result._id,
             courseRequestItemId: result.courseRequestItemId,
             publishedAt: result.publishedAt,
         },
+        action: { label: 'View results', url: (0, notificationService_1.appUrl)('/dashboard/results') },
     });
 };
 const getStudentResults = async (studentId) => Result_1.default.find({ studentId, status: Result_1.ResultStatus.PUBLISHED })

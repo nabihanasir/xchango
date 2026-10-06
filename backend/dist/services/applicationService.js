@@ -36,13 +36,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.studentCanRequestCourseApproval = exports.advisorCanAccessStudent = exports.updateCourseDecision = exports.getAiRecommendations = exports.generateAiRecommendations = exports.selectCourses = exports.listAvailableCourses = exports.uploadDocuments = exports.updateStatus = exports.completeInterview = exports.scheduleInterview = exports.assignAdvisor = exports.submitApplication = exports.getAdvisorApplications = exports.getStudentApplications = exports.getApplicationById = exports.updateApplicationStep = exports.createApplication = exports.applicationOptions = void 0;
+exports.studentCanRequestCourseApproval = exports.advisorCanAccessStudent = exports.updateCourseDecision = exports.getAiRecommendations = exports.generateAiRecommendations = exports.selectCourses = exports.listAvailableCourses = exports.uploadDocuments = exports.updateStatus = exports.recordInterviewDecision = exports.completeInterview = exports.scheduleInterview = exports.assignAdvisor = exports.submitApplication = exports.getAdvisorApplications = exports.getStudentApplications = exports.getApplicationById = exports.updateApplicationStep = exports.createApplication = exports.applicationOptions = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const Application_1 = __importStar(require("../models/Application"));
 const User_1 = __importStar(require("../models/User"));
 const AdvisorProfile_1 = __importDefault(require("../models/AdvisorProfile"));
 const Course_1 = __importStar(require("../models/Course"));
 const University_1 = __importDefault(require("../models/University"));
+const notificationService_1 = require("./notificationService");
 const studentService_1 = require("./studentService");
 const aiRecommendation_service_1 = require("./aiRecommendation.service");
 const AppError_1 = require("../errors/AppError");
@@ -57,6 +58,12 @@ const accessibleStatusesForCourseWork = [
     Application_1.ApplicationStatus.COURSE_SELECTION_PENDING,
     Application_1.ApplicationStatus.READY_FOR_SUBMISSION,
 ];
+/** Statuses in which the advisor has recommended the student, so the application may proceed. */
+const statusesCleared = [
+    Application_1.ApplicationStatus.COURSE_REQUEST_ENABLED,
+    ...accessibleStatusesForCourseWork,
+];
+const MAX_DECISION_NOTES_LENGTH = 1000;
 const normalizeText = (value) => value?.trim().toLowerCase() || '';
 const getReferencedId = (value) => {
     if (!value) {
@@ -102,6 +109,14 @@ const ensureCourseWorkStatus = (application) => {
     }
     return application;
 };
+const notifyStudentAboutApplication = (application, subject, message, type = 'application_status') => (0, notificationService_1.notifyUserSafely)({
+    userId: application.studentId,
+    subject,
+    type,
+    message,
+    metadata: { applicationId: application._id, status: application.status },
+    action: { label: 'View application', url: (0, notificationService_1.appUrl)(`/dashboard/applications/${application._id}`) },
+});
 const populateApplication = (query) => {
     return query
         .populate('studentId', 'name email sapId phone role')
@@ -130,6 +145,17 @@ const validateUniversitySelection = (country, university) => {
     }
     if (!supportedUniversities.includes(university)) {
         throw new AppError_1.ValidationError('Selected university is not available for the chosen country.', 'The selected university does not belong to the chosen country.', 'Choose a listed university for the selected country.', 'UNIVERSITY_NOT_ALLOWED');
+    }
+};
+const assertNoDuplicateUniversityApplication = async (studentId, university, excludeApplicationId) => {
+    const existing = await Application_1.default.exists({
+        studentId,
+        university,
+        status: { $ne: Application_1.ApplicationStatus.REJECTED },
+        ...(excludeApplicationId ? { _id: { $ne: excludeApplicationId } } : {}),
+    });
+    if (existing) {
+        throw new AppError_1.ValidationError(`You already have an application for ${university}.`, 'Only one active application per university is allowed for each student.', 'Continue your existing application or choose a different university.', 'DUPLICATE_UNIVERSITY_APPLICATION');
     }
 };
 const validateMedicalCondition = (input) => {
@@ -218,9 +244,6 @@ const validateSubmission = (application) => {
     if (!application.registrationNumber.trim()) {
         throw new AppError_1.ValidationError('Registration number is required before submission.', 'The application does not include a registration number.', 'Add the registration number and try again.', 'REGISTRATION_NUMBER_REQUIRED');
     }
-    if (!application.passportValid) {
-        throw new AppError_1.ValidationError('A valid passport is required before submission.', 'Passport validity was not confirmed for this application.', 'Confirm passport validity before submitting.', 'PASSPORT_REQUIRED');
-    }
 };
 const buildSubmissionWarnings = (application) => {
     const warnings = [];
@@ -283,6 +306,7 @@ const createApplication = async (studentId, payload) => {
     validateUniversitySelection(payload.country, payload.university);
     validateTravelHistory(payload.travelHistory);
     validateMedicalCondition(payload.medicalCondition);
+    await assertNoDuplicateUniversityApplication(studentId, payload.university);
     return Application_1.default.create({
         studentId,
         country: payload.country,
@@ -313,6 +337,9 @@ const updateApplicationStep = async (applicationId, studentId, payload) => {
     if (application.status === Application_1.ApplicationStatus.REJECTED) {
         throw new AppError_1.ValidationError('Rejected applications cannot be modified.', 'This application has already been rejected.', 'Create a new application if the student needs to reapply.', 'APPLICATION_LOCKED');
     }
+    if (payload.university && payload.university !== application.university) {
+        await assertNoDuplicateUniversityApplication(studentId, payload.university, applicationId);
+    }
     applyStepInput(application, payload);
     await application.save();
     return application;
@@ -339,9 +366,13 @@ exports.getAdvisorApplications = getAdvisorApplications;
 const submitApplication = async (applicationId, studentId) => {
     await assertProfileComplete(studentId);
     const application = ensureApplicationAccess(await Application_1.default.findById(applicationId), studentId);
+    if (application.status !== Application_1.ApplicationStatus.DRAFT) {
+        throw new AppError_1.ValidationError('Application already submitted.', `Applications in status ${application.status} cannot be submitted again.`, 'Only draft applications can be submitted.', 'APPLICATION_ALREADY_SUBMITTED');
+    }
     validateSubmission(application);
     application.status = Application_1.ApplicationStatus.PENDING;
     await application.save();
+    await notifyStudentAboutApplication(application, 'Application submitted', `Your exchange application to ${application.university} has been submitted. We will let you know once an advisor is assigned.`);
     return {
         application,
         warnings: buildSubmissionWarnings(application),
@@ -367,6 +398,15 @@ const assignAdvisor = async (applicationId, advisorId) => {
     application.advisorId = advisor._id;
     application.status = Application_1.ApplicationStatus.ASSIGNED;
     await application.save();
+    await notifyStudentAboutApplication(application, 'Advisor assigned', `${advisor.name} has been assigned as your advisor for your application to ${application.university}. They will contact you to schedule your interview.`);
+    await (0, notificationService_1.notifyUserSafely)({
+        userId: advisor._id,
+        subject: 'New student assigned to you',
+        type: 'advisor_assigned',
+        message: `A new exchange application for ${application.university} (${application.program}) has been assigned to you. Please review it and schedule an interview.`,
+        metadata: { applicationId: application._id },
+        action: { label: 'Open applications', url: (0, notificationService_1.appUrl)('/advisor/applications') },
+    });
     const assignedStudentIds = await Application_1.default.distinct('studentId', { advisorId });
     await AdvisorProfile_1.default.findOneAndUpdate({ userId: advisorId }, { assignedStudents: assignedStudentIds });
     return (0, exports.getApplicationById)(applicationId, { _id: advisorId, role: User_1.UserRole.ADVISOR });
@@ -381,6 +421,7 @@ const scheduleInterview = async (applicationId, advisorId, interview) => {
     application.interview = interview;
     application.status = Application_1.ApplicationStatus.INTERVIEW_SCHEDULED;
     await application.save();
+    await notifyStudentAboutApplication(application, 'Interview scheduled', `Your exchange interview has been scheduled for ${(0, notificationService_1.formatDateTime)(interview.date)} at ${interview.location}. Please be on time and bring any documents your advisor asked for.`, 'interview_scheduled');
     return (0, exports.getApplicationById)(applicationId, { _id: advisorId, role: User_1.UserRole.ADVISOR });
 };
 exports.scheduleInterview = scheduleInterview;
@@ -397,6 +438,35 @@ const completeInterview = async (applicationId, advisorId) => {
     return (0, exports.getApplicationById)(applicationId, { _id: advisorId, role: User_1.UserRole.ADVISOR });
 };
 exports.completeInterview = completeInterview;
+const recordInterviewDecision = async (applicationId, advisorId, input) => {
+    const application = ensureAdvisorOwnsApplication(ensureApplicationExists(await Application_1.default.findById(applicationId)), advisorId);
+    if (typeof input.recommended !== 'boolean') {
+        throw new AppError_1.ValidationError('A decision is required.', 'The request must state whether the student is recommended or not.', 'Choose recommend or not recommend and try again.', 'INTERVIEW_DECISION_REQUIRED');
+    }
+    if (application.status !== Application_1.ApplicationStatus.INTERVIEW_COMPLETED) {
+        throw new AppError_1.ValidationError('The interview decision cannot be recorded yet.', 'A recommendation can only be recorded once the interview is marked completed, and only once.', 'Mark the interview as completed first. A recorded decision cannot be changed.', 'INTERVIEW_DECISION_NOT_ALLOWED');
+    }
+    const notes = input.notes?.trim() ?? '';
+    if (!input.recommended && !notes) {
+        throw new AppError_1.ValidationError('A reason is required.', 'A not-recommended decision must explain the reason to the student.', 'Add a short note explaining why the student is not recommended.', 'INTERVIEW_DECISION_NOTES_REQUIRED');
+    }
+    if (notes.length > MAX_DECISION_NOTES_LENGTH) {
+        throw new AppError_1.ValidationError('The note is too long.', `Decision notes are limited to ${MAX_DECISION_NOTES_LENGTH} characters.`, 'Shorten the note and try again.', 'INTERVIEW_DECISION_NOTES_TOO_LONG');
+    }
+    application.interviewDecision = {
+        recommended: input.recommended,
+        notes,
+        decidedAt: new Date(),
+        decidedBy: new mongoose_1.default.Types.ObjectId(advisorId),
+    };
+    application.status = input.recommended ? Application_1.ApplicationStatus.SHORTLISTED : Application_1.ApplicationStatus.REJECTED;
+    await application.save();
+    await notifyStudentAboutApplication(application, 'Interview outcome', input.recommended
+        ? 'Your advisor has recommended you after the interview. You can now continue your application.'
+        : `Your advisor has not recommended your application, so it cannot proceed. Reason: ${notes}`, 'interview_decision');
+    return (0, exports.getApplicationById)(applicationId, { _id: advisorId, role: User_1.UserRole.ADVISOR });
+};
+exports.recordInterviewDecision = recordInterviewDecision;
 const updateStatus = async (applicationId, advisorId, status) => {
     const application = ensureAdvisorOwnsApplication(ensureApplicationExists(await Application_1.default.findById(applicationId)), advisorId);
     if (![Application_1.ApplicationStatus.SHORTLISTED, Application_1.ApplicationStatus.REJECTED].includes(status)) {
@@ -407,6 +477,9 @@ const updateStatus = async (applicationId, advisorId, status) => {
     }
     application.status = status;
     await application.save();
+    await notifyStudentAboutApplication(application, status === Application_1.ApplicationStatus.SHORTLISTED ? 'You have been shortlisted' : 'Application update', status === Application_1.ApplicationStatus.SHORTLISTED
+        ? `Good news! You have been shortlisted for ${application.university}. Log in to continue with your documents and course selection.`
+        : `Unfortunately your application to ${application.university} was not selected this time.`);
     return (0, exports.getApplicationById)(applicationId, { _id: advisorId, role: User_1.UserRole.ADVISOR });
 };
 exports.updateStatus = updateStatus;
@@ -423,20 +496,16 @@ const uploadDocuments = async (applicationId, studentId, documents) => {
 exports.uploadDocuments = uploadDocuments;
 const listAvailableCourses = async (applicationId, actor) => {
     const application = await (0, exports.getApplicationById)(applicationId, actor);
-    if (![
-        Application_1.ApplicationStatus.INTERVIEW_COMPLETED,
-        Application_1.ApplicationStatus.COURSE_REQUEST_ENABLED,
-        ...accessibleStatusesForCourseWork,
-    ].includes(application.status)) {
-        throw new AppError_1.ValidationError('Interview not completed yet.', 'Course approval can only be requested after the advisor interview is completed.', 'Complete the advisor interview before requesting course approval.', 'INTERVIEW_NOT_COMPLETED');
+    if (!statusesCleared.includes(application.status)) {
+        throw new AppError_1.ValidationError('Advisor recommendation required.', 'Course approval can only be requested once your advisor has recommended you after the interview.', 'Complete the advisor interview and wait for a recommendation before requesting course approval.', 'INTERVIEW_NOT_COMPLETED');
     }
     return getAvailableCoursesForApplication(application);
 };
 exports.listAvailableCourses = listAvailableCourses;
 const selectCourses = async (applicationId, studentId, courseIds) => {
     const application = ensureApplicationAccess(await Application_1.default.findById(applicationId), studentId);
-    if (![Application_1.ApplicationStatus.INTERVIEW_COMPLETED, Application_1.ApplicationStatus.COURSE_REQUEST_ENABLED].includes(application.status)) {
-        throw new AppError_1.ValidationError('Interview not completed yet.', 'You must complete your advisor interview before requesting course approval.', 'Wait until the interview is marked completed, then submit course requests.', 'INTERVIEW_NOT_COMPLETED');
+    if (!statusesCleared.includes(application.status)) {
+        throw new AppError_1.ValidationError('Advisor recommendation required.', 'You can only request courses once your advisor has recommended you after the interview.', 'Wait for your advisor to record a recommendation, then submit course requests.', 'INTERVIEW_NOT_COMPLETED');
     }
     const normalizedIds = Array.from(new Set(courseIds
         .map((courseId) => courseId?.trim())
@@ -454,7 +523,7 @@ const selectCourses = async (applicationId, studentId, courseIds) => {
         status: 'pending',
         advisorComment: '',
     }));
-    application.status = Application_1.ApplicationStatus.COURSE_REQUEST_ENABLED;
+    application.status = calculatePostShortlistStatus(application);
     await application.save();
     return (0, exports.getApplicationById)(applicationId, { _id: studentId, role: User_1.UserRole.STUDENT });
 };
@@ -501,9 +570,7 @@ exports.advisorCanAccessStudent = advisorCanAccessStudent;
 const studentCanRequestCourseApproval = async (studentId) => {
     const application = await Application_1.default.findOne({
         studentId,
-        status: {
-            $in: [Application_1.ApplicationStatus.INTERVIEW_COMPLETED, Application_1.ApplicationStatus.COURSE_REQUEST_ENABLED],
-        },
+        status: { $in: [...statusesCleared] },
     }).sort({ updatedAt: -1 });
     return Boolean(application);
 };

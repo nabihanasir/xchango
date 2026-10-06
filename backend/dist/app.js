@@ -15,6 +15,9 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(requestContext_1.attachRequestContext);
+app.get('/health', (_req, res) => {
+    res.json({ status: 'ok' });
+});
 // Main Routes
 app.use('/api', routes_1.default);
 // Static uploads folder

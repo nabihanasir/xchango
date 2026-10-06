@@ -51,6 +51,8 @@ const CourseSchema = new mongoose_1.Schema({
     universityId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'University', default: null },
     type: { type: String, enum: Object.values(CourseType), required: true },
     isHomeCourse: { type: Boolean, default: true },
+    instructorName: { type: String, default: '', trim: true },
+    instructorEmail: { type: String, default: '', trim: true, lowercase: true },
     createdBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', default: null },
 }, { timestamps: true });
 CourseSchema.pre('validate', function () {

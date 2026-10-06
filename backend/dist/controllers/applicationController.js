@@ -33,10 +33,11 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCourseDecision = exports.getAiRecommendations = exports.generateAiRecommendations = exports.getAvailableCourses = exports.selectCourses = exports.uploadDocuments = exports.updateStatus = exports.completeInterview = exports.scheduleInterview = exports.getAdvisorApplications = exports.assignAdvisor = exports.submitApplication = exports.getStudentApplications = exports.getApplication = exports.updateApplicationStep = exports.createApplication = void 0;
+exports.recordStudentArrival = exports.updateCourseDecision = exports.getAiRecommendations = exports.generateAiRecommendations = exports.getAvailableCourses = exports.selectCourses = exports.uploadDocuments = exports.updateStatus = exports.recordInterviewDecision = exports.completeInterview = exports.scheduleInterview = exports.getAdvisorApplications = exports.assignAdvisor = exports.submitApplication = exports.getStudentApplications = exports.getApplication = exports.updateApplicationStep = exports.createApplication = void 0;
 const AppError_1 = require("../errors/AppError");
 const User_1 = require("../models/User");
 const applicationService = __importStar(require("../services/applicationService"));
+const arrivalService_1 = require("../services/arrivalService");
 const response_1 = require("../utils/response");
 const upload_1 = require("../utils/upload");
 const assertStudentAccess = (req, studentId) => {
@@ -97,6 +98,11 @@ const completeInterview = async (req, res) => {
     (0, response_1.sendResponse)(res, 200, 'Interview marked as completed successfully', application);
 };
 exports.completeInterview = completeInterview;
+const recordInterviewDecision = async (req, res) => {
+    const application = await applicationService.recordInterviewDecision(req.params.id, req.user._id.toString(), { recommended: req.body.recommended, notes: req.body.notes });
+    (0, response_1.sendResponse)(res, 200, 'Interview decision recorded successfully', application);
+};
+exports.recordInterviewDecision = recordInterviewDecision;
 const updateStatus = async (req, res) => {
     const application = await applicationService.updateStatus(req.params.id, req.user._id.toString(), req.body.status);
     (0, response_1.sendResponse)(res, 200, 'Application status updated successfully', application);
@@ -143,3 +149,8 @@ const updateCourseDecision = async (req, res) => {
     (0, response_1.sendResponse)(res, 200, 'Course decision updated successfully', application);
 };
 exports.updateCourseDecision = updateCourseDecision;
+const recordStudentArrival = async (req, res) => {
+    const result = await (0, arrivalService_1.recordArrival)(req.params.id, { _id: req.user._id.toString(), role: req.user.role }, req.body ?? {});
+    (0, response_1.sendResponse)(res, 200, 'Arrival recorded successfully', result);
+};
+exports.recordStudentArrival = recordStudentArrival;

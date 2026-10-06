@@ -51,9 +51,16 @@ var CourseRequestItemStatus;
 var AIMatchStatus;
 (function (AIMatchStatus) {
     AIMatchStatus["NOT_STARTED"] = "not_started";
+    AIMatchStatus["IN_PROGRESS"] = "in_progress";
     AIMatchStatus["COMPLETED"] = "completed";
     AIMatchStatus["FAILED"] = "failed";
 })(AIMatchStatus || (exports.AIMatchStatus = AIMatchStatus = {}));
+const UploadedOutlineSchema = new mongoose_1.Schema({
+    text: { type: String, required: true },
+    fileUrl: { type: String, default: '' },
+    fileName: { type: String, default: '' },
+    uploadedAt: { type: Date, required: true },
+}, { _id: false });
 const CourseRequestItemSchema = new mongoose_1.Schema({
     hostCourseId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course', required: true },
     homeCourseId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Course', default: null },
@@ -69,6 +76,13 @@ const CourseRequestItemSchema = new mongoose_1.Schema({
         default: AIMatchStatus.NOT_STARTED,
     },
     aiMatchError: { type: String, default: null },
+    uploadedOutline: { type: UploadedOutlineSchema, default: null },
+    outlineMatchStatus: {
+        type: String,
+        enum: Object.values(AIMatchStatus),
+        default: AIMatchStatus.NOT_STARTED,
+    },
+    outlineMatchError: { type: String, default: null },
     decidedAt: { type: Date, default: null },
 }, { _id: true });
 const CourseRequestSchema = new mongoose_1.Schema({

@@ -7,6 +7,7 @@ exports.getTranscript = exports.saveTranscript = exports.updateStudentProfile = 
 const StudentProfile_1 = __importDefault(require("../models/StudentProfile"));
 const User_1 = __importDefault(require("../models/User"));
 const AppError_1 = require("../errors/AppError");
+const MAX_SEMESTER = 8;
 const buildDefaultProfile = (user) => ({
     userId: user._id,
     registrationNumber: user.sapId || '',
@@ -134,6 +135,11 @@ exports.ensureStudentProfile = ensureStudentProfile;
 const getStudentProfile = async (userId) => (0, exports.ensureStudentProfile)(userId);
 exports.getStudentProfile = getStudentProfile;
 const updateStudentProfile = async (userId, profileData) => {
+    const requestedSemester = profileData.basicInfo?.semester;
+    if (requestedSemester !== undefined &&
+        (!Number.isInteger(requestedSemester) || requestedSemester < 0 || requestedSemester > MAX_SEMESTER)) {
+        throw new AppError_1.ValidationError(`Semester must be a whole number between 1 and ${MAX_SEMESTER}.`, `The submitted semester (${requestedSemester}) is outside the allowed range.`, `Enter a semester from 1 to ${MAX_SEMESTER}.`, 'INVALID_SEMESTER');
+    }
     const profile = await (0, exports.ensureStudentProfile)(userId);
     if (profileData.basicInfo) {
         profile.basicInfo = {
