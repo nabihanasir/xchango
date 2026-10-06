@@ -392,7 +392,7 @@ export default function ApplicationWorkflowPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Application Module</p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-900">Workflow-Based Student Application</h1>
+          <h1 className="mt-2 text-3xl font-bold text-slate-900">Initial Application Registration</h1>
         </div>
         <Link to="/dashboard/applications" className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm">
           <ArrowLeft className="h-4 w-4" />
