@@ -1,7 +1,7 @@
 import { ICourse } from '../models/Course';
 import { MatchSource } from '../models/CourseMatchResult';
 import { getAiModelConfigRaw } from './adminService';
-import { MAX_LLM_CANDIDATES, prefilterHomeCourses, rankHomeCourseMatches } from './aiCourseMatcherService';
+import { MAX_LLM_CANDIDATES, prefilterHomeCourses, rankHomeCourseMatches, requestLlmJson } from './aiCourseMatcherService';
 
 jest.mock('./adminService', () => ({ getAiModelConfigRaw: jest.fn() }));
 jest.mock('../utils/logger', () => ({
@@ -36,6 +36,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   global.fetch = fetchMock as unknown as typeof fetch;
   delete process.env.OPENAI_API_KEY;
+  delete process.env.GEMINI_API_KEY;
+  delete process.env.OPENROUTER_API_KEY;
   mockedGetAiModelConfigRaw.mockResolvedValue({
     isEnabled: true,
     apiKey: 'key',
@@ -162,5 +164,42 @@ describe('rankHomeCourseMatches', () => {
     await expect(rankHomeCourseMatches(host, [course('empty', 'Empty', ' ')])).rejects.toThrow(
       'No home courses with outlines'
     );
+  });
+});
+
+describe('requestLlmJson provider fallback', () => {
+  beforeEach(() => {
+    mockedGetAiModelConfigRaw.mockResolvedValue(null);
+    process.env.GEMINI_API_KEY = 'gemini-key';
+    process.env.OPENROUTER_API_KEY = 'openrouter-key';
+    process.env.OPENAI_API_KEY = 'openai-key';
+  });
+
+  it('uses the next provider when the first one fails', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ ok: false, status: 429, text: async () => 'rate limited' })
+      .mockResolvedValueOnce(llmReply({ ok: true }));
+
+    await expect(requestLlmJson('prompt')).resolves.toEqual({ ok: true });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0][0]).toContain('generativelanguage.googleapis.com');
+    expect(fetchMock.mock.calls[1][0]).toContain('openrouter.ai');
+  });
+
+  it('throws the last error when every provider fails', async () => {
+    fetchMock.mockResolvedValue({ ok: false, status: 500, text: async () => 'boom' });
+
+    await expect(requestLlmJson('prompt')).rejects.toThrow('LLM request failed: 500');
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('returns null when no provider is configured', async () => {
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+
+    await expect(requestLlmJson('prompt')).resolves.toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
