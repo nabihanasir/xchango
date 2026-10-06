@@ -11,6 +11,13 @@ const MAX_SEMESTER = 8;
 
 const clampSemester = (value: number | string) => Math.min(MAX_SEMESTER, Math.max(0, Math.floor(Number(value)) || 0));
 
+// Only Computing is open for exchange for now; the other faculties are listed but blocked.
+const DEPARTMENTS = [
+  { name: 'Faculty of Computing', available: true },
+  { name: 'Riphah Institute of Pharmaceutical Sciences', available: false },
+  { name: 'Faculty of Social Sciences', available: false },
+];
+
 const DEGREE_LEVELS = ['Undergraduate', 'Graduate'];
 
 const INTAKE_SEASONS = ['Spring', 'Fall'];
@@ -185,7 +192,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
               <BookOpen className="h-4 w-4" />
               Department
             </span>
-            <input
+            <select
               className={inputClassName}
               value={formState.basicInfo.department}
               onChange={(event) =>
@@ -194,8 +201,21 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
                   basicInfo: { ...current.basicInfo, department: event.target.value },
                 }))
               }
-              placeholder="Department or program"
-            />
+            >
+              <option value="">Select department</option>
+              {DEPARTMENTS.map((department) => (
+                <option key={department.name} value={department.name} disabled={!department.available}>
+                  {department.name}
+                  {department.available ? '' : ' (not available yet)'}
+                </option>
+              ))}
+              {formState.basicInfo.department &&
+              !DEPARTMENTS.some((department) => department.name === formState.basicInfo.department) ? (
+                <option value={formState.basicInfo.department} disabled>
+                  {formState.basicInfo.department} (not available yet)
+                </option>
+              ) : null}
+            </select>
           </label>
 
           <label className="space-y-2">
