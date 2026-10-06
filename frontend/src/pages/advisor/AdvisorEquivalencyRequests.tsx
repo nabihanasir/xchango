@@ -120,6 +120,11 @@ export default function AdvisorEquivalencyRequests() {
                       Review snapshot
                     </div>
                     <p>{request.items.filter((item) => item.aiMatchStatus === 'completed').length} AI matches completed</p>
+                    {request.items.some((item) => item.aiMatchStatus === 'in_progress') ? (
+                      <p className="mt-1 text-slate-500">
+                        {request.items.filter((item) => item.aiMatchStatus === 'in_progress').length} still matching
+                      </p>
+                    ) : null}
                   </div>
 
                   <Link

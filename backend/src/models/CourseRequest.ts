@@ -15,8 +15,17 @@ export enum CourseRequestItemStatus {
 
 export enum AIMatchStatus {
   NOT_STARTED = 'not_started',
+  IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   FAILED = 'failed',
+}
+
+/** The real course outline a student uploads once they are at the host university. */
+export interface IUploadedOutline {
+  text: string;
+  fileUrl?: string;
+  fileName?: string;
+  uploadedAt: Date;
 }
 
 export interface ICourseRequestItem extends mongoose.Types.Subdocument {
@@ -26,6 +35,9 @@ export interface ICourseRequestItem extends mongoose.Types.Subdocument {
   advisorComment?: string;
   aiMatchStatus: AIMatchStatus;
   aiMatchError?: string | null;
+  uploadedOutline?: IUploadedOutline | null;
+  outlineMatchStatus: AIMatchStatus;
+  outlineMatchError?: string | null;
   decidedAt?: Date | null;
 }
 
@@ -37,6 +49,16 @@ export interface ICourseRequest extends Document {
   submittedAt: Date;
   updatedAt: Date;
 }
+
+const UploadedOutlineSchema = new Schema<IUploadedOutline>(
+  {
+    text: { type: String, required: true },
+    fileUrl: { type: String, default: '' },
+    fileName: { type: String, default: '' },
+    uploadedAt: { type: Date, required: true },
+  },
+  { _id: false }
+);
 
 const CourseRequestItemSchema = new Schema<ICourseRequestItem>(
   {
@@ -54,6 +76,13 @@ const CourseRequestItemSchema = new Schema<ICourseRequestItem>(
       default: AIMatchStatus.NOT_STARTED,
     },
     aiMatchError: { type: String, default: null },
+    uploadedOutline: { type: UploadedOutlineSchema, default: null },
+    outlineMatchStatus: {
+      type: String,
+      enum: Object.values(AIMatchStatus),
+      default: AIMatchStatus.NOT_STARTED,
+    },
+    outlineMatchError: { type: String, default: null },
     decidedAt: { type: Date, default: null },
   },
   { _id: true }

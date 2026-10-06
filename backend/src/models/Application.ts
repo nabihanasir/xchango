@@ -61,6 +61,23 @@ export interface IInterviewDecision {
   decidedBy: mongoose.Types.ObjectId;
 }
 
+export interface IArrivalNotice {
+  email: string;
+  name: string;
+  courses: string[];
+  /** 'host' = teaches at the host university, 'home' = teaches an online course from the home university. */
+  side: 'host' | 'home';
+  sent: boolean;
+}
+
+export interface IArrival {
+  arrivedAt: Date;
+  recordedAt: Date;
+  recordedBy: mongoose.Types.ObjectId;
+  onlineHomeCourses: mongoose.Types.ObjectId[];
+  notices: IArrivalNotice[];
+}
+
 export interface IApplication extends Document {
   studentId: mongoose.Types.ObjectId;
   advisorId?: mongoose.Types.ObjectId;
@@ -85,6 +102,7 @@ export interface IApplication extends Document {
   interviewDate?: Date;
   interview?: IApplicationInterview;
   interviewDecision?: IInterviewDecision;
+  arrival?: IArrival;
   documents: IApplicationDocument[];
   selectedCourses: ISelectedCourse[];
   aiRecommendations: IAIRecommendation[];
@@ -141,6 +159,28 @@ const InterviewDecisionSchema = new Schema<IInterviewDecision>(
   { _id: false }
 );
 
+const ArrivalNoticeSchema = new Schema<IArrivalNotice>(
+  {
+    email: { type: String, required: true, trim: true },
+    name: { type: String, default: '', trim: true },
+    courses: { type: [String], default: [] },
+    side: { type: String, enum: ['host', 'home'], required: true },
+    sent: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
+
+const ArrivalSchema = new Schema<IArrival>(
+  {
+    arrivedAt: { type: Date, required: true },
+    recordedAt: { type: Date, required: true },
+    recordedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    onlineHomeCourses: { type: [Schema.Types.ObjectId], ref: 'Course', default: [] },
+    notices: { type: [ArrivalNoticeSchema], default: [] },
+  },
+  { _id: false }
+);
+
 const ApplicationSchema = new Schema<IApplication>(
   {
     studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -178,6 +218,7 @@ const ApplicationSchema = new Schema<IApplication>(
     interviewDate: { type: Date, required: false },
     interview: { type: ApplicationInterviewSchema, required: false },
     interviewDecision: { type: InterviewDecisionSchema, required: false },
+    arrival: { type: ArrivalSchema, required: false },
     documents: { type: [ApplicationDocumentSchema], default: [] },
     selectedCourses: { type: [SelectedCourseSchema], default: [] },
     aiRecommendations: { type: [AIRecommendationSchema], default: [] },

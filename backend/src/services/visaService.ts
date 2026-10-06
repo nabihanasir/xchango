@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { NotFoundError, ValidationError } from '../errors/AppError';
 import Application, { ApplicationStatus } from '../models/Application';
-import Notification from '../models/Notification';
+import { appUrl, notifyUser } from './notificationService';
 import User, { UserRole } from '../models/User';
 import VisaProcess, { IVisaProcess, VisaStatus } from '../models/VisaProcess';
 
@@ -31,14 +31,13 @@ const isVisaStatus = (value: unknown): value is VisaStatus =>
 
 const notifyStudent = async (visa: IVisaProcess) => {
   const label = VISA_STATUS_LABELS[visa.status];
-  await Notification.create({
+  await notifyUser({
     userId: visa.studentId,
     subject: 'Visa process update',
     type: 'visa_status_updated',
     message: `Your visa process status is now "${label}".${visa.remarks ? ` Note from the office: ${visa.remarks}` : ''}`,
-    channels: { inApp: true, email: false },
-    emailStatus: 'not_requested',
     metadata: { visaProcessId: visa._id, status: visa.status },
+    action: { label: 'View visa status', url: appUrl('/dashboard/visa') },
   });
 };
 

@@ -2,6 +2,7 @@ import Application, { ApplicationStatus } from '../models/Application';
 import User, { UserRole } from '../models/User';
 import { NotFoundError, ValidationError } from '../errors/AppError';
 import { logger } from '../utils/logger';
+import { appUrl, notifyUserSafely } from './notificationService';
 
 const CLOSED_STATUSES = [ApplicationStatus.COMPLETED, ApplicationStatus.REJECTED];
 const NOT_ELIGIBLE_FOR_END_DATE = [ApplicationStatus.DRAFT, ...CLOSED_STATUSES];
@@ -23,6 +24,14 @@ export const offboardDueStudents = async (studentId?: string) => {
     application.status = ApplicationStatus.COMPLETED;
     await application.save();
     studentIds.add(application.studentId.toString());
+    await notifyUserSafely({
+      userId: application.studentId,
+      subject: 'Exchange semester completed',
+      type: 'application_status',
+      message: `Your exchange semester at ${application.university} has ended and your application is now marked as completed. Your account stays available in read-only mode so you can still view your records.`,
+      metadata: { applicationId: application._id, status: application.status },
+      action: { label: 'View your records', url: appUrl('/dashboard') },
+    });
   }
 
   for (const id of studentIds) {

@@ -44,7 +44,10 @@ export interface ApplicationCourseSummary {
   type: 'home' | 'host';
   universityId?: ApplicationUniversitySummary | string | null;
   isHomeCourse?: boolean;
+  instructorName?: string;
+  instructorEmail?: string;
   createdBy?: string | ApplicationUserSummary | null;
+  updatedAt?: string;
 }
 
 export interface WorkflowApplicationDocument {
@@ -79,6 +82,29 @@ export interface WorkflowInterviewDecision {
   decidedAt: string;
 }
 
+export interface ArrivalNotice {
+  email: string;
+  name: string;
+  courses: string[];
+  side: 'host' | 'home';
+  sent: boolean;
+}
+
+export interface WorkflowApplicationArrival {
+  arrivedAt: string;
+  recordedAt: string;
+  recordedBy: string;
+  onlineHomeCourses: string[];
+  notices: ArrivalNotice[];
+}
+
+export interface ArrivalResult {
+  application: WorkflowApplication;
+  emailConfigured: boolean;
+  notices: ArrivalNotice[];
+  coursesWithoutInstructorEmail: string[];
+}
+
 export interface WorkflowApplication {
   _id: string;
   studentId: string | ApplicationUserSummary;
@@ -104,6 +130,7 @@ export interface WorkflowApplication {
   interviewDate?: string;
   interview?: WorkflowApplicationInterview;
   interviewDecision?: WorkflowInterviewDecision;
+  arrival?: WorkflowApplicationArrival;
   documents: WorkflowApplicationDocument[];
   selectedCourses: WorkflowApplicationCourse[];
   aiRecommendations: WorkflowApplicationAIRecommendation[];
