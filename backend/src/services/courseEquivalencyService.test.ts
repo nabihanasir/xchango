@@ -5,14 +5,19 @@ import Course from '../models/Course';
 import CourseMatchResult, { MatchSource } from '../models/CourseMatchResult';
 import CourseRequest, { AIMatchStatus } from '../models/CourseRequest';
 import { evaluateCourseMatch, rankHomeCourseMatches } from './aiCourseMatcherService';
-import { autoMatchRequestItems, updatePairedHomeCourse, uploadCourseOutline } from './courseEquivalencyService';
+import {
+  autoMatchRequestItems,
+  createCourseRequest,
+  updatePairedHomeCourse,
+  uploadCourseOutline,
+} from './courseEquivalencyService';
 import { extractOutlineText } from './outlineTextService';
 
 jest.mock('../models/Course');
 jest.mock('../models/CourseMatchResult');
 jest.mock('../models/CourseRequest', () => {
   const actual = jest.requireActual('../models/CourseRequest');
-  return { ...actual, __esModule: true, default: { findById: jest.fn(), updateOne: jest.fn(), create: jest.fn() } };
+  return { ...actual, __esModule: true, default: { findById: jest.fn(), findOne: jest.fn(), updateOne: jest.fn(), create: jest.fn() } };
 });
 jest.mock('../models/StudentProfile', () => ({ find: jest.fn(() => ({ lean: jest.fn().mockResolvedValue([]) })) }));
 jest.mock('./notificationService', () => ({ appUrl: jest.fn(), notifyUser: jest.fn() }));
@@ -26,7 +31,7 @@ jest.mock('../utils/logger', () => ({
 
 const MockedCourse = Course as jest.Mocked<typeof Course>;
 const MockedMatchResult = CourseMatchResult as jest.Mocked<typeof CourseMatchResult>;
-const MockedRequest = CourseRequest as unknown as { findById: jest.Mock; updateOne: jest.Mock };
+const MockedRequest = CourseRequest as unknown as { findById: jest.Mock; updateOne: jest.Mock; create: jest.Mock };
 const mockedRank = rankHomeCourseMatches as jest.Mock;
 const mockedEvaluate = evaluateCourseMatch as jest.Mock;
 const mockedApplicationExists = (Application as unknown as { exists: jest.Mock }).exists;
@@ -371,5 +376,18 @@ describe('uploadCourseOutline', () => {
       uploadCourseOutline(String(studentId), String(requestId), String(itemId), { file })
     ).rejects.toThrow('Could not read enough text');
     expect(mockedUnlink).toHaveBeenCalledWith(file.path);
+  });
+});
+
+describe('createCourseRequest', () => {
+  const mockedFindOne = (CourseRequest as unknown as { findOne: jest.Mock }).findOne;
+
+  it.each(['pending', 'under_review', 'approved'])('rejects a new request while one is %s', async (status) => {
+    mockedFindOne.mockResolvedValue({ status });
+
+    await expect(createCourseRequest(String(studentId), [String(hostCourse._id)])).rejects.toMatchObject({
+      code: 'COURSE_REQUEST_ALREADY_ACTIVE',
+    });
+    expect(MockedRequest.create).not.toHaveBeenCalled();
   });
 });
