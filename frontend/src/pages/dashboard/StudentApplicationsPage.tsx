@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, CalendarClock, PlusCircle } from 'lucide-react';
+import { ArrowRight, CalendarClock, Check, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
@@ -18,6 +18,60 @@ const workflowStages = [
   { label: 'Interview', statuses: ['INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED', 'REJECTED'] },
   { label: 'Recommended', statuses: recommendedApplicationStatuses as string[] },
 ];
+
+// Index of the furthest stage the application has reached (Profile is always reached).
+const getCurrentStageIndex = (status: string) =>
+  workflowStages.reduce((current, stage, index) => (stage.statuses.includes(status) ? index : current), 0);
+
+function StageTracker({ status }: { status: string }) {
+  const currentIndex = getCurrentStageIndex(status);
+  const lastIndex = workflowStages.length - 1;
+
+  return (
+    <ol className="mt-6 flex w-full max-w-2xl">
+      {workflowStages.map((stage, index) => {
+        // The final stage counts as complete once reached; earlier stages complete when passed.
+        const complete = index < currentIndex || (index === currentIndex && index === lastIndex) || index === 0;
+        const current = index === currentIndex && !complete;
+
+        return (
+          <li key={stage.label} className="relative flex flex-1 flex-col items-center text-center">
+            {index > 0 ? (
+              <span
+                aria-hidden="true"
+                className={`absolute right-1/2 top-4 h-0.5 w-full -translate-y-1/2 ${
+                  index <= currentIndex ? 'bg-dark-blue' : 'bg-slate-200'
+                }`}
+              />
+            ) : null}
+            <span
+              className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition ${
+                complete
+                  ? 'border-dark-blue bg-dark-blue text-white'
+                  : current
+                    ? 'border-dark-blue bg-white ring-4 ring-dark-blue/15'
+                    : 'border-slate-300 bg-white'
+              }`}
+            >
+              {complete ? (
+                <Check className="h-4 w-4" strokeWidth={3} />
+              ) : current ? (
+                <span className="h-2.5 w-2.5 rounded-full bg-dark-blue" />
+              ) : null}
+            </span>
+            <span
+              className={`mt-2 px-1 text-xs font-bold uppercase tracking-wide ${
+                complete || current ? 'text-dark-blue' : 'text-slate-500'
+              }`}
+            >
+              {stage.label}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 export default function StudentApplicationsPage() {
   const { user } = useAuth();
@@ -112,28 +166,7 @@ export default function StudentApplicationsPage() {
                   <CalendarClock className="h-4 w-4" />
                   Created {new Date(application.createdAt).toLocaleDateString()}
                 </div>
-                <div className="mt-5 grid gap-2 md:grid-cols-5">
-                  {workflowStages.map((stage, index) => {
-                    const active =
-                      stage.statuses.length === 0 ||
-                      workflowStages
-                        .slice(0, index + 1)
-                        .some((item) => item.statuses.includes(application.status));
-
-                    return (
-                      <div
-                        key={stage.label}
-                        className={`rounded-2xl border px-3 py-3 text-center text-xs font-bold uppercase tracking-[0.18em] ${
-                          active
-                            ? 'border-dark-blue bg-dark-blue text-white'
-                            : 'border-slate-200 bg-slate-50 text-slate-600'
-                        }`}
-                      >
-                        {stage.label}
-                      </div>
-                    );
-                  })}
-                </div>
+                <StageTracker status={application.status} />
               </div>
 
               <div className="flex flex-col items-start gap-3 lg:items-end">
