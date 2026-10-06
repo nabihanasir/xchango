@@ -4,6 +4,9 @@ import { X, Mail, Phone, Calendar, Hash, GraduationCap, MapPin, CheckCircle2, Ca
 import StatusBadge from './StatusBadge';
 import { adminApi } from '../../lib/adminApi';
 import MarkArrivalModal from '../MarkArrivalModal';
+import DocumentList from '../DocumentList';
+import { documentApi } from '../../lib/documentApi';
+import type { DocumentStatus, StudentDocument } from '../../types/document';
 import { canMarkArrival } from '../../utils/arrival';
 import type { WorkflowApplication } from '../../types/application';
 
@@ -55,6 +58,49 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
       if (typeof sc.course === 'string') return sc.course;
       return 'Unknown Course';
   }) || [];
+
+  const studentUserId = typeof app.studentId === 'object' && app.studentId ? app.studentId._id : app.studentId;
+  const [studentDocuments, setStudentDocuments] = useState<StudentDocument[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(true);
+  const [documentsError, setDocumentsError] = useState('');
+  const [updatingDocumentId, setUpdatingDocumentId] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    setDocumentsLoading(true);
+    setDocumentsError('');
+
+    documentApi
+      .getStudentDocuments(studentUserId)
+      .then((documents) => {
+        if (!cancelled) setStudentDocuments(documents);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setDocumentsError(error instanceof Error ? error.message : 'Unable to load documents.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setDocumentsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [studentUserId]);
+
+  const handleDocumentStatusUpdate = async (documentId: string, status: Exclude<DocumentStatus, 'pending'>) => {
+    setUpdatingDocumentId(documentId);
+    setDocumentsError('');
+    try {
+      const updated = await documentApi.updateDocumentStatus(documentId, status);
+      setStudentDocuments((current) => current.map((item) => (item._id === updated._id ? updated : item)));
+    } catch (error) {
+      setDocumentsError(error instanceof Error ? error.message : 'Unable to update document status.');
+    } finally {
+      setUpdatingDocumentId('');
+    }
+  };
 
   const canSetEndDate = !['DRAFT', 'REJECTED', 'COMPLETED'].includes(app.status);
   const [endDate, setEndDate] = useState(app.semesterEndDate ? app.semesterEndDate.slice(0, 10) : '');
@@ -256,6 +302,25 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                     <div className="py-4 text-center rounded-xl bg-slate-50 border border-dashed border-light-color">
                         <span className="text-sm font-bold text-slate-600">No courses selected yet.</span>
                     </div>
+                )}
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4">
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Student Documents</h4>
+                {documentsError ? (
+                  <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                    {documentsError}
+                  </p>
+                ) : null}
+                {documentsLoading ? (
+                  <div className="h-20 animate-pulse rounded-[1.75rem] bg-slate-100" />
+                ) : (
+                  <DocumentList
+                    documents={studentDocuments}
+                    updatingId={updatingDocumentId}
+                    emptyMessage="This student has not uploaded any documents."
+                    onUpdateStatus={handleDocumentStatusUpdate}
+                  />
                 )}
               </div>
 
