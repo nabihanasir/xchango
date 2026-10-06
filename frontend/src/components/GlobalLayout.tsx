@@ -114,7 +114,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
             className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl ${theme.footerButton} transition-all outline-none`}
           >
             <Menu className={`h-5 w-5 transition-transform duration-500 ${collapsed ? 'rotate-180' : ''}`} />
-            {!collapsed && <span className="text-sm font-semibold">Collapse Nav</span>}
+            {!collapsed && <span className="text-sm font-semibold">Collapse</span>}
           </button>
           <Link
             to="/login"
