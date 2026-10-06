@@ -10,7 +10,7 @@ const AdvisorLayout = () => {
     { name: 'Dashboard',    path: '/advisor',              icon: Home },
     { name: 'My Students',  path: '/advisor/students',     icon: Users },
     { name: 'Applications', path: '/advisor/applications', icon: FileText },
-    { name: 'Equivalency Requests', path: '/advisor/requests', icon: ClipboardCheck },
+    { name: 'Course Approval', path: '/advisor/requests', icon: ClipboardCheck },
     { name: 'Results', path: '/advisor/results', icon: GraduationCap },
     { name: 'Online Classes', path: '/advisor/online-classes', icon: Video },
     { name: 'Profile',      path: '/advisor/profile',      icon: UserIcon },

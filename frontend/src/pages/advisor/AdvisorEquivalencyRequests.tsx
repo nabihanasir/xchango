@@ -52,9 +52,10 @@ export default function AdvisorEquivalencyRequests() {
               <Sparkles className="h-4 w-4" />
               Advisor Workflow
             </div>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-5xl">Course equivalency review queue</h1>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-5xl">Course approval queue</h1>
             <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-slate-300">
-              Open requests, inspect paired courses, run the AI match manually, and finalize approval or rejection with student-facing comments.
+              Each request is checked against the student's semester, credit limit and program plan, and every course is matched to the
+              closest home course. Review the result and approve or reject with student-facing comments.
             </p>
           </div>
 
@@ -120,6 +121,14 @@ export default function AdvisorEquivalencyRequests() {
                       Review snapshot
                     </div>
                     <p>{request.items.filter((item) => item.aiMatchStatus === 'completed').length} AI matches completed</p>
+                    {request.planSummary?.withinCap === false ? (
+                      <p className="mt-1 font-bold text-red-600">
+                        Over the semester credit limit ({request.planSummary.requestedCredits}/{request.planSummary.allowedCredits})
+                      </p>
+                    ) : null}
+                    {request.planSummary && !request.planSummary.outlineAvailable ? (
+                      <p className="mt-1 text-amber-600">No program outline uploaded</p>
+                    ) : null}
                     {request.items.some((item) => item.aiMatchStatus === 'in_progress') ? (
                       <p className="mt-1 text-slate-500">
                         {request.items.filter((item) => item.aiMatchStatus === 'in_progress').length} still matching
@@ -141,7 +150,7 @@ export default function AdvisorEquivalencyRequests() {
         </div>
       ) : (
         <div className="glass-card rounded-[2rem] px-6 py-12 text-center">
-          <h2 className="text-2xl font-bold text-slate-800">No course equivalency requests yet</h2>
+          <h2 className="text-2xl font-bold text-slate-800">No course approval requests yet</h2>
           <p className="mt-3 text-sm font-medium text-slate-500">Requests will appear here as soon as students submit host-course selections.</p>
         </div>
       )}
