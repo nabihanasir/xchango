@@ -32,9 +32,9 @@ export default function TranscriptUpload({
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">Transcript</p>
-          <h2 className="mt-2 text-2xl font-black text-slate-900">Upload and Parse Excel Transcript</h2>
+          <h2 className="mt-2 text-2xl font-black text-slate-900">Upload and Parse Transcript</h2>
           <p className="mt-2 text-sm text-slate-500">
-            Supports semi-structured sheets and automatically groups courses semester-wise.
+            Upload an Excel, CSV or PDF transcript. Courses are grouped semester-wise, and different layouts are handled automatically.
           </p>
         </div>
 
@@ -61,13 +61,13 @@ export default function TranscriptUpload({
               <p className="text-sm font-bold text-slate-900">
                 {selectedFile ? selectedFile.name : 'Choose transcript file'}
               </p>
-              <p className="text-sm text-slate-500">Accepted: `.xlsx`, `.xls`, `.csv`</p>
+              <p className="text-sm text-slate-500">Accepted: `.xlsx`, `.xls`, `.csv`, `.pdf`</p>
             </div>
           </div>
           <input
             className="hidden"
             type="file"
-            accept=".xlsx,.xls,.csv"
+            accept=".xlsx,.xls,.csv,.pdf"
             onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
           />
         </label>

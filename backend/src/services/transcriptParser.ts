@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx';
 import { IStudentTranscript, ITranscriptCourse, ITranscriptSemester } from '../models/StudentProfile';
 
-const gradeMap: Record<string, number> = {
+export const gradeMap: Record<string, number> = {
   'A+': 4.0,
   A: 4.0,
   'A-': 3.7,
@@ -16,10 +16,10 @@ const gradeMap: Record<string, number> = {
   F: 0,
 };
 
-const gradePattern = /^[A-F][+-]?$/i;
+export const gradePattern = /^[A-F][+-]?$/i;
 const ignoredRowPatterns = [/take all courses/i, /password/i];
 
-const round = (value: number) => Number(value.toFixed(2));
+export const round = (value: number) => Number(value.toFixed(2));
 
 const normalizeCell = (value: unknown): string =>
   String(value ?? '')
@@ -49,7 +49,7 @@ const extractSemesterNumber = (rowText: string): number | null => {
   return match ? Number(match[1]) : null;
 };
 
-const calculateWeightedAverage = (courses: ITranscriptCourse[]) => {
+export const calculateWeightedAverage = (courses: ITranscriptCourse[]) => {
   const totalCredits = courses.reduce((sum, course) => sum + course.creditHours, 0);
   if (!totalCredits) {
     return 0;
@@ -94,7 +94,7 @@ const extractCourse = (cells: string[]): ITranscriptCourse | null => {
   };
 };
 
-const getRowsFromWorkbook = (filePath: string): string[][] => {
+export const getRowsFromWorkbook = (filePath: string): string[][] => {
   const workbook = XLSX.readFile(filePath, { raw: false });
   return workbook.SheetNames.flatMap((sheetName) => {
     const sheet = workbook.Sheets[sheetName];

@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { ForbiddenError, ValidationError } from '../errors/AppError';
 import { UserRole } from '../models/User';
-import { parseTranscriptFile } from '../services/transcriptParser';
+import { parseUploadedTranscript } from '../services/transcriptLlmParser';
 import * as studentService from '../services/studentService';
 import { sendResponse } from '../utils/response';
 import { toPublicFileUrl } from '../utils/upload';
@@ -30,7 +30,7 @@ export const uploadTranscript = async (req: any, res: Response) => {
   const studentId = req.body.studentId || req.user._id.toString();
   assertStudentAccess(req, studentId);
 
-  const transcript = parseTranscriptFile(req.file.path);
+  const transcript = await parseUploadedTranscript(req.file.path);
   transcript.fileUrl = toPublicFileUrl(req.file.path);
 
   const savedTranscript = await studentService.saveTranscript(studentId, transcript);

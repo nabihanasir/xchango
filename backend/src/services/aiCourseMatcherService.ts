@@ -198,7 +198,7 @@ const normalizeMatch = (parsed: Partial<MatchResponse> | undefined): MatchRespon
 });
 
 /** Sends a prompt to the configured LLM and returns the parsed JSON, or null when no LLM is configured. */
-const requestLlmJson = async <T>(prompt: string): Promise<T | null> => {
+export const requestLlmJson = async <T>(prompt: string): Promise<T | null> => {
   const dbConfig = await getAiModelConfigRaw();
   const useDbConfig = Boolean(dbConfig?.isEnabled && dbConfig.apiKey && dbConfig.baseUrl && dbConfig.modelName);
 
