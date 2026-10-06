@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BookOpen, Globe2, Mail, Phone, UserRound } from 'lucide-react';
+import MultiSelectDropdown from '../MultiSelectDropdown';
+import { DESTINATION_COUNTRIES, getProgramsForCountries } from '../../data/destinations';
 import type { StudentBasicInfo, StudentPreferences } from '../../types/studentProfile';
 
 // The submit button lives at the bottom of the page (after the transcript) and targets this form by id.
@@ -8,6 +10,8 @@ export const STUDENT_PROFILE_FORM_ID = 'student-profile-form';
 const MAX_SEMESTER = 8;
 
 const clampSemester = (value: number | string) => Math.min(MAX_SEMESTER, Math.max(0, Math.floor(Number(value)) || 0));
+
+const DEGREE_LEVELS = ['Undergraduate', 'Graduate'];
 
 const INTAKE_SEASONS = ['Spring', 'Fall'];
 const MIN_INTAKE_YEAR = 2023;
@@ -36,7 +40,6 @@ const buildFormState = (basicInfo: StudentBasicInfo, preferences: StudentPrefere
   basicInfo,
   preferences: {
     ...preferences,
-    preferredCountriesText: preferences.preferredCountries.join(', '),
     ...parseIntake(preferences.intake),
   },
 });
@@ -57,6 +60,22 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
     setFormState(buildFormState(basicInfo, preferences));
   }, [basicInfo, preferences]);
 
+  // Fields of interest are the programmes offered in the chosen countries (every partner programme when none chosen).
+  const programOptions = getProgramsForCountries(formState.preferences.preferredCountries);
+
+  const handleCountriesChange = (preferredCountries: string[]) =>
+    setFormState((current) => {
+      const stillOffered = getProgramsForCountries(preferredCountries).includes(current.preferences.fieldOfInterest);
+      return {
+        ...current,
+        preferences: {
+          ...current.preferences,
+          preferredCountries,
+          fieldOfInterest: stillOffered ? current.preferences.fieldOfInterest : '',
+        },
+      };
+    });
+
   const intakeIncomplete =
     Boolean(formState.preferences.intakeSeason) !== Boolean(formState.preferences.intakeYear);
 
@@ -69,10 +88,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
         semester: clampSemester(formState.basicInfo.semester),
       },
       preferences: {
-        preferredCountries: formState.preferences.preferredCountriesText
-          .split(',')
-          .map((country) => country.trim())
-          .filter(Boolean),
+        preferredCountries: formState.preferences.preferredCountries,
         degreeLevel: formState.preferences.degreeLevel,
         fieldOfInterest: formState.preferences.fieldOfInterest,
         intake: buildIntake(formState.preferences.intakeSeason, formState.preferences.intakeYear),
@@ -213,26 +229,22 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-2 md:col-span-2">
+            <div className="space-y-2 md:col-span-2">
               <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                 Preferred Countries
               </span>
-              <input
+              <MultiSelectDropdown
                 className={inputClassName}
-                value={formState.preferences.preferredCountriesText}
-                onChange={(event) =>
-                  setFormState((current) => ({
-                    ...current,
-                    preferences: { ...current.preferences, preferredCountriesText: event.target.value },
-                  }))
-                }
-                placeholder="Malaysia, Turkiye, South Korea"
+                options={[...DESTINATION_COUNTRIES, ...formState.preferences.preferredCountries.filter((country) => !DESTINATION_COUNTRIES.includes(country))]}
+                selected={formState.preferences.preferredCountries}
+                onChange={handleCountriesChange}
+                placeholder="Select destination countries"
               />
-            </label>
+            </div>
 
             <label className="space-y-2">
               <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Degree Level</span>
-              <input
+              <select
                 className={inputClassName}
                 value={formState.preferences.degreeLevel}
                 onChange={(event) =>
@@ -241,15 +253,24 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
                     preferences: { ...current.preferences, degreeLevel: event.target.value },
                   }))
                 }
-                placeholder="Undergraduate / Graduate"
-              />
+              >
+                <option value="">Select degree level</option>
+                {(DEGREE_LEVELS.includes(formState.preferences.degreeLevel) || !formState.preferences.degreeLevel
+                  ? DEGREE_LEVELS
+                  : [formState.preferences.degreeLevel, ...DEGREE_LEVELS]
+                ).map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <label className="space-y-2">
               <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                 Field of Interest
               </span>
-              <input
+              <select
                 className={inputClassName}
                 value={formState.preferences.fieldOfInterest}
                 onChange={(event) =>
@@ -258,8 +279,17 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
                     preferences: { ...current.preferences, fieldOfInterest: event.target.value },
                   }))
                 }
-                placeholder="Artificial Intelligence"
-              />
+              >
+                <option value="">Select a programme</option>
+                {(!formState.preferences.fieldOfInterest || programOptions.includes(formState.preferences.fieldOfInterest)
+                  ? programOptions
+                  : [formState.preferences.fieldOfInterest, ...programOptions]
+                ).map((program) => (
+                  <option key={program} value={program}>
+                    {program}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <div className="space-y-2">
