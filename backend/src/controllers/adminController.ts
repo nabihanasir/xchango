@@ -38,6 +38,11 @@ export const createUser = async (req: Request, res: Response) => {
   sendResponse(res, 201, 'User created successfully', user);
 };
 
+export const updateAdvisorCountries = async (req: Request, res: Response) => {
+  const result = await adminService.setAdvisorCountries(req.params.id as string, req.body.countries);
+  sendResponse(res, 200, 'Advisor countries updated', result);
+};
+
 export const uploadOfferLetter = async (req: any, res: Response) => {
   const { applicationId, offerLetterUrl } = req.body;
   const application = await adminService.updateApplicationOfferLetter(applicationId, offerLetterUrl);

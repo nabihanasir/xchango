@@ -5,6 +5,8 @@ export interface IAdvisorProfile extends Document {
   designation: string;
   department: string;
   assignedStudents: mongoose.Types.ObjectId[];
+  /** Destination countries this advisor supervises; applications to these countries are auto-assigned to them. */
+  countries: string[];
   experience: number;
   phone?: string;
   bio?: string;
@@ -17,6 +19,7 @@ const AdvisorProfileSchema: Schema = new Schema(
     designation: { type: String, required: true, trim: true },
     department: { type: String, required: true },
     assignedStudents: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    countries: { type: [String], default: [] },
     experience: { type: Number },
     phone: { type: String, trim: true, maxlength: 30 },
     bio: { type: String, trim: true, maxlength: 1000 },

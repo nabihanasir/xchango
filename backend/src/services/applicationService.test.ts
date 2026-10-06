@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 import Application, { ApplicationStatus } from '../models/Application';
+import AdvisorProfile from '../models/AdvisorProfile';
 import Notification from '../models/Notification';
+import User from '../models/User';
 import {
+  findAdvisorForApplication,
   recordInterviewDecision,
   selectCourses,
   studentCanRequestCourseApproval,
@@ -169,5 +172,47 @@ describe('gates that depend on the advisor recommendation', () => {
 
     expect(application.status).toBe(ApplicationStatus.REJECTED);
     expect(application.save).not.toHaveBeenCalled();
+  });
+});
+
+describe('findAdvisorForApplication', () => {
+  const advisorA = { _id: new mongoose.Types.ObjectId(), name: 'Alice Advisor' };
+  const advisorB = { _id: new mongoose.Types.ObjectId(), name: 'Bob Advisor' };
+  const application = { studentId, country: 'Malaysia' } as any;
+
+  const givenAdvisors = (advisors: unknown[]) => {
+    (AdvisorProfile.find as jest.Mock).mockReturnValue({
+      select: jest.fn().mockResolvedValue(advisors.map((advisor: any) => ({ userId: advisor._id }))),
+    });
+    (User.find as jest.Mock).mockResolvedValue(advisors);
+  };
+
+  beforeEach(() => {
+    (MockedApplication.findOne as jest.Mock).mockReturnValue({ select: jest.fn().mockResolvedValue(null) });
+  });
+
+  it('returns null when no advisor supervises the country', async () => {
+    givenAdvisors([]);
+
+    await expect(findAdvisorForApplication(application)).resolves.toBeNull();
+  });
+
+  it('picks the advisor with the fewest open applications', async () => {
+    givenAdvisors([advisorA, advisorB]);
+    (MockedApplication.countDocuments as jest.Mock).mockImplementation(async (filter: any) =>
+      String(filter.advisorId) === String(advisorA._id) ? 5 : 2
+    );
+
+    await expect(findAdvisorForApplication(application)).resolves.toBe(advisorB);
+  });
+
+  it('keeps the advisor the student already has for that country', async () => {
+    givenAdvisors([advisorA, advisorB]);
+    (MockedApplication.findOne as jest.Mock).mockReturnValue({
+      select: jest.fn().mockResolvedValue({ advisorId: advisorA._id }),
+    });
+    (MockedApplication.countDocuments as jest.Mock).mockResolvedValue(9);
+
+    await expect(findAdvisorForApplication(application)).resolves.toBe(advisorA);
   });
 });

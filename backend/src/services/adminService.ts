@@ -1,6 +1,6 @@
 import University from '../models/University';
 import Course from '../models/Course';
-import Application, { ApplicationStatus } from '../models/Application';
+import Application, { ApplicationCountry, ApplicationStatus } from '../models/Application';
 import User, { UserRole } from '../models/User';
 import Country from '../models/Country';
 import CourseMapping from '../models/CourseMapping';
@@ -75,7 +75,37 @@ export const createCourse = async (adminId: string, courseData: any) => {
 };
 
 export const getAllUsers = async () => {
-  return await User.find().select('-password');
+  const [users, advisorProfiles] = await Promise.all([
+    User.find().select('-password').lean(),
+    AdvisorProfile.find().select('userId countries').lean(),
+  ]);
+  const countriesByAdvisor = new Map(advisorProfiles.map((profile) => [String(profile.userId), profile.countries ?? []]));
+
+  return users.map((user) =>
+    user.role === UserRole.ADVISOR ? { ...user, countries: countriesByAdvisor.get(String(user._id)) ?? [] } : user
+  );
+};
+
+const normalizeAdvisorCountries = (countries: unknown): string[] => {
+  const requested = Array.isArray(countries) ? countries.map((country) => String(country).trim()) : [];
+  const allowed = Object.values(ApplicationCountry) as string[];
+  const invalid = requested.filter((country) => !allowed.includes(country));
+  if (invalid.length) {
+    throw new Error(`Unsupported countries: ${invalid.join(', ')}. Allowed: ${allowed.join(', ')}.`);
+  }
+  return [...new Set(requested)];
+};
+
+export const setAdvisorCountries = async (userId: string, countries: unknown) => {
+  const profile = await AdvisorProfile.findOneAndUpdate(
+    { userId },
+    { countries: normalizeAdvisorCountries(countries) },
+    { new: true }
+  );
+  if (!profile) {
+    throw new Error('Advisor profile not found.');
+  }
+  return { _id: userId, countries: profile.countries };
 };
 
 export const getAllApplications = async () =>
@@ -153,6 +183,7 @@ export const createUser = async (userData: any) => {
         department: department.trim(),
         assignedStudents: [],
         experience: typeof experience === 'number' ? experience : 0,
+        countries: normalizeAdvisorCountries(userData.countries),
       });
     }
   } catch (error) {
@@ -169,6 +200,7 @@ export const createUser = async (userData: any) => {
     sapId: user.sapId,
     designation: normalizedRole === UserRole.ADVISOR ? designation?.trim() : undefined,
     department: normalizedRole === UserRole.ADVISOR ? department?.trim() : undefined,
+    countries: normalizedRole === UserRole.ADVISOR ? normalizeAdvisorCountries(userData.countries) : undefined,
     ...(password?.trim() ? {} : { password: plainPassword }),
   };
 };
