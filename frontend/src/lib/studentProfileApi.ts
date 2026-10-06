@@ -44,6 +44,8 @@ export const studentProfileApi = {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        // Reading a transcript may involve an AI model (and provider fallbacks), which can outlast the default timeout.
+        timeout: 120000,
       })
     );
   },

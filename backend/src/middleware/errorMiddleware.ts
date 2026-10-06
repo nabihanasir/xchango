@@ -56,6 +56,15 @@ const buildError = (err: unknown): AppError => {
     );
   }
 
+  if (err instanceof Error && err.message.startsWith('Invalid file type')) {
+    return new ValidationError(
+      'Unsupported file type.',
+      err.message,
+      'Upload a file in one of the allowed formats and try again.',
+      'INVALID_FILE_TYPE'
+    );
+  }
+
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return new ValidationError(
