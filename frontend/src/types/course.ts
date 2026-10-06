@@ -32,6 +32,13 @@ export interface CourseInput {
   title: string;
   description?: string;
   creditHours: number;
+  instructorName?: string;
+  instructorEmail?: string;
+}
+
+export interface CourseInstructorInput {
+  instructorName: string;
+  instructorEmail: string;
 }
 
 export const getCourseDisplayTitle = (course?: CourseRecord | null) =>

@@ -5,6 +5,7 @@ import User, { IUser, UserRole } from '../models/User';
 import { AuthenticationError, DatabaseError, ValidationError } from '../errors/AppError';
 import { logger } from '../utils/logger';
 import { offboardDueStudents } from './offboardingService';
+import { isEmailConfigured, sendEmail } from './emailService';
 
 const generateToken = (id: string, role: string) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET || 'secret', {
@@ -224,7 +225,7 @@ export const requestPasswordReset = async (payload: any) => {
   }
 
   const genericResponse = {
-    message: 'If an account exists for that email, a password reset link has been prepared.',
+    message: 'If an account exists for that email, a password reset link has been sent to it.',
   };
 
   if (!user) {
@@ -248,9 +249,23 @@ export const requestPasswordReset = async (payload: any) => {
     );
   }
 
+  const resetUrl = buildResetPasswordLink(resetToken);
+
+  if (isEmailConfigured()) {
+    // Sent in the background so response time does not reveal whether the account exists.
+    void sendEmail({
+      to: user.email,
+      subject: 'Reset your Xchango password',
+      text: `Hi ${user.name || 'there'},\n\nWe received a request to reset your Xchango password. The link below is valid for 15 minutes.\n\nIf you did not ask for this, you can ignore this email and your password will stay the same.`,
+      action: { label: 'Reset password', url: resetUrl },
+    });
+    return genericResponse;
+  }
+
+  // Without email set up, expose the link outside production so the flow can still be tested.
   return {
     ...genericResponse,
-    resetUrl: process.env.NODE_ENV === 'production' ? undefined : buildResetPasswordLink(resetToken),
+    resetUrl: process.env.NODE_ENV === 'production' ? undefined : resetUrl,
   };
 };
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BookOpen, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
+import HostCourseInstructors from '../../components/admin/HostCourseInstructors';
 import { adminApi } from '../../lib/adminApi';
 import type { ApplicationCourseSummary } from '../../types/application';
 import { getCourseDisplayTitle } from '../../types/course';
@@ -9,13 +10,35 @@ type CourseFormState = {
   title: string;
   description: string;
   creditHours: string;
+  instructorName: string;
+  instructorEmail: string;
 };
 
 const emptyForm = (): CourseFormState => ({
   title: '',
   description: '',
   creditHours: '3',
+  instructorName: '',
+  instructorEmail: '',
 });
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const inputClassName =
+  'w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-maroon transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50';
+
+function InstructorCell({ course }: { course: ApplicationCourseSummary }) {
+  if (!course.instructorEmail) {
+    return <span className="text-sm text-slate-400">Not set</span>;
+  }
+
+  return (
+    <div className="text-sm">
+      <p className="font-semibold text-slate-700">{course.instructorName || 'Instructor'}</p>
+      <p className="text-xs text-slate-500">{course.instructorEmail}</p>
+    </div>
+  );
+}
 
 export default function AdminCourses() {
   const [courses, setCourses] = useState<ApplicationCourseSummary[]>([]);
@@ -82,6 +105,8 @@ export default function AdminCourses() {
       title: course.title || course.name || '',
       description: course.description || '',
       creditHours: String(course.creditHours || 3),
+      instructorName: course.instructorName || '',
+      instructorEmail: course.instructorEmail || '',
     });
     setFormError('');
     setIsModalOpen(true);
@@ -115,12 +140,20 @@ export default function AdminCourses() {
       return;
     }
 
+    const instructorEmail = form.instructorEmail.trim();
+    if (instructorEmail && !EMAIL_PATTERN.test(instructorEmail)) {
+      setFormError('Enter a valid instructor email or leave it empty.');
+      return;
+    }
+
     try {
       setSubmitting(true);
       const payload = {
         title,
         description: form.description.trim(),
         creditHours,
+        instructorName: form.instructorName.trim(),
+        instructorEmail,
       };
 
       if (editingCourseId) {
@@ -181,6 +214,11 @@ export default function AdminCourses() {
       header: 'Credit Hours',
       accessor: 'creditHours',
       render: (value: number) => <span className="font-black text-maroon">{value}</span>,
+    },
+    {
+      header: 'Instructor',
+      accessor: 'instructorEmail',
+      render: (_value: string, row: ApplicationCourseSummary) => <InstructorCell course={row} />,
     },
     {
       header: 'Created By',
@@ -294,6 +332,8 @@ export default function AdminCourses() {
         )}
       </div>
 
+      <HostCourseInstructors />
+
       {isModalOpen ? (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
           <div
@@ -367,6 +407,35 @@ export default function AdminCourses() {
                     className="w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-maroon transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                     required
                   />
+                </div>
+
+                <div className="md:col-span-1">
+                  <label className="mb-2 block text-xs font-black uppercase tracking-widest text-maroon/60">
+                    Instructor Name
+                  </label>
+                  <input
+                    type="text"
+                    value={form.instructorName}
+                    onChange={(event) => setForm((current) => ({ ...current, instructorName: event.target.value }))}
+                    placeholder="e.g. Dr. Ayesha Malik"
+                    className={inputClassName}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-xs font-black uppercase tracking-widest text-maroon/60">
+                    Instructor Email
+                  </label>
+                  <input
+                    type="email"
+                    value={form.instructorEmail}
+                    onChange={(event) => setForm((current) => ({ ...current, instructorEmail: event.target.value }))}
+                    placeholder="instructor@university.edu"
+                    className={inputClassName}
+                  />
+                  <p className="mt-2 text-xs text-body-text">
+                    Emailed when a student taking this course online from abroad arrives at their host university.
+                  </p>
                 </div>
               </div>
 

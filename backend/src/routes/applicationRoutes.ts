@@ -65,5 +65,10 @@ router.post(
   applicationController.uploadDocuments
 );
 router.post('/:id/courses', authorizeRoles(UserRole.STUDENT), applicationController.selectCourses);
+router.post(
+  '/:id/arrival',
+  authorizeRoles(UserRole.ADVISOR, UserRole.ADMIN),
+  applicationController.recordStudentArrival
+);
 
 export default router;
