@@ -6,7 +6,6 @@ import type {
   ApplicationStatus,
   SelectedCourseStatus,
   WorkflowApplication,
-  WorkflowApplicationAIRecommendation,
 } from '../types/application';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -77,12 +76,6 @@ export const applicationApi = {
     unwrap<ApplicationCourseSummary[]>(apiClient.get(`/applications/${applicationId}/available-courses`)),
   selectCourses: (applicationId: string, courseIds: string[]) =>
     unwrap<WorkflowApplication>(apiClient.post(`/applications/${applicationId}/courses`, { courseIds })),
-  generateAiRecommendations: (applicationId: string) =>
-    unwrap<WorkflowApplication>(apiClient.post(`/applications/${applicationId}/ai-recommendations`)),
-  getAiRecommendations: (applicationId: string) =>
-    unwrap<WorkflowApplicationAIRecommendation[]>(
-      apiClient.get(`/applications/${applicationId}/ai-recommendations`)
-    ),
   updateCourseDecision: (
     applicationId: string,
     payload: { courseId: string; status: Exclude<SelectedCourseStatus, 'pending'>; advisorComment?: string }

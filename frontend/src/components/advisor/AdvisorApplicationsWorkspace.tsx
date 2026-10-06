@@ -5,7 +5,6 @@ import {
   FileText,
   GraduationCap,
   PlaneLanding,
-  Sparkles,
   UserRound,
   X,
 } from 'lucide-react';
@@ -66,7 +65,6 @@ export default function AdvisorApplicationsWorkspace({
   const [detailsError, setDetailsError] = useState('');
   const [documentsError, setDocumentsError] = useState('');
   const [actionError, setActionError] = useState('');
-  const [generatingSuggestions, setGeneratingSuggestions] = useState(false);
   const [activeCourseDecision, setActiveCourseDecision] = useState('');
   const [updatingDocumentId, setUpdatingDocumentId] = useState('');
   const [interviewForm, setInterviewForm] = useState({ date: '', location: 'Advisor Office' });
@@ -85,16 +83,6 @@ export default function AdvisorApplicationsWorkspace({
 
     return { pending, shortlisted, rejected };
   }, [applications]);
-
-  const aiRecommendationIds = useMemo(
-    () =>
-      new Set(
-        (selectedApplication?.aiRecommendations || [])
-          .map((recommendation) => getApplicationCourseId(recommendation.course))
-          .filter(Boolean)
-      ),
-    [selectedApplication?.aiRecommendations]
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -161,10 +149,7 @@ export default function AdvisorApplicationsWorkspace({
           throw new Error('Student record could not be resolved for this application.');
         }
 
-        const [profile, aiRecommendations] = await Promise.all([
-          studentProfileApi.getStudentProfile(studentId),
-          applicationApi.getAiRecommendations(selectedApplicationId),
-        ]);
+        const profile = await studentProfileApi.getStudentProfile(studentId);
         const documents = await documentApi
           .getStudentDocuments(studentId)
           .catch((documentError) => {
@@ -182,18 +167,13 @@ export default function AdvisorApplicationsWorkspace({
           return;
         }
 
-        const hydratedApplication = {
-          ...application,
-          aiRecommendations,
-        };
-
         startTransition(() => {
-          setSelectedApplication(hydratedApplication);
+          setSelectedApplication(application);
           setStudentProfile(profile);
           setStudentDocuments(documents);
           setCourseCommentDrafts(
             Object.fromEntries(
-              hydratedApplication.selectedCourses.map((course) => [
+              application.selectedCourses.map((course) => [
                 getApplicationCourseId(course.course),
                 course.advisorComment || '',
               ])
@@ -261,24 +241,6 @@ export default function AdvisorApplicationsWorkspace({
       behavior: 'smooth',
       block: 'start',
     });
-  };
-
-  const handleGenerateSuggestions = async () => {
-    if (!selectedApplicationId) {
-      return;
-    }
-
-    setGeneratingSuggestions(true);
-    setActionError('');
-
-    try {
-      const updatedApplication = await applicationApi.generateAiRecommendations(selectedApplicationId);
-      syncApplication(updatedApplication);
-    } catch (error) {
-      setActionError(error instanceof Error ? error.message : 'Unable to generate AI suggestions.');
-    } finally {
-      setGeneratingSuggestions(false);
-    }
   };
 
   const handleCourseDecision = async (
@@ -548,17 +510,6 @@ export default function AdvisorApplicationsWorkspace({
               Review assigned students, schedule interviews, and record a recommendation after each interview.
             </p>
           </div>
-          {selectedApplication ? (
-            <button
-              type="button"
-              onClick={() => void handleGenerateSuggestions()}
-              disabled={generatingSuggestions}
-              className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>{generatingSuggestions ? 'Generating...' : 'Generate AI Suggestions'}</span>
-            </button>
-          ) : null}
         </div>
         {detailsLoading ? (
           <div className="mt-6 h-48 animate-pulse rounded-2xl bg-slate-100" />
@@ -589,7 +540,6 @@ export default function AdvisorApplicationsWorkspace({
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Email:</span> {selectedStudent?.email || 'Email unavailable'}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Documents:</span> {selectedApplication.documents.length}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Selected courses:</span> {selectedApplication.selectedCourses.length}</p>
-                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">AI suggestions:</span> {selectedApplication.aiRecommendations.length}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview date:</span> {selectedApplication.interviewDate ? new Date(selectedApplication.interviewDate).toLocaleDateString() : selectedApplication.interview ? new Date(selectedApplication.interview.date).toLocaleDateString() : 'Not scheduled'}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview location:</span> {selectedApplication.interview?.location || 'Not scheduled'}</p>
                 <div className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4">
@@ -745,69 +695,10 @@ export default function AdvisorApplicationsWorkspace({
               </div>
             </div>
 
-            <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50/70 p-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">AI Recommendation Panel</h3>
-                  <p className="mt-2 max-w-3xl text-sm text-slate-600">
-                    The AI scores available courses against the student profile and explains why. It does not approve anything.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600">
-                  Advisor remains final decision-maker
-                </div>
-              </div>
-
-              {selectedApplication.aiRecommendations.length ? (
-                <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                  {selectedApplication.aiRecommendations.map((recommendation) => {
-                    const courseId = getApplicationCourseId(recommendation.course);
-                    const isSelectedByStudent = selectedApplication.selectedCourses.some(
-                      (course) => getApplicationCourseId(course.course) === courseId
-                    );
-
-                    return (
-                      <article key={recommendation._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="font-bold text-slate-900">
-                              {getApplicationCourseLabel(recommendation.course)}
-                            </p>
-                            <p className="mt-1 text-sm text-slate-500">
-                              {getApplicationCourseUniversity(recommendation.course) || 'University not linked'}
-                            </p>
-                          </div>
-                          <span className="rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
-                            {recommendation.matchScore}% match
-                          </span>
-                        </div>
-                        <p className="mt-4 text-sm leading-6 text-slate-600">{recommendation.reason}</p>
-                        <div className="mt-4">
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] ${
-                              isSelectedByStudent
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-amber-100 text-amber-700'
-                            }`}
-                          >
-                            {isSelectedByStudent ? 'Also selected by student' : 'AI-only suggestion'}
-                          </span>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="mt-5 rounded-[1.5rem] border border-dashed border-slate-300 bg-white px-5 py-8 text-center text-sm font-medium text-slate-500">
-                  No AI suggestions generated yet for this application.
-                </div>
-              )}
-            </div>
-            <div className="grid gap-6 xl:grid-cols-2">
               <section className="rounded-[1.75rem] border border-slate-200 p-6">
                 <h3 className="text-xl font-bold text-slate-900">Student Selected Courses</h3>
                 <p className="mt-2 text-sm text-slate-500">
-                  Approve or reject each selected course after comparing it with AI suggestions.
+                  Approve or reject each course the student selected. Course equivalency is reviewed under Course Approval.
                 </p>
 
                 <div className="mt-5 space-y-4">
@@ -815,7 +706,6 @@ export default function AdvisorApplicationsWorkspace({
                     selectedApplication.selectedCourses.map((selectedCourse) => {
                       const courseId = getApplicationCourseId(selectedCourse.course);
                       const summary = getApplicationCourseSummary(selectedCourse.course);
-                      const isAiRecommended = aiRecommendationIds.has(courseId);
 
                       return (
                         <article key={selectedCourse._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-5">
@@ -828,22 +718,11 @@ export default function AdvisorApplicationsWorkspace({
                                 {getApplicationCourseUniversity(selectedCourse.course) || 'University not linked'}
                               </p>
                             </div>
-                            <div className="flex flex-wrap gap-2">
-                              <span
-                                className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${selectedCourseTone[selectedCourse.status]}`}
-                              >
-                                {selectedCourse.status}
-                              </span>
-                              <span
-                                className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${
-                                  isAiRecommended
-                                    ? 'bg-emerald-100 text-emerald-700'
-                                    : 'bg-amber-100 text-amber-700'
-                                }`}
-                              >
-                                {isAiRecommended ? 'AI recommended' : 'Not recommended by AI'}
-                              </span>
-                            </div>
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${selectedCourseTone[selectedCourse.status]}`}
+                            >
+                              {selectedCourse.status}
+                            </span>
                           </div>
                           <p className="mt-4 text-sm text-slate-600">
                             {summary?.description || 'No course description is available for this selection.'}
@@ -897,66 +776,6 @@ export default function AdvisorApplicationsWorkspace({
                   )}
                 </div>
               </section>
-
-              <section className="rounded-[1.75rem] border border-slate-200 p-6">
-                <h3 className="text-xl font-bold text-slate-900">Comparison View</h3>
-                <p className="mt-2 text-sm text-slate-500">
-                  Compare student-selected courses with AI-suggested courses before recording a decision.
-                </p>
-
-                <div className="mt-5 space-y-4">
-                  {selectedApplication.aiRecommendations.length ? (
-                    selectedApplication.aiRecommendations.map((recommendation) => {
-                      const courseId = getApplicationCourseId(recommendation.course);
-                      const selectedMatch = selectedApplication.selectedCourses.find(
-                        (course) => getApplicationCourseId(course.course) === courseId
-                      );
-
-                      return (
-                        <article key={recommendation._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-                          <div className="flex flex-wrap items-start justify-between gap-3">
-                            <div>
-                              <p className="font-bold text-slate-900">
-                                {getApplicationCourseLabel(recommendation.course)}
-                              </p>
-                              <p className="mt-1 text-sm text-slate-500">
-                                {getApplicationCourseUniversity(recommendation.course) || 'University not linked'}
-                              </p>
-                            </div>
-                            <span className="rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
-                              {recommendation.matchScore}%
-                            </span>
-                          </div>
-                          <p className="mt-4 text-sm text-slate-600">{recommendation.reason}</p>
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${
-                                selectedMatch
-                                  ? 'bg-emerald-100 text-emerald-700'
-                                  : 'bg-slate-100 text-slate-700'
-                              }`}
-                            >
-                              {selectedMatch ? 'Chosen by student' : 'Not chosen by student'}
-                            </span>
-                            {selectedMatch ? (
-                              <span
-                                className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${selectedCourseTone[selectedMatch.status]}`}
-                              >
-                                Advisor status: {selectedMatch.status}
-                              </span>
-                            ) : null}
-                          </div>
-                        </article>
-                      );
-                    })
-                  ) : (
-                    <div className="rounded-[1.5rem] border border-dashed border-slate-300 px-5 py-8 text-sm font-medium text-slate-500">
-                      Generate AI suggestions to unlock the comparison view.
-                    </div>
-                  )}
-                </div>
-              </section>
-            </div>
           </div>
         ) : (
           <div className="mt-6 rounded-[1.75rem] border border-dashed border-slate-300 px-6 py-10 text-center text-sm font-medium text-slate-500">
