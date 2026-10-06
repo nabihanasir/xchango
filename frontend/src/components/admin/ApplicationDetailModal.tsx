@@ -297,10 +297,6 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               {submitting ? 'Issuing...' : 'Issue Offer Letter'}
             </button>
           )}
-          <button className="px-8 py-3 bg-maroon-gradient hover:brightness-110 text-white font-bold rounded-xl transition-all shadow-lg shadow-maroon/20 flex items-center gap-2">
-            Download Full Report
-            <Hash className="h-4 w-4 opacity-40 rotate-12" />
-          </button>
         </footer>
       </div>
 
