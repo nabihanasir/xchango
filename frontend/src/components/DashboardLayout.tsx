@@ -1,5 +1,5 @@
 import {
-  Home, School, FileText, BookOpenCheck, ListChecks, UserRoundCog, Video, GraduationCap, Stamp
+  Home, School, FileText, BookOpenCheck, ListChecks, UserRoundCog, Video, GraduationCap, Stamp, Building2
 } from 'lucide-react';
 import GlobalLayout from './GlobalLayout';
 import { useEffect, useState } from 'react';
@@ -20,6 +20,7 @@ const DashboardLayout = () => {
   const navItems = [
     { name: 'Dashboard',               path: '/dashboard',              icon: Home },
     { name: 'University & Programmes', path: '/dashboard/programmes',   icon: School },
+    { name: 'International Office',    path: '/dashboard/international-office', icon: Building2 },
     { name: 'Student Profile',         path: '/dashboard/profile',      icon: UserRoundCog },
     { name: 'Your Application',        path: '/dashboard/applications', icon: FileText },
     { name: 'Documents',               path: '/dashboard/documents',    icon: FileText },
