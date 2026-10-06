@@ -28,6 +28,8 @@ export interface MatchOptions {
   basis?: MatchBasis;
   /** Required for the outline basis: the text of the outline the student uploaded. */
   uploadedOutline?: string;
+  /** Added to a home course's keyword score when the shortlist is made, e.g. for courses in the student's plan. */
+  homeCourseBoost?: (homeCourse: ICourse) => number;
 }
 
 /** The course fields the matcher reads. `outlineText` carries whichever text the match is based on. */
@@ -349,7 +351,12 @@ const jaccard = (left: Set<string>, right: Set<string>): number => {
 };
 
 /** Cheap keyword similarity used to shortlist home courses before asking the LLM. */
-export const prefilterHomeCourses = (hostCourse: CourseText, homeCourses: ICourse[], limit = MAX_LLM_CANDIDATES): ICourse[] => {
+export const prefilterHomeCourses = (
+  hostCourse: CourseText,
+  homeCourses: ICourse[],
+  limit = MAX_LLM_CANDIDATES,
+  boost?: (homeCourse: ICourse) => number
+): ICourse[] => {
   const hostName = toTopicSet(hostCourse.name || hostCourse.title || '');
   const hostContent = toTopicSet(`${hostCourse.description || ''} ${hostCourse.outlineText || ''}`);
 
@@ -358,7 +365,8 @@ export const prefilterHomeCourses = (hostCourse: CourseText, homeCourses: ICours
       homeCourse,
       score:
         jaccard(hostName, toTopicSet(homeCourse.name || homeCourse.title || '')) * 0.3 +
-        jaccard(hostContent, toTopicSet(`${homeCourse.description || ''} ${homeCourse.outlineText || ''}`)) * 0.7,
+        jaccard(hostContent, toTopicSet(`${homeCourse.description || ''} ${homeCourse.outlineText || ''}`)) * 0.7 +
+        (boost?.(homeCourse) ?? 0),
     }))
     .sort((left, right) => right.score - left.score)
     .slice(0, limit)
@@ -454,7 +462,7 @@ export const rankHomeCourseMatches = async (
     throw new Error('No home courses with outlines are available to match against.');
   }
 
-  const shortlist = prefilterHomeCourses(host, eligible);
+  const shortlist = prefilterHomeCourses(host, eligible, MAX_LLM_CANDIDATES, options.homeCourseBoost);
   const byScore = (left: RankedHomeCourse, right: RankedHomeCourse) => right.matchScore - left.matchScore;
 
   try {
