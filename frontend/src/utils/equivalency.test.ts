@@ -1,6 +1,7 @@
 import {
   formatDisplayDate,
   getItemStatusClasses,
+  getMatchTier,
   getRequestStatusClasses,
   getScoreBadgeClasses,
   getScoreTrackClasses,
@@ -37,5 +38,15 @@ describe('equivalency helpers', () => {
     expect(getUniversityName('FAST')).toBe('FAST');
     expect(getUniversityName({ name: 'NUST' })).toBe('NUST');
     expect(getUniversityName(undefined)).toBe('University not set');
+  });
+
+  it('colours a match by score: green is a perfect match', () => {
+    expect(getMatchTier(100).key).toBe('perfect');
+    expect(getMatchTier(85).key).toBe('perfect');
+    expect(getMatchTier(84).key).toBe('partial');
+    expect(getMatchTier(60).key).toBe('partial');
+    expect(getMatchTier(59).key).toBe('weak');
+    expect(getMatchTier(0).ring).toContain('red');
+    expect(getMatchTier(92).ring).toContain('emerald');
   });
 });

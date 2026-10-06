@@ -54,7 +54,58 @@ export const getScoreTrackClasses = (score: number) => {
   return 'bg-red-500';
 };
 
-export const getUniversityName = (university: { name: string } | string | null | undefined) =>
+/** From this score a match counts as perfect and is shown in green. */
+export const PERFECT_MATCH_SCORE = 85;
+/** From this score a match is partial (amber); below it the match is weak (red). */
+export const PARTIAL_MATCH_SCORE = 60;
+
+export type MatchTierKey = 'perfect' | 'partial' | 'weak';
+
+export interface MatchTier {
+  key: MatchTierKey;
+  label: string;
+  /** Stroke of the score ring. */
+  ring: string;
+  /** Text colour for the score and its label. */
+  text: string;
+  /** Soft background and border for banners and chips. */
+  soft: string;
+  /** Left accent of a course card. */
+  accent: string;
+}
+
+const MATCH_TIERS: Record<MatchTierKey, MatchTier> = {
+  perfect: {
+    key: 'perfect',
+    label: 'Perfect match',
+    ring: 'stroke-emerald-500',
+    text: 'text-emerald-700',
+    soft: 'bg-emerald-50 border-emerald-200',
+    accent: 'border-l-emerald-500',
+  },
+  partial: {
+    key: 'partial',
+    label: 'Partial match',
+    ring: 'stroke-amber-500',
+    text: 'text-amber-700',
+    soft: 'bg-amber-50 border-amber-200',
+    accent: 'border-l-amber-400',
+  },
+  weak: {
+    key: 'weak',
+    label: 'Weak match',
+    ring: 'stroke-red-500',
+    text: 'text-red-700',
+    soft: 'bg-red-50 border-red-200',
+    accent: 'border-l-red-400',
+  },
+};
+
+/** Colour code for a match score: green for a perfect match, amber for partial, red for weak. */
+export const getMatchTier = (score: number): MatchTier =>
+  MATCH_TIERS[score >= PERFECT_MATCH_SCORE ? 'perfect' : score >= PARTIAL_MATCH_SCORE ? 'partial' : 'weak'];
+
+export const getUniversityName =(university: { name: string } | string | null | undefined) =>
   typeof university === 'string' ? university : university?.name || 'University not set';
 
 /** The preliminary match made from the host course's catalogue description. */
@@ -64,6 +115,8 @@ export const getDescriptionMatch = (item: CourseRequestItem): MatchSnapshot | nu
     ? {
         homeCourseId: result.homeCourseId,
         matchScore: result.matchScore,
+        contentScore: result.contentScore,
+        eligibility: result.eligibility,
         reasoning: result.reasoning,
         matchedBy: result.matchedBy,
         candidates: result.candidates,
