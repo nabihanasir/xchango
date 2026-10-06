@@ -1,5 +1,5 @@
 import {
-  Home, School, FileText, BookOpenCheck, ListChecks, UserRoundCog, Video, GraduationCap, Stamp, Building2
+  Home, School, FileText, BookOpenCheck, UserRoundCog, Video, GraduationCap, Stamp, Building2
 } from 'lucide-react';
 import GlobalLayout from './GlobalLayout';
 import { useEffect, useState } from 'react';
@@ -25,8 +25,7 @@ const DashboardLayout = () => {
     { name: 'Your Application',        path: '/dashboard/applications', icon: FileText },
     { name: 'Documents',               path: '/dashboard/documents',    icon: FileText },
     { name: 'Online Classes',          path: '/dashboard/online-classes', icon: Video },
-    { name: 'Browse Equivalency',      path: '/dashboard/equivalency/courses', icon: BookOpenCheck },
-    { name: 'My Equivalency Requests', path: '/dashboard/equivalency/requests', icon: ListChecks },
+    { name: 'Courses',                 path: '/dashboard/courses', icon: BookOpenCheck },
     { name: 'Results',                 path: '/dashboard/results', icon: GraduationCap },
     { name: 'Visa Status',             path: '/dashboard/visa', icon: Stamp },
   ];

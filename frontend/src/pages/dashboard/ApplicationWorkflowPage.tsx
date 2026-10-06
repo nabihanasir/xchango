@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ApplicationStepper from '../../components/ApplicationStepper';
-import DocumentUpload from '../../components/DocumentUpload';
-import CourseSelection from '../../components/CourseSelection';
+import PostShortlistSteps from '../../components/PostShortlistSteps';
 import InterviewDecisionBanner from '../../components/InterviewDecisionBanner';
 import CountryStep from '../../components/steps/CountryStep';
 import UniversityStep from '../../components/steps/UniversityStep';
@@ -13,7 +12,6 @@ import ReviewStep from '../../components/steps/ReviewStep';
 import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
 import {
-  type ApplicationCourseSummary,
   countryOptions,
   getApplicationStatusLabel,
   getApplicationStatusTone,
@@ -65,10 +63,6 @@ export default function ApplicationWorkflowPage() {
   const [loading, setLoading] = useState(Boolean(id));
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [uploadingDocuments, setUploadingDocuments] = useState(false);
-  const [savingCourses, setSavingCourses] = useState(false);
-  const [availableCourses, setAvailableCourses] = useState<ApplicationCourseSummary[]>([]);
-  const [loadingAvailableCourses, setLoadingAvailableCourses] = useState(false);
   const [appliedUniversities, setAppliedUniversities] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -122,43 +116,6 @@ export default function ApplicationWorkflowPage() {
       cancelled = true;
     };
   }, [id]);
-
-  useEffect(() => {
-    if (!application || !postShortlistStatuses.some((status) => status === application.status)) {
-      setAvailableCourses([]);
-      setLoadingAvailableCourses(false);
-      return;
-    }
-
-    let cancelled = false;
-
-    const loadAvailableCourses = async () => {
-      setLoadingAvailableCourses(true);
-
-      try {
-        const courses = await applicationApi.getAvailableCourses(application._id);
-        if (!cancelled) {
-          setAvailableCourses(courses);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setErrorMessage(
-            error instanceof Error ? error.message : 'Unable to load available courses.'
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingAvailableCourses(false);
-        }
-      }
-    };
-
-    void loadAvailableCourses();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [application?._id, application?.status]);
 
   useEffect(() => {
     if (!studentId) {
@@ -309,46 +266,6 @@ export default function ApplicationWorkflowPage() {
     }
   };
 
-  const handleDocumentUpload = async (type: string, files: File[]) => {
-    if (!application) {
-      return;
-    }
-
-    setUploadingDocuments(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-
-    try {
-      const updatedApplication = await applicationApi.uploadDocuments(application._id, type, files);
-      setApplication(updatedApplication);
-      setSuccessMessage('Application documents uploaded successfully.');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to upload documents.');
-    } finally {
-      setUploadingDocuments(false);
-    }
-  };
-
-  const handleCourseSave = async (courseIds: string[]) => {
-    if (!application) {
-      return;
-    }
-
-    setSavingCourses(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-
-    try {
-      const updatedApplication = await applicationApi.selectCourses(application._id, courseIds);
-      setApplication(updatedApplication);
-      setSuccessMessage('Selected courses saved successfully.');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to save selected courses.');
-    } finally {
-      setSavingCourses(false);
-    }
-  };
-
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -482,22 +399,7 @@ export default function ApplicationWorkflowPage() {
       </section>
 
       {application && postShortlistStatuses.some((status) => status === application.status) ? (
-        <div className="grid gap-6 xl:grid-cols-2">
-          <DocumentUpload
-            documents={application.documents}
-            uploading={uploadingDocuments}
-            errorMessage={errorMessage}
-            onUpload={handleDocumentUpload}
-          />
-          <CourseSelection
-            selectedCourses={application.selectedCourses}
-            availableCourses={availableCourses}
-            loadingCourses={loadingAvailableCourses}
-            saving={savingCourses}
-            errorMessage={errorMessage}
-            onSave={handleCourseSave}
-          />
-        </div>
+        <PostShortlistSteps />
       ) : null}
     </div>
   );

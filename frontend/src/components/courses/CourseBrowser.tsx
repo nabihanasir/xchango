@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, BookOpen, CheckCircle2, LoaderCircle, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import Button from '../../components/Button';
+import Button from '../Button';
 import { useAuth } from '../../context/AuthContext';
 import { equivalencyApi } from '../../lib/api';
 import type { CourseSummary } from '../../types/equivalency';
 import { getUniversityName } from '../../utils/equivalency';
 
-export default function CourseEquivalencyBrowse() {
+interface CourseBrowserProps {
+  /** Called after a request is created so the parent can reload and lock the selection. */
+  onSubmitted: () => void | Promise<void>;
+  resubmitting?: boolean;
+}
+
+export default function CourseBrowser({ onSubmitted, resubmitting = false }: CourseBrowserProps) {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,7 +64,7 @@ export default function CourseEquivalencyBrowse() {
       setError('');
       await equivalencyApi.createStudentRequest(user.token, selectedCourseIds);
       setSelectedCourseIds([]);
-      navigate('/dashboard/equivalency/requests');
+      await onSubmitted();
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Unable to submit your request.');
     } finally {
@@ -198,7 +202,7 @@ export default function CourseEquivalencyBrowse() {
             onClick={handleSubmit}
             disabled={!selectedCourseIds.length || isSubmitting}
           >
-            {isSubmitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : 'Submit request'}
+            {isSubmitting ? <LoaderCircle className="h-5 w-5 animate-spin" /> : resubmitting ? 'Resubmit request' : 'Submit request'}
             {!isSubmitting ? <ArrowRight className="ml-2 h-5 w-5" /> : null}
           </Button>
         </aside>
