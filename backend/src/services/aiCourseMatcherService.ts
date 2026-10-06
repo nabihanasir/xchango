@@ -204,16 +204,42 @@ interface LlmProvider {
   baseUrl: string;
   apiKey: string;
   model: string;
+  /** 'ollama' providers are called through Ollama's own chat API; everything else is OpenAI-compatible. */
+  kind?: 'openai' | 'ollama';
+  timeoutMs?: number;
+  /** Extra fields sent with every request, e.g. to switch off a model's hidden "thinking". */
+  extraBody?: Record<string, unknown>;
 }
 
+/** What a prompt is for. A local model is only used for 'matching'; documents and chat go to the hosted models. */
+export type LlmTask = 'matching' | 'general';
+
 const LLM_TIMEOUT_MS = 30000;
+/** The free Gemini tier is slow under load, so it gets more time than the other hosted models. */
+const GEMINI_TIMEOUT_MS = 60000;
+/** A model on the CPU of a laptop needs minutes, not seconds. */
+const OLLAMA_DEFAULT_TIMEOUT_MS = 300000;
+const OLLAMA_DEFAULT_CONTEXT = 8192;
 
 /**
- * Providers in the order they are tried: the admin-configured model (if enabled) first, then the keys
- * from the environment - Gemini, OpenRouter, OpenAI. A provider without a key is skipped.
+ * Providers in the order they are tried. For course matching a local Ollama model (OLLAMA_MODEL) comes first
+ * when one is configured. Then the admin-configured model (if enabled), then the keys from the environment -
+ * Gemini, OpenRouter, OpenAI. A provider without a key is skipped, so a missing or stopped Ollama just falls
+ * through to the next one.
  */
-const getLlmProviders = async (): Promise<LlmProvider[]> => {
+const getLlmProviders = async (task: LlmTask): Promise<LlmProvider[]> => {
   const providers: LlmProvider[] = [];
+
+  if (task === 'matching' && process.env.OLLAMA_MODEL) {
+    providers.push({
+      name: 'ollama',
+      kind: 'ollama',
+      baseUrl: (process.env.OLLAMA_BASE_URL || 'http://localhost:11434').replace(/\/+$/, ''),
+      apiKey: '',
+      model: process.env.OLLAMA_MODEL,
+      timeoutMs: Number(process.env.OLLAMA_TIMEOUT_MS) || OLLAMA_DEFAULT_TIMEOUT_MS,
+    });
+  }
 
   const dbConfig = await getAiModelConfigRaw();
   if (dbConfig?.isEnabled && dbConfig.apiKey && dbConfig.baseUrl && dbConfig.modelName) {
@@ -221,11 +247,16 @@ const getLlmProviders = async (): Promise<LlmProvider[]> => {
   }
 
   if (process.env.GEMINI_API_KEY) {
+    const reasoningEffort = process.env.GEMINI_REASONING_EFFORT || 'none';
     providers.push({
       name: 'gemini',
       baseUrl: process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai',
       apiKey: process.env.GEMINI_API_KEY,
       model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+      timeoutMs: GEMINI_TIMEOUT_MS,
+      // Gemini 2.5 thinks before answering by default, which turned a 6 second answer into a 28 second one.
+      // Set GEMINI_REASONING_EFFORT=default to switch the thinking back on.
+      extraBody: reasoningEffort === 'default' ? undefined : { reasoning_effort: reasoningEffort },
     });
   }
 
@@ -250,18 +281,55 @@ const getLlmProviders = async (): Promise<LlmProvider[]> => {
   return providers;
 };
 
+/** Ollama's own chat API: JSON-constrained output, thinking switched off, and an explicit context window. */
+const requestJsonFromOllama = async <T>(provider: LlmProvider, prompt: string): Promise<T> => {
+  const response = await fetch(`${provider.baseUrl}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(provider.timeoutMs ?? OLLAMA_DEFAULT_TIMEOUT_MS),
+    body: JSON.stringify({
+      model: provider.model,
+      stream: false,
+      think: false,
+      format: 'json',
+      options: { temperature: 0.1, num_ctx: Number(process.env.OLLAMA_NUM_CTX) || OLLAMA_DEFAULT_CONTEXT },
+      messages: [
+        { role: 'system', content: 'Return only valid JSON.' },
+        { role: 'user', content: prompt },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`LLM request failed: ${response.status} ${await response.text()}`);
+  }
+
+  const payload = (await response.json()) as { message?: { content?: string } };
+  const rawContent = payload.message?.content;
+  if (!rawContent) {
+    throw new Error('LLM response was empty.');
+  }
+
+  return JSON.parse(extractJsonObject(rawContent)) as T;
+};
+
 const requestJsonFromProvider = async <T>(provider: LlmProvider, prompt: string): Promise<T> => {
+  if (provider.kind === 'ollama') {
+    return requestJsonFromOllama<T>(provider, prompt);
+  }
+
   const response = await fetch(`${provider.baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${provider.apiKey}`,
     },
-    signal: AbortSignal.timeout(LLM_TIMEOUT_MS),
+    signal: AbortSignal.timeout(provider.timeoutMs ?? LLM_TIMEOUT_MS),
     body: JSON.stringify({
       model: provider.model,
       temperature: 0.1,
       response_format: { type: 'json_object' },
+      ...provider.extraBody,
       messages: [
         { role: 'system', content: 'Return only valid JSON.' },
         { role: 'user', content: prompt },
@@ -287,11 +355,15 @@ const requestJsonFromProvider = async <T>(provider: LlmProvider, prompt: string)
 
 /**
  * Sends a prompt to the configured LLMs and returns the parsed JSON, or null when none is configured.
- * If one provider fails (error, timeout, rate limit, unparseable answer) the next one is tried; the last
- * error is thrown only when every provider has failed.
+ * If one provider fails (error, timeout, rate limit, unparseable answer, or an answer `accept` rejects) the
+ * next one is tried; the last error is thrown only when every provider has failed.
  */
-export const requestLlmJson = async <T>(prompt: string): Promise<T | null> => {
-  const providers = await getLlmProviders();
+export const requestLlmJson = async <T>(
+  prompt: string,
+  task: LlmTask = 'general',
+  accept?: (answer: T) => boolean
+): Promise<T | null> => {
+  const providers = await getLlmProviders(task);
   if (!providers.length) {
     return null;
   }
@@ -299,7 +371,11 @@ export const requestLlmJson = async <T>(prompt: string): Promise<T | null> => {
   let lastError: unknown;
   for (const provider of providers) {
     try {
-      return await requestJsonFromProvider<T>(provider, prompt);
+      const answer = await requestJsonFromProvider<T>(provider, prompt);
+      if (accept && !accept(answer)) {
+        throw new Error('LLM answer did not have the expected shape.');
+      }
+      return answer;
     } catch (error) {
       lastError = error;
       logger.warn(`LLM provider ${provider.name} failed, trying next provider`, {
@@ -316,7 +392,11 @@ const callConfiguredLLM = async (
   homeCourse: CourseText,
   basis: MatchBasis
 ): Promise<MatchResponse | null> => {
-  const parsed = await requestLlmJson<MatchResponse>(buildPrompt(hostCourse, homeCourse, basis));
+  const parsed = await requestLlmJson<MatchResponse>(
+    buildPrompt(hostCourse, homeCourse, basis),
+    'matching',
+    (answer) => Number.isFinite(Number(answer?.matchScore))
+  );
   return parsed ? normalizeMatch(parsed) : null;
 };
 
@@ -414,21 +494,14 @@ Return a JSON response in this exact format, with one entry per candidate:
   ]
 }`;
 
-const rankWithLlm = async (
-  hostCourse: CourseText,
-  candidates: ICourse[],
-  basis: MatchBasis
-): Promise<RankedHomeCourse[] | null> => {
-  const parsed = await requestLlmJson<{ candidates?: Array<Partial<MatchResponse> & { id?: string }> }>(
-    buildRankingPrompt(hostCourse, candidates, basis)
-  );
-  if (!parsed) {
-    return null;
-  }
+type RankingAnswer = { candidates?: Array<Partial<MatchResponse> & { id?: string }> };
 
+/** The candidates the LLM scored, matched back to the home courses by their C1, C2, ... ids. */
+const readRanking = (answer: RankingAnswer | null | undefined, candidates: ICourse[]): RankedHomeCourse[] => {
   const seen = new Set<number>();
-  const ranked = (parsed.candidates || []).flatMap((entry) => {
-    const index = Number(String(entry.id || '').replace(/\D/g, '')) - 1;
+  const entries = Array.isArray(answer?.candidates) ? answer.candidates : [];
+  return entries.flatMap((entry) => {
+    const index = Number(String(entry?.id || '').replace(/\D/g, '')) - 1;
     if (!candidates[index] || seen.has(index)) {
       return [];
     }
@@ -436,7 +509,24 @@ const rankWithLlm = async (
     seen.add(index);
     return [{ homeCourse: candidates[index], ...normalizeMatch(entry) }];
   });
+};
 
+const rankWithLlm = async (
+  hostCourse: CourseText,
+  candidates: ICourse[],
+  basis: MatchBasis
+): Promise<RankedHomeCourse[] | null> => {
+  // An answer that scores none of the candidates counts as a failure, so the next provider is tried.
+  const parsed = await requestLlmJson<RankingAnswer>(
+    buildRankingPrompt(hostCourse, candidates, basis),
+    'matching',
+    (answer) => readRanking(answer, candidates).length > 0
+  );
+  if (!parsed) {
+    return null;
+  }
+
+  const ranked = readRanking(parsed, candidates);
   if (!ranked.length) {
     throw new Error('LLM response did not score any of the candidate home courses.');
   }

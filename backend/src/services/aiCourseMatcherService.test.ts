@@ -38,6 +38,7 @@ beforeEach(() => {
   delete process.env.OPENAI_API_KEY;
   delete process.env.GEMINI_API_KEY;
   delete process.env.OPENROUTER_API_KEY;
+  delete process.env.OLLAMA_MODEL;
   mockedGetAiModelConfigRaw.mockResolvedValue({
     isEnabled: true,
     apiKey: 'key',
@@ -201,5 +202,129 @@ describe('requestLlmJson provider fallback', () => {
 
     await expect(requestLlmJson('prompt')).resolves.toBeNull();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('requestLlmJson with a local Ollama model', () => {
+  const ollamaReply = (content: unknown) => ({ ok: true, json: async () => ({ message: { content: JSON.stringify(content) } }) });
+
+  beforeEach(() => {
+    mockedGetAiModelConfigRaw.mockResolvedValue(null);
+    process.env.GEMINI_API_KEY = 'gemini-key';
+    process.env.OLLAMA_MODEL = 'gemma4:e4b-it-qat';
+  });
+
+  afterEach(() => {
+    delete process.env.OLLAMA_MODEL;
+    delete process.env.OLLAMA_BASE_URL;
+    delete process.env.OLLAMA_NUM_CTX;
+  });
+
+  it('asks Ollama first for matching, with thinking off and a context window', async () => {
+    fetchMock.mockResolvedValue(ollamaReply({ ok: true }));
+
+    await expect(requestLlmJson('prompt', 'matching')).resolves.toEqual({ ok: true });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:11434/api/chat');
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+      model: 'gemma4:e4b-it-qat',
+      think: false,
+      format: 'json',
+      stream: false,
+      options: { num_ctx: 8192 },
+    });
+  });
+
+  it('falls back to the hosted models when Ollama is not running', async () => {
+    fetchMock.mockRejectedValueOnce(new Error('fetch failed')).mockResolvedValueOnce(llmReply({ ok: true }));
+
+    await expect(requestLlmJson('prompt', 'matching')).resolves.toEqual({ ok: true });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1][0]).toContain('generativelanguage.googleapis.com');
+  });
+
+  it('does not use Ollama for documents and chat', async () => {
+    fetchMock.mockResolvedValue(llmReply({ ok: true }));
+
+    await expect(requestLlmJson('prompt')).resolves.toEqual({ ok: true });
+
+    expect(fetchMock.mock.calls[0][0]).toContain('generativelanguage.googleapis.com');
+  });
+
+  it('honours a custom base URL and context size', async () => {
+    process.env.OLLAMA_BASE_URL = 'http://gpu-box:11434/';
+    process.env.OLLAMA_NUM_CTX = '16384';
+    fetchMock.mockResolvedValue(ollamaReply({ ok: true }));
+
+    await requestLlmJson('prompt', 'matching');
+
+    expect(fetchMock.mock.calls[0][0]).toBe('http://gpu-box:11434/api/chat');
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).options.num_ctx).toBe(16384);
+  });
+});
+
+describe('answers with the wrong shape', () => {
+  beforeEach(() => {
+    mockedGetAiModelConfigRaw.mockResolvedValue(null);
+    process.env.GEMINI_API_KEY = 'gemini-key';
+    process.env.OPENROUTER_API_KEY = 'openrouter-key';
+  });
+
+  it('tries the next provider when an answer does not match the expected shape', async () => {
+    fetchMock
+      .mockResolvedValueOnce(llmReply({ unexpected: 'shape' }))
+      .mockResolvedValueOnce(llmReply({ ok: true }));
+
+    await expect(requestLlmJson('prompt', 'general', (answer: { ok?: boolean }) => answer.ok === true)).resolves.toEqual({ ok: true });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('ranks with the second provider when the first scores none of the candidates', async () => {
+    fetchMock
+      .mockResolvedValueOnce(llmReply({ matchScore: 70 }))
+      .mockResolvedValueOnce(llmReply({ candidates: [{ id: 'C1', matchScore: 88, reasoning: reasoning('good') }] }));
+
+    const ranking = await rankHomeCourseMatches(host, [dataStructures]);
+
+    expect(ranking.matchedBy).toBe(MatchSource.LLM);
+    expect(ranking.candidates[0].matchScore).toBe(88);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('Gemini request options', () => {
+  beforeEach(() => {
+    mockedGetAiModelConfigRaw.mockResolvedValue(null);
+    process.env.GEMINI_API_KEY = 'gemini-key';
+    fetchMock.mockResolvedValue(llmReply({ ok: true }));
+  });
+
+  afterEach(() => {
+    delete process.env.GEMINI_REASONING_EFFORT;
+  });
+
+  it('switches thinking off by default so answers come back in seconds', async () => {
+    await requestLlmJson('prompt');
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).reasoning_effort).toBe('none');
+  });
+
+  it('leaves thinking alone when asked to', async () => {
+    process.env.GEMINI_REASONING_EFFORT = 'default';
+
+    await requestLlmJson('prompt');
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).not.toHaveProperty('reasoning_effort');
+  });
+
+  it('does not send the thinking option to other providers', async () => {
+    delete process.env.GEMINI_API_KEY;
+    process.env.OPENAI_API_KEY = 'openai-key';
+
+    await requestLlmJson('prompt');
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).not.toHaveProperty('reasoning_effort');
   });
 });
