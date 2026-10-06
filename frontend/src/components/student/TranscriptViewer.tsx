@@ -18,7 +18,7 @@ export default function TranscriptViewer({ transcript }: TranscriptViewerProps) 
   if (!transcript || transcript.semesters.length === 0) {
     return (
       <section className="glass-card rounded-[2rem] p-7 md:p-8">
-        <h2 className="text-2xl font-black text-slate-900">Transcript Viewer</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Transcript Viewer</h2>
         <p className="mt-3 text-sm text-slate-500">
           Upload a transcript to see semester-wise courses, SGPA, total credits, and CGPA.
         </p>
@@ -30,23 +30,23 @@ export default function TranscriptViewer({ transcript }: TranscriptViewerProps) 
     <section className="glass-card rounded-[2rem] p-7 md:p-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">Parsed Transcript</p>
-          <h2 className="mt-2 text-2xl font-black text-slate-900">Semester-Wise Academic Record</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Parsed Transcript</p>
+          <h2 className="mt-2 text-2xl font-bold text-slate-900">Semester-Wise Academic Record</h2>
         </div>
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         <div className={metricCardClassName}>
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">CGPA</p>
-          <p className="mt-3 text-4xl font-black text-dark-blue">{transcript.cgpa.toFixed(2)}</p>
+          <p className="mt-3 text-4xl font-bold text-dark-blue">{transcript.cgpa.toFixed(2)}</p>
         </div>
         <div className={metricCardClassName}>
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Total Credits</p>
-          <p className="mt-3 text-4xl font-black text-slate-900">{transcript.totalCredits}</p>
+          <p className="mt-3 text-4xl font-bold text-slate-900">{transcript.totalCredits}</p>
         </div>
         <div className={metricCardClassName}>
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Semesters Parsed</p>
-          <p className="mt-3 text-4xl font-black text-slate-900">{transcript.semesters.length}</p>
+          <p className="mt-3 text-4xl font-bold text-slate-900">{transcript.semesters.length}</p>
         </div>
       </div>
 
@@ -66,13 +66,13 @@ export default function TranscriptViewer({ transcript }: TranscriptViewerProps) 
                     <GraduationCap className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-slate-900">Semester {semester.semester}</p>
+                    <p className="text-lg font-bold text-slate-900">Semester {semester.semester}</p>
                     <p className="mt-1 text-sm text-slate-500">{semester.courses.length} course(s) parsed</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="rounded-2xl bg-accent-yellow/20 px-4 py-2 text-sm font-black text-dark-blue">
+                  <div className="rounded-2xl bg-accent-yellow/20 px-4 py-2 text-sm font-bold text-dark-blue">
                     <span className="mr-2 inline-flex align-middle">
                       <Sigma className="h-4 w-4" />
                     </span>
@@ -90,16 +90,16 @@ export default function TranscriptViewer({ transcript }: TranscriptViewerProps) 
                     <table className="min-w-full text-left">
                       <thead className="bg-slate-50">
                         <tr>
-                          <th className="px-5 py-3 text-xs font-black uppercase tracking-[0.25em] text-slate-600">
+                          <th className="px-5 py-3 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                             Course
                           </th>
-                          <th className="px-5 py-3 text-xs font-black uppercase tracking-[0.25em] text-slate-600">
+                          <th className="px-5 py-3 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                             Grade
                           </th>
-                          <th className="px-5 py-3 text-xs font-black uppercase tracking-[0.25em] text-slate-600">
+                          <th className="px-5 py-3 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                             Credit Hours
                           </th>
-                          <th className="px-5 py-3 text-xs font-black uppercase tracking-[0.25em] text-slate-600">
+                          <th className="px-5 py-3 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                             Grade Points
                           </th>
                         </tr>

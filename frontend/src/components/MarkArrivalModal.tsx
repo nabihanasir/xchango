@@ -74,7 +74,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
               <PlaneLanding className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-maroon">Mark student arrived</h2>
+              <h2 className="text-xl font-bold text-maroon">Mark student arrived</h2>
               <p className="text-sm font-medium text-body-text">
                 {student?.name || 'Student'} · {application.university}
               </p>
@@ -95,7 +95,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
             <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
               <div className="text-sm font-medium">
-                <p className="font-black">Arrival recorded.</p>
+                <p className="font-bold">Arrival recorded.</p>
                 <p className="mt-1">
                   {result.notices.length === 0
                     ? 'No instructors with an email address were found for this student’s courses.'
@@ -119,7 +119,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
                         <Mail className="h-4 w-4 shrink-0" />
                         <span className="truncate">{notice.name || notice.email}</span>
                       </span>
-                      <span className={`text-xs font-black ${notice.sent ? 'text-emerald-700' : 'text-red-600'}`}>
+                      <span className={`text-xs font-bold ${notice.sent ? 'text-emerald-700' : 'text-red-600'}`}>
                         {notice.sent ? 'Sent' : 'Not sent'}
                       </span>
                     </div>
@@ -156,7 +156,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
             </p>
 
             <div>
-              <label className="mb-2 block text-xs font-black uppercase tracking-widest text-maroon/60">Arrival date</label>
+              <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">Arrival date</label>
               <input
                 type="date"
                 value={arrivedAt}
@@ -168,7 +168,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-black uppercase tracking-widest text-maroon/60">
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-maroon/60">
                 Home courses taken online (optional)
               </p>
               {loadingCourses ? (

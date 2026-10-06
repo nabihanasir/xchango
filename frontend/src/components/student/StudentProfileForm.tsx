@@ -84,8 +84,8 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
     <section className="glass-card rounded-[2rem] p-7 md:p-8">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">Student Profile</p>
-          <h2 className="mt-2 text-2xl font-black text-slate-900">Basic Info and Preferences</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Student Profile</p>
+          <h2 className="mt-2 text-2xl font-bold text-slate-900">Basic Info and Preferences</h2>
           <p className="mt-2 text-sm text-slate-500">
             Keep your profile current so transcript review and outbound placement stay aligned.
           </p>

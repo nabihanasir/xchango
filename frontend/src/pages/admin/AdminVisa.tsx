@@ -118,7 +118,7 @@ export default function AdminVisa() {
     <div className="space-y-6 animate-fade-in">
       <div className="glass-card flex items-center justify-between rounded-[2rem] border-b border-light-color/50 bg-white p-6 pb-6 md:p-8">
         <div>
-          <h2 className="mb-2 text-3xl font-black text-maroon">Visa Process</h2>
+          <h2 className="mb-2 text-3xl font-bold text-maroon">Visa Process</h2>
           <p className="mt-1 font-medium text-body-text md:text-lg">
             Update each student&apos;s visa status. They see it on their own dashboard and are notified of changes.
           </p>

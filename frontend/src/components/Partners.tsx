@@ -63,11 +63,11 @@ export default function Partners() {
                 <div className="relative flex flex-1 flex-col">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.28em] text-slate-600">{partner.flag}</p>
-                      <h3 className="mt-3 text-2xl font-black text-dark-blue">{partner.name}</h3>
+                      <p className="text-xs font-bold uppercase tracking-[0.28em] text-slate-600">{partner.flag}</p>
+                      <h3 className="mt-3 text-2xl font-bold text-dark-blue">{partner.name}</h3>
                       <p className="mt-2 text-sm font-semibold text-yellow-default">{partner.country}</p>
                     </div>
-                    <div className="rounded-2xl bg-slate-100 px-3 py-2 text-xs font-black uppercase tracking-[0.2em] text-dark-blue">
+                    <div className="rounded-2xl bg-slate-100 px-3 py-2 text-xs font-bold uppercase tracking-[0.2em] text-dark-blue">
                       {partner.programs.length} Program{partner.programs.length > 1 ? 's' : ''}
                     </div>
                   </div>
@@ -75,7 +75,7 @@ export default function Partners() {
                   <p className="mt-5 text-sm leading-7 text-slate-600">{partner.description}</p>
 
                   <div className="mt-6">
-                    <p className="text-xs font-black uppercase tracking-[0.28em] text-black">Programs</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.28em] text-black">Programs</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {partner.programs.map((program) => (
                         <span
@@ -95,7 +95,7 @@ export default function Partners() {
                       className="flex w-full items-center justify-between text-left"
                     >
                       <div>
-                        <p className="text-sm font-black text-dark-blue">Featured Courses</p>
+                        <p className="text-sm font-bold text-dark-blue">Featured Courses</p>
                         <p className="mt-1 text-xs font-medium text-slate-500">Tap to expand or collapse the course list</p>
                       </div>
                       <ChevronDown className={`h-5 w-5 text-dark-blue transition ${expanded ? 'rotate-180' : ''}`} />
@@ -141,8 +141,8 @@ export default function Partners() {
           <div className="w-full max-w-2xl rounded-[2rem] bg-white p-6 shadow-2xl shadow-slate-950/20 sm:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.3em] text-yellow-default">{selectedPartner.country}</p>
-                <h3 className="mt-3 text-3xl font-black text-dark-blue">{selectedPartner.name}</h3>
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-yellow-default">{selectedPartner.country}</p>
+                <h3 className="mt-3 text-3xl font-bold text-dark-blue">{selectedPartner.name}</h3>
                 <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600">{selectedPartner.description}</p>
               </div>
               <button
@@ -157,7 +157,7 @@ export default function Partners() {
 
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               <div className="rounded-[1.75rem] bg-slate-50 p-5">
-                <p className="text-sm font-black uppercase tracking-[0.28em] text-slate-600">Programs</p>
+                <p className="text-sm font-bold uppercase tracking-[0.28em] text-slate-600">Programs</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {selectedPartner.programs.map((program) => (
                     <span key={program} className="rounded-full bg-dark-blue px-3 py-2 text-xs font-bold text-white">
@@ -168,7 +168,7 @@ export default function Partners() {
               </div>
 
               <div className="rounded-[1.75rem] bg-slate-50 p-5">
-                <p className="text-sm font-black uppercase tracking-[0.28em] text-slate-600">Courses</p>
+                <p className="text-sm font-bold uppercase tracking-[0.28em] text-slate-600">Courses</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {selectedPartner.courses.map((course) => (
                     <span key={course} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">

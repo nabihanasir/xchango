@@ -107,10 +107,10 @@ export default function StudentDocuments() {
       <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#081028] via-[#102b52] to-[#19648b] p-8 text-white shadow-2xl shadow-sky-950/10 md:p-10">
         <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-cyan-300/15 blur-[80px]" />
         <div className="relative z-10 max-w-4xl">
-          <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">
+          <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">
             Student Documents
           </p>
-          <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
+          <h1 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
             Submit and manage your supporting documents
           </h1>
           <p className="mt-4 max-w-2xl text-base text-slate-200 md:text-lg">
@@ -121,8 +121,8 @@ export default function StudentDocuments() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="glass-card rounded-[2rem] p-6">
-          <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-600">Uploaded Files</p>
-          <p className="mt-3 text-4xl font-black text-dark-blue">{documents.length}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-600">Uploaded Files</p>
+          <p className="mt-3 text-4xl font-bold text-dark-blue">{documents.length}</p>
         </div>
         <div className="glass-card rounded-[2rem] p-6">
           <div className="inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
@@ -141,8 +141,8 @@ export default function StudentDocuments() {
       <section className="glass-card rounded-[2rem] p-7 md:p-8">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">Upload Documents</p>
-            <h2 className="mt-2 text-2xl font-black text-slate-900">Submit supporting files</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Upload Documents</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900">Submit supporting files</h2>
             <p className="mt-2 text-sm text-slate-500">
               Choose a document type and upload the matching file. Uploaded files are stored securely and listed below.
             </p>

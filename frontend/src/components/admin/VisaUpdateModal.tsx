@@ -58,8 +58,8 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-accent-yellow">Visa process</p>
-            <h3 id="visa-modal-title" className="mt-2 text-2xl font-black text-maroon">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">Visa process</p>
+            <h3 id="visa-modal-title" className="mt-2 text-2xl font-bold text-maroon">
               {row.student.name}
             </h3>
             <p className="mt-1 text-sm font-medium text-slate-500">

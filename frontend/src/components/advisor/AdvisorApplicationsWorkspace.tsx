@@ -34,8 +34,8 @@ import type { StudentDocument } from '../../types/document';
 
 const SummaryCard = ({ title, value }: { title: string; value: string }) => (
   <div className="glass-card rounded-[2rem] p-6">
-    <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-600">{title}</p>
-    <p className="mt-3 text-4xl font-black text-emerald-700">{value}</p>
+    <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-600">{title}</p>
+    <p className="mt-3 text-4xl font-bold text-emerald-700">{value}</p>
   </div>
 );
 
@@ -415,10 +415,10 @@ export default function AdvisorApplicationsWorkspace({
           <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-emerald-300/15 blur-3xl" />
           <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-1/4 translate-y-1/4 rounded-full bg-accent-yellow/20 blur-3xl" />
           <div className="relative z-10 max-w-4xl">
-            <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-black uppercase tracking-[0.35em] text-accent-yellow">
+            <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">
               Advisor Review Queue
             </p>
-            <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
+            <h1 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
               Review assigned applications and AI-assisted course recommendations.
             </h1>
             <p className="mt-4 max-w-2xl text-base text-slate-200 md:text-lg">
@@ -442,7 +442,7 @@ export default function AdvisorApplicationsWorkspace({
 
       <section className="glass-card overflow-hidden rounded-[2rem]">
         <div className="border-b border-slate-200/80 px-6 py-6">
-          <h2 className="text-2xl font-black text-slate-900">Assigned Applications</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Assigned Applications</h2>
           <p className="mt-1 text-sm font-medium text-slate-500">
             Review application status first, then use AI suggestions as decision support for course approvals.
           </p>
@@ -463,11 +463,11 @@ export default function AdvisorApplicationsWorkspace({
             <table className="min-w-full divide-y divide-slate-200 text-left">
               <thead className="bg-slate-50/80">
                 <tr>
-                  <th className="px-6 py-4 text-xs font-black uppercase tracking-[0.25em] text-slate-500">Student</th>
-                  <th className="px-6 py-4 text-xs font-black uppercase tracking-[0.25em] text-slate-500">Country</th>
-                  <th className="px-6 py-4 text-xs font-black uppercase tracking-[0.25em] text-slate-500">University</th>
-                  <th className="px-6 py-4 text-xs font-black uppercase tracking-[0.25em] text-slate-500">Status</th>
-                  <th className="px-6 py-4 text-xs font-black uppercase tracking-[0.25em] text-slate-500">Actions</th>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Student</th>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Country</th>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">University</th>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Status</th>
+                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
@@ -494,7 +494,7 @@ export default function AdvisorApplicationsWorkspace({
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${getApplicationStatusTone(application)}`}
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${getApplicationStatusTone(application)}`}
                         >
                           {getApplicationStatusLabel(application)}
                         </span>
@@ -504,7 +504,7 @@ export default function AdvisorApplicationsWorkspace({
                           <button
                             type="button"
                             onClick={() => handleOpen(application._id, 'application')}
-                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-700 transition hover:border-emerald-700 hover:text-emerald-700"
+                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-700 transition hover:border-emerald-700 hover:text-emerald-700"
                           >
                             <Eye className="h-3.5 w-3.5" />
                             <span>View Application</span>
@@ -512,7 +512,7 @@ export default function AdvisorApplicationsWorkspace({
                           <button
                             type="button"
                             onClick={() => handleOpen(application._id, 'student')}
-                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-700 transition hover:border-emerald-700 hover:text-emerald-700"
+                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-700 transition hover:border-emerald-700 hover:text-emerald-700"
                           >
                             <UserRound className="h-3.5 w-3.5" />
                             <span>View Student Profile</span>
@@ -543,7 +543,7 @@ export default function AdvisorApplicationsWorkspace({
       <section ref={applicationRef} className="glass-card rounded-[2rem] p-6 lg:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-black text-slate-900">Application Details</h2>
+            <h2 className="text-2xl font-bold text-slate-900">Application Details</h2>
             <p className="mt-1 text-sm font-medium text-slate-500">
               Review assigned students, schedule interviews, and record a recommendation after each interview.
             </p>
@@ -553,7 +553,7 @@ export default function AdvisorApplicationsWorkspace({
               type="button"
               onClick={() => void handleGenerateSuggestions()}
               disabled={generatingSuggestions}
-              className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Sparkles className="h-4 w-4" />
               <span>{generatingSuggestions ? 'Generating...' : 'Generate AI Suggestions'}</span>
@@ -567,10 +567,10 @@ export default function AdvisorApplicationsWorkspace({
             <div className="grid gap-4 lg:grid-cols-2">
               <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">
+                  <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
                     Application summary
                   </p>
-                  <h3 className="mt-3 text-2xl font-black text-slate-900">{selectedApplication.university}</h3>
+                  <h3 className="mt-3 text-2xl font-bold text-slate-900">{selectedApplication.university}</h3>
                   <p className="mt-1 text-sm font-medium text-slate-500">{selectedApplication.program}</p>
                 </div>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Country:</span> {selectedApplication.country}</p>
@@ -582,7 +582,7 @@ export default function AdvisorApplicationsWorkspace({
               </div>
 
               <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
-                <div className="inline-flex rounded-full bg-emerald-700 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white">
+                <div className="inline-flex rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
                   {getApplicationStatusLabel(selectedApplication)}
                 </div>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Student:</span> {selectedStudent?.name || 'Student record'}</p>
@@ -593,7 +593,7 @@ export default function AdvisorApplicationsWorkspace({
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview date:</span> {selectedApplication.interviewDate ? new Date(selectedApplication.interviewDate).toLocaleDateString() : selectedApplication.interview ? new Date(selectedApplication.interview.date).toLocaleDateString() : 'Not scheduled'}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview location:</span> {selectedApplication.interview?.location || 'Not scheduled'}</p>
                 <div className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
                     Interview Scheduler
                   </p>
                   <div className="grid gap-3 md:grid-cols-2">
@@ -635,7 +635,7 @@ export default function AdvisorApplicationsWorkspace({
                         schedulingInterview ||
                         !['ASSIGNED', 'INTERVIEW_SCHEDULED'].includes(selectedApplication.status)
                       }
-                      className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <span>{schedulingInterview ? 'Saving...' : 'Schedule Interview'}</span>
                     </button>
@@ -645,7 +645,7 @@ export default function AdvisorApplicationsWorkspace({
                       disabled={
                         completingInterview || selectedApplication.status !== 'INTERVIEW_SCHEDULED'
                       }
-                      className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Check className="h-4 w-4" />
                       <span>
@@ -657,7 +657,7 @@ export default function AdvisorApplicationsWorkspace({
 
                 {isAwaitingAdvisorDecision(selectedApplication) ? (
                   <div className="space-y-3 rounded-[1.5rem] border border-amber-200 bg-amber-50/70 p-4">
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-700">
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">
                       Interview Decision
                     </p>
                     <p className="text-sm text-slate-600">
@@ -680,7 +680,7 @@ export default function AdvisorApplicationsWorkspace({
                         type="button"
                         onClick={() => void handleInterviewDecision(true)}
                         disabled={Boolean(submittingDecision)}
-                        className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <Check className="h-4 w-4" />
                         <span>{submittingDecision === 'recommend' ? 'Saving...' : 'Recommend'}</span>
@@ -689,7 +689,7 @@ export default function AdvisorApplicationsWorkspace({
                         type="button"
                         onClick={() => void handleInterviewDecision(false)}
                         disabled={Boolean(submittingDecision)}
-                        className="inline-flex items-center gap-2 rounded-full border border-rose-300 bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center gap-2 rounded-full border border-rose-300 bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <X className="h-4 w-4" />
                         <span>{submittingDecision === 'not-recommend' ? 'Saving...' : 'Not Recommend'}</span>
@@ -707,7 +707,7 @@ export default function AdvisorApplicationsWorkspace({
                     }`}
                   >
                     <p
-                      className={`text-xs font-black uppercase tracking-[0.2em] ${
+                      className={`text-xs font-bold uppercase tracking-[0.2em] ${
                         selectedApplication.interviewDecision.recommended ? 'text-emerald-700' : 'text-rose-700'
                       }`}
                     >
@@ -726,7 +726,7 @@ export default function AdvisorApplicationsWorkspace({
 
                 {selectedApplication.arrival?.arrivedAt ? (
                   <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/70 p-4">
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700">Arrived at host university</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">Arrived at host university</p>
                     <p className="mt-2 text-sm text-slate-700">
                       {new Date(selectedApplication.arrival.arrivedAt).toLocaleDateString()} ·{' '}
                       {selectedApplication.arrival.notices.filter((notice) => notice.sent).length} instructor email(s) sent
@@ -748,7 +748,7 @@ export default function AdvisorApplicationsWorkspace({
             <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50/70 p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">AI Recommendation Panel</h3>
+                  <h3 className="text-xl font-bold text-slate-900">AI Recommendation Panel</h3>
                   <p className="mt-2 max-w-3xl text-sm text-slate-600">
                     The AI scores available courses against the student profile and explains why. It does not approve anything.
                   </p>
@@ -770,21 +770,21 @@ export default function AdvisorApplicationsWorkspace({
                       <article key={recommendation._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
-                            <p className="font-black text-slate-900">
+                            <p className="font-bold text-slate-900">
                               {getApplicationCourseLabel(recommendation.course)}
                             </p>
                             <p className="mt-1 text-sm text-slate-500">
                               {getApplicationCourseUniversity(recommendation.course) || 'University not linked'}
                             </p>
                           </div>
-                          <span className="rounded-full bg-emerald-700 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white">
+                          <span className="rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
                             {recommendation.matchScore}% match
                           </span>
                         </div>
                         <p className="mt-4 text-sm leading-6 text-slate-600">{recommendation.reason}</p>
                         <div className="mt-4">
                           <span
-                            className={`inline-flex rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] ${
+                            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] ${
                               isSelectedByStudent
                                 ? 'bg-emerald-100 text-emerald-700'
                                 : 'bg-amber-100 text-amber-700'
@@ -805,7 +805,7 @@ export default function AdvisorApplicationsWorkspace({
             </div>
             <div className="grid gap-6 xl:grid-cols-2">
               <section className="rounded-[1.75rem] border border-slate-200 p-6">
-                <h3 className="text-xl font-black text-slate-900">Student Selected Courses</h3>
+                <h3 className="text-xl font-bold text-slate-900">Student Selected Courses</h3>
                 <p className="mt-2 text-sm text-slate-500">
                   Approve or reject each selected course after comparing it with AI suggestions.
                 </p>
@@ -821,7 +821,7 @@ export default function AdvisorApplicationsWorkspace({
                         <article key={selectedCourse._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-5">
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                              <p className="font-black text-slate-900">
+                              <p className="font-bold text-slate-900">
                                 {getApplicationCourseLabel(selectedCourse.course)}
                               </p>
                               <p className="mt-1 text-sm text-slate-500">
@@ -830,12 +830,12 @@ export default function AdvisorApplicationsWorkspace({
                             </div>
                             <div className="flex flex-wrap gap-2">
                               <span
-                                className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${selectedCourseTone[selectedCourse.status]}`}
+                                className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${selectedCourseTone[selectedCourse.status]}`}
                               >
                                 {selectedCourse.status}
                               </span>
                               <span
-                                className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
+                                className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${
                                   isAiRecommended
                                     ? 'bg-emerald-100 text-emerald-700'
                                     : 'bg-amber-100 text-amber-700'
@@ -864,7 +864,7 @@ export default function AdvisorApplicationsWorkspace({
                               type="button"
                               onClick={() => void handleCourseDecision(courseId, 'approved')}
                               disabled={activeCourseDecision.length > 0}
-                              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               <Check className="h-3.5 w-3.5" />
                               <span>
@@ -877,7 +877,7 @@ export default function AdvisorApplicationsWorkspace({
                               type="button"
                               onClick={() => void handleCourseDecision(courseId, 'rejected')}
                               disabled={activeCourseDecision.length > 0}
-                              className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-3 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               <X className="h-3.5 w-3.5" />
                               <span>
@@ -899,7 +899,7 @@ export default function AdvisorApplicationsWorkspace({
               </section>
 
               <section className="rounded-[1.75rem] border border-slate-200 p-6">
-                <h3 className="text-xl font-black text-slate-900">Comparison View</h3>
+                <h3 className="text-xl font-bold text-slate-900">Comparison View</h3>
                 <p className="mt-2 text-sm text-slate-500">
                   Compare student-selected courses with AI-suggested courses before recording a decision.
                 </p>
@@ -916,21 +916,21 @@ export default function AdvisorApplicationsWorkspace({
                         <article key={recommendation._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                              <p className="font-black text-slate-900">
+                              <p className="font-bold text-slate-900">
                                 {getApplicationCourseLabel(recommendation.course)}
                               </p>
                               <p className="mt-1 text-sm text-slate-500">
                                 {getApplicationCourseUniversity(recommendation.course) || 'University not linked'}
                               </p>
                             </div>
-                            <span className="rounded-full bg-emerald-700 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white">
+                            <span className="rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
                               {recommendation.matchScore}%
                             </span>
                           </div>
                           <p className="mt-4 text-sm text-slate-600">{recommendation.reason}</p>
                           <div className="mt-4 flex flex-wrap gap-2">
                             <span
-                              className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${
+                              className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${
                                 selectedMatch
                                   ? 'bg-emerald-100 text-emerald-700'
                                   : 'bg-slate-100 text-slate-700'
@@ -940,7 +940,7 @@ export default function AdvisorApplicationsWorkspace({
                             </span>
                             {selectedMatch ? (
                               <span
-                                className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${selectedCourseTone[selectedMatch.status]}`}
+                                className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${selectedCourseTone[selectedMatch.status]}`}
                               >
                                 Advisor status: {selectedMatch.status}
                               </span>
@@ -966,7 +966,7 @@ export default function AdvisorApplicationsWorkspace({
       </section>
 
       <section ref={studentRef} className="glass-card rounded-[2rem] p-6 lg:p-8">
-        <h2 className="text-2xl font-black text-slate-900">Student Profile View</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Student Profile View</h2>
         <p className="mt-1 text-sm font-medium text-slate-500">
           Loaded only for the student linked to the selected assigned application.
         </p>
@@ -976,7 +976,7 @@ export default function AdvisorApplicationsWorkspace({
         ) : studentProfile ? (
           <div className="mt-6 grid gap-4 xl:grid-cols-2">
             <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
-              <h3 className="flex items-center gap-2 text-lg font-black text-slate-900">
+              <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
                 <GraduationCap className="h-5 w-5 text-emerald-600" />
                 <span>Basic and academic profile</span>
               </h3>
@@ -991,7 +991,7 @@ export default function AdvisorApplicationsWorkspace({
             </div>
 
             <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
-              <h3 className="flex items-center gap-2 text-lg font-black text-slate-900">
+              <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
                 <FileText className="h-5 w-5 text-amber-600" />
                 <span>Supporting files</span>
               </h3>

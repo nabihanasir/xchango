@@ -17,7 +17,7 @@ export default function Faq() {
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-dark-blue/5 text-dark-blue">
                 <HelpCircle className="h-5 w-5" />
               </span>
-              <h3 className="mt-5 text-base font-black text-dark-blue">{question}</h3>
+              <h3 className="mt-5 text-base font-bold text-dark-blue">{question}</h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">{answer}</p>
             </article>
           ))}

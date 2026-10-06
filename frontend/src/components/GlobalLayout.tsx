@@ -54,17 +54,17 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
           <Link to={navItems[0]?.path || '/'} className="flex items-center gap-4 overflow-hidden group">
             {!collapsed && (
               <div className="flex flex-col animate-fade-in py-2">
-                <span className="text-white font-black text-2xl tracking-tight leading-tight">
+                <span className="text-white font-bold text-2xl tracking-tight leading-tight">
                   Xchango
                 </span>
-                <span className={`${theme.panelLabel} text-[11px] uppercase font-bold tracking-widest mt-1`}>
+                <span className={`${theme.panelLabel} text-xs uppercase font-bold tracking-widest mt-1`}>
                   {panelName}
                 </span>
               </div>
             )}
             {collapsed && (
               <div className="flex items-center justify-center w-full">
-                <span className="text-white font-black text-2xl tracking-tight">X</span>
+                <span className="text-white font-bold text-2xl tracking-tight">X</span>
               </div>
             )}
           </Link>
@@ -94,7 +94,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
                 <Icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-300 ${isActive ? `scale-110 ${theme.navActiveIconGlow}` : 'group-hover:scale-110'}`} />
                 
                 {!collapsed && (
-                  <span className={`font-semibold text-[15px] ${isActive ? 'text-white' : ''}`}>
+                  <span className={`font-semibold text-base ${isActive ? 'text-white' : ''}`}>
                     {item.name}
                   </span>
                 )}
@@ -142,8 +142,8 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
         <div className="h-28 flex items-center justify-between px-8 border-b border-white/10">
            <Link to={navItems[0]?.path || '/'} className="flex items-center gap-4">
             <div className="flex flex-col">
-              <span className="text-white font-black text-xl tracking-tight leading-tight">Xchango</span>
-              <span className={`${theme.panelLabel} text-[10px] uppercase font-bold tracking-widest`}>{panelName}</span>
+              <span className="text-white font-bold text-xl tracking-tight leading-tight">Xchango</span>
+              <span className={`${theme.panelLabel} text-xs uppercase font-bold tracking-widest`}>{panelName}</span>
             </div>
           </Link>
           <button onClick={() => setIsMobileMenuOpen(false)} className="text-white/50 hover:text-white p-2 bg-white/5 rounded-xl transition-colors">
@@ -201,12 +201,12 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
             <div className="h-8 w-px bg-slate-200 hidden sm:block" />
             
             <div className="flex items-center gap-3 bg-white border border-slate-100 py-1.5 pl-1.5 pr-5 rounded-full shadow-sm hover:shadow-soft transition-all cursor-pointer select-none group">
-              <div className={`bg-gradient-to-br ${theme.avatar} h-11 w-11 rounded-full flex items-center justify-center font-bold text-white text-[13px] ring-2 ring-white shadow-md group-hover:scale-105 transition-transform`}>
+              <div className={`bg-gradient-to-br ${theme.avatar} h-11 w-11 rounded-full flex items-center justify-center font-bold text-white text-base ring-2 ring-white shadow-md group-hover:scale-105 transition-transform`}>
                 {userProfile.initials}
               </div>
               <div className="hidden sm:block">
-                <p className={`text-[14px] font-bold text-slate-800 leading-none ${theme.groupHoverText} transition-colors`}>{userProfile.name}</p>
-                <p className={`text-[11px] font-bold ${theme.roleCaption} uppercase tracking-widest mt-1.5 leading-none`}>{userProfile.role}</p>
+                <p className={`text-base font-bold text-slate-800 leading-none ${theme.groupHoverText} transition-colors`}>{userProfile.name}</p>
+                <p className={`text-xs font-bold ${theme.roleCaption} uppercase tracking-widest mt-1.5 leading-none`}>{userProfile.role}</p>
               </div>
             </div>
           </div>

@@ -12,7 +12,7 @@ export default function DetailsStep({ draft, onChange }: DetailsStepProps) {
   return (
     <div className="space-y-6">
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6">
-        <h3 className="text-lg font-black text-slate-900">Section A: Travel</h3>
+        <h3 className="text-lg font-bold text-slate-900">Section A: Travel</h3>
         <div className="mt-4 space-y-4">
           <label className="flex items-center gap-3 text-sm text-slate-700">
             <input
@@ -46,7 +46,7 @@ export default function DetailsStep({ draft, onChange }: DetailsStepProps) {
       </section>
 
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6">
-        <h3 className="text-lg font-black text-slate-900">Section B: Eligibility</h3>
+        <h3 className="text-lg font-bold text-slate-900">Section B: Eligibility</h3>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-4 text-sm text-slate-700">
             <input
@@ -68,7 +68,7 @@ export default function DetailsStep({ draft, onChange }: DetailsStepProps) {
       </section>
 
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6">
-        <h3 className="text-lg font-black text-slate-900">Section C: Health</h3>
+        <h3 className="text-lg font-bold text-slate-900">Section C: Health</h3>
         <div className="mt-4 space-y-4">
           <label className="flex items-center gap-3 text-sm text-slate-700">
             <input
@@ -102,10 +102,10 @@ export default function DetailsStep({ draft, onChange }: DetailsStepProps) {
       </section>
 
       <section className="rounded-[2rem] border border-slate-200 bg-white p-6">
-        <h3 className="text-lg font-black text-slate-900">Section D: Logistics</h3>
+        <h3 className="text-lg font-bold text-slate-900">Section D: Logistics</h3>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
               Registration Number
             </span>
             <input
@@ -117,7 +117,7 @@ export default function DetailsStep({ draft, onChange }: DetailsStepProps) {
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs font-black uppercase tracking-[0.25em] text-slate-600">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
               Accommodation Preference
             </span>
             <select

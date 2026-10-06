@@ -71,7 +71,7 @@ export default function CourseEquivalencyBrowse() {
   if (!user) {
     return (
       <div className="glass-card rounded-[2rem] p-8">
-        <h2 className="text-2xl font-black text-slate-800">Sign in to request course equivalency</h2>
+        <h2 className="text-2xl font-bold text-slate-800">Sign in to request course equivalency</h2>
       </div>
     );
   }
@@ -82,23 +82,23 @@ export default function CourseEquivalencyBrowse() {
         <div className="absolute inset-y-0 right-0 w-72 bg-accent-yellow/10 blur-[90px]" />
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.3em] text-accent-yellow">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">
               <Sparkles className="h-4 w-4" />
               AI-Assisted Equivalency
             </div>
-            <h1 className="text-3xl font-black tracking-tight md:text-5xl">Browse host courses and build your request</h1>
+            <h1 className="text-3xl font-bold tracking-tight md:text-5xl">Browse host courses and build your request</h1>
             <p className="max-w-xl text-sm font-medium leading-7 text-slate-300 md:text-base">
               Select the host-university courses you want evaluated for home-university credit. Your advisor will review each pairing and run the AI match manually before deciding.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400">Available</p>
-              <p className="mt-2 text-3xl font-black">{courses.length}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Available</p>
+              <p className="mt-2 text-3xl font-bold">{courses.length}</p>
             </div>
             <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400">Selected</p>
-              <p className="mt-2 text-3xl font-black">{selectedCourseIds.length}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Selected</p>
+              <p className="mt-2 text-3xl font-bold">{selectedCourseIds.length}</p>
             </div>
           </div>
         </div>
@@ -113,7 +113,7 @@ export default function CourseEquivalencyBrowse() {
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="space-y-5">
           <div>
-            <h2 className="text-2xl font-black text-slate-800">Host University Courses</h2>
+            <h2 className="text-2xl font-bold text-slate-800">Host University Courses</h2>
             <p className="mt-1 text-sm font-medium text-slate-500">Review outlines, credit hours, and descriptions before selecting.</p>
           </div>
 
@@ -139,8 +139,8 @@ export default function CourseEquivalencyBrowse() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-accent-yellow">{course.code}</p>
-                        <h3 className="mt-2 text-xl font-black text-slate-800">{course.name}</h3>
+                        <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">{course.code}</p>
+                        <h3 className="mt-2 text-xl font-bold text-slate-800">{course.name}</h3>
                       </div>
                       {isSelected ? (
                         <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
@@ -153,7 +153,7 @@ export default function CourseEquivalencyBrowse() {
                       )}
                     </div>
 
-                    <div className="mt-5 flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">
+                    <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
                       <span className="rounded-full bg-slate-100 px-3 py-2">{course.creditHours} credit hours</span>
                       <span className="rounded-full bg-slate-100 px-3 py-2">{getUniversityName(course.universityId)}</span>
                     </div>
@@ -169,8 +169,8 @@ export default function CourseEquivalencyBrowse() {
         </section>
 
         <aside className="glass-card h-fit rounded-[2rem] p-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-accent-yellow">Request Preview</p>
-          <h2 className="mt-3 text-2xl font-black text-slate-800">Selected courses</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">Request Preview</p>
+          <h2 className="mt-3 text-2xl font-bold text-slate-800">Selected courses</h2>
           <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
             Your advisor will receive the selected host courses together with suggested home-course equivalents.
           </p>
@@ -179,8 +179,8 @@ export default function CourseEquivalencyBrowse() {
             {selectedCourses.length ? (
               selectedCourses.map((course) => (
                 <div key={course._id} className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">{course.code}</p>
-                  <h3 className="mt-2 text-base font-black text-slate-800">{course.name}</h3>
+                  <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">{course.code}</p>
+                  <h3 className="mt-2 text-base font-bold text-slate-800">{course.name}</h3>
                   <p className="mt-2 text-sm font-medium text-slate-500">{course.creditHours} credit hours</p>
                 </div>
               ))

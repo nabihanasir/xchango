@@ -16,7 +16,7 @@ export default function ErrorAlert({ error, titleOverride }: ErrorAlertProps) {
           <AlertTriangle className="h-5 w-5" />
         </div>
         <div className="flex-1">
-          <p className="text-lg font-black">{titleOverride || summary.title}</p>
+          <p className="text-lg font-bold">{titleOverride || summary.title}</p>
           <p className="mt-2 text-sm leading-6">
             <span className="font-bold">Reason:</span> {summary.reason}
           </p>

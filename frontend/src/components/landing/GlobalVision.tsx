@@ -40,13 +40,13 @@ export default function GlobalVision() {
             >
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-2 -top-6 text-[7rem] font-black leading-none text-slate-100 transition group-hover:text-accent-yellow/20"
+                className="pointer-events-none absolute -right-2 -top-6 text-[7rem] font-bold leading-none text-slate-100 transition group-hover:text-accent-yellow/20"
               >
                 {number}
               </span>
               <div className="relative">
-                <p className="text-xs font-black uppercase tracking-[0.28em] text-yellow-default">{number}</p>
-                <h3 className="mt-4 text-xl font-black text-dark-blue">{title}</h3>
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-yellow-default">{number}</p>
+                <h3 className="mt-4 text-xl font-bold text-dark-blue">{title}</h3>
                 <p className="mt-4 text-sm leading-7 text-slate-600">{body}</p>
               </div>
             </article>

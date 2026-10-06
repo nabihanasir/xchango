@@ -94,7 +94,7 @@ const STATUS_LABELS: Record<IntakeStatus, { label: string; className: string }> 
 function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description?: string }) {
   return (
     <div className="mb-6">
-      <p className="text-[11px] font-black uppercase tracking-[0.3em] text-accent-yellow">{eyebrow}</p>
+      <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">{eyebrow}</p>
       <h2 className="mt-2 text-dark-blue">{title}</h2>
       {description ? <p className="mt-2 max-w-2xl text-sm text-body-text">{description}</p> : null}
     </div>
@@ -143,7 +143,7 @@ function Hero({ university }: { university: UniversityProfile }) {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               to="/dashboard/applications/new"
-              className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-6 py-3.5 text-sm font-black text-dark-blue shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-yellow-default"
+              className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-6 py-3.5 text-sm font-bold text-dark-blue shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-yellow-default"
             >
               Start application
               <ArrowRight className="h-4 w-4" />
@@ -184,7 +184,7 @@ function Timeline({ intake, now }: { intake: UniversityIntake; now: number }) {
             ) : null}
 
             <span
-              className={`relative z-10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
+              className={`relative z-10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${
                 isDone
                   ? 'border-emerald-500 bg-emerald-500 text-white'
                   : isCurrent
@@ -209,15 +209,15 @@ function Timeline({ intake, now }: { intake: UniversityIntake; now: number }) {
               </div>
               <p className="mt-2 text-sm text-body-text">{milestone.description}</p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ${OWNER_STYLES[milestone.owner]}`}>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ring-1 ${OWNER_STYLES[milestone.owner]}`}>
                   {milestone.owner}
                 </span>
                 {isCurrent ? (
-                  <span className="rounded-full bg-dark-blue px-2.5 py-1 text-[11px] font-bold text-white">
+                  <span className="rounded-full bg-dark-blue px-2.5 py-1 text-xs font-bold text-white">
                     Next up · {daysLeft === 0 ? 'today' : `in ${daysLeft} days`}
                   </span>
                 ) : null}
-                {isDone ? <span className="text-[11px] font-bold text-emerald-600">Done</span> : null}
+                {isDone ? <span className="text-xs font-bold text-emerald-600">Done</span> : null}
               </div>
             </div>
           </li>
@@ -262,7 +262,7 @@ function Intakes({ university, now }: { university: UniversityProfile; now: numb
             >
               <div className="flex items-center justify-between">
                 <span className="font-display text-lg font-bold">{item.label}</span>
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ring-1 ${active ? 'bg-white/15 text-white ring-white/20' : STATUS_LABELS[itemStatus].className}`}>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wide ring-1 ${active ? 'bg-white/15 text-white ring-white/20' : STATUS_LABELS[itemStatus].className}`}>
                   {STATUS_LABELS[itemStatus].label}
                 </span>
               </div>
@@ -277,21 +277,21 @@ function Intakes({ university, now }: { university: UniversityProfile; now: numb
       <Card>
         <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Application deadline</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Application deadline</p>
             <p className="mt-1 font-display text-xl font-bold text-dark-blue">{formatDate(intake.applicationDeadline)}</p>
             <p className="mt-1 text-xs font-semibold text-slate-500">
               {deadlineDays >= 0 ? `${deadlineDays} days left` : `Closed ${Math.abs(deadlineDays)} days ago`}
             </p>
           </div>
           <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Semester dates</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Semester dates</p>
             <p className="mt-1 font-display text-xl font-bold text-dark-blue">{formatDate(intake.startDate)}</p>
             <p className="mt-1 text-xs font-semibold text-slate-500">to {formatDate(intake.milestones[intake.milestones.length - 1].date)}</p>
           </div>
           <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center justify-between">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Seats</p>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ${STATUS_LABELS[status].className}`}>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Seats</p>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-bold ring-1 ${STATUS_LABELS[status].className}`}>
                 {STATUS_LABELS[status].label}
               </span>
             </div>
@@ -354,7 +354,7 @@ export default function UniversityDetail() {
         {university.facts.map((fact) => (
           <div key={fact.label} className="rounded-2xl border border-slate-200/60 bg-white p-4 text-center shadow-lg shadow-slate-200/60">
             <p className="font-display text-lg font-bold text-dark-blue">{fact.value}</p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-slate-500">{fact.label}</p>
+            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">{fact.label}</p>
           </div>
         ))}
       </div>
@@ -418,7 +418,7 @@ export default function UniversityDetail() {
             <div key={programme.name} className="glass-card rounded-3xl p-6">
               <div className="flex items-start justify-between gap-3">
                 <h4 className="text-dark-blue">{programme.name}</h4>
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600">{programme.level}</span>
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{programme.level}</span>
               </div>
               <p className="mt-3 text-sm text-body-text">{programme.description}</p>
               <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-slate-600">
@@ -548,7 +548,7 @@ export default function UniversityDetail() {
           <ol className="grid gap-3 md:grid-cols-2">
             {university.visa.steps.map((step, index) => (
               <li key={step} className="flex gap-4 rounded-2xl bg-slate-50 p-4">
-                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-dark-blue text-sm font-black text-white">
+                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-dark-blue text-sm font-bold text-white">
                   {index + 1}
                 </span>
                 <p className="pt-1 text-sm text-slate-700">{step}</p>
@@ -576,7 +576,7 @@ export default function UniversityDetail() {
             </p>
             <Link
               to="/dashboard/applications/new"
-              className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-6 py-3.5 text-sm font-black text-dark-blue shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-default"
+              className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-6 py-3.5 text-sm font-bold text-dark-blue shadow-lg transition hover:-translate-y-0.5 hover:bg-yellow-default"
             >
               Start application
               <ArrowRight className="h-4 w-4" />

@@ -21,8 +21,8 @@ export default function CountryStep({ country, onChange }: CountryStepProps) {
               : 'border-slate-200 bg-white text-slate-700 hover:border-dark-blue/30'
           }`}
         >
-          <p className="text-xs font-black uppercase tracking-[0.25em] opacity-70">Destination</p>
-          <p className="mt-3 text-xl font-black">{option}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.25em] opacity-70">Destination</p>
+          <p className="mt-3 text-xl font-bold">{option}</p>
         </button>
       ))}
     </div>

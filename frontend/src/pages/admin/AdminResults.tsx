@@ -68,7 +68,7 @@ export default function AdminResults() {
       accessor: 'status',
       render: (val: string) => (
         <span
-          className={`rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] ${
+          className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] ${
             val === 'published' ? 'bg-emerald-500/10 text-emerald-700' : 'bg-amber-500/10 text-amber-700'
           }`}
         >
@@ -101,7 +101,7 @@ export default function AdminResults() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between border-b border-light-color/50 pb-6 glass-card p-6 md:p-8 rounded-[2rem] bg-white">
         <div>
-          <h2 className="text-3xl font-black text-maroon mb-2">Student Results</h2>
+          <h2 className="text-3xl font-bold text-maroon mb-2">Student Results</h2>
           <p className="text-body-text font-medium mt-1 md:text-lg">
             View every result advisors have entered for enrolled host courses.
           </p>

@@ -45,8 +45,8 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
         <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
           <div className="w-full max-w-2xl space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft">
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.32em] text-yellow-default">Application Error</p>
-              <h1 className="mt-3 text-3xl font-black text-dark-blue">We hit an unexpected interface problem</h1>
+              <p className="text-sm font-bold uppercase tracking-[0.32em] text-yellow-default">Application Error</p>
+              <h1 className="mt-3 text-3xl font-bold text-dark-blue">We hit an unexpected interface problem</h1>
             </div>
             <ErrorAlert error={fallbackError} />
             <button

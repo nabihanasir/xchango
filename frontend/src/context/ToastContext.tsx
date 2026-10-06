@@ -58,7 +58,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <div className="flex items-start gap-3">
                 <Icon className="mt-0.5 h-5 w-5 shrink-0" />
                 <div className="flex-1">
-                  <p className="font-black">{toast.title}</p>
+                  <p className="font-bold">{toast.title}</p>
                   {toast.description ? <p className="mt-1 text-sm leading-6">{toast.description}</p> : null}
                 </div>
                 <button

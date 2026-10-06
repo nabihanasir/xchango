@@ -41,7 +41,7 @@ export default function SiteFooter() {
                 <Globe2 className="h-5 w-5" />
               </span>
               <div>
-                <p className="text-sm font-black uppercase tracking-[0.24em]">Riphah</p>
+                <p className="text-sm font-bold uppercase tracking-[0.24em]">Riphah</p>
                 <p className="text-sm text-white/50">International Office</p>
               </div>
             </div>
@@ -53,7 +53,7 @@ export default function SiteFooter() {
 
           {columns.map((column) => (
             <div key={column.heading}>
-              <h3 className="text-xs font-black uppercase tracking-[0.24em] text-accent-yellow">
+              <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-accent-yellow">
                 {column.heading}
               </h3>
               <ul className="mt-6 space-y-3.5">
@@ -75,7 +75,7 @@ export default function SiteFooter() {
           ))}
 
           <div>
-            <h3 className="text-xs font-black uppercase tracking-[0.24em] text-accent-yellow">Contact</h3>
+            <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-accent-yellow">Contact</h3>
             <ul className="mt-6 space-y-4 text-sm text-white/60">
               <li className="flex gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-white/35" />

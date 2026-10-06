@@ -49,8 +49,8 @@ export default function StudentVisa() {
   return (
     <div className="space-y-8">
       <section className="glass-card rounded-[2.5rem] p-8 md:p-10">
-        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-accent-yellow">Visa Process</p>
-        <h1 className="mt-3 text-3xl font-black text-slate-800 md:text-4xl">Your visa status</h1>
+        <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">Visa Process</p>
+        <h1 className="mt-3 text-3xl font-bold text-slate-800 md:text-4xl">Your visa status</h1>
         <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-slate-500">
           Follow your visa application from document collection to approval. The International Office updates this
           page as your case moves forward.
@@ -89,7 +89,7 @@ export default function StudentVisa() {
 
             {visa?.remarks ? (
               <div className="mt-6 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
                   Note from the International Office
                 </p>
                 <p className="mt-2 whitespace-pre-line text-sm font-medium leading-6 text-slate-700">{visa.remarks}</p>
@@ -98,7 +98,7 @@ export default function StudentVisa() {
           </section>
 
           <section className="glass-card rounded-[2.25rem] p-6 md:p-8" aria-label="Visa progress">
-            <h2 className="text-lg font-black text-slate-800">Progress</h2>
+            <h2 className="text-lg font-bold text-slate-800">Progress</h2>
             <ol className="mt-6 grid gap-5 md:grid-cols-6 md:gap-3">
               {VISA_STAGES.map((stage, index) => {
                 const state: StepState =
@@ -119,7 +119,7 @@ export default function StudentVisa() {
                     className="flex items-center gap-4 md:flex-col md:items-center md:gap-3 md:text-center"
                   >
                     <span
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-black transition ${STEP_CIRCLE[state]}`}
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold transition ${STEP_CIRCLE[state]}`}
                     >
                       {state === 'done' ? <Check className="h-5 w-5" strokeWidth={3} /> : index + 1}
                     </span>
@@ -136,7 +136,7 @@ export default function StudentVisa() {
 
           {history.length ? (
             <section className="glass-card rounded-[2.25rem] p-6 md:p-8">
-              <h2 className="text-lg font-black text-slate-800">Update history</h2>
+              <h2 className="text-lg font-bold text-slate-800">Update history</h2>
               <ul className="mt-6 space-y-5">
                 {history.map((entry) => (
                   <li key={entry._id} className="flex gap-4">
@@ -161,7 +161,7 @@ export default function StudentVisa() {
           ) : (
             <div className="glass-card rounded-[2rem] px-6 py-12 text-center">
               <Stamp className="mx-auto h-8 w-8 text-slate-400" />
-              <h2 className="mt-4 text-2xl font-black text-slate-800">Nothing to report yet</h2>
+              <h2 className="mt-4 text-2xl font-bold text-slate-800">Nothing to report yet</h2>
               <p className="mt-3 text-sm font-medium text-slate-500">
                 Once the International Office begins your visa process, each update will appear here.
               </p>

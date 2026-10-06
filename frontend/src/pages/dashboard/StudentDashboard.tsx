@@ -10,7 +10,7 @@ const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass, delay }
     <div className="flex items-start justify-between relative z-10">
       <div>
         <p className="text-slate-600 text-xs font-bold mb-1.5 uppercase tracking-widest">{title}</p>
-        <h3 className="text-[2.5rem] font-black text-slate-800 tracking-tight leading-none">{value}</h3>
+        <h3 className="text-[2.5rem] font-bold text-slate-800 tracking-tight leading-none">{value}</h3>
       </div>
       <div className={`p-4 rounded-[1.25rem] ${colorClass} bg-opacity-10 transition-colors duration-300 shadow-sm`}>
         <Icon className={`h-8 w-8 ${colorClass.replace('bg-', 'text-')}`} />
@@ -29,10 +29,10 @@ const QuickAction = ({ title, description, icon: Icon, to, delay }: any) => (
       <div className="p-4 bg-slate-50 border border-slate-100 rounded-[1.25rem] group-hover:bg-dark-blue-deep group-hover:border-dark-blue-deep group-hover:text-white transition-all duration-300 text-dark-blue shadow-sm">
         <Icon className="h-7 w-7" />
       </div>
-      <h4 className="text-xl font-black text-slate-800 group-hover:text-dark-blue transition-colors">{title}</h4>
+      <h4 className="text-xl font-bold text-slate-800 group-hover:text-dark-blue transition-colors">{title}</h4>
     </div>
-    <p className="text-slate-500 text-[15px] font-medium mb-8 line-clamp-2 leading-relaxed">{description}</p>
-    <div className="flex items-center text-accent-yellow font-black text-sm uppercase tracking-widest group-hover:text-yellow-default transition-colors">
+    <p className="text-slate-500 text-base font-medium mb-8 line-clamp-2 leading-relaxed">{description}</p>
+    <div className="flex items-center text-accent-yellow font-bold text-sm uppercase tracking-widest group-hover:text-yellow-default transition-colors">
       <span>Get Started</span>
       <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-2 transition-transform duration-300" />
     </div>
@@ -49,11 +49,11 @@ export default function StudentDashboard() {
 
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="space-y-6 max-w-2xl text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-accent-yellow text-[11px] font-bold uppercase tracking-widest backdrop-blur-md self-center md:self-start shadow-inner">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-accent-yellow text-xs font-bold uppercase tracking-widest backdrop-blur-md self-center md:self-start shadow-inner">
               <Sparkles className="h-4 w-4" />
               <span>Welcome to your future</span>
             </div>
-            <h2 className="text-[3.5rem] md:text-[4.5rem] font-black text-white leading-[1.05] tracking-tight">
+            <h2 className="text-[3.5rem] md:text-[4.5rem] font-bold text-white leading-[1.05] tracking-tight">
               Ready to start your <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-yellow to-yellow-default relative">
                 global journey?
@@ -64,7 +64,7 @@ export default function StudentDashboard() {
               Discover top universities, track your applications, and connect with advisors — all in one seamlessly designed place.
             </p>
             <div className="pt-6 flex flex-wrap gap-4 justify-center md:justify-start">
-              <Link to="/dashboard/programmes" className="px-10 py-5 rounded-[1.25rem] bg-gradient-to-r from-accent-yellow to-yellow-default text-dark-blue font-black text-lg shadow-[0_0_30px_rgba(251,210,19,0.3)] hover:shadow-[0_0_40px_rgba(251,210,19,0.5)] transition-all duration-300 hover:scale-[1.02] flex items-center gap-3">
+              <Link to="/dashboard/programmes" className="px-10 py-5 rounded-[1.25rem] bg-gradient-to-r from-accent-yellow to-yellow-default text-dark-blue font-bold text-lg shadow-[0_0_30px_rgba(251,210,19,0.3)] hover:shadow-[0_0_40px_rgba(251,210,19,0.5)] transition-all duration-300 hover:scale-[1.02] flex items-center gap-3">
                 Explore Universities
                 <ArrowRight className="h-6 w-6" />
               </Link>

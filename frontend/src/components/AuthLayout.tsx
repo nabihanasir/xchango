@@ -25,10 +25,10 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
             alt="Xchango Logo" 
             className="h-24 w-auto object-contain mb-6 transform hover:scale-105 transition-transform duration-500 drop-shadow-xl"
           />
-          <h2 className="text-[2rem] font-black text-slate-800 mb-3 tracking-tight leading-none">
+          <h2 className="text-[2rem] font-bold text-slate-800 mb-3 tracking-tight leading-none">
             {title}
           </h2>
-          <p className="text-slate-500 font-medium text-[15px]">{subtitle}</p>
+          <p className="text-slate-500 font-medium text-base">{subtitle}</p>
         </div>
 
         {/* Injected Form Content */}

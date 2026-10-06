@@ -53,13 +53,13 @@ export default function Equivalency() {
                 className="pointer-events-none absolute inset-0 h-full w-full object-cover object-top opacity-[0.09] transition duration-300 group-hover:opacity-[0.16]"
               />
               <div className="relative">
-                <span className="text-[11px] font-black uppercase tracking-[0.28em] text-black">
+                <span className="text-xs font-bold uppercase tracking-[0.28em] text-black">
                   Step 0{index + 1}
                 </span>
                 <span className="mt-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-yellow/15 text-dark-blue transition group-hover:scale-105">
                   <Icon className="h-5 w-5" />
                 </span>
-                <h3 className="mt-6 text-lg font-black text-dark-blue">{title}</h3>
+                <h3 className="mt-6 text-lg font-bold text-dark-blue">{title}</h3>
                 <p className="mt-3 text-sm leading-7 text-slate-600">{body}</p>
               </div>
             </article>
@@ -70,10 +70,10 @@ export default function Equivalency() {
         <div className="mt-10 overflow-hidden rounded-[2rem] border border-slate-200 bg-dark-blue p-8 shadow-[0_25px_80px_-30px_rgba(9,6,56,0.6)] sm:p-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.3em] text-accent-yellow">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">
                 Course mapping
               </p>
-              <h3 className="mt-3 text-xl font-black text-white">Partner course to Riphah credit</h3>
+              <h3 className="mt-3 text-xl font-bold text-white">Partner course to Riphah credit</h3>
             </div>
             <p className="max-w-xs text-xs leading-6 text-white/45">
               Illustrative example. Every equivalency is decided by an academic advisor against the live course
@@ -90,7 +90,7 @@ export default function Equivalency() {
                   <p className="text-sm font-bold text-white/70">{row.to}</p>
                 </div>
                 <span
-                  className={`mt-4 inline-block rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wider ${
+                  className={`mt-4 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
                     row.status === 'Approved'
                       ? 'bg-emerald-400/15 text-emerald-300'
                       : 'bg-amber-400/15 text-amber-300'

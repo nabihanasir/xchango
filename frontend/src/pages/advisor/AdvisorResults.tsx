@@ -93,8 +93,8 @@ export default function AdvisorResults() {
   return (
     <div className="space-y-8">
       <section className="glass-card rounded-[2.5rem] p-8 md:p-10">
-        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-accent-yellow">Results</p>
-        <h1 className="mt-3 text-3xl font-black text-slate-800 md:text-4xl">Grade your students' host courses</h1>
+        <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">Results</p>
+        <h1 className="mt-3 text-3xl font-bold text-slate-800 md:text-4xl">Grade your students' host courses</h1>
         <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-slate-500">
           Only approved course enrollments for students assigned to you appear here.
         </p>
@@ -123,11 +123,11 @@ export default function AdvisorResults() {
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
                       {item.result ? (
-                        <span className={`rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.25em] ${getResultStatusClasses(item.result.status)}`}>
+                        <span className={`rounded-full px-3 py-2 text-xs font-bold uppercase tracking-[0.25em] ${getResultStatusClasses(item.result.status)}`}>
                           {item.result.status}
                         </span>
                       ) : (
-                        <span className="rounded-full border border-dashed border-slate-300 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">
+                        <span className="rounded-full border border-dashed border-slate-300 px-3 py-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
                           Not graded
                         </span>
                       )}
@@ -137,7 +137,7 @@ export default function AdvisorResults() {
                         </span>
                       ) : null}
                     </div>
-                    <h2 className="mt-4 text-xl font-black text-slate-800">
+                    <h2 className="mt-4 text-xl font-bold text-slate-800">
                       {item.hostCourseId.code} · {getCourseTitle(item.hostCourseId)}
                     </h2>
                     <p className="mt-2 text-sm font-medium text-slate-500">
@@ -149,7 +149,7 @@ export default function AdvisorResults() {
 
                 <div className="mt-6 grid gap-4 lg:grid-cols-[160px_160px_minmax(0,1fr)]">
                   <div>
-                    <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Grade</label>
+                    <label className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Grade</label>
                     <input
                       type="text"
                       value={draft.grade}
@@ -159,7 +159,7 @@ export default function AdvisorResults() {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Marks (0-100)</label>
+                    <label className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Marks (0-100)</label>
                     <input
                       type="number"
                       min={0}
@@ -171,7 +171,7 @@ export default function AdvisorResults() {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Marksheet (optional)</label>
+                    <label className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Marksheet (optional)</label>
                     <input
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
@@ -193,7 +193,7 @@ export default function AdvisorResults() {
                 </div>
 
                 <div className="mt-4">
-                  <label className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">Remarks</label>
+                  <label className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Remarks</label>
                   <textarea
                     value={draft.remarks}
                     onChange={(event) => updateDraft(item.courseRequestItemId, { remarks: event.target.value })}
@@ -229,7 +229,7 @@ export default function AdvisorResults() {
         </div>
       ) : (
         <div className="glass-card rounded-[2rem] px-6 py-12 text-center">
-          <h2 className="text-2xl font-black text-slate-800">No enrolled courses to grade</h2>
+          <h2 className="text-2xl font-bold text-slate-800">No enrolled courses to grade</h2>
           <p className="mt-3 text-sm font-medium text-slate-500">
             Courses appear here once a course request item is approved for one of your assigned students.
           </p>

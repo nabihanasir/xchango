@@ -99,7 +99,7 @@ export default function AdvisorProfile() {
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
       <div className="glass-card rounded-[2rem] p-8 shadow-md">
         <div className="mb-8 flex items-center justify-between gap-4">
-          <h2 className="text-2xl font-black text-emerald-700">My Profile</h2>
+          <h2 className="text-2xl font-bold text-emerald-700">My Profile</h2>
           {!editing && (
             <button
               type="button"

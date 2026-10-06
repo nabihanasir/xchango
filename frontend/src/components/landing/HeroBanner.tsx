@@ -101,12 +101,12 @@ export default function HeroBanner() {
 
       <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-32 sm:px-6 sm:pb-32 sm:pt-40 lg:px-8">
         <div key={index} className="max-w-4xl animate-fade-in-up">
-          <p className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.34em] text-accent-yellow">
+          <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.34em] text-accent-yellow">
             <span className="h-px w-10 bg-accent-yellow/70" />
             {slides[index].eyebrow}
           </p>
 
-          <h1 className="mt-7 text-4xl font-black uppercase leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-7 text-4xl font-bold uppercase leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
             {slides[index].title}
           </h1>
 
@@ -121,14 +121,14 @@ export default function HeroBanner() {
           <div className="mt-11 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
             <a
               href="#exchange"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-accent-yellow px-8 py-4 text-sm font-black text-dark-blue shadow-lg shadow-accent-yellow/25 transition hover:-translate-y-0.5 hover:bg-yellow-default"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-accent-yellow px-8 py-4 text-sm font-bold text-dark-blue shadow-lg shadow-accent-yellow/25 transition hover:-translate-y-0.5 hover:bg-yellow-default"
             >
               Explore Programmes
               <Compass className="h-4 w-4" />
             </a>
             <Link
               to="/signup"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-8 py-4 text-sm font-black text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/20"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-8 py-4 text-sm font-bold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/20"
             >
               Apply Now
               <ArrowRight className="h-4 w-4" />

@@ -52,7 +52,7 @@ export default function OutlineUploadPanel({ item, onUpload }: OutlineUploadPane
   return (
     <div className="mt-4 rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
           <FileText className="h-4 w-4" />
           Course outline from the host university
         </p>

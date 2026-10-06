@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
 
       {result ? (
         <div className="mt-6 rounded-[1.75rem] border border-emerald-200 bg-emerald-50/90 p-5 text-emerald-950 shadow-soft">
-          <p className="text-lg font-black">Check your inbox</p>
+          <p className="text-lg font-bold">Check your inbox</p>
           <p className="mt-2 text-sm leading-6">{result.message}</p>
           {result.resetUrl ? (
             <div className="mt-4 rounded-2xl border border-emerald-200 bg-white p-4">

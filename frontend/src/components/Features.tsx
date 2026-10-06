@@ -28,8 +28,8 @@ export default function Features() {
     <section id="features" className="px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="max-w-2xl">
-          <p className="text-sm font-black uppercase tracking-[0.32em] text-yellow-default">Why It Matters</p>
-          <h2 className="mt-4 text-3xl font-black tracking-tight text-head-text sm:text-4xl">
+          <p className="text-sm font-bold uppercase tracking-[0.32em] text-yellow-default">Why It Matters</p>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-head-text sm:text-4xl">
             A modern gateway to international study and career growth
           </h2>
         </div>
@@ -43,7 +43,7 @@ export default function Features() {
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-dark-blue to-dark-blue-light text-white">
                 <Icon className="h-6 w-6" />
               </div>
-              <h3 className="mt-5 text-xl font-black text-dark-blue">{title}</h3>
+              <h3 className="mt-5 text-xl font-bold text-dark-blue">{title}</h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
             </article>
           ))}

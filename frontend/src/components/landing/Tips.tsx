@@ -44,11 +44,11 @@ export default function Tips() {
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-dark-blue text-accent-yellow">
                     <Icon className="h-5 w-5" />
                   </span>
-                  <span className="text-xs font-black uppercase tracking-[0.24em] text-slate-600">
+                  <span className="text-xs font-bold uppercase tracking-[0.24em] text-slate-600">
                     Tip 0{index + 1}
                   </span>
                 </div>
-                <h3 className="mt-6 text-base font-black text-dark-blue">{title}</h3>
+                <h3 className="mt-6 text-base font-bold text-dark-blue">{title}</h3>
                 <p className="mt-3 text-sm leading-7 text-slate-600">{body}</p>
               </div>
             </article>
