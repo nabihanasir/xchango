@@ -144,7 +144,7 @@ export default function StudentDocuments() {
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Upload Documents</p>
             <h2 className="mt-2 text-2xl font-bold text-slate-900">Submit supporting files</h2>
             <p className="mt-2 text-sm text-slate-500">
-              Choose a document type and upload the matching file. Uploaded files are stored securely and listed below.
+              Work down the checklist: pick a document, then upload or drop the file. Completed items turn grey.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
@@ -154,7 +154,7 @@ export default function StudentDocuments() {
         </div>
 
         <div className="mt-6 space-y-4">
-          <DocumentUploadForm uploading={uploading} onUpload={handleUpload} />
+          <DocumentUploadForm documents={documents} uploading={uploading} onUpload={handleUpload} />
 
           {errorMessage ? (
             <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
