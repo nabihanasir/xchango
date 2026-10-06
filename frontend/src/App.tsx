@@ -14,8 +14,7 @@ import StudentApplicationsPage from './pages/dashboard/StudentApplicationsPage';
 import StudentDocuments from './pages/dashboard/StudentDocuments';
 import Communicate from './pages/dashboard/Communicate';
 import OnlineClasses from './pages/dashboard/OnlineClasses';
-import CourseEquivalencyBrowse from './pages/dashboard/CourseEquivalencyBrowse';
-import CourseEquivalencyRequests from './pages/dashboard/CourseEquivalencyRequests';
+import StudentCourses from './pages/dashboard/StudentCourses';
 import StudentResults from './pages/dashboard/StudentResults';
 import StudentVisa from './pages/dashboard/StudentVisa';
 import StudentProfile from './pages/dashboard/StudentProfile';
@@ -74,9 +73,10 @@ function App() {
             <Route path="communicate" element={<Communicate />} />
             <Route path="online-classes" element={<OnlineClasses />} />
             <Route element={<RequireInterviewCompleted />}>
-              <Route path="equivalency/courses" element={<CourseEquivalencyBrowse />} />
-              <Route path="equivalency/requests" element={<CourseEquivalencyRequests />} />
+              <Route path="courses" element={<StudentCourses />} />
             </Route>
+            <Route path="equivalency/courses" element={<Navigate to="/dashboard/courses" replace />} />
+            <Route path="equivalency/requests" element={<Navigate to="/dashboard/courses" replace />} />
             <Route path="results" element={<StudentResults />} />
             <Route path="visa" element={<StudentVisa />} />
           </Route>

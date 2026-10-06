@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { BookOpenCheck, Clock3, LoaderCircle, MessageSquareText } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import OutlineUploadPanel from '../../components/equivalency/OutlineUploadPanel';
+import OutlineUploadPanel from '../equivalency/OutlineUploadPanel';
 import { useAuth } from '../../context/AuthContext';
 import { equivalencyApi } from '../../lib/api';
 import type { CourseRequest } from '../../types/equivalency';
@@ -16,32 +15,15 @@ import {
 
 const MATCH_POLL_INTERVAL_MS = 4000;
 
-export default function CourseEquivalencyRequests() {
+interface CourseRequestsPanelProps {
+  requests: CourseRequest[];
+  isLoading: boolean;
+  error: string;
+  onRequestsChange: (update: (current: CourseRequest[]) => CourseRequest[]) => void;
+}
+
+export default function CourseRequestsPanel({ requests, isLoading, error, onRequestsChange }: CourseRequestsPanelProps) {
   const { user } = useAuth();
-  const [requests, setRequests] = useState<CourseRequest[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const loadRequests = async () => {
-      if (!user?.token) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setError('');
-        const response = await equivalencyApi.getStudentRequests(user.token);
-        setRequests(response);
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load your requests.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void loadRequests();
-  }, [user?.token]);
 
   const hasPendingOutlineMatches = requests.some((request) =>
     request.items.some((item) => item.outlineMatchStatus === 'in_progress')
@@ -57,7 +39,7 @@ export default function CourseEquivalencyRequests() {
     const intervalId = window.setInterval(() => {
       equivalencyApi
         .getStudentRequests(token)
-        .then(setRequests)
+        .then((latest) => onRequestsChange(() => latest))
         .catch(() => undefined);
     }, MATCH_POLL_INTERVAL_MS);
 
@@ -70,7 +52,7 @@ export default function CourseEquivalencyRequests() {
     }
 
     const updated = await equivalencyApi.uploadCourseOutline(user.token, requestId, itemId, outline);
-    setRequests((current) => current.map((request) => (request._id === updated._id ? updated : request)));
+    onRequestsChange((current) => current.map((request) => (request._id === updated._id ? updated : request)));
   };
 
   const requestSummary = useMemo(
@@ -84,24 +66,6 @@ export default function CourseEquivalencyRequests() {
 
   return (
     <div className="space-y-8">
-      <section className="glass-card rounded-[2.5rem] p-8 md:p-10">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">Student Requests</p>
-            <h1 className="mt-3 text-3xl font-bold text-slate-800 md:text-4xl">Track your course equivalency reviews</h1>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-slate-500">
-              See each request status, the suggested course pairing, and any advisor feedback after review.
-            </p>
-          </div>
-          <Link
-            to="/dashboard/equivalency/courses"
-            className="inline-flex items-center justify-center rounded-[1.25rem] bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#120d52]"
-          >
-            Submit another request
-          </Link>
-        </div>
-      </section>
-
       <div className="grid gap-4 md:grid-cols-3">
         <div className="glass-card rounded-[2rem] p-6">
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Pending</p>
@@ -248,7 +212,7 @@ export default function CourseEquivalencyRequests() {
       ) : (
         <div className="glass-card rounded-[2rem] px-6 py-12 text-center">
           <h2 className="text-2xl font-bold text-slate-800">No course requests yet</h2>
-          <p className="mt-3 text-sm font-medium text-slate-500">Submit your first host-course selection to start the advisor review workflow.</p>
+          <p className="mt-3 text-sm font-medium text-slate-500">Pick your host courses above to start the advisor review workflow.</p>
         </div>
       )}
     </div>
