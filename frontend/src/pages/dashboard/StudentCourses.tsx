@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowRight, CheckCircle2, Clock3, LoaderCircle, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock3, FileWarning, LoaderCircle, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CourseBrowser from '../../components/courses/CourseBrowser';
 import CourseRequestsPanel from '../../components/courses/CourseRequestsPanel';
 import { useAuth } from '../../context/AuthContext';
 import { equivalencyApi } from '../../lib/api';
+import { programOutlineApi } from '../../lib/programOutlineApi';
+import { studentProfileApi } from '../../lib/studentProfileApi';
 import type { CourseRequest } from '../../types/equivalency';
 import { getCourseStepState } from '../../utils/courseStep';
 
@@ -33,6 +35,24 @@ export default function StudentCourses() {
   useEffect(() => {
     void loadRequests();
   }, [loadRequests]);
+
+  // The advisor checks the request against the program outline and transcript, so tell the student if one is missing.
+  const [missingDocuments, setMissingDocuments] = useState<string[]>([]);
+  useEffect(() => {
+    if (!user?._id) {
+      return;
+    }
+
+    Promise.all([
+      programOutlineApi.getMine().catch(() => undefined),
+      studentProfileApi.getTranscript(user._id).catch(() => undefined),
+    ]).then(([outline, transcript]) => {
+      const missing: string[] = [];
+      if (outline === null) missing.push('program outline');
+      if (transcript && !transcript.semesters.length) missing.push('transcript');
+      setMissingDocuments(missing);
+    });
+  }, [user?._id]);
 
   if (!user) {
     return (
@@ -94,6 +114,28 @@ export default function StudentCourses() {
               Check your advisor's comments below, then choose your courses again and resubmit.
             </p>
           </div>
+        </div>
+      ) : null}
+
+      {missingDocuments.length && (stepState === 'open' || stepState === 'rejected') ? (
+        <div className="flex flex-col gap-4 rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-amber-800 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-4">
+            <FileWarning className="mt-0.5 h-6 w-6 flex-shrink-0" />
+            <div>
+              <h2 className="text-lg font-bold">Upload your {missingDocuments.join(' and ')} first</h2>
+              <p className="mt-1 text-sm font-medium">
+                Your advisor checks your courses against your semester, credit limit and program plan. Without them the request
+                can only be matched on course content.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/dashboard/profile"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-amber-800"
+          >
+            Go to profile
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       ) : null}
 

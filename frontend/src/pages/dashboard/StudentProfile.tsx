@@ -2,11 +2,14 @@ import { startTransition, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, CheckCircle2, FileText, GraduationCap } from 'lucide-react';
 import StudentProfileForm, { STUDENT_PROFILE_FORM_ID } from '../../components/student/StudentProfileForm';
+import ProgramOutlineUpload from '../../components/student/ProgramOutlineUpload';
 import TranscriptUpload from '../../components/student/TranscriptUpload';
 import TranscriptViewer from '../../components/student/TranscriptViewer';
 import { useAuth } from '../../context/AuthContext';
 import { parseApiError } from '../../lib/errorUtils';
+import { programOutlineApi } from '../../lib/programOutlineApi';
 import { studentProfileApi } from '../../lib/studentProfileApi';
+import type { ProgramOutline } from '../../types/equivalency';
 import type {
   StudentProfile as StudentProfileType,
   StudentTranscript,
@@ -27,6 +30,9 @@ export default function StudentProfile() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [showSavedPopup, setShowSavedPopup] = useState(false);
   const [uploadingTranscript, setUploadingTranscript] = useState(false);
+  const [programOutline, setProgramOutline] = useState<ProgramOutline | null>(null);
+  const [uploadingOutline, setUploadingOutline] = useState(false);
+  const [outlineError, setOutlineError] = useState('');
 
   useEffect(() => {
     if (!studentId) {
@@ -41,9 +47,11 @@ export default function StudentProfile() {
       setPageError('');
 
       try {
-        const [profileData, transcriptData] = await Promise.all([
+        const [profileData, transcriptData, outlineData] = await Promise.all([
           studentProfileApi.getStudentProfile(studentId),
           studentProfileApi.getTranscript(studentId),
+          // The outline is optional, so a failure to load it must not block the rest of the page.
+          programOutlineApi.getMine().catch(() => null),
         ]);
 
         if (cancelled) {
@@ -53,6 +61,7 @@ export default function StudentProfile() {
         startTransition(() => {
           setProfile(profileData);
           setTranscript(transcriptData);
+          setProgramOutline(outlineData);
         });
       } catch (error) {
         if (cancelled) {
@@ -121,6 +130,20 @@ export default function StudentProfile() {
       setTranscriptError({ title: parsed.message, solution: parsed.solution });
     } finally {
       setUploadingTranscript(false);
+    }
+  };
+
+  const handleOutlineUpload = async (file: File) => {
+    setUploadingOutline(true);
+    setOutlineError('');
+
+    try {
+      setProgramOutline(await programOutlineApi.upload(file));
+    } catch (error) {
+      const parsed = parseApiError(error);
+      setOutlineError([parsed.message, parsed.solution].filter(Boolean).join(' '));
+    } finally {
+      setUploadingOutline(false);
     }
   };
 
@@ -241,6 +264,13 @@ export default function StudentProfile() {
       />
 
       <TranscriptViewer transcript={transcript} />
+
+      <ProgramOutlineUpload
+        outline={programOutline}
+        uploading={uploadingOutline}
+        errorMessage={outlineError}
+        onUpload={handleOutlineUpload}
+      />
 
       <section className="glass-card rounded-[2rem] p-6 md:p-7">
         {profileError ? (
