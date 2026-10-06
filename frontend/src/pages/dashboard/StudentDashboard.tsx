@@ -1,4 +1,4 @@
-import { ArrowRight, Globe, FileCheck, CheckCircle2, TrendingUp, Sparkles, Zap, Award, MessageSquare, Video } from 'lucide-react';
+import { ArrowRight, Globe, FileCheck, CheckCircle2, TrendingUp, Sparkles, Zap, Award, Building2, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass, delay }: any) => (
@@ -95,7 +95,7 @@ export default function StudentDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           <QuickAction title="Browse Programs" description="Search through hundreds of programs across South Korea, Malaysia, and Turkiye." icon={Globe} to="/dashboard/programmes" delay={500} />
           <QuickAction title="Track Application" description="View the real-time status of your submitted university applications." icon={FileCheck} to="/dashboard/applications" delay={600} />
-          <QuickAction title="Contact Advisor" description="Have questions? Send a direct message to your assigned student advisor." icon={MessageSquare} to="/dashboard/communicate" delay={700} />
+          <QuickAction title="International Office" description="Learn how the Riphah International Office supports your exchange journey." icon={Building2} to="/dashboard/international-office" delay={700} />
           <QuickAction title="Join Online Class" description="Open your free Jitsi classroom and copy meeting details for upcoming lectures." icon={Video} to="/dashboard/online-classes" delay={800} />
         </div>
       </div>

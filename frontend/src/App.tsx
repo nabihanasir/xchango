@@ -8,6 +8,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import DashboardLayout from './components/DashboardLayout';
 import StudentDashboard from './pages/dashboard/StudentDashboard';
 import UniversityProgrammes from './pages/dashboard/UniversityProgrammes';
+import InternationalOffice from './pages/dashboard/InternationalOffice';
 import UniversityDetail from './pages/dashboard/UniversityDetail';
 import StudentApplicationsPage from './pages/dashboard/StudentApplicationsPage';
 import StudentDocuments from './pages/dashboard/StudentDocuments';
@@ -64,6 +65,7 @@ function App() {
             <Route path="documents" element={<StudentDocuments />} />
             <Route path="programmes" element={<UniversityProgrammes />} />
             <Route path="programmes/:slug" element={<UniversityDetail />} />
+            <Route path="international-office" element={<InternationalOffice />} />
             <Route path="applications" element={<StudentApplicationsPage />} />
             <Route element={<RequireProfileComplete />}>
               <Route path="applications/new" element={<ApplicationWorkflowPage />} />
