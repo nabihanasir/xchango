@@ -10,6 +10,7 @@ import CourseRequest, {
   ICourseRequest,
   ICourseRequestItem,
 } from '../models/CourseRequest';
+import ProgramOutline from '../models/ProgramOutline';
 import StudentProfile from '../models/StudentProfile';
 import { ValidationError } from '../errors/AppError';
 import { appUrl, notifyUser } from './notificationService';
@@ -23,6 +24,14 @@ import {
   rankHomeCourseMatches,
 } from './aiCourseMatcherService';
 import { extractOutlineText } from './outlineTextService';
+import {
+  CourseLike,
+  PlanContext,
+  evaluateCandidate,
+  evaluateCreditCaps,
+  isPlanCandidate,
+  toFinalScore,
+} from './courseEligibilityService';
 
 interface DecisionInput {
   itemId: string;
@@ -102,6 +111,9 @@ const rankingToSnapshot = (ranking: HomeCourseRanking): MatchSnapshotInput => {
   };
 };
 
+/** Added to the keyword score of home courses that are in the student's plan, so they make the LLM shortlist. */
+const PLAN_COURSE_BOOST = 0.25;
+
 /** Finds the best home course for one request item and records the ranked candidates. Never throws. */
 const autoMatchItem = async (requestId: string, itemId: string, homeCourses: ICourse[], basis: MatchBasis) => {
   const fields = STATUS_FIELDS[basis];
@@ -118,11 +130,22 @@ const autoMatchItem = async (requestId: string, itemId: string, homeCourses: ICo
       throw new Error('The host course for this request item could not be loaded.');
     }
 
+    // Courses in the student's plan are favoured when the shortlist is made, and the best match is the
+    // one with the highest score once eligibility (plan, transcript, course type, credits) is counted.
+    const context = await loadPlanContext(String(request.studentId));
     const ranking = await rankHomeCourseMatches(hostCourse, homeCourses, {
       basis,
       uploadedOutline: item.uploadedOutline?.text,
+      homeCourseBoost: (homeCourse) => (isPlanCandidate(context, homeCourse) ? PLAN_COURSE_BOOST : 0),
     });
-    const snapshot = rankingToSnapshot(ranking);
+    const snapshot = rankingToSnapshot({
+      ...ranking,
+      candidates: [...ranking.candidates].sort(
+        (left, right) =>
+          toFinalScore(right.matchScore, evaluateCandidate(context, hostCourse, right.homeCourse)) -
+          toFinalScore(left.matchScore, evaluateCandidate(context, hostCourse, left.homeCourse))
+      ),
+    });
 
     const itemUpdate: Record<string, unknown> = {
       [`items.$.${fields.status}`]: AIMatchStatus.COMPLETED,
@@ -214,6 +237,77 @@ const attachStudentProfiles = async (requests: Array<Record<string, any>>): Prom
   });
 };
 
+const toPlanContext = (
+  outline: Record<string, any> | null | undefined,
+  transcript: Record<string, any> | null | undefined
+): PlanContext => ({
+  outline: outline?.semesters?.length ? (outline as PlanContext['outline']) : null,
+  transcript: transcript?.semesters?.length ? (transcript as PlanContext['transcript']) : null,
+});
+
+const loadPlanContext = async (studentId: string): Promise<PlanContext> => {
+  const [outline, profile] = await Promise.all([
+    ProgramOutline.findOne({ studentId }).lean(),
+    StudentProfile.findOne({ userId: studentId }).lean(),
+  ]);
+  return toPlanContext(outline, profile?.transcript);
+};
+
+const sameId = (left: any, right: any) => Boolean(left && right && String(left._id ?? left) === String(right._id ?? right));
+
+/** Adds the eligibility checks and the final score to every candidate of a stored match, best first. */
+const decorateSnapshot = (snapshot: Record<string, any> | null | undefined, hostCourse: CourseLike, context: PlanContext) => {
+  if (!snapshot) {
+    return snapshot;
+  }
+
+  const candidates = ((snapshot.candidates || []) as Array<Record<string, any>>)
+    .filter((candidate) => candidate.homeCourseId)
+    .map((candidate): Record<string, any> => {
+      const eligibility = evaluateCandidate(context, hostCourse, candidate.homeCourseId);
+      return {
+        ...candidate,
+        contentScore: candidate.matchScore,
+        matchScore: toFinalScore(candidate.matchScore, eligibility),
+        eligibility,
+      };
+    })
+    .sort((left, right) => right.matchScore - left.matchScore);
+
+  const paired = candidates.find((candidate) => sameId(candidate.homeCourseId, snapshot.homeCourseId));
+  return {
+    ...snapshot,
+    candidates,
+    ...(paired ? { matchScore: paired.matchScore, contentScore: paired.contentScore, eligibility: paired.eligibility } : {}),
+  };
+};
+
+/**
+ * Checks a request against the student's program plan and transcript: the semester credit limit for each
+ * course, and the plan/passed/type/credit checks for every home course the matcher scored.
+ */
+const withEligibility = async (request: Record<string, any>): Promise<Record<string, any>> => {
+  const studentId = String(request.studentId?._id ?? request.studentId);
+  const outline = await ProgramOutline.findOne({ studentId }).lean();
+  const context = toPlanContext(outline, request.studentProfile?.transcript);
+
+  const hostCourses: CourseLike[] = request.items.map((item: Record<string, any>) => item.hostCourseId || { creditHours: 0 });
+  const { summary, checks } = evaluateCreditCaps(context, hostCourses);
+
+  return {
+    ...request,
+    planSummary: summary,
+    programOutline: outline || null,
+    items: request.items.map((item: Record<string, any>, index: number) => {
+      const matchResult = item.matchResult && {
+        ...decorateSnapshot(item.matchResult, hostCourses[index], context),
+        outlineMatch: decorateSnapshot(item.matchResult.outlineMatch, hostCourses[index], context),
+      };
+      return { ...item, creditCap: checks[index], matchResult: matchResult || null };
+    }),
+  };
+};
+
 const hydrateRequest = async (request: ICourseRequest | null): Promise<Record<string, any> | null> => {
   if (!request) {
     return null;
@@ -244,7 +338,7 @@ const hydrateRequest = async (request: ICourseRequest | null): Promise<Record<st
   };
 
   const [withProfile] = await attachStudentProfiles([hydrated]);
-  return withProfile;
+  return withEligibility(withProfile);
 };
 
 const createDecisionMessage = (request: Record<string, any>) => {

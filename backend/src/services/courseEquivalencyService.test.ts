@@ -19,7 +19,14 @@ jest.mock('../models/CourseRequest', () => {
   const actual = jest.requireActual('../models/CourseRequest');
   return { ...actual, __esModule: true, default: { findById: jest.fn(), findOne: jest.fn(), updateOne: jest.fn(), create: jest.fn() } };
 });
-jest.mock('../models/StudentProfile', () => ({ find: jest.fn(() => ({ lean: jest.fn().mockResolvedValue([]) })) }));
+jest.mock('../models/StudentProfile', () => ({
+  find: jest.fn(() => ({ lean: jest.fn().mockResolvedValue([]) })),
+  findOne: jest.fn(() => ({ lean: jest.fn().mockResolvedValue(null) })),
+}));
+jest.mock('../models/ProgramOutline', () => {
+  const actual = jest.requireActual('../models/ProgramOutline');
+  return { ...actual, __esModule: true, default: { findOne: jest.fn(() => ({ lean: jest.fn().mockResolvedValue(null) })) } };
+});
 jest.mock('./notificationService', () => ({ appUrl: jest.fn(), notifyUser: jest.fn() }));
 jest.mock('../models/Application', () => ({ __esModule: true, default: { exists: jest.fn() } }));
 jest.mock('./outlineTextService', () => ({ extractOutlineText: jest.fn() }));
@@ -67,7 +74,7 @@ const buildRequest = (itemOverrides: Record<string, unknown> = {}) => {
     studentId,
     items: Object.assign([item], { id: (value: string) => (String(item._id) === String(value) ? item : null) }),
     save: jest.fn().mockResolvedValue(undefined),
-    toObject: () => ({ _id: requestId, items: [{ ...item }] }),
+    toObject: () => ({ _id: requestId, studentId, items: [{ ...item }] }),
   };
   return { request, item };
 };
@@ -271,6 +278,7 @@ describe('outline-based matching', () => {
     expect(mockedRank).toHaveBeenCalledWith(hostCourse, [bestHome, altHome], {
       basis: 'outline',
       uploadedOutline: 'Week 1 arrays...',
+      homeCourseBoost: expect.any(Function),
     });
     expect(MockedRequest.updateOne).toHaveBeenCalledWith(
       { _id: String(requestId), items: { $elemMatch: { _id: String(itemId), outlineMatchStatus: AIMatchStatus.IN_PROGRESS } } },
