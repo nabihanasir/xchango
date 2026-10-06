@@ -47,6 +47,7 @@ export interface AdminUserRecord {
   createdAt?: string;
   designation?: string;
   department?: string;
+  countries?: string[];
   password?: string;
 }
 
@@ -97,6 +98,8 @@ export const adminApi = {
   getUsers: () => unwrap<AdminUserRecord[]>(apiClient.get('/admin/users')),
   createUser: (payload: Record<string, unknown>) =>
     unwrap<AdminUserRecord>(apiClient.post('/admin/users', payload)),
+  setAdvisorCountries: (userId: string, countries: string[]) =>
+    unwrap<{ _id: string; countries: string[] }>(apiClient.put(`/admin/users/${userId}/countries`, { countries })),
   getApplications: () =>
     unwrap<WorkflowApplication[]>(apiClient.get('/admin/applications')),
   getPendingApplications: () =>

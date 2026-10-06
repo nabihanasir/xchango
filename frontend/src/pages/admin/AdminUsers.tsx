@@ -3,12 +3,42 @@ import DataTable from '../../components/admin/DataTable';
 import SearchFilter from '../../components/admin/SearchFilter';
 import { adminApi, type AdminUserRecord } from '../../lib/adminApi';
 
+// Must match the application countries on the backend; advisors receive applications for the countries ticked here.
+const ADVISOR_COUNTRIES = ['Malaysia', 'South Korea', 'Turkey'];
+
+function CountryCheckboxes({ selected, onChange }: { selected: string[]; onChange: (countries: string[]) => void }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {ADVISOR_COUNTRIES.map((country) => {
+        const checked = selected.includes(country);
+        return (
+          <label
+            key={country}
+            className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+              checked ? 'border-maroon bg-maroon/5 text-maroon' : 'border-light-color bg-slate-50 text-slate-600'
+            }`}
+          >
+            <input
+              type="checkbox"
+              className="accent-maroon"
+              checked={checked}
+              onChange={() => onChange(checked ? selected.filter((item) => item !== country) : [...selected, country])}
+            />
+            {country}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 interface CreateUserFormState {
   name: string;
   email: string;
   role: 'advisor' | 'admin';
   designation: string;
   department: string;
+  countries: string[];
   password: string;
 }
 
@@ -18,6 +48,7 @@ const defaultForm: CreateUserFormState = {
   role: 'advisor',
   designation: '',
   department: '',
+  countries: [],
   password: '',
 };
 
@@ -32,6 +63,8 @@ export default function AdminUsers() {
   const [error, setError] = useState('');
   const [createError, setCreateError] = useState('');
   const [generatedPassword, setGeneratedPassword] = useState('');
+  const [countryEdit, setCountryEdit] = useState<{ user: AdminUserRecord; countries: string[] } | null>(null);
+  const [savingCountries, setSavingCountries] = useState(false);
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -68,6 +101,24 @@ export default function AdminUsers() {
       header: 'Role',
       accessor: 'role',
       render: (value: string) => value.toUpperCase(),
+    },
+    {
+      header: 'Countries',
+      accessor: 'countries',
+      render: (_value: unknown, row: AdminUserRecord) =>
+        row.role === 'advisor' ? (
+          <div className="flex items-center gap-2">
+            <span>{row.countries?.length ? row.countries.join(', ') : 'None'}</span>
+            <button
+              onClick={() => setCountryEdit({ user: row, countries: row.countries ?? [] })}
+              className="text-xs font-bold text-maroon underline"
+            >
+              Edit
+            </button>
+          </div>
+        ) : (
+          '—'
+        ),
     },
     {
       header: 'Status',
@@ -110,6 +161,23 @@ export default function AdminUsers() {
     }
   };
 
+  const handleSaveCountries = async () => {
+    if (!countryEdit) return;
+    setSavingCountries(true);
+    try {
+      const result = await adminApi.setAdvisorCountries(countryEdit.user._id, countryEdit.countries);
+      setUsers((current) =>
+        current.map((record) => (record._id === result._id ? { ...record, countries: result.countries } : record))
+      );
+      setCountryEdit(null);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Unable to update countries.');
+      setCountryEdit(null);
+    } finally {
+      setSavingCountries(false);
+    }
+  };
+
   const handleCreateUser = async () => {
     setSubmitting(true);
     setCreateError('');
@@ -122,6 +190,7 @@ export default function AdminUsers() {
         role: form.role,
         designation: form.role === 'advisor' ? form.designation : undefined,
         department: form.role === 'advisor' ? form.department : undefined,
+        countries: form.role === 'advisor' ? form.countries : undefined,
         password: form.password || undefined,
       });
 
@@ -224,6 +293,11 @@ export default function AdminUsers() {
                       placeholder="Computer Science"
                     />
                   </div>
+                  <div>
+                    <label className="block text-xs font-bold text-maroon/60 uppercase mb-2">Supervises countries</label>
+                    <CountryCheckboxes selected={form.countries} onChange={(countries) => setForm({ ...form, countries })} />
+                    <p className="mt-2 text-xs text-slate-500">Applications to these countries are assigned to this advisor automatically.</p>
+                  </div>
                 </>
               ) : null}
               <div>
@@ -257,6 +331,36 @@ export default function AdminUsers() {
                 className="flex-1 px-6 py-3 bg-accent-yellow text-maroon font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 text-sm disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? 'Creating...' : 'Create User'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {countryEdit ? (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[2rem] bg-white p-8 shadow-2xl">
+            <h3 className="text-xl font-bold text-maroon">Countries for {countryEdit.user.name}</h3>
+            <p className="mt-2 text-sm text-slate-500">New applications to these countries are assigned to this advisor.</p>
+            <div className="mt-5">
+              <CountryCheckboxes
+                selected={countryEdit.countries}
+                onChange={(countries) => setCountryEdit({ ...countryEdit, countries })}
+              />
+            </div>
+            <div className="mt-8 flex gap-4">
+              <button
+                onClick={() => setCountryEdit(null)}
+                className="flex-1 rounded-xl bg-slate-100 px-6 py-3 text-sm font-bold text-maroon transition-all hover:bg-slate-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void handleSaveCountries()}
+                disabled={savingCountries}
+                className="flex-1 rounded-xl bg-accent-yellow px-6 py-3 text-sm font-bold text-maroon transition-all hover:bg-yellow-default disabled:opacity-60"
+              >
+                {savingCountries ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>
