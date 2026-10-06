@@ -22,7 +22,7 @@ export default function ApplicationStepper({ currentStep }: ApplicationStepperPr
                   isDone
                     ? 'border-accent-yellow bg-accent-yellow text-dark-blue'
                     : isActive
-                      ? 'border-dark-blue bg-dark-blue text-white'
+                      ? 'animate-pulse border-dark-blue bg-dark-blue text-white'
                       : 'border-slate-200 bg-white text-slate-500'
                 }`}
               >
@@ -37,7 +37,14 @@ export default function ApplicationStepper({ currentStep }: ApplicationStepperPr
       </div>
 
       <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-accent-yellow transition-all duration-300" style={{ width: `${progress}%` }} />
+        <div
+          className="progress-bar-animated h-full rounded-full transition-[width] duration-700 ease-out"
+          style={{ width: `${progress}%` }}
+          role="progressbar"
+          aria-valuenow={Math.round(progress)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        />
       </div>
     </div>
   );
