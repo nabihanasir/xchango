@@ -40,6 +40,7 @@ import AdminCourses from './pages/admin/AdminCourses';
 import AdminAiModelConfig from './pages/admin/AdminAiModelConfig';
 import AdminResults from './pages/admin/AdminResults';
 import AdminVisa from './pages/admin/AdminVisa';
+import FaqChatWidget from './components/FaqChatWidget';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import {
   RequireInterviewCompleted,
@@ -110,6 +111,7 @@ function App() {
         {/* Default route redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <FaqChatWidget />
     </Router>
   );
 }
