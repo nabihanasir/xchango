@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Eye, EyeOff, Hash, Lock, Mail, Phone, Shield, User } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Hash, Lock, Mail, Phone, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import Button from '../components/Button';
@@ -74,7 +74,6 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [sapId, setSapId] = useState('');
-  const [role, setRole] = useState('student');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -127,7 +126,7 @@ export default function Signup() {
         email: normalizedEmail,
         phone: phone.trim(),
         sapId: sapId.trim(),
-        role,
+        role: 'student',
         password,
       });
 
@@ -190,28 +189,6 @@ export default function Signup() {
             icon={<Hash className="h-5 w-5 text-body-text" />}
             required
           />
-
-          <div className="space-y-1.5 md:col-span-2">
-            <label className="block pl-1 text-xs font-bold uppercase tracking-widest text-slate-500">Role</label>
-            <div className="relative group">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-dark-blue">
-                <Shield className="h-5 w-5" />
-              </div>
-              <select
-                value={role}
-                onChange={(event) => setRole(event.target.value)}
-                className="block w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-10 font-medium text-slate-800 shadow-sm transition-all hover:bg-slate-100/50 focus:border-accent-yellow/50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-accent-yellow/10"
-                required
-              >
-                <option value="student">Student Account</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">
-                <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                </svg>
-              </div>
-            </div>
-          </div>
 
           <InputField
             label="Password"
