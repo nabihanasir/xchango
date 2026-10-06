@@ -74,3 +74,6 @@ export default upload;
 export const outlineUpload = createUploader('outlines', ['.pdf', '.docx'], {
   fileSize: 10 * 1024 * 1024,
 });
+export const programOutlineUpload = createUploader('program-outlines', ['.pdf'], {
+  fileSize: 10 * 1024 * 1024,
+});
