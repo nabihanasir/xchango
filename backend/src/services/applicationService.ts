@@ -8,6 +8,7 @@ import Application, {
 import User, { UserRole } from '../models/User';
 import AdvisorProfile from '../models/AdvisorProfile';
 import Course, { CourseType, ICourse } from '../models/Course';
+import { logger } from '../utils/logger';
 import University from '../models/University';
 import { appUrl, formatDateTime, notifyUserSafely } from './notificationService';
 import { ensureStudentProfile } from './studentService';
@@ -567,10 +568,102 @@ export const submitApplication = async (applicationId: string, studentId: string
     `Your exchange application to ${application.university} has been submitted. We will let you know once an advisor is assigned.`
   );
 
+  // Hand the application to the advisor supervising this country. If none is set up it stays PENDING for an admin.
+  try {
+    const advisor = await findAdvisorForApplication(application);
+    if (advisor) {
+      await applyAdvisorAssignment(application, advisor);
+    } else {
+      logger.warn('No advisor configured for application country; awaiting manual assignment', {
+        applicationId: String(application._id),
+        country: application.country,
+      });
+    }
+  } catch (error) {
+    logger.error('Automatic advisor assignment failed', {
+      applicationId: String(application._id),
+      cause: error instanceof Error ? error.message : String(error),
+    });
+  }
+
   return {
     application,
     warnings: buildSubmissionWarnings(application),
   };
+};
+
+/** Links the advisor to the application, moves it to ASSIGNED and notifies both parties. */
+const applyAdvisorAssignment = async (
+  application: IApplication,
+  advisor: { _id: unknown; name: string }
+) => {
+  const advisorId = String(advisor._id);
+  application.advisorId = advisor._id as any;
+  application.status = ApplicationStatus.ASSIGNED;
+  await application.save();
+
+  await notifyStudentAboutApplication(
+    application,
+    'Advisor assigned',
+    `${advisor.name} has been assigned as your advisor for your application to ${application.university}. They will contact you to schedule your interview.`
+  );
+  await notifyUserSafely({
+    userId: advisor._id as mongoose.Types.ObjectId,
+    subject: 'New student assigned to you',
+    type: 'advisor_assigned',
+    message: `A new exchange application for ${application.university} (${application.program}) has been assigned to you. Please review it and schedule an interview.`,
+    metadata: { applicationId: application._id },
+    action: { label: 'Open applications', url: appUrl('/advisor/applications') },
+  });
+
+  const assignedStudentIds = await Application.distinct('studentId', { advisorId });
+  await AdvisorProfile.findOneAndUpdate(
+    { userId: advisorId },
+    { assignedStudents: assignedStudentIds }
+  );
+};
+
+/** Statuses in which an application no longer counts towards an advisor's workload. */
+const CLOSED_STATUSES = [ApplicationStatus.REJECTED, ApplicationStatus.COMPLETED, ApplicationStatus.DRAFT];
+
+/**
+ * Picks the advisor responsible for an application's country. A student keeps the advisor they already
+ * have for that country; otherwise the advisor with the fewest open applications is chosen.
+ */
+export const findAdvisorForApplication = async (application: IApplication) => {
+  const profiles = await AdvisorProfile.find({ countries: application.country }).select('userId');
+  if (!profiles.length) {
+    return null;
+  }
+
+  const advisors = await User.find({
+    _id: { $in: profiles.map((profile) => profile.userId) },
+    role: UserRole.ADVISOR,
+    isActive: { $ne: false },
+    offboardedAt: { $exists: false },
+  });
+  if (!advisors.length) {
+    return null;
+  }
+
+  const existing = await Application.findOne({
+    studentId: application.studentId,
+    country: application.country,
+    advisorId: { $in: advisors.map((advisor) => advisor._id) },
+  }).select('advisorId');
+  const existingAdvisor = existing && advisors.find((advisor) => String(advisor._id) === String(existing.advisorId));
+  if (existingAdvisor) {
+    return existingAdvisor;
+  }
+
+  const workloads = await Promise.all(
+    advisors.map(async (advisor) => ({
+      advisor,
+      open: await Application.countDocuments({ advisorId: advisor._id, status: { $nin: CLOSED_STATUSES } }),
+    }))
+  );
+  workloads.sort((left, right) => left.open - right.open || left.advisor.name.localeCompare(right.advisor.name));
+  return workloads[0].advisor;
 };
 
 export const assignAdvisor = async (applicationId: string, advisorId: string) => {
@@ -602,29 +695,7 @@ export const assignAdvisor = async (applicationId: string, advisorId: string) =>
     );
   }
 
-  application.advisorId = advisor._id as any;
-  application.status = ApplicationStatus.ASSIGNED;
-  await application.save();
-
-  await notifyStudentAboutApplication(
-    application,
-    'Advisor assigned',
-    `${advisor.name} has been assigned as your advisor for your application to ${application.university}. They will contact you to schedule your interview.`
-  );
-  await notifyUserSafely({
-    userId: advisor._id as mongoose.Types.ObjectId,
-    subject: 'New student assigned to you',
-    type: 'advisor_assigned',
-    message: `A new exchange application for ${application.university} (${application.program}) has been assigned to you. Please review it and schedule an interview.`,
-    metadata: { applicationId: application._id },
-    action: { label: 'Open applications', url: appUrl('/advisor/applications') },
-  });
-
-  const assignedStudentIds = await Application.distinct('studentId', { advisorId });
-  await AdvisorProfile.findOneAndUpdate(
-    { userId: advisorId },
-    { assignedStudents: assignedStudentIds }
-  );
+  await applyAdvisorAssignment(application, advisor);
 
   return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
 };
