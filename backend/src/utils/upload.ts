@@ -60,7 +60,9 @@ export const toPublicFileUrl = (filePath: string) => {
 
 const upload = createUploader('documents');
 
-export const transcriptUpload = createUploader('transcripts', ['.xlsx', '.xls', '.csv']);
+export const transcriptUpload = createUploader('transcripts', ['.xlsx', '.xls', '.csv', '.pdf'], {
+  fileSize: 10 * 1024 * 1024,
+});
 export const documentUpload = createUploader('documents', ['.pdf', '.jpg', '.jpeg', '.png'], {
   fileSize: 5 * 1024 * 1024,
 });
