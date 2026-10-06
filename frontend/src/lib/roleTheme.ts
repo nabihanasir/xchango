@@ -32,7 +32,7 @@ export interface RoleTheme {
   panelLabel: string;
   /** Inactive nav row text + hover (desktop sidebar and mobile drawer). */
   navInactive: string;
-  /** Sidebar footer buttons ("Collapse Nav") text + hover. */
+  /** Sidebar footer buttons ("Collapse") text + hover. */
   footerButton: string;
   /** Sidebar "Sign Out" text + hover. */
   signOut: string;
