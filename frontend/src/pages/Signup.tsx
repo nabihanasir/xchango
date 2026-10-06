@@ -11,6 +11,58 @@ import { authApi } from '../lib/authApi';
 import { parseApiError } from '../lib/errorUtils';
 import { AppApiError } from '../types/error';
 
+const NAME_PATTERN = /^[A-Za-z][A-Za-z .'-]*$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PHONE_PATTERN = /^\+?[0-9][0-9\s-]{6,17}$/;
+const SAP_ID_PATTERN = /^[0-9]{5,10}$/;
+
+type SignupValues = Record<'name' | 'email' | 'phone' | 'sapId' | 'password' | 'confirmPassword', string>;
+
+const validateField = (field: keyof SignupValues, values: SignupValues): string => {
+  const value = values[field];
+  switch (field) {
+    case 'name':
+      if (!value.trim()) return 'Full name is required.';
+      if (value.trim().length < 2) return 'Full name must be at least 2 characters.';
+      if (!NAME_PATTERN.test(value.trim())) return 'Full name can only contain letters, spaces, apostrophes and hyphens.';
+      return '';
+    case 'email':
+      if (!value.trim()) return 'Email is required.';
+      if (!EMAIL_PATTERN.test(value.trim())) return 'Enter a valid email address, e.g. you@example.com.';
+      return '';
+    case 'phone': {
+      if (!value.trim()) return 'Phone number is required.';
+      const digits = value.replace(/[^0-9]/g, '').length;
+      if (!PHONE_PATTERN.test(value.trim()) || digits < 7 || digits > 15) {
+        return 'Enter a valid phone number (7-15 digits, optional + prefix).';
+      }
+      return '';
+    }
+    case 'sapId':
+      if (!value.trim()) return 'SAP ID is required.';
+      if (!SAP_ID_PATTERN.test(value.trim())) return 'SAP ID must be 5-10 digits.';
+      return '';
+    case 'password':
+      if (!value) return 'Password is required.';
+      if (value.length < 8) return 'Password must be at least 8 characters.';
+      if (!/[A-Za-z]/.test(value) || !/[0-9]/.test(value)) return 'Password must include both letters and numbers.';
+      return '';
+    case 'confirmPassword':
+      if (!value) return 'Please confirm your password.';
+      if (value !== values.password) return 'Passwords do not match.';
+      return '';
+  }
+};
+
+const validateSignup = (values: SignupValues) => {
+  const errors: Record<string, string> = {};
+  (Object.keys(values) as (keyof SignupValues)[]).forEach((field) => {
+    const message = validateField(field, values);
+    if (message) errors[field] = message;
+  });
+  return errors;
+};
+
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -26,6 +78,31 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  const values: SignupValues = { name, email, phone, sapId, password, confirmPassword };
+
+  const checkField = (field: keyof SignupValues, overrides: Partial<SignupValues> = {}) => {
+    const message = validateField(field, { ...values, ...overrides });
+    setFieldErrors((current) => {
+      const next = { ...current };
+      if (message) next[field] = message;
+      else delete next[field];
+      return next;
+    });
+  };
+
+  // Validate on blur; once a field has been flagged, re-check as the user types so the message clears when fixed.
+  const fieldProps = (field: keyof SignupValues, setter: (value: string) => void) => ({
+    value: values[field],
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+      const next = event.target.value;
+      setter(next);
+      if (fieldErrors[field]) checkField(field, { [field]: next });
+      if (field === 'password' && confirmPassword) checkField('confirmPassword', { password: next });
+    },
+    onBlur: () => checkField(field),
+    error: fieldErrors[field],
+  });
+
   const navigate = useNavigate();
   const { login } = useAuth();
   const { showToast } = useToast();
@@ -34,22 +111,8 @@ export default function Signup() {
     event.preventDefault();
     setError(null);
 
-    const nextFieldErrors: Record<string, string> = {};
+    const nextFieldErrors = validateSignup(values);
     const normalizedEmail = email.trim().toLowerCase();
-
-    if (!name.trim()) nextFieldErrors.name = 'Full name is required.';
-    if (!normalizedEmail) nextFieldErrors.email = 'Email is required.';
-    if (normalizedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-      nextFieldErrors.email = 'Email is invalid format.';
-    }
-    if (!phone.trim()) nextFieldErrors.phone = 'Phone number is required.';
-    if (!sapId.trim()) nextFieldErrors.sapId = 'SAP ID is required.';
-    if (!password) nextFieldErrors.password = 'Password is required.';
-    if (password && password.length < 8) nextFieldErrors.password = 'Password must be at least 8 characters.';
-    if (!confirmPassword) nextFieldErrors.confirmPassword = 'Please confirm your password.';
-    if (password && confirmPassword && password !== confirmPassword) {
-      nextFieldErrors.confirmPassword = 'Passwords do not match.';
-    }
 
     setFieldErrors(nextFieldErrors);
     if (Object.keys(nextFieldErrors).length) {
@@ -90,49 +153,41 @@ export default function Signup() {
 
   return (
     <AuthLayout title="Create Account" subtitle="Register with clear guidance and instant validation">
-      <form className="w-full space-y-6" onSubmit={handleSubmit}>
+      <form className="w-full space-y-6" onSubmit={handleSubmit} noValidate>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <InputField
             label="Full Name"
             type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
+            {...fieldProps('name', setName)}
             placeholder="John Doe"
             icon={<User className="h-5 w-5 text-body-text" />}
-            error={fieldErrors.name}
             required
           />
 
           <InputField
             label="Email Address"
             type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            {...fieldProps('email', setEmail)}
             placeholder="you@example.com"
             icon={<Mail className="h-5 w-5 text-body-text" />}
-            error={fieldErrors.email}
             required
           />
 
           <InputField
             label="Phone Number"
             type="tel"
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            {...fieldProps('phone', setPhone)}
             placeholder="+92 300 1234567"
             icon={<Phone className="h-5 w-5 text-body-text" />}
-            error={fieldErrors.phone}
             required
           />
 
           <InputField
             label="SAP ID"
             type="text"
-            value={sapId}
-            onChange={(event) => setSapId(event.target.value)}
+            {...fieldProps('sapId', setSapId)}
             placeholder="e.g. 70012345"
             icon={<Hash className="h-5 w-5 text-body-text" />}
-            error={fieldErrors.sapId}
             required
           />
 
@@ -161,26 +216,22 @@ export default function Signup() {
           <InputField
             label="Password"
             type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Enter at least 8 characters"
+            {...fieldProps('password', setPassword)}
+            placeholder="8+ characters, letters and numbers"
             icon={<Lock className="h-5 w-5" />}
             rightIcon={showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             onRightIconClick={() => setShowPassword((value) => !value)}
-            error={fieldErrors.password}
             required
           />
 
           <InputField
             label="Confirm Password"
             type={showConfirmPassword ? 'text' : 'password'}
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
+            {...fieldProps('confirmPassword', setConfirmPassword)}
             placeholder="Re-enter your password"
             icon={<Lock className="h-5 w-5" />}
             rightIcon={showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             onRightIconClick={() => setShowConfirmPassword((value) => !value)}
-            error={fieldErrors.confirmPassword}
             required
           />
         </div>
