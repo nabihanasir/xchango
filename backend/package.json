@@ -24,7 +24,6 @@
     "nodemailer": "^10.0.12",
     "pdf-parse": "^2.4.5",
     "socket.io": "^4.8.3",
-    "xchango": "file:..",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

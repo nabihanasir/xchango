@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.submitAdvisorDecision = exports.runMatch = exports.updateHomeCourseSelection = exports.getAdvisorRequestById = exports.getAdvisorRequests = exports.getStudentRequests = exports.createStudentRequest = exports.getHomeCourses = exports.getHostCourses = void 0;
+exports.submitAdvisorDecision = exports.uploadCourseOutline = exports.rerunOutlineMatch = exports.rerunAutoMatch = exports.runMatch = exports.updateHomeCourseSelection = exports.getAdvisorRequestById = exports.getAdvisorRequests = exports.getStudentRequests = exports.createStudentRequest = exports.getHomeCourses = exports.getHostCourses = void 0;
 const response_1 = require("../utils/response");
 const courseEquivalencyService = __importStar(require("../services/courseEquivalencyService"));
 const getHostCourses = async (_req, res) => {
@@ -76,6 +76,21 @@ const runMatch = async (req, res) => {
     (0, response_1.sendResponse)(res, 200, 'AI course match completed successfully', request);
 };
 exports.runMatch = runMatch;
+const rerunAutoMatch = async (req, res) => {
+    const request = await courseEquivalencyService.rerunAutoMatch(req.params.id, req.params.itemId);
+    (0, response_1.sendResponse)(res, 200, 'Automatic course match completed', request);
+};
+exports.rerunAutoMatch = rerunAutoMatch;
+const rerunOutlineMatch = async (req, res) => {
+    const request = await courseEquivalencyService.rerunAutoMatch(req.params.id, req.params.itemId, 'outline');
+    (0, response_1.sendResponse)(res, 200, 'Outline course match completed', request);
+};
+exports.rerunOutlineMatch = rerunOutlineMatch;
+const uploadCourseOutline = async (req, res) => {
+    const request = await courseEquivalencyService.uploadCourseOutline(req.user._id.toString(), req.params.id, req.params.itemId, { file: req.file, pastedText: typeof req.body?.text === 'string' ? req.body.text : undefined });
+    (0, response_1.sendResponse)(res, 200, 'Course outline uploaded. Matching has started.', request);
+};
+exports.uploadCourseOutline = uploadCourseOutline;
 const submitAdvisorDecision = async (req, res) => {
     const wholeRequestDecision = req.body.wholeRequestDecision;
     const request = await courseEquivalencyService.submitAdvisorDecision(req.params.id, req.body.advisorComment || '', req.body.itemDecisions || [], wholeRequestDecision);

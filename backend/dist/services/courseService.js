@@ -36,11 +36,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.seedDemoHomeCoursesIfNeeded = exports.deleteHomeCourse = exports.updateHomeCourse = exports.createHomeCourse = exports.getCourseById = exports.listHomeCourses = void 0;
+exports.seedDemoHomeCoursesIfNeeded = exports.deleteHomeCourse = exports.updateCourseInstructor = exports.listHostCourses = exports.updateHomeCourse = exports.createHomeCourse = exports.getCourseById = exports.listHomeCourses = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const Course_1 = __importStar(require("../models/Course"));
 const User_1 = __importStar(require("../models/User"));
 const AppError_1 = require("../errors/AppError");
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DEMO_ADMIN_EMAIL = 'admin@xchango.com';
 const DEMO_ADMIN_PASSWORD = 'Admin@123';
 const DEMO_HOME_COURSES = [
@@ -92,6 +93,14 @@ const validateCourseInput = (payload) => {
     }
     return { title, creditHours };
 };
+const validateInstructorInput = (payload) => {
+    const instructorName = payload.instructorName?.trim() || '';
+    const instructorEmail = payload.instructorEmail?.trim().toLowerCase() || '';
+    if (instructorEmail && !EMAIL_PATTERN.test(instructorEmail)) {
+        throw new AppError_1.ValidationError('Instructor email is invalid.', 'The instructor email address is not in a valid format.', 'Enter an address like name@university.edu or leave it empty.', 'COURSE_INSTRUCTOR_EMAIL_INVALID');
+    }
+    return { instructorName, instructorEmail };
+};
 const populateCourse = (query) => query.populate('createdBy', 'name email role');
 const ensureAdminUser = async () => {
     const existingAdmin = await User_1.default.findOne({ role: User_1.UserRole.ADMIN }).sort({ createdAt: 1 });
@@ -126,11 +135,13 @@ const createHomeCourse = async (adminId, payload) => {
         throw new AppError_1.ForbiddenError('Access denied.', 'Only administrators can create home courses.', 'Sign in with an administrator account and try again.', 'ROLE_NOT_ALLOWED');
     }
     const { title, creditHours } = validateCourseInput(payload);
+    const instructor = validateInstructorInput(payload);
     const course = await Course_1.default.create({
         title,
         name: title,
         description: payload.description?.trim() || '',
         creditHours,
+        ...instructor,
         code: '',
         universityId: null,
         type: Course_1.CourseType.HOME,
@@ -142,6 +153,7 @@ const createHomeCourse = async (adminId, payload) => {
 exports.createHomeCourse = createHomeCourse;
 const updateHomeCourse = async (courseId, payload) => {
     const { title, creditHours } = validateCourseInput(payload);
+    const instructor = validateInstructorInput(payload);
     const course = await Course_1.default.findOne({
         _id: courseId,
         $or: [{ isHomeCourse: true }, { type: Course_1.CourseType.HOME }],
@@ -153,12 +165,29 @@ const updateHomeCourse = async (courseId, payload) => {
     course.name = title;
     course.description = payload.description?.trim() || '';
     course.creditHours = creditHours;
+    course.instructorName = instructor.instructorName;
+    course.instructorEmail = instructor.instructorEmail;
     course.isHomeCourse = true;
     course.type = Course_1.CourseType.HOME;
     await course.save();
     return (0, exports.getCourseById)(courseId);
 };
 exports.updateHomeCourse = updateHomeCourse;
+const listHostCourses = async () => Course_1.default.find({ type: Course_1.CourseType.HOST }).populate('universityId', 'name').sort({ code: 1, title: 1 });
+exports.listHostCourses = listHostCourses;
+/** Sets who teaches a course (home or host). Empty values clear the instructor. */
+const updateCourseInstructor = async (courseId, payload) => {
+    const instructor = validateInstructorInput(payload);
+    const course = await Course_1.default.findById(courseId);
+    if (!course) {
+        throw new AppError_1.NotFoundError('Course not found.', 'No course exists for the provided identifier.', 'Refresh the list and try again.', 'COURSE_NOT_FOUND');
+    }
+    course.instructorName = instructor.instructorName;
+    course.instructorEmail = instructor.instructorEmail;
+    await course.save();
+    return course.populate('universityId', 'name');
+};
+exports.updateCourseInstructor = updateCourseInstructor;
 const deleteHomeCourse = async (courseId) => {
     const deleted = await Course_1.default.findOneAndDelete({
         _id: courseId,

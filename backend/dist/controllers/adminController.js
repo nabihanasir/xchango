@@ -33,8 +33,9 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCourseMappings = exports.addCourseMapping = exports.uploadOfferLetter = exports.createUser = exports.getPendingApplications = exports.getApplications = exports.getUsers = exports.addCourse = exports.addUniversity = exports.getDashboardStats = void 0;
+exports.reactivateStudent = exports.setSemesterEndDate = exports.updateAiModelConfig = exports.getAiModelConfig = exports.getCourseMappings = exports.addCourseMapping = exports.uploadOfferLetter = exports.createUser = exports.getPendingApplications = exports.getApplications = exports.getUsers = exports.addCourse = exports.addUniversity = exports.getDashboardStats = void 0;
 const adminService = __importStar(require("../services/adminService"));
+const offboardingService = __importStar(require("../services/offboardingService"));
 const response_1 = require("../utils/response");
 const getDashboardStats = async (req, res) => {
     const stats = await adminService.getAllStats();
@@ -88,3 +89,23 @@ const getCourseMappings = async (req, res) => {
     (0, response_1.sendResponse)(res, 200, 'Course mappings fetched', mappings);
 };
 exports.getCourseMappings = getCourseMappings;
+const getAiModelConfig = async (_req, res) => {
+    const config = await adminService.getAiModelConfig();
+    (0, response_1.sendResponse)(res, 200, 'AI model configuration fetched', config);
+};
+exports.getAiModelConfig = getAiModelConfig;
+const updateAiModelConfig = async (req, res) => {
+    const config = await adminService.upsertAiModelConfig(req.user._id.toString(), req.body);
+    (0, response_1.sendResponse)(res, 200, 'AI model configuration saved', config);
+};
+exports.updateAiModelConfig = updateAiModelConfig;
+const setSemesterEndDate = async (req, res) => {
+    const application = await offboardingService.setSemesterEndDate(String(req.params.id), req.body?.semesterEndDate ?? null);
+    (0, response_1.sendResponse)(res, 200, 'Semester end date updated', application);
+};
+exports.setSemesterEndDate = setSemesterEndDate;
+const reactivateStudent = async (req, res) => {
+    const user = await offboardingService.reactivateStudent(String(req.params.id));
+    (0, response_1.sendResponse)(res, 200, 'Student account re-activated', user);
+};
+exports.reactivateStudent = reactivateStudent;

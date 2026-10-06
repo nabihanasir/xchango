@@ -40,5 +40,8 @@ const AdvisorProfileSchema = new mongoose_1.Schema({
     department: { type: String, required: true },
     assignedStudents: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }],
     experience: { type: Number },
+    phone: { type: String, trim: true, maxlength: 30 },
+    bio: { type: String, trim: true, maxlength: 1000 },
+    officeHours: { type: String, trim: true, maxlength: 200 },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('AdvisorProfile', AdvisorProfileSchema);

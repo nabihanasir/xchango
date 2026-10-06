@@ -5,3 +5,6 @@ backend/.jest-cache/
 frontend/.jest-cache/
 backend/.env
 frontend/.env
+backend/dist/
+frontend/dist/
+backend/uploads/

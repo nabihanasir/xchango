@@ -14,6 +14,10 @@ app.use(cors());
 app.use(express.json());
 app.use(attachRequestContext);
 
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Main Routes
 app.use('/api', routes);
 

@@ -57,10 +57,12 @@ router.post('/:id/submit', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDE
 router.patch('/:id/assign-advisor', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADMIN), applicationController.assignAdvisor);
 router.patch('/:id/schedule-interview', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.scheduleInterview);
 router.patch('/:id/complete-interview', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.completeInterview);
+router.patch('/:id/interview-decision', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.recordInterviewDecision);
 router.post('/:id/interview', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.scheduleInterview);
 router.patch('/:id/status', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.updateStatus);
 router.post('/:id/ai-recommendations', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.generateAiRecommendations);
 router.put('/:id/course-decision', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR), applicationController.updateCourseDecision);
 router.post('/:id/documents', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT), applicationDocumentUpload.array('files'), applicationController.uploadDocuments);
 router.post('/:id/courses', (0, authorize_1.authorizeRoles)(User_1.UserRole.STUDENT), applicationController.selectCourses);
+router.post('/:id/arrival', (0, authorize_1.authorizeRoles)(User_1.UserRole.ADVISOR, User_1.UserRole.ADMIN), applicationController.recordStudentArrival);
 exports.default = router;

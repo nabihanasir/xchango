@@ -59,7 +59,7 @@ const requireInterviewCompleted = async (req, _res, next) => {
         const studentId = req.user?._id?.toString();
         const canRequest = await applicationService.studentCanRequestCourseApproval(studentId);
         if (!canRequest) {
-            throw new AppError_1.ValidationError('Interview not completed yet.', 'You must complete your advisor interview before requesting course approval.', 'Wait until your advisor marks the interview completed, then try again.', 'INTERVIEW_NOT_COMPLETED');
+            throw new AppError_1.ValidationError('Advisor recommendation required.', 'You can only request course approval once your advisor has recommended you after the interview.', 'Wait until your advisor records a recommendation, then try again.', 'INTERVIEW_NOT_COMPLETED');
         }
         next();
     }
