@@ -11,6 +11,7 @@ import CourseRequest, {
   ICourseRequestItem,
 } from '../models/CourseRequest';
 import StudentProfile from '../models/StudentProfile';
+import { ValidationError } from '../errors/AppError';
 import { appUrl, notifyUser } from './notificationService';
 import { logger } from '../utils/logger';
 import { toPublicFileUrl } from '../utils/upload';
@@ -272,7 +273,7 @@ const createStudentNotification = async (request: Record<string, any>) => {
       status: request.status,
       decidedAt: new Date().toISOString(),
     },
-    action: { label: 'View decision', url: appUrl('/dashboard/equivalency/requests') },
+    action: { label: 'View decision', url: appUrl('/dashboard/courses') },
   });
 };
 
@@ -287,6 +288,26 @@ export const listHomeCourses = async () =>
 export const createCourseRequest = async (studentId: string, hostCourseIds: string[]) => {
   if (!hostCourseIds.length) {
     throw new Error('Select at least one host course to submit a request.');
+  }
+
+  // One request at a time: a new one is only allowed after the previous one was rejected.
+  const activeRequest = await CourseRequest.findOne({
+    studentId,
+    status: {
+      $in: [CourseRequestStatus.PENDING, CourseRequestStatus.UNDER_REVIEW, CourseRequestStatus.APPROVED],
+    },
+  });
+  if (activeRequest) {
+    throw new ValidationError(
+      activeRequest.status === CourseRequestStatus.APPROVED
+        ? 'Your course request has already been approved.'
+        : 'You already have a course request awaiting advisor review.',
+      'A student can only have one course request that is pending or approved.',
+      activeRequest.status === CourseRequestStatus.APPROVED
+        ? 'Continue to the document upload step.'
+        : 'Wait for your advisor to approve or reject the request, then resubmit if it is rejected.',
+      'COURSE_REQUEST_ALREADY_ACTIVE'
+    );
   }
 
   hostCourseIds.forEach((courseId) => ensureValidObjectId(courseId, 'One or more host course IDs are invalid.'));
