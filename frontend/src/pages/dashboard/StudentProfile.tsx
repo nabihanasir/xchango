@@ -1,10 +1,11 @@
 import { startTransition, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { CheckCircle2, FileText, GraduationCap } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, FileText, GraduationCap } from 'lucide-react';
 import StudentProfileForm, { STUDENT_PROFILE_FORM_ID } from '../../components/student/StudentProfileForm';
 import TranscriptUpload from '../../components/student/TranscriptUpload';
 import TranscriptViewer from '../../components/student/TranscriptViewer';
 import { useAuth } from '../../context/AuthContext';
+import { parseApiError } from '../../lib/errorUtils';
 import { studentProfileApi } from '../../lib/studentProfileApi';
 import type {
   StudentProfile as StudentProfileType,
@@ -22,7 +23,7 @@ export default function StudentProfile() {
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState('');
   const [profileError, setProfileError] = useState('');
-  const [transcriptError, setTranscriptError] = useState('');
+  const [transcriptError, setTranscriptError] = useState<{ title: string; solution: string } | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [showSavedPopup, setShowSavedPopup] = useState(false);
   const [uploadingTranscript, setUploadingTranscript] = useState(false);
@@ -101,7 +102,7 @@ export default function StudentProfile() {
     }
 
     setUploadingTranscript(true);
-    setTranscriptError('');
+    setTranscriptError(null);
 
     try {
       const uploadedTranscript = await studentProfileApi.uploadTranscript(studentId, file);
@@ -116,7 +117,8 @@ export default function StudentProfile() {
           : current
       );
     } catch (error) {
-      setTranscriptError(error instanceof Error ? error.message : 'Unable to upload transcript.');
+      const parsed = parseApiError(error);
+      setTranscriptError({ title: parsed.message, solution: parsed.solution });
     } finally {
       setUploadingTranscript(false);
     }
@@ -235,7 +237,6 @@ export default function StudentProfile() {
       <TranscriptUpload
         uploading={uploadingTranscript}
         currentFileUrl={transcript?.fileUrl}
-        errorMessage={transcriptError}
         onUpload={handleTranscriptUpload}
       />
 
@@ -261,6 +262,37 @@ export default function StudentProfile() {
           </button>
         </div>
       </section>
+
+      {transcriptError
+        ? createPortal(
+            <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm">
+              <div
+                role="alertdialog"
+                aria-modal="true"
+                aria-labelledby="transcript-error-title"
+                className="w-full max-w-md rounded-[2rem] bg-white p-8 text-center shadow-2xl shadow-slate-950/20"
+              >
+                <div className="mx-auto inline-flex rounded-full bg-red-100 p-3 text-red-600">
+                  <AlertTriangle className="h-8 w-8" />
+                </div>
+                <h3 id="transcript-error-title" className="mt-4 text-2xl font-bold text-slate-900">
+                  Transcript upload failed
+                </h3>
+                <p className="mt-3 text-sm font-semibold text-slate-700">{transcriptError.title}</p>
+                <p className="mt-2 text-sm text-slate-500">{transcriptError.solution}</p>
+                <button
+                  type="button"
+                  autoFocus
+                  onClick={() => setTranscriptError(null)}
+                  className="mt-6 rounded-2xl bg-dark-blue px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0e1550]"
+                >
+                  Try again
+                </button>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
 
       {showSavedPopup
         ? createPortal(

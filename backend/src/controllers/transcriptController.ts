@@ -1,5 +1,6 @@
+import fs from 'fs/promises';
 import { Response } from 'express';
-import { ForbiddenError, ValidationError } from '../errors/AppError';
+import { AppError, ForbiddenError, ValidationError } from '../errors/AppError';
 import { UserRole } from '../models/User';
 import { parseUploadedTranscript } from '../services/transcriptLlmParser';
 import * as studentService from '../services/studentService';
@@ -30,7 +31,33 @@ export const uploadTranscript = async (req: any, res: Response) => {
   const studentId = req.body.studentId || req.user._id.toString();
   assertStudentAccess(req, studentId);
 
-  const transcript = await parseUploadedTranscript(req.file.path);
+  let transcript;
+  try {
+    transcript = await parseUploadedTranscript(req.file.path);
+  } catch (error) {
+    // Don't keep files that could not be read as a transcript.
+    await fs.unlink(req.file.path).catch(() => undefined);
+
+    const detail = error instanceof Error ? error.message : 'The file could not be read.';
+    if (error instanceof AppError) {
+      throw error;
+    }
+    if (/^LLM |timed out|aborted|fetch failed|AI model/i.test(detail)) {
+      throw new AppError({
+        code: 'TRANSCRIPT_PARSER_UNAVAILABLE',
+        message: 'Transcript reading is temporarily unavailable.',
+        reason: detail,
+        solution: 'Try again in a moment, or upload an Excel or CSV transcript.',
+        status: 503,
+      });
+    }
+    throw new ValidationError(
+      "This file doesn't look like a transcript.",
+      detail,
+      'Upload your academic transcript (Excel, CSV or PDF) that lists courses, grades and credit hours.',
+      'INVALID_TRANSCRIPT'
+    );
+  }
   transcript.fileUrl = toPublicFileUrl(req.file.path);
 
   const savedTranscript = await studentService.saveTranscript(studentId, transcript);
