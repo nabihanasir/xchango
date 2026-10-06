@@ -197,27 +197,67 @@ const normalizeMatch = (parsed: Partial<MatchResponse> | undefined): MatchRespon
   },
 });
 
-/** Sends a prompt to the configured LLM and returns the parsed JSON, or null when no LLM is configured. */
-export const requestLlmJson = async <T>(prompt: string): Promise<T | null> => {
-  const dbConfig = await getAiModelConfigRaw();
-  const useDbConfig = Boolean(dbConfig?.isEnabled && dbConfig.apiKey && dbConfig.baseUrl && dbConfig.modelName);
+interface LlmProvider {
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+}
 
-  const apiKey = useDbConfig ? dbConfig!.apiKey : process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return null;
+const LLM_TIMEOUT_MS = 30000;
+
+/**
+ * Providers in the order they are tried: the admin-configured model (if enabled) first, then the keys
+ * from the environment - Gemini, OpenRouter, OpenAI. A provider without a key is skipped.
+ */
+const getLlmProviders = async (): Promise<LlmProvider[]> => {
+  const providers: LlmProvider[] = [];
+
+  const dbConfig = await getAiModelConfigRaw();
+  if (dbConfig?.isEnabled && dbConfig.apiKey && dbConfig.baseUrl && dbConfig.modelName) {
+    providers.push({ name: `admin-config (${dbConfig.provider})`, baseUrl: dbConfig.baseUrl, apiKey: dbConfig.apiKey, model: dbConfig.modelName });
   }
 
-  const baseUrl = useDbConfig ? dbConfig!.baseUrl : (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1');
-  const model = useDbConfig ? dbConfig!.modelName : (process.env.OPENAI_MODEL || 'gpt-4.1-mini');
+  if (process.env.GEMINI_API_KEY) {
+    providers.push({
+      name: 'gemini',
+      baseUrl: process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai',
+      apiKey: process.env.GEMINI_API_KEY,
+      model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+    });
+  }
 
-  const response = await fetch(`${baseUrl}/chat/completions`, {
+  if (process.env.OPENROUTER_API_KEY) {
+    providers.push({
+      name: 'openrouter',
+      baseUrl: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
+      apiKey: process.env.OPENROUTER_API_KEY,
+      model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
+    });
+  }
+
+  if (process.env.OPENAI_API_KEY) {
+    providers.push({
+      name: 'openai',
+      baseUrl: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
+      apiKey: process.env.OPENAI_API_KEY,
+      model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
+    });
+  }
+
+  return providers;
+};
+
+const requestJsonFromProvider = async <T>(provider: LlmProvider, prompt: string): Promise<T> => {
+  const response = await fetch(`${provider.baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${provider.apiKey}`,
     },
+    signal: AbortSignal.timeout(LLM_TIMEOUT_MS),
     body: JSON.stringify({
-      model,
+      model: provider.model,
       temperature: 0.1,
       response_format: { type: 'json_object' },
       messages: [
@@ -241,6 +281,32 @@ export const requestLlmJson = async <T>(prompt: string): Promise<T | null> => {
   }
 
   return JSON.parse(extractJsonObject(rawContent)) as T;
+};
+
+/**
+ * Sends a prompt to the configured LLMs and returns the parsed JSON, or null when none is configured.
+ * If one provider fails (error, timeout, rate limit, unparseable answer) the next one is tried; the last
+ * error is thrown only when every provider has failed.
+ */
+export const requestLlmJson = async <T>(prompt: string): Promise<T | null> => {
+  const providers = await getLlmProviders();
+  if (!providers.length) {
+    return null;
+  }
+
+  let lastError: unknown;
+  for (const provider of providers) {
+    try {
+      return await requestJsonFromProvider<T>(provider, prompt);
+    } catch (error) {
+      lastError = error;
+      logger.warn(`LLM provider ${provider.name} failed, trying next provider`, {
+        cause: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('All LLM providers failed.');
 };
 
 const callConfiguredLLM = async (
