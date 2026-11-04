@@ -51,6 +51,10 @@ export default {
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out forwards',
         'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        // Same entrance, but without filling forwards: a finished "forwards" animation leaves an identity transform on
+        // the element, which makes it the containing block for position:fixed descendants (modals). Used on the
+        // page wrapper so modals inside pages cover the viewport.
+        'page-in': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
         'float': 'float 6s ease-in-out infinite',
         'pop-in': 'popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both',
         'shimmer': 'shimmer 1.6s linear infinite',

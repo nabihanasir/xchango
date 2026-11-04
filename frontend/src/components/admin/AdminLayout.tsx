@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Users, FileText, School,
-  BookOpen, GraduationCap, Settings, Stamp
+  BookOpen, GraduationCap, Bot, Stamp
 } from 'lucide-react';
 import GlobalLayout from '../GlobalLayout';
 import { useAuth } from '../../context/AuthContext';
@@ -15,7 +15,7 @@ const AdminLayout = () => {
     { name: 'Home Courses', path: '/admin/courses', icon: BookOpen },
     { name: 'Results', path: '/admin/results', icon: GraduationCap },
     { name: 'Visa Process', path: '/admin/visa', icon: Stamp },
-    { name: 'Settings', path: '/admin/settings', icon: Settings },
+    { name: 'LLM Models', path: '/admin/llm-models', icon: Bot },
   ];
 
   const initials = (user?.name || 'Admin')

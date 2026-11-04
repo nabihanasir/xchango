@@ -91,7 +91,8 @@ function App() {
             <Route path="courses" element={<AdminCourses />} />
             <Route path="results" element={<AdminResults />} />
             <Route path="visa" element={<AdminVisa />} />
-            <Route path="settings" element={<AdminAiModelConfig />} />
+            <Route path="llm-models" element={<AdminAiModelConfig />} />
+            <Route path="settings" element={<Navigate to="/admin/llm-models" replace />} />
           </Route>
         </Route>
 
