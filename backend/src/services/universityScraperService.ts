@@ -1,3 +1,4 @@
+import * as cheerio from 'cheerio';
 import dns from 'dns/promises';
 import net from 'net';
 import { ValidationError } from '../errors/AppError';
@@ -253,6 +254,272 @@ const fetchRobots = async (origin: string) => {
   }
 };
 
+// ---------------------------------------------------------------------------------------------------------------
+// Page readers. A reader turns one URL into text and links. Three engines, all free:
+//   1. a real browser (Playwright) when Chromium is installed, which renders JavaScript;
+//   2. plain HTTP plus an HTML parser, which needs nothing installed and works for server-rendered sites;
+//   3. the free Jina Reader service, used only when a page's plain HTML has almost no text (JavaScript-built page).
+// ---------------------------------------------------------------------------------------------------------------
+
+export interface PageLink {
+  href: string;
+  text: string;
+}
+
+export interface PageContent {
+  url: string;
+  text: string;
+  links: PageLink[];
+}
+
+export interface PageReader {
+  name: 'browser' | 'http';
+  /** Reads one page; throws when it cannot be read. */
+  read: (url: string) => Promise<PageContent>;
+  /** Notes worth showing the admin (for example that a fallback service was used). */
+  notes: string[];
+  close: () => Promise<void>;
+}
+
+const MAX_HTML_BYTES = 1_500_000;
+const MAX_REDIRECTS = 5;
+/** Below this much text a plain-HTTP page is assumed to be built by JavaScript. */
+const THIN_TEXT_CHARS = 400;
+const JINA_BASE = 'https://r.jina.ai/';
+
+type FetchLike = typeof fetch;
+
+const cleanText = (value: string) =>
+  value
+    .replace(/[^\S\n]+/g, ' ')
+    .replace(/ ?\n ?/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+/** Visible text and links from raw HTML, with scripts, styles and hidden widgets removed. */
+export const htmlToContent = (html: string, baseUrl: string): { text: string; links: PageLink[] } => {
+  const $ = cheerio.load(html);
+  const links: PageLink[] = [];
+  $('a[href]').each((_, element) => {
+    const href = $(element).attr('href') ?? '';
+    if (!href || href.startsWith('#') || /^(mailto|tel|javascript):/i.test(href)) return;
+    try {
+      links.push({ href: new URL(href, baseUrl).toString(), text: $(element).text().replace(/\s+/g, ' ').trim() });
+    } catch {
+      // ignore malformed links
+    }
+  });
+
+  $('script, style, noscript, svg, iframe, template, [hidden], [aria-hidden="true"]').remove();
+  $('br').replaceWith('\n');
+  $('p, div, li, ul, ol, h1, h2, h3, h4, h5, h6, tr, section, article, header, footer, nav, table').each((_, element) => {
+    $(element).append('\n');
+  });
+  return { text: cleanText($('body').text() || $.root().text()).slice(0, MAX_PAGE_CHARS), links };
+};
+
+/** Links written as markdown ([text](url)), which is how Jina Reader returns them. */
+export const markdownLinks = (markdown: string): PageLink[] =>
+  [...markdown.matchAll(/\[([^\]\n]{0,200})\]\((https?:\/\/[^)\s]+)\)/g)].map((match) => ({ text: match[1].trim(), href: match[2] }));
+
+/** Reads a response body but stops at maxBytes, so a huge page cannot exhaust memory. */
+export const readBodyCapped = async (response: Response, maxBytes = MAX_HTML_BYTES): Promise<string> => {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    return (await response.text()).slice(0, maxBytes);
+  }
+
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  while (received < maxBytes) {
+    const { done, value } = await reader.read();
+    if (done || !value) break;
+    chunks.push(value);
+    received += value.byteLength;
+  }
+  await reader.cancel().catch(() => undefined);
+  return new TextDecoder('utf-8').decode(Buffer.concat(chunks)).slice(0, maxBytes);
+};
+
+/**
+ * Fetches HTML over plain HTTP, following redirects by hand so that every hop is checked to be a public address.
+ * (Automatic redirects would let a public site bounce the server to an internal one.)
+ */
+export const fetchHtml = async (startUrl: string, fetchImpl: FetchLike = fetch): Promise<{ url: string; html: string }> => {
+  let current = startUrl;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop += 1) {
+    await assertPublicUrl(current);
+    const response = await fetchImpl(current, {
+      redirect: 'manual',
+      headers: { 'User-Agent': USER_AGENT, Accept: 'text/html,application/xhtml+xml', 'Accept-Language': 'en' },
+      signal: AbortSignal.timeout(PAGE_TIMEOUT_MS),
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      await response.body?.cancel().catch(() => undefined);
+      if (!location) throw new Error('The site redirected without saying where.');
+      current = new URL(location, current).toString();
+      continue;
+    }
+
+    if (!response.ok) {
+      await response.body?.cancel().catch(() => undefined);
+      throw new Error(`The site answered ${response.status}.`);
+    }
+
+    const type = response.headers.get('content-type') ?? '';
+    if (type && !/html|xml|text\/plain/i.test(type)) {
+      await response.body?.cancel().catch(() => undefined);
+      throw new Error('That address is not a web page.');
+    }
+    return { url: current, html: await readBodyCapped(response) };
+  }
+  throw new Error('The site redirected too many times.');
+};
+
+/** Free hosted reader that renders JavaScript pages and returns markdown. Only used for pages that need it. */
+const fetchViaJina = async (url: string, fetchImpl: FetchLike = fetch): Promise<PageContent> => {
+  const response = await fetchImpl(`${JINA_BASE}${url}`, {
+    headers: { Accept: 'text/plain', 'User-Agent': USER_AGENT, 'X-Return-Format': 'markdown' },
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!response.ok) {
+    await response.body?.cancel().catch(() => undefined);
+    throw new Error(`The fallback reader answered ${response.status}.`);
+  }
+  const markdown = await readBodyCapped(response, MAX_HTML_BYTES);
+  return { url, text: cleanText(markdown).slice(0, MAX_PAGE_CHARS), links: markdownLinks(markdown) };
+};
+
+const isUrlBlock = (error: unknown) => typeof (error as { code?: string })?.code === 'string' && (error as { code: string }).code.startsWith('SCRAPE_URL');
+
+/** Plain HTTP first; if the page has almost no text, ask the free fallback reader. */
+export const createHttpReader = (fetchImpl: FetchLike = fetch): PageReader => {
+  const notes: string[] = [];
+  let usedFallback = false;
+
+  return {
+    name: 'http',
+    notes,
+    close: async () => undefined,
+    read: async (url) => {
+      let plain: PageContent | null = null;
+      let plainError: unknown = null;
+      try {
+        const { url: finalUrl, html } = await fetchHtml(url, fetchImpl);
+        const { text, links } = htmlToContent(html, finalUrl);
+        plain = { url: finalUrl, text, links };
+      } catch (error) {
+        if (isUrlBlock(error)) throw error;
+        plainError = error;
+      }
+
+      if (plain && plain.text.length >= THIN_TEXT_CHARS) return plain;
+
+      try {
+        const viaJina = await fetchViaJina(url, fetchImpl);
+        if (viaJina.text.length > (plain?.text.length ?? 0)) {
+          if (!usedFallback) {
+            usedFallback = true;
+            notes.push('Some pages need JavaScript, so they were read through the free Jina Reader service (the page address was sent to it).');
+          }
+          return viaJina;
+        }
+      } catch (error) {
+        logger.warn('University scrape: fallback reader failed', { cause: error instanceof Error ? error.message : String(error) });
+      }
+
+      if (plain?.text) return plain;
+      throw plainError instanceof Error ? plainError : new Error('No readable text on this page.');
+    },
+  };
+};
+
+let browserUnavailable = false;
+
+/** A real headless browser, or null when Playwright or Chromium is not installed (for example on Render). */
+const createBrowserReader = async (disallowedNote: string[]): Promise<PageReader | null> => {
+  if (browserUnavailable) return null;
+
+  let playwright: typeof import('playwright');
+  try {
+    playwright = await import('playwright');
+  } catch {
+    browserUnavailable = true;
+    return null;
+  }
+
+  let browser: import('playwright').Browser;
+  try {
+    browser = await playwright.chromium.launch({ headless: true });
+  } catch (error) {
+    browserUnavailable = true;
+    logger.info('University scrape: no browser available, using plain HTTP', {
+      cause: error instanceof Error ? error.message.split('\n')[0] : String(error),
+    });
+    return null;
+  }
+
+  const context = await browser.newContext({ userAgent: USER_AGENT });
+  const hostChecks = new Map<string, boolean>();
+  // Every request the pages make (including redirects) must also go to a public address.
+  await context.route('**/*', async (route) => {
+    try {
+      const host = new URL(route.request().url()).hostname;
+      if (!hostChecks.has(host)) {
+        await assertPublicUrl(route.request().url());
+        hostChecks.set(host, true);
+      }
+      await route.continue();
+    } catch {
+      await route.abort();
+    }
+  });
+  const page = await context.newPage();
+
+  return {
+    name: 'browser',
+    notes: disallowedNote,
+    close: async () => {
+      await browser.close().catch(() => undefined);
+    },
+    read: async (url) => {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: PAGE_TIMEOUT_MS });
+      await page.waitForLoadState('networkidle', { timeout: 4_000 }).catch(() => undefined);
+      const content = await page.evaluate(() => ({
+        text: document.body?.innerText ?? '',
+        links: Array.from(document.querySelectorAll('a[href]')).map((anchor) => ({
+          href: (anchor as HTMLAnchorElement).href,
+          text: (anchor.textContent ?? '').trim(),
+        })),
+      }));
+      return { url: page.url(), text: cleanText(content.text).slice(0, MAX_PAGE_CHARS), links: content.links };
+    },
+  };
+};
+
+/**
+ * SCRAPE_ENGINE=auto (default): a real browser when one is installed, otherwise plain HTTP with the free fallback.
+ * SCRAPE_ENGINE=http forces the browser-free path; SCRAPE_ENGINE=browser requires Chromium.
+ */
+export const openReader = async (): Promise<PageReader> => {
+  const engine = (process.env.SCRAPE_ENGINE || 'auto').toLowerCase();
+  if (engine !== 'http') {
+    const browserReader = await createBrowserReader([]);
+    if (browserReader) return browserReader;
+    if (engine === 'browser') {
+      return fail(
+        'Website scanning is not available on this server.',
+        'The browser engine (Playwright/Chromium) is not installed here.',
+        'Install it with "npx playwright install chromium", or leave SCRAPE_ENGINE unset to scan without a browser.',
+        'SCRAPE_UNAVAILABLE'
+      );
+    }
+  }
+  return createHttpReader();
+};
+
 export const scrapeUniversityWebsite = async (rawUrl: unknown): Promise<ScrapeResult> => {
   const startUrl = await assertPublicUrl(typeof rawUrl === 'string' ? rawUrl.trim() : '');
   if (scraping) {
@@ -270,46 +537,10 @@ export const scrapeUniversityWebsite = async (rawUrl: unknown): Promise<ScrapeRe
   const deadline = Date.now() + TOTAL_TIMEOUT_MS;
 
   try {
-    let playwright: typeof import('playwright');
-    try {
-      playwright = await import('playwright');
-    } catch {
-      return fail(
-        'Website scanning is not available on this server.',
-        'The browser engine (Playwright) is not installed here.',
-        'Fill the form by hand, or run the scan from a machine where Playwright is installed.',
-        'SCRAPE_UNAVAILABLE'
-      );
-    }
-
     const disallowed = await fetchRobots(startUrl.origin);
-    const browser = await playwright.chromium.launch({ headless: true }).catch(() =>
-      fail(
-        'Website scanning is not available on this server.',
-        'The browser could not be started.',
-        'Fill the form by hand, or run the scan from a machine where the browser is installed (npx playwright install chromium).',
-        'SCRAPE_UNAVAILABLE'
-      )
-    );
+    const reader = await openReader();
 
     try {
-      const context = await browser.newContext({ userAgent: USER_AGENT });
-      const hostChecks = new Map<string, boolean>();
-      // Every request the pages make (including redirects) must also go to a public address.
-      await context.route('**/*', async (route) => {
-        try {
-          const host = new URL(route.request().url()).hostname;
-          if (!hostChecks.has(host)) {
-            await assertPublicUrl(route.request().url());
-            hostChecks.set(host, true);
-          }
-          await route.continue();
-        } catch {
-          await route.abort();
-        }
-      });
-
-      const page = await context.newPage();
       const visit = async (url: string) => {
         if (Date.now() > deadline) return null;
         const target = new URL(url);
@@ -318,17 +549,8 @@ export const scrapeUniversityWebsite = async (rawUrl: unknown): Promise<ScrapeRe
           return null;
         }
         try {
-          await page.goto(url, { waitUntil: 'domcontentloaded', timeout: PAGE_TIMEOUT_MS });
-          await page.waitForLoadState('networkidle', { timeout: 4_000 }).catch(() => undefined);
-          const content = await page.evaluate(() => ({
-            text: document.body?.innerText ?? '',
-            links: Array.from(document.querySelectorAll('a[href]')).map((anchor) => ({
-              href: (anchor as HTMLAnchorElement).href,
-              text: (anchor.textContent ?? '').trim(),
-            })),
-          }));
-          const text = content.text.replace(/\n{3,}/g, '\n\n').trim().slice(0, MAX_PAGE_CHARS);
-          if (text) pages.push({ url: page.url(), text });
+          const content = await reader.read(url);
+          if (content.text) pages.push({ url: content.url, text: content.text });
           return content.links;
         } catch (error) {
           warnings.push(`Could not read ${url}: ${error instanceof Error ? error.message.split('\n')[0] : 'unknown error'}`);
@@ -340,8 +562,9 @@ export const scrapeUniversityWebsite = async (rawUrl: unknown): Promise<ScrapeRe
       for (const link of pickLinks(startUrl.origin, homeLinks ?? [])) {
         await visit(link);
       }
+      warnings.push(...reader.notes);
     } finally {
-      await browser.close().catch(() => undefined);
+      await reader.close();
     }
   } finally {
     scraping = false;
