@@ -1,4 +1,3 @@
-import fs from 'fs/promises';
 import { Response } from 'express';
 import { AppError, ForbiddenError, ValidationError } from '../errors/AppError';
 import { UserRole } from '../models/User';
@@ -6,6 +5,7 @@ import { parseUploadedTranscript } from '../services/transcriptLlmParser';
 import * as studentService from '../services/studentService';
 import { sendResponse } from '../utils/response';
 import { toPublicFileUrl } from '../utils/upload';
+import { discardUploadedFile } from '../utils/storedFiles';
 
 const assertStudentAccess = (req: any, studentId: string) => {
   if (req.user.role === UserRole.STUDENT && req.user._id.toString() !== studentId) {
@@ -36,7 +36,7 @@ export const uploadTranscript = async (req: any, res: Response) => {
     transcript = await parseUploadedTranscript(req.file.path);
   } catch (error) {
     // Don't keep files that could not be read as a transcript.
-    await fs.unlink(req.file.path).catch(() => undefined);
+    await discardUploadedFile(req.file);
 
     const detail = error instanceof Error ? error.message : 'The file could not be read.';
     if (error instanceof AppError) {

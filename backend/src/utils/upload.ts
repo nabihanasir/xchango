@@ -1,8 +1,10 @@
 import fs from 'fs';
 import multer, { type Options as MulterOptions } from 'multer';
 import path from 'path';
+import type { RequestHandler } from 'express';
+import { persistUploadedFiles, uploadsRoot } from './storedFiles';
 
-export const uploadsRoot = path.resolve(__dirname, '../../uploads');
+export { uploadsRoot };
 
 const ensureDirectory = (directory: string) => {
   if (!fs.existsSync(directory)) {
@@ -27,7 +29,7 @@ const createStorage = (folderName: string) =>
     },
   });
 
-export const createUploader = (
+const buildUploader = (
   folderName: string,
   allowedExtensions?: string[],
   limits?: MulterOptions['limits']
@@ -52,6 +54,25 @@ export const createUploader = (
       cb(null, true);
     },
   });
+
+/**
+ * Uploads land in a temp file first (so parsers can read them by path), then the
+ * middleware copies them into MongoDB GridFS. Use these instead of raw multer methods.
+ */
+export const createUploader = (
+  folderName: string,
+  allowedExtensions?: string[],
+  limits?: MulterOptions['limits']
+) => {
+  const instance = buildUploader(folderName, allowedExtensions, limits);
+  return {
+    single: (field: string): RequestHandler[] => [instance.single(field), persistUploadedFiles],
+    array: (field: string, maxCount?: number): RequestHandler[] => [
+      instance.array(field, maxCount),
+      persistUploadedFiles,
+    ],
+  };
+};
 
 export const toPublicFileUrl = (filePath: string) => {
   const relativePath = path.relative(uploadsRoot, path.resolve(filePath)).split(path.sep).join('/');

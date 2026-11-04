@@ -1,16 +1,6 @@
-import fs from 'fs/promises';
-import path from 'path';
 import StudentDocument, { DocumentStatus, IStudentDocument } from './document.model';
 import { NotFoundError } from '../../errors/AppError';
-import { uploadsRoot } from '../../utils/upload';
-
-const resolveStoredFilePath = (fileUrl: string) => {
-  if (!fileUrl.startsWith('/uploads/')) {
-    return '';
-  }
-
-  return path.resolve(uploadsRoot, fileUrl.replace(/^\/uploads\//, ''));
-};
+import { deleteStoredFile } from '../../utils/storedFiles';
 
 export const createDocument = async (input: {
   studentId: string;
@@ -46,12 +36,7 @@ export const updateDocumentStatus = async (documentId: string, status: DocumentS
 
 export const deleteDocument = async (documentId: string) => {
   const document = await getDocumentById(documentId);
-  const storedFilePath = resolveStoredFilePath(document.fileUrl);
-
-  if (storedFilePath) {
-    await fs.unlink(storedFilePath).catch(() => undefined);
-  }
-
+  await deleteStoredFile(document.fileUrl);
   await document.deleteOne();
   return document as IStudentDocument;
 };

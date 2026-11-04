@@ -10,6 +10,7 @@
     "seed:courses": "ts-node src/seedCourses.ts",
     "import-university-catalog": "ts-node src/importUniversityCatalog.ts",
     "ensure-admin": "ts-node src/ensureAdmin.ts",
+    "migrate-uploads": "ts-node src/migrateUploadsToGridFs.ts",
     "test": "jest --config jest.config.cjs --runInBand"
   },
   "keywords": [],

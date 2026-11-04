@@ -1,4 +1,3 @@
-import fs from 'fs/promises';
 import mongoose from 'mongoose';
 import Application from '../models/Application';
 import Course, { CourseType, ICourse } from '../models/Course';
@@ -16,6 +15,7 @@ import { ValidationError } from '../errors/AppError';
 import { appUrl, notifyUser } from './notificationService';
 import { logger } from '../utils/logger';
 import { toPublicFileUrl } from '../utils/upload';
+import { discardUploadedFile } from '../utils/storedFiles';
 import {
   HomeCourseRanking,
   MatchBasis,
@@ -458,7 +458,7 @@ export const uploadCourseOutline = async (
   itemId: string,
   { file, pastedText }: { file?: Express.Multer.File; pastedText?: string }
 ) => {
-  const discardFile = () => (file ? fs.unlink(file.path).catch(() => undefined) : undefined);
+  const discardFile = () => discardUploadedFile(file);
 
   try {
     const { request, item } = await loadRequestItem(requestId, itemId);

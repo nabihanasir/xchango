@@ -1,4 +1,3 @@
-import fs from 'fs/promises';
 import path from 'path';
 import mongoose from 'mongoose';
 import ProgramOutline, {
@@ -9,7 +8,8 @@ import ProgramOutline, {
 } from '../models/ProgramOutline';
 import { ValidationError } from '../errors/AppError';
 import { parseOutlinePdf } from './programOutlinePdfParser';
-import { toPublicFileUrl, uploadsRoot } from '../utils/upload';
+import { toPublicFileUrl } from '../utils/upload';
+import { deleteStoredFile } from '../utils/storedFiles';
 
 /** A parsed semester total this far from the stated one is reported to the advisor. */
 const CREDIT_MISMATCH_TOLERANCE = 0.01;
@@ -168,7 +168,7 @@ export const saveUploadedProgramOutline = async (
   const previous = await ProgramOutline.findOne({ studentId });
   if (previous?.fileUrl) {
     // The previous file is no longer referenced once the new outline replaces it.
-    await fs.unlink(path.join(uploadsRoot, previous.fileUrl.replace(/^\/uploads\//, ''))).catch(() => undefined);
+    await deleteStoredFile(previous.fileUrl);
   }
 
   return ProgramOutline.findOneAndUpdate(

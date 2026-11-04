@@ -1,10 +1,10 @@
-import fs from 'fs/promises';
 import { Response } from 'express';
 import { AppError, ForbiddenError, ValidationError } from '../errors/AppError';
 import { UserRole } from '../models/User';
 import { advisorCanAccessStudent } from '../services/applicationService';
 import * as programOutlineService from '../services/programOutlineService';
 import { sendResponse } from '../utils/response';
+import { discardUploadedFile } from '../utils/storedFiles';
 
 const assertCanView = async (req: any, studentId: string) => {
   const { role, _id } = req.user;
@@ -36,7 +36,7 @@ export const uploadProgramOutline = async (req: any, res: Response) => {
     sendResponse(res, 201, 'Program outline uploaded and read successfully', outline);
   } catch (error) {
     // Don't keep files that could not be read as a program outline.
-    await fs.unlink(req.file.path).catch(() => undefined);
+    await discardUploadedFile(req.file);
 
     if (error instanceof AppError) {
       throw error;
