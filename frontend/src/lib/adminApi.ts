@@ -4,6 +4,7 @@ import type {
   WorkflowApplication,
 } from '../types/application';
 import type { CourseInput, CourseInstructorInput } from '../types/course';
+import type { CatalogCountry, CatalogUniversity } from '../types/university';
 
 interface ApiEnvelope<T> {
   success: boolean;
@@ -51,20 +52,45 @@ export interface AdminUserRecord {
   password?: string;
 }
 
-export interface CountryRecord {
-  _id: string;
-  name: string;
-  code: string;
-}
+export type CountryRecord = CatalogCountry;
 
-export interface UniversityRecord {
-  _id: string;
-  name: string;
-  countryId: CountryRecord | string;
-  website?: string;
-  seatLimit: number;
+/** A university as the admin sees it: drafts included, plus what is still missing before it can be published. */
+export interface UniversityRecord extends CatalogUniversity {
   createdAt?: string;
   updatedAt?: string;
+  /** Advisors responsible for this university's country (shared by every university in that country). */
+  advisorIds: string[];
+  hostCourseCount: number;
+  publishIssues: string[];
+}
+
+export interface UniversitySavePayload extends Partial<Omit<CatalogUniversity, 'countryId'>> {
+  countryId?: string;
+  country?: { name: string; code: string; flag?: string; image?: string };
+  countryImage?: string;
+  advisorIds?: string[];
+}
+
+export interface UniversitySaveResult {
+  university: UniversityRecord;
+  assignedApplications: number;
+}
+
+export interface ScrapeUniversityResult {
+  fields: Record<string, unknown>;
+  confidence: Record<string, 'found' | 'review' | 'empty'>;
+  sources: string[];
+  warnings: string[];
+}
+
+export interface HostCoursePayload {
+  universityId: string;
+  code: string;
+  title: string;
+  creditHours: number;
+  description?: string;
+  instructorName?: string;
+  instructorEmail?: string;
 }
 
 export type AiProvider = 'openrouter' | 'gemini' | 'groq' | 'openai-compatible';
@@ -111,9 +137,16 @@ export const adminApi = {
   uploadOfferLetter: (payload: { applicationId: string; offerLetterUrl: string }) =>
     unwrap<Record<string, unknown>>(apiClient.post('/admin/offer-letter', payload)),
   getCountries: () => unwrap<CountryRecord[]>(apiClient.get('/catalog/countries')),
-  getUniversities: () => unwrap<UniversityRecord[]>(apiClient.get('/catalog/universities')),
-  createUniversity: (payload: Record<string, unknown>) =>
-    unwrap<UniversityRecord>(apiClient.post('/admin/universities', payload)),
+  getUniversities: () => unwrap<UniversityRecord[]>(apiClient.get('/admin/universities')),
+  createUniversity: (payload: UniversitySavePayload) =>
+    unwrap<UniversitySaveResult>(apiClient.post('/admin/universities', payload)),
+  updateUniversity: (universityId: string, payload: UniversitySavePayload) =>
+    unwrap<UniversitySaveResult>(apiClient.put(`/admin/universities/${universityId}`, payload)),
+  // Reading several pages with a headless browser and an LLM can take a minute.
+  scrapeUniversity: (url: string) =>
+    unwrap<ScrapeUniversityResult>(apiClient.post('/admin/universities/scrape', { url }, { timeout: 120000 })),
+  createHostCourse: (payload: HostCoursePayload) =>
+    unwrap<ApplicationCourseSummary>(apiClient.post('/admin/host-courses', payload)),
   getCourses: () =>
     unwrap<ApplicationCourseSummary[]>(apiClient.get('/courses')),
   createCourse: (payload: CourseInput) =>

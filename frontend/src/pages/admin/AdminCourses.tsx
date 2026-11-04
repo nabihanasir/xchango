@@ -6,6 +6,7 @@ import { adminApi } from '../../lib/adminApi';
 import type { ApplicationCourseSummary } from '../../types/application';
 import { getCourseDisplayTitle } from '../../types/course';
 import Notice from '../../components/Notice';
+import Modal from '../../components/Modal';
 
 type CourseFormState = {
   title: string;
@@ -334,12 +335,7 @@ export default function AdminCourses() {
       <HostCourseInstructors />
 
       {isModalOpen ? (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-maroon/80 backdrop-blur-md"
-            onClick={() => !submitting && closeModal()}
-          />
-          <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-[32px] border border-white/20 bg-white shadow-2xl animate-fade-in-up">
+        <Modal onClose={closeModal} widthClass="max-w-2xl" locked={submitting}>
             <header className="sticky top-0 z-10 flex items-center justify-between border-b border-light-color/60 bg-white/80 px-8 py-6 backdrop-blur-md">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-maroon">
@@ -364,7 +360,7 @@ export default function AdminCourses() {
               </button>
             </header>
 
-            <form onSubmit={handleSubmit} className="space-y-5 p-8">
+            <form onSubmit={handleSubmit} className="space-y-5 overflow-y-auto p-8">
               <div>
                 <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
                   Title
@@ -459,8 +455,7 @@ export default function AdminCourses() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       ) : null}
     </div>
   );

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, Mail, Pencil, Search, X } from 'lucide-react';
+import { Check, Mail, Pencil, Plus, Search, X } from 'lucide-react';
 import { adminApi } from '../../lib/adminApi';
 import type { ApplicationCourseSummary } from '../../types/application';
 import { getCourseDisplayTitle } from '../../types/course';
 import Notice from '../Notice';
+import HostCourseModal from './HostCourseModal';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -20,13 +21,17 @@ export default function HostCourseInstructors() {
   const [editingId, setEditingId] = useState('');
   const [draft, setDraft] = useState({ instructorName: '', instructorEmail: '' });
   const [saving, setSaving] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  useEffect(() => {
+  const loadCourses = () =>
     adminApi
       .getHostCourses()
       .then(setCourses)
       .catch(() => setError('Unable to load host courses.'))
       .finally(() => setLoading(false));
+
+  useEffect(() => {
+    void loadCourses();
   }, []);
 
   const filtered = useMemo(() => {
@@ -79,9 +84,18 @@ export default function HostCourseInstructors() {
     <div className="glass-card rounded-[2rem] bg-white p-6 shadow-sm md:p-8">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h3 className="text-xl font-bold text-maroon">Host Course Instructors</h3>
+          <div className="flex flex-wrap items-center gap-3">
+            <h3 className="text-xl font-bold text-maroon">Host Courses & Instructors</h3>
+            <button
+              type="button"
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-maroon-gradient px-4 py-2 text-sm font-bold text-white shadow-md shadow-maroon/20 transition hover:brightness-110"
+            >
+              <Plus className="h-4 w-4" /> Add Host Course
+            </button>
+          </div>
           <p className="mt-1 text-sm font-medium text-body-text">
-            Instructors listed here are emailed when an exchange student enrolled in their course arrives.
+            Courses taught at partner universities, which students request equivalency for. Instructors listed here are emailed when an exchange student enrolled in their course arrives.
             {missingCount ? ` ${missingCount} course${missingCount === 1 ? '' : 's'} still missing an email.` : ''}
           </p>
         </div>
@@ -120,7 +134,7 @@ export default function HostCourseInstructors() {
         </div>
       ) : filtered.length === 0 ? (
         <p className="rounded-2xl border-2 border-dashed border-light-color bg-slate-50 px-6 py-10 text-center text-sm text-body-text">
-          {courses.length ? 'No matching host courses.' : 'No host courses have been imported yet.'}
+          {courses.length ? 'No matching host courses.' : 'No host courses yet. Add one with the button above.'}
         </p>
       ) : (
         <ul className="max-h-[32rem] divide-y divide-light-color/60 overflow-y-auto rounded-2xl border border-light-color/50">
@@ -200,6 +214,15 @@ export default function HostCourseInstructors() {
           ))}
         </ul>
       )}
+      {showAddModal ? (
+        <HostCourseModal
+          onClose={() => setShowAddModal(false)}
+          onCreated={() => {
+            setLoading(true);
+            void loadCourses();
+          }}
+        />
+      ) : null}
     </div>
   );
 }
