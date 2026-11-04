@@ -4,12 +4,13 @@ import { seedDemoHomeCoursesIfNeeded } from './services/courseService';
 import { offboardDueStudents } from './services/offboardingService';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { isOriginAllowed } from './config/cors';
 
 const PORT = process.env.PORT || 5000;
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: '*',
+    origin: (origin, callback) => callback(null, isOriginAllowed(origin)),
   },
 });
 

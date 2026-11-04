@@ -5,12 +5,13 @@ import routes from './routes';
 import { errorHandler, notFound } from './middleware/errorMiddleware';
 import path from 'path';
 import { attachRequestContext } from './middleware/requestContext';
+import { corsOptions } from './config/cors';
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(attachRequestContext);
 
