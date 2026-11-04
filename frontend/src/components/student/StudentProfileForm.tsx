@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { BookOpen, Globe2, Mail, Phone, UserRound } from 'lucide-react';
 import MultiSelectDropdown from '../MultiSelectDropdown';
-import { DESTINATION_COUNTRIES, getProgramsForCountries } from '../../data/destinations';
+import { useCatalog } from '../../hooks/useCatalog';
+import type { CatalogUniversity } from '../../types/university';
 import type { StudentBasicInfo, StudentPreferences } from '../../types/studentProfile';
 
 // The submit button lives at the bottom of the page (after the transcript) and targets this form by id.
@@ -57,22 +58,34 @@ interface StudentProfileFormProps {
   onSubmit: (payload: { basicInfo: StudentBasicInfo; preferences: StudentPreferences }) => Promise<void>;
 }
 
+// Programmes offered by the published universities in the given countries (every country when none are given).
+const getProgramsForCountries = (universities: CatalogUniversity[], countries: string[]) => {
+  const selected = countries.length
+    ? universities.filter((university) => countries.includes(university.countryId?.name))
+    : universities;
+  return [...new Set(selected.flatMap((university) => (university.programmes ?? []).map((programme) => programme.name)))];
+};
+
 const inputClassName =
   'w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-dark-blue focus:ring-4 focus:ring-dark-blue/10';
 
 export default function StudentProfileForm({ basicInfo, preferences, onSubmit }: StudentProfileFormProps) {
   const [formState, setFormState] = useState(() => buildFormState(basicInfo, preferences));
+  const { countries: catalogCountries, universities: catalogUniversities } = useCatalog();
+  const destinationCountries = catalogCountries.map((country) => country.name);
 
   useEffect(() => {
     setFormState(buildFormState(basicInfo, preferences));
   }, [basicInfo, preferences]);
 
   // Fields of interest are the programmes offered in the chosen countries (every partner programme when none chosen).
-  const programOptions = getProgramsForCountries(formState.preferences.preferredCountries);
+  const programOptions = getProgramsForCountries(catalogUniversities, formState.preferences.preferredCountries);
 
   const handleCountriesChange = (preferredCountries: string[]) =>
     setFormState((current) => {
-      const stillOffered = getProgramsForCountries(preferredCountries).includes(current.preferences.fieldOfInterest);
+      const stillOffered = getProgramsForCountries(catalogUniversities, preferredCountries).includes(
+        current.preferences.fieldOfInterest
+      );
       return {
         ...current,
         preferences: {
@@ -255,7 +268,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
               </span>
               <MultiSelectDropdown
                 className={inputClassName}
-                options={[...DESTINATION_COUNTRIES, ...formState.preferences.preferredCountries.filter((country) => !DESTINATION_COUNTRIES.includes(country))]}
+                options={[...destinationCountries, ...formState.preferences.preferredCountries.filter((country) => !destinationCountries.includes(country))]}
                 selected={formState.preferences.preferredCountries}
                 onChange={handleCountriesChange}
                 placeholder="Select destination countries"

@@ -1,4 +1,4 @@
-import { useState, type ComponentType } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -14,26 +14,25 @@ import {
   FlaskConical,
   HeartPulse,
   Home,
-  Info,
   Library,
   Mail,
   MapPin,
   Phone,
   Plane,
-  Star,
   Stamp,
   Users,
   Utensils,
   Wallet,
   Wifi,
 } from 'lucide-react';
-import {
-  getUniversityProfile,
-  type FacilityIcon,
-  type IntakeMilestone,
-  type UniversityIntake,
-  type UniversityProfile,
-} from '../../data/universityProfiles';
+import { catalogApi } from '../../lib/catalogApi';
+import { toUniversityProfile } from '../../lib/universityProfile';
+import type {
+  FacilityIcon,
+  IntakeMilestone,
+  UniversityIntake,
+  UniversityProfile,
+} from '../../types/university';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -127,11 +126,7 @@ function Hero({ university }: { university: UniversityProfile }) {
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 backdrop-blur">
               <MapPin className="h-3.5 w-3.5" />
-              {university.city}, {university.country}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 backdrop-blur">
-              <Star className="h-3.5 w-3.5 fill-accent-yellow text-accent-yellow" />
-              {university.rating} student rating
+              {[university.city, university.country].filter(Boolean).join(', ')}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-yellow px-3 py-1.5 text-dark-blue">
               Partner university
@@ -235,7 +230,7 @@ function Intakes({ university, now }: { university: UniversityProfile; now: numb
   const status = getIntakeStatus(intake, now);
   const deadlineDays = daysUntil(intake.applicationDeadline, now);
   const seatsLeft = Math.max(0, intake.seatsTotal - intake.seatsTaken);
-  const seatPercent = Math.round((intake.seatsTaken / intake.seatsTotal) * 100);
+  const seatPercent = intake.seatsTotal > 0 ? Math.round((intake.seatsTaken / intake.seatsTotal) * 100) : 100;
 
   return (
     <section id="intakes" className="scroll-mt-20">
@@ -333,13 +328,57 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 
 export default function UniversityDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const university = getUniversityProfile(slug);
+  const [university, setUniversity] = useState<UniversityProfile | null>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'missing'>('loading');
   const [now] = useState(() => Date.now());
   const [activeSection, setActiveSection] = useState('overview');
 
-  if (!university) {
+  useEffect(() => {
+    let cancelled = false;
+    setStatus('loading');
+
+    catalogApi
+      .getUniversityBySlug(slug ?? '')
+      .then((record) => {
+        if (cancelled) return;
+        setUniversity(toUniversityProfile(record));
+        setStatus('ready');
+      })
+      .catch(() => {
+        if (!cancelled) setStatus('missing');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  if (status === 'missing') {
     return <Navigate to="/dashboard/programmes" replace />;
   }
+
+  if (!university) {
+    return <p className="p-8 text-body-text">Loading university...</p>;
+  }
+
+  const sections = SECTIONS.filter((section) => {
+    switch (section.id) {
+      case 'programmes':
+        return university.programmes.length > 0 || university.requirements.length > 0;
+      case 'intakes':
+        return university.intakes.length > 0;
+      case 'costs':
+        return university.costs.length > 0 || university.scholarships.length > 0;
+      case 'campus':
+        return university.facilities.length + university.accommodation.length + university.livingTips.length > 0;
+      case 'visa':
+        return Boolean(university.visa.summary) || university.visa.steps.length > 0;
+      case 'faq':
+        return university.faqs.length > 0;
+      default:
+        return true;
+    }
+  });
 
   const goToSection = (id: string) => {
     setActiveSection(id);
@@ -350,18 +389,20 @@ export default function UniversityDetail() {
     <div className="space-y-8 pb-16 animate-fade-in">
       <Hero university={university} />
 
-      <div className="relative z-10 -mt-14 grid grid-cols-2 gap-3 px-2 md:grid-cols-3 md:px-6 lg:grid-cols-6">
-        {university.facts.map((fact) => (
-          <div key={fact.label} className="rounded-2xl border border-slate-200/60 bg-white p-4 text-center shadow-lg shadow-slate-200/60">
-            <p className="font-display text-lg font-bold text-dark-blue">{fact.value}</p>
-            <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">{fact.label}</p>
-          </div>
-        ))}
-      </div>
+      {university.facts.length > 0 ? (
+        <div className="relative z-10 -mt-14 grid grid-cols-2 gap-3 px-2 md:grid-cols-3 md:px-6 lg:grid-cols-6">
+          {university.facts.map((fact) => (
+            <div key={fact.label} className="rounded-2xl border border-slate-200/60 bg-white p-4 text-center shadow-lg shadow-slate-200/60">
+              <p className="font-display text-lg font-bold text-dark-blue">{fact.value}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">{fact.label}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       <div className="sticky top-0 z-20 -mx-1 rounded-2xl border border-slate-200/70 bg-white/90 p-2 shadow-sm backdrop-blur">
         <nav className="flex gap-1 overflow-x-auto">
-          {SECTIONS.map((section) => (
+          {sections.map((section) => (
             <button
               key={section.id}
               type="button"
@@ -376,14 +417,9 @@ export default function UniversityDetail() {
         </nav>
       </div>
 
-      <div className="flex items-start gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-800">
-        <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
-        <p>This page shows sample information for demonstration. Dates, costs and figures are placeholders and are not official.</p>
-      </div>
-
       <section id="overview" className="scroll-mt-20">
         <div className="grid gap-6 lg:grid-cols-5">
-          <Card className="lg:col-span-3">
+          <Card className={university.highlights.length ? 'lg:col-span-3' : 'lg:col-span-5'}>
             <SectionHeading eyebrow="Overview" title={`About ${university.shortName}`} />
             <div className="space-y-4 text-body-text">
               {university.about.map((paragraph) => (
@@ -391,6 +427,7 @@ export default function UniversityDetail() {
               ))}
             </div>
           </Card>
+          {university.highlights.length > 0 ? (
           <Card className="lg:col-span-2">
             <SectionHeading eyebrow="Why study here" title="Highlights" />
             <ul className="space-y-3">
@@ -404,9 +441,11 @@ export default function UniversityDetail() {
               ))}
             </ul>
           </Card>
+          ) : null}
         </div>
       </section>
 
+      {sections.some((section) => section.id === 'programmes') ? (
       <section id="programmes" className="scroll-mt-20">
         <SectionHeading
           eyebrow="Programmes"
@@ -432,6 +471,7 @@ export default function UniversityDetail() {
           ))}
         </div>
 
+        {university.requirements.length > 0 ? (
         <Card className="mt-6">
           <SectionHeading eyebrow="Eligibility" title="Entry requirements" />
           <ul className="grid gap-3 md:grid-cols-2">
@@ -443,10 +483,13 @@ export default function UniversityDetail() {
             ))}
           </ul>
         </Card>
+        ) : null}
       </section>
+      ) : null}
 
-      <Intakes key={university.slug} university={university} now={now} />
+      {university.intakes.length > 0 ? <Intakes key={university.slug} university={university} now={now} /> : null}
 
+      {sections.some((section) => section.id === 'costs') ? (
       <section id="costs" className="scroll-mt-20">
         <SectionHeading
           eyebrow="Costs"
@@ -454,6 +497,7 @@ export default function UniversityDetail() {
           description="Approximate costs for one semester. Tuition stays with Riphah, so you pay no tuition at the host university."
         />
         <div className="grid gap-6 lg:grid-cols-5">
+          {university.costs.length > 0 ? (
           <Card className="lg:col-span-3">
             <div className="mb-4 flex items-center gap-2 text-dark-blue">
               <Wallet className="h-5 w-5 text-accent-yellow" />
@@ -471,6 +515,8 @@ export default function UniversityDetail() {
               ))}
             </div>
           </Card>
+          ) : null}
+          {university.scholarships.length > 0 ? (
           <Card className="lg:col-span-2">
             <div className="mb-4 flex items-center gap-2 text-dark-blue">
               <Award className="h-5 w-5 text-accent-yellow" />
@@ -486,14 +532,17 @@ export default function UniversityDetail() {
               ))}
             </div>
           </Card>
+          ) : null}
         </div>
       </section>
+      ) : null}
 
+      {sections.some((section) => section.id === 'campus') ? (
       <section id="campus" className="scroll-mt-20">
         <SectionHeading eyebrow="Campus & living" title="Life on campus" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {university.facilities.map((facility) => {
-            const Icon = FACILITY_ICONS[facility.icon];
+            const Icon = FACILITY_ICONS[facility.icon] ?? Users;
             return (
               <div key={facility.title} className="glass-card rounded-3xl p-5">
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-dark-blue text-accent-yellow">
@@ -507,6 +556,7 @@ export default function UniversityDetail() {
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          {university.accommodation.length > 0 ? (
           <Card>
             <div className="mb-4 flex items-center gap-2 text-dark-blue">
               <Home className="h-5 w-5 text-accent-yellow" />
@@ -521,6 +571,8 @@ export default function UniversityDetail() {
               ))}
             </dl>
           </Card>
+          ) : null}
+          {university.livingTips.length > 0 ? (
           <Card>
             <div className="mb-4 flex items-center gap-2 text-dark-blue">
               <Plane className="h-5 w-5 text-accent-yellow" />
@@ -535,9 +587,12 @@ export default function UniversityDetail() {
               ))}
             </dl>
           </Card>
+          ) : null}
         </div>
       </section>
+      ) : null}
 
+      {sections.some((section) => section.id === 'visa') ? (
       <section id="visa" className="scroll-mt-20">
         <SectionHeading eyebrow="Visa" title={university.visa.title} description={university.visa.summary} />
         <Card>
@@ -557,7 +612,9 @@ export default function UniversityDetail() {
           </ol>
         </Card>
       </section>
+      ) : null}
 
+      {university.faqs.length > 0 ? (
       <section id="faq" className="scroll-mt-20">
         <SectionHeading eyebrow="FAQ" title="Frequently asked questions" />
         <div className="space-y-3">
@@ -566,11 +623,12 @@ export default function UniversityDetail() {
           ))}
         </div>
       </section>
+      ) : null}
 
       <section className={`overflow-hidden rounded-[2rem] bg-gradient-to-br ${university.gradient} p-8 text-white shadow-xl md:p-10`}>
         <div className="grid gap-8 md:grid-cols-2 md:items-center">
           <div>
-            <h2 className="text-white">Ready to study in {university.city}?</h2>
+            <h2 className="text-white">Ready to study {university.city ? `in ${university.city}` : 'here'}?</h2>
             <p className="mt-3 max-w-md text-white/80">
               Start your application today. The International Office will guide you through every stage of the timeline.
             </p>
@@ -583,18 +641,26 @@ export default function UniversityDetail() {
             </Link>
           </div>
           <div className="space-y-3 rounded-3xl bg-white/10 p-6 text-sm backdrop-blur">
-            <p className="flex items-center gap-3">
-              <Mail className="h-4 w-4 flex-shrink-0" /> {university.contact.email}
-            </p>
-            <p className="flex items-center gap-3">
-              <Phone className="h-4 w-4 flex-shrink-0" /> {university.contact.phone}
-            </p>
-            <p className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" /> {university.contact.address}
-            </p>
-            <p className="flex items-center gap-3">
-              <ExternalLink className="h-4 w-4 flex-shrink-0" /> {university.contact.website}
-            </p>
+            {university.contact.email ? (
+              <p className="flex items-center gap-3">
+                <Mail className="h-4 w-4 flex-shrink-0" /> {university.contact.email}
+              </p>
+            ) : null}
+            {university.contact.phone ? (
+              <p className="flex items-center gap-3">
+                <Phone className="h-4 w-4 flex-shrink-0" /> {university.contact.phone}
+              </p>
+            ) : null}
+            {university.contact.address ? (
+              <p className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" /> {university.contact.address}
+              </p>
+            ) : null}
+            {university.contact.website ? (
+              <p className="flex items-center gap-3">
+                <ExternalLink className="h-4 w-4 flex-shrink-0" /> {university.contact.website}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>

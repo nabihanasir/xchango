@@ -1,4 +1,5 @@
-export type ApplicationCountry = 'Malaysia' | 'South Korea' | 'Turkey';
+/** Destination countries are maintained by admins (see the catalog), so this is just the country's name. */
+export type ApplicationCountry = string;
 export type AccommodationPreference = 'UNIVERSITY' | 'SELF';
 
 export type ApplicationStatus =
@@ -156,12 +157,6 @@ export interface ApplicationDraftPayload {
   registrationNumber: string;
   accommodationPreference: AccommodationPreference;
 }
-
-export const countryOptions: Record<ApplicationCountry, string[]> = {
-  Malaysia: ['MMU', 'UTHM'],
-  'South Korea': ['KDU'],
-  Turkey: ['GTU'],
-};
 
 export const applicationStatusTone: Record<ApplicationStatus, string> = {
   DRAFT: 'bg-slate-100 text-slate-700',

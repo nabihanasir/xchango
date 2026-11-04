@@ -1,6 +1,6 @@
 interface UniversityStepProps {
   country: string;
-  universities: string[];
+  universities: Array<{ code: string; name: string }>;
   university: string;
   appliedUniversities?: string[];
   onChange: (university: string) => void;
@@ -23,7 +23,7 @@ export default function UniversityStep({
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      {universities.map((option) => {
+      {universities.map(({ code: option, name }) => {
         const alreadyApplied = appliedUniversities.includes(option);
 
         return (
@@ -42,6 +42,7 @@ export default function UniversityStep({
           >
             <p className="text-xs font-bold uppercase tracking-[0.25em] opacity-70">{country}</p>
             <p className="mt-3 text-xl font-bold">{option}</p>
+            {name !== option ? <p className="mt-1 text-sm font-medium opacity-80">{name}</p> : null}
             {alreadyApplied ? (
               <p className="mt-2 text-xs font-semibold">You already have an application here</p>
             ) : null}

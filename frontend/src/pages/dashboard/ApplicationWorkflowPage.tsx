@@ -11,8 +11,8 @@ import DetailsStep from '../../components/steps/DetailsStep';
 import ReviewStep from '../../components/steps/ReviewStep';
 import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
+import { useCatalog, universitiesInCountry } from '../../hooks/useCatalog';
 import {
-  countryOptions,
   getApplicationStatusLabel,
   getApplicationStatusTone,
   isNotRecommended,
@@ -57,6 +57,7 @@ export default function ApplicationWorkflowPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const studentId = user?._id ?? '';
+  const catalog = useCatalog();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [draft, setDraft] = useState<WorkflowDraft>(createEmptyDraft());
@@ -147,13 +148,15 @@ export default function ApplicationWorkflowPage() {
     };
   }, [studentId, id]);
 
-  const universityOptions = useMemo(() => {
-    if (!draft.country) {
-      return [];
-    }
-
-    return countryOptions[draft.country];
-  }, [draft.country]);
+  const universityOptions = useMemo(
+    () =>
+      draft.country
+        ? universitiesInCountry(catalog.universities, draft.country)
+            .filter((university) => university.shortName)
+            .map((university) => ({ code: university.shortName as string, name: university.name }))
+        : [],
+    [catalog.universities, draft.country]
+  );
 
   const validateCurrentStep = () => {
     if (currentStep === 1 && !draft.country) {
@@ -272,6 +275,9 @@ export default function ApplicationWorkflowPage() {
       case 1:
         return (
           <CountryStep
+            countries={catalog.countries}
+            loading={catalog.loading}
+            error={catalog.error}
             country={draft.country}
             onChange={(country) => {
               setDraft((current) => ({ ...current, country, university: '' }));

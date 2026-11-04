@@ -3,6 +3,7 @@ import DataTable from '../../components/admin/DataTable';
 import SearchFilter from '../../components/admin/SearchFilter';
 import { adminApi, type AdminUserRecord } from '../../lib/adminApi';
 import Notice from '../../components/Notice';
+import Modal from '../../components/Modal';
 import { useCatalog } from '../../hooks/useCatalog';
 
 /** Advisors receive applications for the countries ticked here. Countries come from the universities admins have added. */
@@ -248,8 +249,8 @@ export default function AdminUsers() {
       ) : null}
 
       {showAddModal ? (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-maroon/40 p-4 py-6 backdrop-blur-sm sm:items-center">
-          <div className="max-h-[calc(100vh-3rem)] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl animate-fade-in-up">
+        <Modal onClose={() => setShowAddModal(false)} widthClass="max-w-md" locked={submitting}>
+          <div className="overflow-y-auto p-8">
             <h3 className="text-2xl font-bold text-maroon mb-6">Create New User</h3>
             <div className="space-y-4">
               <div>
@@ -344,12 +345,12 @@ export default function AdminUsers() {
               </button>
             </div>
           </div>
-        </div>
+        </Modal>
       ) : null}
 
       {countryEdit ? (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[2rem] bg-white p-8 shadow-2xl">
+        <Modal onClose={() => setCountryEdit(null)} widthClass="max-w-md" locked={savingCountries}>
+          <div className="overflow-y-auto p-8">
             <h3 className="text-xl font-bold text-maroon">Countries for {countryEdit.user.name}</h3>
             <p className="mt-2 text-sm text-slate-500">New applications to these countries are assigned to this advisor.</p>
             <div className="mt-5">
@@ -375,7 +376,7 @@ export default function AdminUsers() {
               </button>
             </div>
           </div>
-        </div>
+        </Modal>
       ) : null}
 
       <SearchFilter

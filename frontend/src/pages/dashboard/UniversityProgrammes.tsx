@@ -1,21 +1,25 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, BookOpen, ChevronRight, Globe, Star, Search } from 'lucide-react';
+import { MapPin, BookOpen, ChevronRight, Globe, Search } from 'lucide-react';
 
-import { COUNTRY_DATA } from '../../data/destinations';
+import CountryFlag from '../../components/CountryFlag';
+import { useCatalog } from '../../hooks/useCatalog';
+
+const FALLBACK_BACKGROUND = 'bg-gradient-to-br from-dark-blue via-dark-blue-light to-dark-blue';
 
 export default function UniversityProgrammes() {
   const [searchQuery, setSearchQuery] = useState('');
+  const { universities, loading, error } = useCatalog();
 
   const query = searchQuery.trim().toLowerCase();
-  const universityTiles = COUNTRY_DATA.flatMap((country) =>
-    country.universities.map((university) => ({ country, university }))
-  ).filter(
-    ({ country, university }) =>
-      !query ||
-      country.name.toLowerCase().includes(query) ||
-      university.name.toLowerCase().includes(query)
-  );
+  const universityTiles = universities
+    .filter((university) => university.slug)
+    .filter(
+      (university) =>
+        !query ||
+        university.countryId?.name.toLowerCase().includes(query) ||
+        university.name.toLowerCase().includes(query)
+    );
 
   return (
     <div className="space-y-8 animate-fade-in pb-12">
@@ -61,60 +65,73 @@ export default function UniversityProgrammes() {
       <div>
         <h3 className="mb-4 text-xl font-bold text-dark-blue">Partner Universities</h3>
 
-        {universityTiles.length === 0 ? (
+        {loading ? (
+          <p className="rounded-2xl border border-light-color bg-white p-6 text-body-text">Loading universities...</p>
+        ) : error ? (
+          <p className="rounded-2xl border border-red-100 bg-red-50 p-6 font-semibold text-red-600">{error}</p>
+        ) : universityTiles.length === 0 ? (
           <p className="rounded-2xl border border-light-color bg-white p-6 text-body-text">
-            No universities match "{searchQuery}".
+            {query ? `No universities match "${searchQuery}".` : 'No partner universities have been published yet.'}
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {universityTiles.map(({ country, university }) => (
-              <Link
-                key={university.slug}
-                to={`/dashboard/programmes/${university.slug}`}
-                className="group overflow-hidden rounded-2xl border border-light-color/50 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="relative h-52 overflow-hidden">
-                  <img
-                    src={country.image}
-                    alt={country.name}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-dark-blue/90 via-dark-blue/40 to-transparent"></div>
-                  <div className="absolute bottom-4 left-5 right-5">
-                    <p className="flex items-center gap-2 text-sm font-semibold text-white/90">
-                      <span className="text-2xl">{country.flag}</span>
-                      {country.name}
-                    </p>
-                    <h3 className="mt-1 text-xl font-bold text-white">{university.name}</h3>
-                  </div>
-                </div>
+            {universityTiles.map((university) => {
+              const country = university.countryId;
+              const image = university.image || country?.image;
+              const programmes = (university.programmes ?? []).slice(0, 3);
 
-                <div className="space-y-4 p-5">
-                  <div className="flex items-center gap-4 text-sm text-body-text">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" /> {university.location}
-                    </span>
-                    <span className="flex items-center gap-1 font-medium text-accent-yellow">
-                      <Star className="h-4 w-4 fill-current" /> {university.rating}
+              return (
+                <Link
+                  key={university._id}
+                  to={`/dashboard/programmes/${university.slug}`}
+                  className="group overflow-hidden rounded-2xl border border-light-color/50 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className={`relative h-52 overflow-hidden ${FALLBACK_BACKGROUND}`}>
+                    {image ? (
+                      <img
+                        src={image}
+                        alt={country?.name}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    ) : null}
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-blue/90 via-dark-blue/40 to-transparent"></div>
+                    <div className="absolute bottom-4 left-5 right-5">
+                      <p className="flex items-center gap-2 text-sm font-semibold text-white/90">
+                        <CountryFlag code={country?.code} emoji={country?.flag} />
+                        {country?.name}
+                      </p>
+                      <h3 className="mt-1 text-xl font-bold text-white">{university.name}</h3>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 p-5">
+                    {university.city ? (
+                      <div className="flex items-center gap-4 text-sm text-body-text">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" /> {university.city}
+                        </span>
+                      </div>
+                    ) : null}
+                    {programmes.length ? (
+                      <div>
+                        <p className="mb-2 flex items-center gap-2 text-sm font-bold text-dark-blue">
+                          <BookOpen className="h-4 w-4" /> Available Programs
+                        </p>
+                        <ul className="space-y-1 text-sm text-body-text">
+                          {programmes.map((programme) => (
+                            <li key={programme.name} className="truncate">{programme.name}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-dark-blue">
+                      View university
+                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </span>
                   </div>
-                  <div>
-                    <p className="mb-2 flex items-center gap-2 text-sm font-bold text-dark-blue">
-                      <BookOpen className="h-4 w-4" /> Available Programs
-                    </p>
-                    <ul className="space-y-1 text-sm text-body-text">
-                      {university.programs.map((program) => (
-                        <li key={program} className="truncate">{program}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-dark-blue">
-                    View university
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
