@@ -4,6 +4,7 @@ import Collapsible from './Collapsible';
 import { programOutlineApi } from '../../lib/programOutlineApi';
 import { resolveUploadUrl } from '../../lib/studentProfileApi';
 import type { OutlineCategory, OutlineSemester, PlanSummary, ProgramOutline } from '../../types/equivalency';
+import Notice from '../Notice';
 
 export const CATEGORY_OPTIONS: Array<{ value: OutlineCategory; label: string }> = [
   { value: 'computing_core', label: 'Computing core' },
@@ -185,7 +186,7 @@ export default function ProgramOutlinePanel({ studentId, summary, outline, onSav
                 ))}
 
                 {error ? (
-                  <p className="rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>
+                  <Notice tone="error">{error}</Notice>
                 ) : null}
 
                 <button

@@ -5,6 +5,7 @@ import { resultsApi } from '../../lib/api';
 import { resolveUploadUrl } from '../../lib/studentProfileApi';
 import type { StudentResult } from '../../types/result';
 import { formatDisplayDate, getResultStatusClasses } from '../../utils/result';
+import Notice from '../../components/Notice';
 
 const getCourseTitle = (course: StudentResult['hostCourseId']) => course?.title || course?.name || course?.code || 'Untitled course';
 
@@ -46,9 +47,7 @@ export default function StudentResults() {
       </section>
 
       {error ? (
-        <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-medium text-red-700">
-          {error}
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       {isLoading ? (

@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { equivalencyApi } from '../../lib/api';
 import type { CourseRequest } from '../../types/equivalency';
 import { formatDisplayDate, getRequestStatusClasses } from '../../utils/equivalency';
+import Notice from '../../components/Notice';
 
 export default function AdvisorEquivalencyRequests() {
   const { user } = useAuth();
@@ -77,9 +78,7 @@ export default function AdvisorEquivalencyRequests() {
       </section>
 
       {error ? (
-        <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-medium text-red-700">
-          {error}
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       {isLoading ? (

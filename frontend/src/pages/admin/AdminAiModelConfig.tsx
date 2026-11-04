@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Bot, KeyRound, Save, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Bot, KeyRound, Save } from 'lucide-react';
 import { adminApi, type AiModelConfigRecord, type AiModelConfigInput, type AiProvider } from '../../lib/adminApi';
+import Notice from '../../components/Notice';
 
 const PROVIDER_PRESETS: Record<AiProvider, { label: string; baseUrl: string; modelPlaceholder: string; hint: string }> = {
   groq: {
@@ -130,17 +131,11 @@ export default function AdminAiModelConfig() {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 text-red-600 font-bold rounded-xl border border-red-100 flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 shrink-0" />
-          <span>{error}</span>
-        </div>
+        <Notice tone="error">{error}</Notice>
       )}
 
       {savedAt && !error && (
-        <div className="p-4 bg-green-50 text-green-700 font-bold rounded-xl border border-green-100 flex items-center gap-2">
-          <CheckCircle2 className="h-5 w-5 shrink-0" />
-          <span>Configuration saved. New match requests will use this model.</span>
-        </div>
+        <Notice tone="success">Configuration saved. New match requests will use this model.</Notice>
       )}
 
       <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">

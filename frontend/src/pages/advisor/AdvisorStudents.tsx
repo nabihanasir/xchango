@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Mail, Phone, BookOpen, Clock, AlertCircle } from 'lucide-react';
+import { Mail, Phone, BookOpen, Clock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { advisorApi, type AdvisorProfileData } from '../../lib/advisorApi';
 import type { StudentProfile } from '../../types/studentProfile';
+import Notice from '../../components/Notice';
 
 export default function AdvisorStudents() {
   const { user } = useAuth();
@@ -67,10 +68,7 @@ export default function AdvisorStudents() {
       </section>
 
       {error ? (
-        <div className="rounded-[2rem] border border-red-200 bg-red-50 px-6 py-5 flex items-center gap-3 text-sm font-medium text-red-700">
-          <AlertCircle className="h-5 w-5" />
-          {error}
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       <div className="space-y-6">

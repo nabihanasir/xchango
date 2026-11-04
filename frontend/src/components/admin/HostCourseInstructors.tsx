@@ -3,6 +3,7 @@ import { Check, Mail, Pencil, Search, X } from 'lucide-react';
 import { adminApi } from '../../lib/adminApi';
 import type { ApplicationCourseSummary } from '../../types/application';
 import { getCourseDisplayTitle } from '../../types/course';
+import Notice from '../Notice';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -108,7 +109,7 @@ export default function HostCourseInstructors() {
       </div>
 
       {error ? (
-        <div className="mb-4 rounded-xl border border-red-100 bg-red-50 p-3 text-sm font-bold text-red-600">{error}</div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       {loading ? (

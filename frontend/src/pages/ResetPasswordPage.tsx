@@ -9,6 +9,7 @@ import { useToast } from '../context/ToastContext';
 import { authApi } from '../lib/authApi';
 import { parseApiError } from '../lib/errorUtils';
 import { AppApiError } from '../types/error';
+import Notice from '../components/Notice';
 
 export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -126,9 +127,7 @@ export default function ResetPasswordPage() {
         </Button>
 
         {successMessage ? (
-          <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50/90 p-5 text-sm font-medium text-emerald-950 shadow-soft">
-            {successMessage}
-          </div>
+          <Notice tone="success">{successMessage}</Notice>
         ) : null}
 
         {error ? <ErrorAlert error={error} titleOverride="Password reset failed" /> : null}

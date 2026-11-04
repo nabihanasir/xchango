@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { resultsApi } from '../../lib/api';
 import { resolveUploadUrl } from '../../lib/studentProfileApi';
 import type { StudentResult } from '../../types/result';
+import Notice from '../../components/Notice';
 
 const getName = (value: StudentResult['studentId']) => (typeof value === 'string' ? value : value?.name || 'Unknown');
 const getEmail = (value: StudentResult['studentId']) => (typeof value === 'string' ? '' : value?.email || '');
@@ -109,9 +110,7 @@ export default function AdminResults() {
       </div>
 
       {loadError && (
-        <div className="p-4 bg-red-50 text-red-600 font-bold rounded-xl border border-red-100 flex items-center gap-2">
-          <span>Failed to load: {loadError}</span>
-        </div>
+        <Notice tone="error">Failed to load: {loadError}</Notice>
       )}
 
       <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">

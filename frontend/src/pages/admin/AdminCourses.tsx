@@ -5,6 +5,7 @@ import HostCourseInstructors from '../../components/admin/HostCourseInstructors'
 import { adminApi } from '../../lib/adminApi';
 import type { ApplicationCourseSummary } from '../../types/application';
 import { getCourseDisplayTitle } from '../../types/course';
+import Notice from '../../components/Notice';
 
 type CourseFormState = {
   title: string;
@@ -282,9 +283,7 @@ export default function AdminCourses() {
       </div>
 
       {error ? (
-        <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 p-4 font-bold text-red-600">
-          <span>{error}</span>
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       <div className="glass-card rounded-[2rem] bg-white p-6 shadow-sm md:p-8">
@@ -440,9 +439,7 @@ export default function AdminCourses() {
               </div>
 
               {formError ? (
-                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                  {formError}
-                </div>
+                <Notice tone="error">{formError}</Notice>
               ) : null}
 
               <div className="flex justify-end gap-3 pt-4">

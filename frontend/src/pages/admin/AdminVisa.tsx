@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { visaApi } from '../../lib/api';
 import type { AdminVisaRow } from '../../types/visa';
 import { formatVisaDate, VISA_STATUS_META, VISA_STATUSES } from '../../utils/visa';
+import Notice from '../../components/Notice';
 
 const filterOptions = [
   { label: 'All Status', value: 'all' },
@@ -126,15 +127,13 @@ export default function AdminVisa() {
       </div>
 
       {loadError ? (
-        <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 p-4 font-bold text-red-600">
-          <span>Failed to load: {loadError}</span>
-        </div>
+        <Notice tone="error">Failed to load: {loadError}</Notice>
       ) : null}
 
       {savedFor ? (
-        <div role="status" className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 font-bold text-emerald-700">
+        <Notice tone="success">
           Visa status updated for {savedFor}. The student has been notified.
-        </div>
+        </Notice>
       ) : null}
 
       <div className="glass-card rounded-[2rem] bg-white p-6 shadow-sm md:p-8">

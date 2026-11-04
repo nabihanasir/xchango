@@ -10,6 +10,7 @@ import {
   recommendedApplicationStatuses,
   type WorkflowApplication,
 } from '../../types/application';
+import Notice from '../../components/Notice';
 
 const workflowStages = [
   { label: 'Profile', statuses: [] as string[] },
@@ -143,9 +144,7 @@ export default function StudentApplicationsPage() {
       </section>
 
       {errorMessage ? (
-        <div className="rounded-[2rem] border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
-          {errorMessage}
-        </div>
+        <Notice tone="error">{errorMessage}</Notice>
       ) : null}
 
       <div className="grid gap-5">

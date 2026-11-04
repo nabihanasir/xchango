@@ -5,6 +5,7 @@ import { resultsApi } from '../../lib/api';
 import { resolveUploadUrl } from '../../lib/studentProfileApi';
 import type { GradableItem, ResultStatus } from '../../types/result';
 import { formatDisplayDate, getResultStatusClasses } from '../../utils/result';
+import Notice from '../../components/Notice';
 
 interface Draft {
   grade: string;
@@ -101,9 +102,7 @@ export default function AdvisorResults() {
       </section>
 
       {error ? (
-        <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-medium text-red-700">
-          {error}
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       {isLoading ? (

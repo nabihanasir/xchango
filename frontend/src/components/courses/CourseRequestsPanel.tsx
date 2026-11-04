@@ -12,6 +12,7 @@ import {
   getRequestStatusClasses,
   getScoreBadgeClasses,
 } from '../../utils/equivalency';
+import Notice from '../Notice';
 
 const MATCH_POLL_INTERVAL_MS = 4000;
 
@@ -82,9 +83,7 @@ export default function CourseRequestsPanel({ requests, isLoading, error, onRequ
       </div>
 
       {error ? (
-        <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-medium text-red-700">
-          {error}
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       {isLoading ? (

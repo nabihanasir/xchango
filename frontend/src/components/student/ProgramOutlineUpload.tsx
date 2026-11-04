@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { CheckCircle2, FileText, UploadCloud } from 'lucide-react';
+import { FileText, UploadCloud } from 'lucide-react';
 import { resolveUploadUrl } from '../../lib/studentProfileApi';
 import type { ProgramOutline } from '../../types/equivalency';
+import Notice from '../Notice';
 
 interface ProgramOutlineUploadProps {
   outline: ProgramOutline | null;
@@ -49,13 +50,10 @@ export default function ProgramOutlineUpload({ outline, uploading, errorMessage,
       </div>
 
       {outline ? (
-        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>
-            {outline.programName || 'Program outline'} read: {outline.semesters.length} semesters,{' '}
+        <Notice tone="success">
+          {outline.programName || 'Program outline'} read: {outline.semesters.length} semesters,{' '}
             {outline.totalCredits} credit hours. Your advisor will review the course types.
-          </p>
-        </div>
+        </Notice>
       ) : null}
 
       <form className="mt-6 flex flex-col gap-4 md:flex-row" onSubmit={handleSubmit}>
@@ -89,9 +87,7 @@ export default function ProgramOutlineUpload({ outline, uploading, errorMessage,
       </form>
 
       {errorMessage ? (
-        <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {errorMessage}
-        </p>
+        <Notice tone="error">{errorMessage}</Notice>
       ) : null}
     </section>
   );

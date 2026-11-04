@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FileSpreadsheet, UploadCloud } from 'lucide-react';
 import { resolveUploadUrl } from '../../lib/studentProfileApi';
+import Notice from '../Notice';
 
 interface TranscriptUploadProps {
   uploading: boolean;
@@ -82,9 +83,7 @@ export default function TranscriptUpload({
       </form>
 
       {errorMessage ? (
-        <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-          {errorMessage}
-        </p>
+        <Notice tone="error">{errorMessage}</Notice>
       ) : null}
     </section>
   );

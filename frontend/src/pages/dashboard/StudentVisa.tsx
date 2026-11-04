@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { visaApi } from '../../lib/api';
 import type { StudentVisaProcess } from '../../types/visa';
 import { formatVisaDate, getReachedStageIndex, VISA_STAGES, VISA_STATUS_META } from '../../utils/visa';
+import Notice from '../../components/Notice';
 
 type StepState = 'done' | 'current' | 'stopped' | 'upcoming';
 
@@ -58,9 +59,7 @@ export default function StudentVisa() {
       </section>
 
       {error ? (
-        <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-medium text-red-700">
-          {error}
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       {isLoading ? (

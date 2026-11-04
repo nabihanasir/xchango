@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { visaApi } from '../../lib/api';
 import type { AdminVisaRow, VisaStatus } from '../../types/visa';
 import { VISA_STATUS_META, VISA_STATUSES } from '../../utils/visa';
+import Notice from '../Notice';
 
 const MAX_REMARKS = 1000;
 
@@ -118,9 +119,7 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
         </p>
 
         {error ? (
-          <div role="alert" className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-bold text-red-600">
-            {error}
-          </div>
+          <Notice tone="error">{error}</Notice>
         ) : null}
 
         <div className="mt-6 flex justify-end gap-3">

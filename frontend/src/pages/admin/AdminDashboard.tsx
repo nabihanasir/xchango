@@ -14,6 +14,7 @@ import { ArrowRight, BookOpen, Globe, Sparkles, TrendingUp } from 'lucide-react'
 import { Link } from 'react-router-dom';
 import StatCard from '../../components/admin/StatCard';
 import { adminApi, type AdminDashboardMetrics } from '../../lib/adminApi';
+import Notice from '../../components/Notice';
 
 const emptyMetrics: AdminDashboardMetrics = {
   adminStats: [],
@@ -85,9 +86,7 @@ export default function AdminDashboard() {
       </div>
 
       {error ? (
-        <div className="rounded-[1.75rem] border border-red-200 bg-red-50 px-6 py-5 text-sm font-medium text-red-700">
-          {error}
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">

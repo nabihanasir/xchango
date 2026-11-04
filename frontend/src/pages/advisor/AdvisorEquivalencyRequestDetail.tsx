@@ -46,6 +46,7 @@ import {
   getOutlineMatch,
   getRequestStatusClasses,
 } from '../../utils/equivalency';
+import Notice from '../../components/Notice';
 
 type StatusDrafts = Record<string, ItemStatus>;
 type CommentDrafts = Record<string, string>;
@@ -506,7 +507,7 @@ function CourseCard({
               </select>
             </div>
             {courseLoadError ? (
-              <p className="mt-2 rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{courseLoadError}</p>
+              <Notice tone="error">{courseLoadError}</Notice>
             ) : null}
             {!filteredHomeCourses.length && !courseLoadError ? (
               <p className="mt-2 rounded-[1.25rem] border border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-500">
@@ -829,7 +830,7 @@ export default function AdvisorEquivalencyRequestDetail() {
       </Collapsible>
 
       {error ? (
-        <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-medium text-red-700 motion-safe:animate-pop-in">{error}</div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       <div className="flex items-center justify-between">

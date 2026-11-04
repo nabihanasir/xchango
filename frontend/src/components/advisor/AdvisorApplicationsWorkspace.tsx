@@ -30,6 +30,7 @@ import {
 } from '../../types/application';
 import type { StudentProfile } from '../../types/studentProfile';
 import type { StudentDocument } from '../../types/document';
+import Notice from '../Notice';
 
 const SummaryCard = ({ title, value }: { title: string; value: string }) => (
   <div className="glass-card rounded-[2rem] p-6">
@@ -397,9 +398,7 @@ export default function AdvisorApplicationsWorkspace({
       </div>
 
       {pageError ? (
-        <div className="rounded-[2rem] border border-red-200 bg-red-50 px-6 py-5 text-sm font-medium text-red-700">
-          {pageError}
-        </div>
+        <Notice tone="error">{pageError}</Notice>
       ) : null}
 
       <section className="glass-card overflow-hidden rounded-[2rem]">
@@ -491,15 +490,11 @@ export default function AdvisorApplicationsWorkspace({
       </section>
 
       {detailsError ? (
-        <div className="rounded-[2rem] border border-red-200 bg-red-50 px-6 py-5 text-sm font-medium text-red-700">
-          {detailsError}
-        </div>
+        <Notice tone="error">{detailsError}</Notice>
       ) : null}
 
       {actionError ? (
-        <div className="rounded-[2rem] border border-red-200 bg-red-50 px-6 py-5 text-sm font-medium text-red-700">
-          {actionError}
-        </div>
+        <Notice tone="error">{actionError}</Notice>
       ) : null}
 
       <section ref={applicationRef} className="glass-card rounded-[2rem] p-6 lg:p-8">
@@ -830,9 +825,7 @@ export default function AdvisorApplicationsWorkspace({
                   <p className="text-sm text-slate-500">No transcript file uploaded yet.</p>
                 )}
               {documentsError ? (
-                <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                  {documentsError}
-                </p>
+                <Notice tone="error">{documentsError}</Notice>
               ) : null}
               <DocumentList
                 documents={studentDocuments}

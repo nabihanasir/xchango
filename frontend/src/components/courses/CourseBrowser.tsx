@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { equivalencyApi } from '../../lib/api';
 import type { CourseSummary } from '../../types/equivalency';
 import { getUniversityName } from '../../utils/equivalency';
+import Notice from '../Notice';
 
 interface CourseBrowserProps {
   /** Called after a request is created so the parent can reload and lock the selection. */
@@ -109,9 +110,7 @@ export default function CourseBrowser({ onSubmitted, resubmitting = false }: Cou
       </section>
 
       {error ? (
-        <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-medium text-red-700">
-          {error}
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">

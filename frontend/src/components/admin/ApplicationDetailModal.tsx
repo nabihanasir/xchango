@@ -9,6 +9,7 @@ import { documentApi } from '../../lib/documentApi';
 import type { DocumentStatus, StudentDocument } from '../../types/document';
 import { canMarkArrival } from '../../utils/arrival';
 import type { WorkflowApplication } from '../../types/application';
+import Notice from '../Notice';
 
 interface ApplicationDetailModalProps {
   app: WorkflowApplication;
@@ -308,9 +309,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4">
                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Student Documents</h4>
                 {documentsError ? (
-                  <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                    {documentsError}
-                  </p>
+                  <Notice tone="error">{documentsError}</Notice>
                 ) : null}
                 {documentsLoading ? (
                   <div className="h-20 animate-pulse rounded-[1.75rem] bg-slate-100" />

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { onlineClassesApi, type OnlineClass } from '../../lib/onlineClassesApi';
+import Notice from '../../components/Notice';
 
 const statusStyles: Record<OnlineClass['status'], string> = {
   'Live now': 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -176,10 +177,9 @@ export default function OnlineClasses() {
       ) : null}
 
       {copyError ? (
-        <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>Clipboard access was blocked. Copy the join link manually from the class details.</span>
-        </div>
+        <Notice tone="error">
+          Clipboard access was blocked. Copy the join link manually from the class details.
+        </Notice>
       ) : null}
 
       <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">

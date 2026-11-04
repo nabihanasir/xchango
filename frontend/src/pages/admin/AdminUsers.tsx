@@ -2,14 +2,26 @@ import { useEffect, useMemo, useState } from 'react';
 import DataTable from '../../components/admin/DataTable';
 import SearchFilter from '../../components/admin/SearchFilter';
 import { adminApi, type AdminUserRecord } from '../../lib/adminApi';
+import Notice from '../../components/Notice';
+import { useCatalog } from '../../hooks/useCatalog';
 
-// Must match the application countries on the backend; advisors receive applications for the countries ticked here.
-const ADVISOR_COUNTRIES = ['Malaysia', 'South Korea', 'Turkey'];
+/** Advisors receive applications for the countries ticked here. Countries come from the universities admins have added. */
+function CountryCheckboxes({
+  countries,
+  selected,
+  onChange,
+}: {
+  countries: string[];
+  selected: string[];
+  onChange: (countries: string[]) => void;
+}) {
+  if (!countries.length) {
+    return <p className="text-sm text-slate-500">No countries yet. Add a university first (Universities tab).</p>;
+  }
 
-function CountryCheckboxes({ selected, onChange }: { selected: string[]; onChange: (countries: string[]) => void }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {ADVISOR_COUNTRIES.map((country) => {
+      {countries.map((country) => {
         const checked = selected.includes(country);
         return (
           <label
@@ -53,6 +65,8 @@ const defaultForm: CreateUserFormState = {
 };
 
 export default function AdminUsers() {
+  const { countries: catalogCountries } = useCatalog();
+  const countryNames = useMemo(() => catalogCountries.map((country) => country.name), [catalogCountries]);
   const [users, setUsers] = useState<AdminUserRecord[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [form, setForm] = useState<CreateUserFormState>(defaultForm);
@@ -224,15 +238,13 @@ export default function AdminUsers() {
       </div>
 
       {generatedPassword ? (
-        <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-6 py-5 text-sm font-medium text-emerald-800">
+        <Notice tone="success">
           Auto-generated advisor password: <span className="font-bold">{generatedPassword}</span>
-        </div>
+        </Notice>
       ) : null}
 
       {error ? (
-        <div className="rounded-[1.75rem] border border-red-200 bg-red-50 px-6 py-5 text-sm font-medium text-red-700">
-          {error}
-        </div>
+        <Notice tone="error">{error}</Notice>
       ) : null}
 
       {showAddModal ? (
@@ -295,7 +307,7 @@ export default function AdminUsers() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-maroon/60 uppercase mb-2">Supervises countries</label>
-                    <CountryCheckboxes selected={form.countries} onChange={(countries) => setForm({ ...form, countries })} />
+                    <CountryCheckboxes countries={countryNames} selected={form.countries} onChange={(countries) => setForm({ ...form, countries })} />
                     <p className="mt-2 text-xs text-slate-500">Applications to these countries are assigned to this advisor automatically.</p>
                   </div>
                 </>
@@ -313,9 +325,7 @@ export default function AdminUsers() {
             </div>
 
             {createError ? (
-              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                {createError}
-              </div>
+              <Notice tone="error">{createError}</Notice>
             ) : null}
 
             <div className="flex gap-4 mt-8">
@@ -344,6 +354,7 @@ export default function AdminUsers() {
             <p className="mt-2 text-sm text-slate-500">New applications to these countries are assigned to this advisor.</p>
             <div className="mt-5">
               <CountryCheckboxes
+                countries={countryNames}
                 selected={countryEdit.countries}
                 onChange={(countries) => setCountryEdit({ ...countryEdit, countries })}
               />

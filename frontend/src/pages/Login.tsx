@@ -6,6 +6,7 @@ import InputField from '../components/InputField';
 import Button from '../components/Button';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../lib/authApi';
+import Notice from '../components/Notice';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -70,9 +71,7 @@ export default function Login() {
         </Button>
 
         {errorMessage ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-            {errorMessage}
-          </div>
+          <Notice tone="error">{errorMessage}</Notice>
         ) : null}
       </form>
 

@@ -14,6 +14,7 @@ import type {
   StudentProfile as StudentProfileType,
   StudentTranscript,
 } from '../../types/studentProfile';
+import Notice from '../../components/Notice';
 
 const summaryCardClassName = 'glass-card rounded-[2rem] p-6';
 
@@ -274,9 +275,7 @@ export default function StudentProfile() {
 
       <section className="glass-card rounded-[2rem] p-6 md:p-7">
         {profileError ? (
-          <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-            {profileError}
-          </p>
+          <Notice tone="error">{profileError}</Notice>
         ) : null}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-slate-500">

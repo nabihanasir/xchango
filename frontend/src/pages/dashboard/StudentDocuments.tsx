@@ -5,6 +5,7 @@ import DocumentUploadForm from '../../components/DocumentUploadForm';
 import { useAuth } from '../../context/AuthContext';
 import { documentApi } from '../../lib/documentApi';
 import type { StudentDocument } from '../../types/document';
+import Notice from '../../components/Notice';
 
 export default function StudentDocuments() {
   const { user } = useAuth();
@@ -157,15 +158,11 @@ export default function StudentDocuments() {
           <DocumentUploadForm documents={documents} uploading={uploading} onUpload={handleUpload} />
 
           {errorMessage ? (
-            <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-              {errorMessage}
-            </p>
+            <Notice tone="error">{errorMessage}</Notice>
           ) : null}
 
           {successMessage ? (
-            <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-              {successMessage}
-            </p>
+            <Notice tone="success">{successMessage}</Notice>
           ) : null}
 
           {loading ? (

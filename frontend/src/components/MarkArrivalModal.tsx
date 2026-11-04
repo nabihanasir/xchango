@@ -6,6 +6,7 @@ import { applicationApi } from '../lib/applicationApi';
 import type { ApplicationCourseSummary, ArrivalResult, WorkflowApplication } from '../types/application';
 import { AppApiError } from '../types/error';
 import { getCourseDisplayTitle } from '../types/course';
+import Notice from './Notice';
 
 interface MarkArrivalModalProps {
   application: WorkflowApplication;
@@ -199,9 +200,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
             </div>
 
             {error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                {error}
-              </div>
+              <Notice tone="error">{error}</Notice>
             ) : null}
 
             <div className="flex justify-end gap-3 pt-2">

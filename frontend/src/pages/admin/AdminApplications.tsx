@@ -7,6 +7,7 @@ import { adminApi } from '../../lib/adminApi';
 import { applicationApi } from '../../lib/applicationApi';
 import type { WorkflowApplication } from '../../types/application';
 import type { AdminUserRecord } from '../../lib/adminApi';
+import Notice from '../../components/Notice';
 
 export default function AdminApplications() {
   const [data, setData] = useState<WorkflowApplication[]>([]);
@@ -161,15 +162,11 @@ export default function AdminApplications() {
       </div>
 
       {loadError && (
-        <div className="p-4 bg-red-50 text-red-600 font-bold rounded-xl border border-red-100 flex items-center gap-2">
-          <span>Failed to load: {loadError}</span>
-        </div>
+        <Notice tone="error">Failed to load: {loadError}</Notice>
       )}
 
       {assignError && (
-        <div className="p-4 bg-red-50 text-red-600 font-bold rounded-xl border border-red-100 flex items-center gap-2">
-          <span>Failed to assign advisor: {assignError}</span>
-        </div>
+        <Notice tone="error">Failed to assign advisor: {assignError}</Notice>
       )}
 
       <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">
