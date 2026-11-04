@@ -1,11 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export enum ApplicationCountry {
-  MALAYSIA = 'Malaysia',
-  SOUTH_KOREA = 'South Korea',
-  TURKEY = 'Turkey',
-}
-
 export enum AccommodationPreference {
   UNIVERSITY = 'UNIVERSITY',
   SELF = 'SELF',
@@ -81,7 +75,7 @@ export interface IArrival {
 export interface IApplication extends Document {
   studentId: mongoose.Types.ObjectId;
   advisorId?: mongoose.Types.ObjectId;
-  country: ApplicationCountry;
+  country: string;
   university: string;
   program: string;
   travelHistory: {
@@ -187,8 +181,8 @@ const ApplicationSchema = new Schema<IApplication>(
     advisorId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
     country: {
       type: String,
-      enum: Object.values(ApplicationCountry),
       required: true,
+      trim: true,
     },
     university: { type: String, required: true, trim: true },
     program: { type: String, required: true, trim: true },

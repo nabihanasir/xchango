@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as adminService from '../services/adminService';
+import { scrapeUniversityWebsite } from '../services/universityScraperService';
 import * as offboardingService from '../services/offboardingService';
 import { sendResponse } from '../utils/response';
 
@@ -8,9 +9,29 @@ export const getDashboardStats = async (req: Request, res: Response) => {
   sendResponse(res, 200, 'Dashboard stats fetched', stats);
 };
 
+export const getUniversities = async (_req: Request, res: Response) => {
+  const universities = await adminService.listUniversities();
+  sendResponse(res, 200, 'Universities fetched successfully', universities);
+};
+
 export const addUniversity = async (req: Request, res: Response) => {
-  const university = await adminService.createUniversity(req.body);
-  sendResponse(res, 201, 'University added successfully', university);
+  const result = await adminService.createUniversity(req.body);
+  sendResponse(res, 201, 'University added successfully', result);
+};
+
+export const updateUniversity = async (req: Request, res: Response) => {
+  const result = await adminService.updateUniversity(req.params.id as string, req.body);
+  sendResponse(res, 200, 'University updated successfully', result);
+};
+
+export const scrapeUniversity = async (req: Request, res: Response) => {
+  const result = await scrapeUniversityWebsite(req.body?.url);
+  sendResponse(res, 200, 'Website scanned', result);
+};
+
+export const addHostCourse = async (req: any, res: Response) => {
+  const course = await adminService.createHostCourse(req.user._id.toString(), req.body);
+  sendResponse(res, 201, 'Host course added successfully', course);
 };
 
 export const addCourse = async (req: any, res: Response) => {

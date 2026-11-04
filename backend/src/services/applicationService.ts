@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import Application, {
   AccommodationPreference,
-  ApplicationCountry,
   ApplicationStatus,
   IApplication,
 } from '../models/Application';
@@ -10,6 +9,7 @@ import AdvisorProfile from '../models/AdvisorProfile';
 import Course, { CourseType, ICourse } from '../models/Course';
 import { logger } from '../utils/logger';
 import University from '../models/University';
+import Country from '../models/Country';
 import { appUrl, formatDateTime, notifyUserSafely } from './notificationService';
 import { ensureStudentProfile } from './studentService';
 import {
@@ -22,14 +22,8 @@ import {
   ValidationError,
 } from '../errors/AppError';
 
-export const applicationOptions: Record<ApplicationCountry, string[]> = {
-  [ApplicationCountry.MALAYSIA]: ['MMU', 'UTHM'],
-  [ApplicationCountry.SOUTH_KOREA]: ['KDU'],
-  [ApplicationCountry.TURKEY]: ['GTU'],
-};
-
 interface ApplicationStepInput {
-  country?: ApplicationCountry;
+  country?: string;
   university?: string;
   program?: string;
   travelHistory?: {
@@ -200,9 +194,18 @@ const populateApplication = <T>(query: T) => {
     });
 };
 
-const validateUniversitySelection = (country: ApplicationCountry, university: string) => {
-  const supportedUniversities = applicationOptions[country];
-  if (!supportedUniversities) {
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * A student may only apply to a university that an admin has published for the chosen country.
+ * Countries and universities live in the database, so new destinations work without code changes.
+ */
+export const validateUniversitySelection = async (country: string, university: string) => {
+  const countryDoc = await Country.findOne({
+    name: new RegExp(`^${escapeRegExp(String(country).trim())}$`, 'i'),
+    isActive: { $ne: false },
+  });
+  if (!countryDoc) {
     throw new ValidationError(
       'Selected country is not supported.',
       'The selected country is outside the configured application destinations.',
@@ -211,7 +214,12 @@ const validateUniversitySelection = (country: ApplicationCountry, university: st
     );
   }
 
-  if (!supportedUniversities.includes(university)) {
+  const match = await University.findOne({
+    countryId: countryDoc._id,
+    shortName: university,
+    status: { $ne: 'draft' },
+  });
+  if (!match) {
     throw new ValidationError(
       'Selected university is not available for the chosen country.',
       'The selected university does not belong to the chosen country.',
@@ -219,6 +227,8 @@ const validateUniversitySelection = (country: ApplicationCountry, university: st
       'UNIVERSITY_NOT_ALLOWED'
     );
   }
+
+  return countryDoc.name;
 };
 
 const assertNoDuplicateUniversityApplication = async (
@@ -303,7 +313,7 @@ const calculatePostShortlistStatus = (application: IApplication) => {
   return ApplicationStatus.SHORTLISTED;
 };
 
-const applyStepInput = (application: IApplication, input: ApplicationStepInput) => {
+const applyStepInput = async (application: IApplication, input: ApplicationStepInput) => {
   if (input.country) {
     application.country = input.country;
   }
@@ -355,12 +365,12 @@ const applyStepInput = (application: IApplication, input: ApplicationStepInput) 
   }
 };
 
-const validateSubmission = (application: IApplication) => {
+const validateSubmission = async (application: IApplication) => {
   if (!application.country || !application.university || !application.program) {
     throw new Error('Country, university, and program are required before submission.');
   }
 
-  validateUniversitySelection(application.country, application.university);
+  await validateUniversitySelection(application.country, application.university);
   validateTravelHistory(application.travelHistory);
   validateMedicalCondition(application.medicalCondition);
 
@@ -455,7 +465,7 @@ export const createApplication = async (studentId: string, payload: ApplicationS
     );
   }
 
-  validateUniversitySelection(payload.country, payload.university);
+  payload.country = await validateUniversitySelection(payload.country, payload.university);
   validateTravelHistory(payload.travelHistory);
   validateMedicalCondition(payload.medicalCondition);
   await assertNoDuplicateUniversityApplication(studentId, payload.university);
@@ -506,7 +516,7 @@ export const updateApplicationStep = async (
     await assertNoDuplicateUniversityApplication(studentId, payload.university, applicationId);
   }
 
-  applyStepInput(application, payload);
+  await applyStepInput(application, payload);
   await application.save();
   return application;
 };
@@ -558,7 +568,7 @@ export const submitApplication = async (applicationId: string, studentId: string
     );
   }
 
-  validateSubmission(application);
+  await validateSubmission(application);
   application.status = ApplicationStatus.PENDING;
   await application.save();
 
@@ -590,6 +600,37 @@ export const submitApplication = async (applicationId: string, studentId: string
     application,
     warnings: buildSubmissionWarnings(application),
   };
+};
+
+/**
+ * Hands every still-unassigned PENDING application for a country to its advisors. Called after an admin sets
+ * who supervises a country, so applications that were waiting do not need to be assigned one by one.
+ * Applications that already have an advisor are left alone.
+ */
+export const assignPendingApplicationsForCountry = async (country: string) => {
+  const pending = await Application.find({
+    country,
+    status: ApplicationStatus.PENDING,
+    advisorId: null,
+  });
+
+  let assigned = 0;
+  for (const application of pending) {
+    try {
+      const advisor = await findAdvisorForApplication(application);
+      if (!advisor) {
+        break;
+      }
+      await applyAdvisorAssignment(application, advisor);
+      assigned += 1;
+    } catch (error) {
+      logger.error('Automatic advisor assignment failed', {
+        applicationId: String(application._id),
+        cause: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  return assigned;
 };
 
 /** Links the advisor to the application, moves it to ASSIGNED and notifies both parties. */

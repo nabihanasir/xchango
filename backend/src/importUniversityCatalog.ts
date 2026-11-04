@@ -171,11 +171,9 @@ const upsertCatalog = async (blocks: ParsedUniversityBlock[]) => {
     const university = await University.findOneAndUpdate(
       { name: block.universityName },
       {
-        $set: {
-          countryId: country._id,
-          website: '',
-          seatLimit: 100,
-        },
+        // Admins now maintain website, seats and profile in the app, so re-running the import must not reset them.
+        $set: { countryId: country._id },
+        $setOnInsert: { website: '', seatLimit: 100 },
       },
       { returnDocument: 'after', upsert: true }
     );

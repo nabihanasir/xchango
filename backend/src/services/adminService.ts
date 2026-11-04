@@ -1,6 +1,6 @@
 import University from '../models/University';
 import Course from '../models/Course';
-import Application, { ApplicationCountry, ApplicationStatus } from '../models/Application';
+import Application, { ApplicationStatus } from '../models/Application';
 import User, { UserRole } from '../models/User';
 import Country from '../models/Country';
 import CourseMapping from '../models/CourseMapping';
@@ -9,6 +9,8 @@ import AiModelConfig, { AiProvider, IAiModelConfig } from '../models/AiModelConf
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import * as courseService from './courseService';
+import { assignPendingApplicationsForCountry } from './applicationService';
+import * as universityAdminService from './universityAdminService';
 import { appUrl, notifyUserSafely } from './notificationService';
 
 const populateApplications = <T>(query: T) =>
@@ -66,9 +68,15 @@ export const getAllStats = async () => {
   };
 };
 
-export const createUniversity = async (universityData: any) => {
-  return await University.create(universityData);
-};
+export const createUniversity = async (universityData: any) => universityAdminService.saveUniversity(null, universityData);
+
+export const updateUniversity = async (universityId: string, universityData: any) =>
+  universityAdminService.saveUniversity(universityId, universityData);
+
+export const listUniversities = async () => universityAdminService.listUniversitiesForAdmin();
+
+export const createHostCourse = async (adminId: string, courseData: any) =>
+  universityAdminService.createHostCourse(adminId, courseData);
 
 export const createCourse = async (adminId: string, courseData: any) => {
   return courseService.createHomeCourse(adminId, courseData);
@@ -86,9 +94,11 @@ export const getAllUsers = async () => {
   );
 };
 
-const normalizeAdvisorCountries = (countries: unknown): string[] => {
+/** Countries come from the database, so any country an admin has added can be assigned to an advisor. */
+const normalizeAdvisorCountries = async (countries: unknown): Promise<string[]> => {
   const requested = Array.isArray(countries) ? countries.map((country) => String(country).trim()) : [];
-  const allowed = Object.values(ApplicationCountry) as string[];
+  const known = await Country.find({ isActive: { $ne: false } }).select('name');
+  const allowed = known.map((country) => country.name);
   const invalid = requested.filter((country) => !allowed.includes(country));
   if (invalid.length) {
     throw new Error(`Unsupported countries: ${invalid.join(', ')}. Allowed: ${allowed.join(', ')}.`);
@@ -97,13 +107,14 @@ const normalizeAdvisorCountries = (countries: unknown): string[] => {
 };
 
 export const setAdvisorCountries = async (userId: string, countries: unknown) => {
-  const profile = await AdvisorProfile.findOneAndUpdate(
-    { userId },
-    { countries: normalizeAdvisorCountries(countries) },
-    { new: true }
-  );
+  const normalized = await normalizeAdvisorCountries(countries);
+  const profile = await AdvisorProfile.findOneAndUpdate({ userId }, { countries: normalized }, { new: true });
   if (!profile) {
     throw new Error('Advisor profile not found.');
+  }
+  // Applications that were waiting for an advisor in these countries can now be assigned.
+  for (const country of normalized) {
+    await assignPendingApplicationsForCountry(country);
   }
   return { _id: userId, countries: profile.countries };
 };
@@ -183,7 +194,7 @@ export const createUser = async (userData: any) => {
         department: department.trim(),
         assignedStudents: [],
         experience: typeof experience === 'number' ? experience : 0,
-        countries: normalizeAdvisorCountries(userData.countries),
+        countries: await normalizeAdvisorCountries(userData.countries),
       });
     }
   } catch (error) {

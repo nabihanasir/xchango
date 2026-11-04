@@ -11,6 +11,7 @@ router.use(authorizeRoles(UserRole.ADMIN, UserRole.ADVISOR, UserRole.STUDENT));
 
 router.get('/countries', catalogController.getCountries);
 router.get('/universities', catalogController.getUniversities);
+router.get('/universities/:slug', catalogController.getUniversityBySlug);
 router.get('/courses', catalogController.getCourses);
 
 export default router;
