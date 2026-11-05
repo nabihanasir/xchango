@@ -16,16 +16,11 @@ import { applicationApi } from '../../lib/applicationApi';
 import { resolveUploadUrl, studentProfileApi } from '../../lib/studentProfileApi';
 import { documentApi } from '../../lib/documentApi';
 import {
-  getApplicationCourseId,
-  getApplicationCourseLabel,
-  getApplicationCourseSummary,
-  getApplicationCourseUniversity,
   getApplicationStatusLabel,
   getApplicationStatusTone,
   getApplicationUserId,
   getApplicationUserSummary,
   isAwaitingAdvisorDecision,
-  type SelectedCourseStatus,
   type WorkflowApplication,
 } from '../../types/application';
 import type { StudentProfile } from '../../types/studentProfile';
@@ -39,11 +34,6 @@ const SummaryCard = ({ title, value }: { title: string; value: string }) => (
   </div>
 );
 
-const selectedCourseTone: Record<SelectedCourseStatus, string> = {
-  pending: 'bg-slate-100 text-slate-700',
-  approved: 'bg-emerald-100 text-emerald-700',
-  rejected: 'bg-rose-100 text-rose-700',
-};
 
 export default function AdvisorApplicationsWorkspace({
   showHero = false,
@@ -59,14 +49,12 @@ export default function AdvisorApplicationsWorkspace({
   const [selectedApplication, setSelectedApplication] = useState<WorkflowApplication | null>(null);
   const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null);
   const [studentDocuments, setStudentDocuments] = useState<StudentDocument[]>([]);
-  const [courseCommentDrafts, setCourseCommentDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [pageError, setPageError] = useState('');
   const [detailsError, setDetailsError] = useState('');
   const [documentsError, setDocumentsError] = useState('');
   const [actionError, setActionError] = useState('');
-  const [activeCourseDecision, setActiveCourseDecision] = useState('');
   const [updatingDocumentId, setUpdatingDocumentId] = useState('');
   const [interviewForm, setInterviewForm] = useState({ date: '', location: 'Advisor Office' });
   const [schedulingInterview, setSchedulingInterview] = useState(false);
@@ -129,7 +117,6 @@ export default function AdvisorApplicationsWorkspace({
       setSelectedApplication(null);
       setStudentProfile(null);
       setStudentDocuments([]);
-      setCourseCommentDrafts({});
       setDetailsError('');
       setDocumentsError('');
       return;
@@ -172,14 +159,6 @@ export default function AdvisorApplicationsWorkspace({
           setSelectedApplication(application);
           setStudentProfile(profile);
           setStudentDocuments(documents);
-          setCourseCommentDrafts(
-            Object.fromEntries(
-              application.selectedCourses.map((course) => [
-                getApplicationCourseId(course.course),
-                course.advisorComment || '',
-              ])
-            )
-          );
         });
       } catch (error) {
         if (!cancelled) {
@@ -226,14 +205,6 @@ export default function AdvisorApplicationsWorkspace({
       )
     );
     setSelectedApplication(updatedApplication);
-    setCourseCommentDrafts(
-      Object.fromEntries(
-        updatedApplication.selectedCourses.map((course) => [
-          getApplicationCourseId(course.course),
-          course.advisorComment || '',
-        ])
-      )
-    );
   };
 
   const handleOpen = (applicationId: string, target: 'application' | 'student') => {
@@ -242,31 +213,6 @@ export default function AdvisorApplicationsWorkspace({
       behavior: 'smooth',
       block: 'start',
     });
-  };
-
-  const handleCourseDecision = async (
-    courseId: string,
-    status: Exclude<SelectedCourseStatus, 'pending'>
-  ) => {
-    if (!selectedApplicationId) {
-      return;
-    }
-
-    setActiveCourseDecision(`${courseId}-${status}`);
-    setActionError('');
-
-    try {
-      const updatedApplication = await applicationApi.updateCourseDecision(selectedApplicationId, {
-        courseId,
-        status,
-        advisorComment: courseCommentDrafts[courseId] || '',
-      });
-      syncApplication(updatedApplication);
-    } catch (error) {
-      setActionError(error instanceof Error ? error.message : 'Unable to update course decision.');
-    } finally {
-      setActiveCourseDecision('');
-    }
   };
 
   const handleDocumentStatusUpdate = async (documentId: string, status: 'approved' | 'rejected') => {
@@ -534,7 +480,6 @@ export default function AdvisorApplicationsWorkspace({
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Student:</span> {selectedStudent?.name || 'Student record'}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Email:</span> {selectedStudent?.email || 'Email unavailable'}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Documents:</span> {selectedApplication.documents.length}</p>
-                <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Selected courses:</span> {selectedApplication.selectedCourses.length}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview date:</span> {selectedApplication.interviewDate ? new Date(selectedApplication.interviewDate).toLocaleDateString() : selectedApplication.interview ? new Date(selectedApplication.interview.date).toLocaleDateString() : 'Not scheduled'}</p>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Interview location:</span> {selectedApplication.interview?.location || 'Not scheduled'}</p>
                 <div className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4">
@@ -696,88 +641,6 @@ export default function AdvisorApplicationsWorkspace({
                 ) : null}
               </div>
             </div>
-
-              <section className="rounded-[1.75rem] border border-slate-200 p-6">
-                <h3 className="text-xl font-bold text-slate-900">Student Selected Courses</h3>
-                <p className="mt-2 text-sm text-slate-500">
-                  Approve or reject each course the student selected. Course equivalency is reviewed under Course Approval.
-                </p>
-
-                <div className="mt-5 space-y-4">
-                  {selectedApplication.selectedCourses.length ? (
-                    selectedApplication.selectedCourses.map((selectedCourse) => {
-                      const courseId = getApplicationCourseId(selectedCourse.course);
-                      const summary = getApplicationCourseSummary(selectedCourse.course);
-
-                      return (
-                        <article key={selectedCourse._id || courseId} className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-5">
-                          <div className="flex flex-wrap items-start justify-between gap-3">
-                            <div>
-                              <p className="font-bold text-slate-900">
-                                {getApplicationCourseLabel(selectedCourse.course)}
-                              </p>
-                              <p className="mt-1 text-sm text-slate-500">
-                                {getApplicationCourseUniversity(selectedCourse.course) || 'University not linked'}
-                              </p>
-                            </div>
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] ${selectedCourseTone[selectedCourse.status]}`}
-                            >
-                              {selectedCourse.status}
-                            </span>
-                          </div>
-                          <p className="mt-4 text-sm text-slate-600">
-                            {summary?.description || 'No course description is available for this selection.'}
-                          </p>
-                          <textarea
-                            value={courseCommentDrafts[courseId] || ''}
-                            onChange={(event) =>
-                              setCourseCommentDrafts((current) => ({
-                                ...current,
-                                [courseId]: event.target.value,
-                              }))
-                            }
-                            placeholder="Add advisor rationale for this course decision"
-                            className="mt-4 min-h-24 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
-                          />
-                          <div className="mt-4 flex flex-wrap gap-3">
-                            <button
-                              type="button"
-                              onClick={() => void handleCourseDecision(courseId, 'approved')}
-                              disabled={activeCourseDecision.length > 0}
-                              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              <Check className="h-3.5 w-3.5" />
-                              <span>
-                                {activeCourseDecision === `${courseId}-approved`
-                                  ? 'Saving...'
-                                  : 'Approve Course'}
-                              </span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => void handleCourseDecision(courseId, 'rejected')}
-                              disabled={activeCourseDecision.length > 0}
-                              className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                              <span>
-                                {activeCourseDecision === `${courseId}-rejected`
-                                  ? 'Saving...'
-                                  : 'Reject Course'}
-                              </span>
-                            </button>
-                          </div>
-                        </article>
-                      );
-                    })
-                  ) : (
-                    <div className="rounded-[1.5rem] border border-dashed border-slate-300 px-5 py-8 text-sm font-medium text-slate-500">
-                      The student has not selected any courses yet.
-                    </div>
-                  )}
-                </div>
-              </section>
           </div>
         ) : (
           <div className="mt-6 rounded-[1.75rem] border border-dashed border-slate-300 px-6 py-10 text-center text-sm font-medium text-slate-500">
