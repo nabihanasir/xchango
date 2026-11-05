@@ -10,6 +10,7 @@ import CourseRequest, {
   ICourseRequestItem,
 } from '../models/CourseRequest';
 import ProgramOutline from '../models/ProgramOutline';
+import University from '../models/University';
 import StudentProfile from '../models/StudentProfile';
 import { ValidationError } from '../errors/AppError';
 import { appUrl, notifyUser } from './notificationService';
@@ -374,6 +375,33 @@ const createStudentNotification = async (request: Record<string, any>) => {
 export const listHostCourses = async () =>
   Course.find({ type: CourseType.HOST }).populate('universityId', 'name').sort({ code: 1 });
 
+/** Ids of the universities a student has applied to (rejected applications do not count). */
+const getChosenUniversityIds = async (studentId: string) => {
+  const names: string[] = await Application.distinct('university', {
+    studentId,
+    status: { $ne: 'rejected' },
+  });
+  const wanted = new Set(names.map((name) => String(name).trim().toLowerCase()).filter(Boolean));
+  if (!wanted.size) {
+    return [];
+  }
+  const universities = await University.find().select('name');
+  return universities
+    .filter((university) => wanted.has(String(university.name).trim().toLowerCase()))
+    .map((university) => university._id);
+};
+
+/** Host courses a student may request: only those of universities they have applied to. */
+export const listHostCoursesForStudent = async (studentId: string) => {
+  const universityIds = await getChosenUniversityIds(studentId);
+  if (!universityIds.length) {
+    return [];
+  }
+  return Course.find({ type: CourseType.HOST, universityId: { $in: universityIds } })
+    .populate('universityId', 'name')
+    .sort({ code: 1 });
+};
+
 export const listHomeCourses = async () =>
   Course.find(homeCourseFilter)
     .populate('createdBy', 'name email role')
@@ -435,6 +463,16 @@ export const createCourseRequest = async (studentId: string, hostCourseIds: stri
 
   if (hostCourses.length !== hostCourseIds.length) {
     throw new Error('One or more selected host courses could not be found.');
+  }
+
+  const allowedUniversityIds = new Set((await getChosenUniversityIds(studentId)).map(String));
+  if (hostCourses.some((course) => !course.universityId || !allowedUniversityIds.has(course.universityId.toString()))) {
+    throw new ValidationError(
+      'Some selected courses are not available to you.',
+      'You can only request courses from universities you have applied to.',
+      'Remove courses from other universities and submit again.',
+      'COURSE_NOT_AVAILABLE'
+    );
   }
 
   const request = await CourseRequest.create({

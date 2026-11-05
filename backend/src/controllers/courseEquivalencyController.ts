@@ -1,10 +1,14 @@
 import { Response } from 'express';
 import { sendResponse } from '../utils/response';
 import { CourseRequestItemStatus } from '../models/CourseRequest';
+import { UserRole } from '../models/User';
 import * as courseEquivalencyService from '../services/courseEquivalencyService';
 
-export const getHostCourses = async (_req: any, res: Response) => {
-  const courses = await courseEquivalencyService.listHostCourses();
+export const getHostCourses = async (req: any, res: Response) => {
+  const courses =
+    req.user?.role === UserRole.STUDENT
+      ? await courseEquivalencyService.listHostCoursesForStudent(req.user._id.toString())
+      : await courseEquivalencyService.listHostCourses();
   sendResponse(res, 200, 'Host courses fetched successfully', courses);
 };
 
