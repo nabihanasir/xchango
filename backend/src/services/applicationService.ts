@@ -10,7 +10,7 @@ import Course, { CourseType, ICourse } from '../models/Course';
 import { logger } from '../utils/logger';
 import University from '../models/University';
 import Country from '../models/Country';
-import { appUrl, formatDateTime, notifyUserSafely } from './notificationService';
+import { appUrl, formatDateTime, notifyAdmins, notifyUserSafely } from './notificationService';
 import { ensureStudentProfile } from './studentService';
 import {
   getCourseRecommendations,
@@ -587,6 +587,13 @@ export const submitApplication = async (applicationId: string, studentId: string
       logger.warn('No advisor configured for application country; awaiting manual assignment', {
         applicationId: String(application._id),
         country: application.country,
+      });
+      await notifyAdmins({
+        subject: 'Application needs an advisor',
+        type: 'application_unassigned',
+        message: `A new application to ${application.university} (${application.country}) could not be assigned automatically because no advisor supervises that country. Please assign an advisor.`,
+        metadata: { applicationId: application._id },
+        action: { label: 'Open applications', url: appUrl('/admin/applications') },
       });
     }
   } catch (error) {

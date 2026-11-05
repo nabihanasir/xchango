@@ -379,6 +379,29 @@ export const listHomeCourses = async () =>
     .populate('createdBy', 'name email role')
     .sort({ title: 1, name: 1 });
 
+/** Tells the student's advisor that a course request is waiting. Never blocks the request itself. */
+const notifyAdvisorsOfCourseRequest = async (studentId: string, courseCount: number) => {
+  try {
+    const advisorIds = await Application.distinct('advisorId', { studentId, advisorId: { $ne: null } });
+    await Promise.all(
+      advisorIds.map((advisorId) =>
+        notifyUser({
+          userId: advisorId,
+          subject: 'New course equivalency request',
+          type: 'course_request_submitted',
+          message: `A student submitted a course equivalency request for ${courseCount} host course${courseCount === 1 ? '' : 's'}. Please review and match them.`,
+          metadata: { studentId },
+          action: { label: 'Review request', url: appUrl('/advisor/requests') },
+        })
+      )
+    );
+  } catch (error) {
+    logger.error('Failed to notify advisor of course request', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
 export const createCourseRequest = async (studentId: string, hostCourseIds: string[]) => {
   if (!hostCourseIds.length) {
     throw new Error('Select at least one host course to submit a request.');
@@ -426,6 +449,7 @@ export const createCourseRequest = async (studentId: string, hostCourseIds: stri
 
   // Matching calls the LLM once per course, so it runs in the background; the advisor UI polls for results.
   runInBackground(request._id.toString(), undefined, 'description');
+  await notifyAdvisorsOfCourseRequest(studentId, hostCourses.length);
 
   const hydratedRequest = await CourseRequest.findById(request._id).populate(coursePopulate).populate('studentId', 'name email');
   return hydrateRequest(hydratedRequest);

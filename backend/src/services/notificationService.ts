@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Notification from '../models/Notification';
-import User from '../models/User';
+import User, { UserRole } from '../models/User';
 import { logger } from '../utils/logger';
 import { isEmailConfigured, sendEmail } from './emailService';
 
@@ -68,6 +68,7 @@ export const notifyUser = async (input: NotifyUserInput) => {
     userId: input.userId,
     subject: input.subject,
     type: input.type,
+    link: input.action?.url ?? '',
     message: input.message,
     channels: { inApp: true, email: wantsEmail },
     emailStatus: wantsEmail ? 'queued' : 'not_requested',
@@ -96,5 +97,22 @@ export const notifyUserSafely = async (input: NotifyUserInput) => {
       error: error instanceof Error ? error.message : String(error),
     });
     return null;
+  }
+};
+
+/** In-app notification for every admin (no email, so a busy day does not flood their inbox). */
+export const notifyAdmins = async (input: Omit<NotifyUserInput, 'userId' | 'email'>) => {
+  try {
+    const admins = await User.find({ role: UserRole.ADMIN }).select('_id');
+    await Promise.all(
+      admins.map((admin) =>
+        notifyUserSafely({ ...input, userId: admin._id as mongoose.Types.ObjectId, email: false })
+      )
+    );
+  } catch (error) {
+    logger.error('Failed to notify admins', {
+      type: input.type,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 };

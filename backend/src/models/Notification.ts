@@ -5,6 +5,8 @@ export interface INotification extends Document {
   message: string;
   subject?: string;
   type?: string;
+  /** Absolute app URL the notification opens (from the email button). */
+  link?: string;
   channels?: {
     inApp: boolean;
     email: boolean;
@@ -20,6 +22,7 @@ const NotificationSchema: Schema = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     subject: { type: String, default: '' },
     type: { type: String, default: 'general' },
+    link: { type: String, default: '' },
     message: { type: String, required: true },
     channels: {
       inApp: { type: Boolean, default: true },
@@ -35,5 +38,7 @@ const NotificationSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+
+NotificationSchema.index({ userId: 1, createdAt: -1 });
 
 export default mongoose.model<INotification>('Notification', NotificationSchema);

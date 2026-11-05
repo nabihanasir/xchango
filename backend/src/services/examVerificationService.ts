@@ -4,7 +4,7 @@ import AdvisorProfile from '../models/AdvisorProfile';
 import Application, { ApplicationStatus, IApplication } from '../models/Application';
 import ExamVerification, { ExamVerificationStatus } from '../models/ExamVerification';
 import { deleteStoredFile } from '../utils/storedFiles';
-import { appUrl, notifyUserSafely } from './notificationService';
+import { appUrl, notifyAdmins, notifyUserSafely } from './notificationService';
 
 /** The exchange the student is returning from: their latest application that got past the draft stage. */
 export const findStudentExchange = async (studentId: string): Promise<IApplication | null> =>
@@ -94,6 +94,13 @@ const advisorIdsForApplication = async (application: IApplication) => {
 
 const notifyAdvisorsOfSubmission = async (application: IApplication, studentId: string) => {
   const advisorIds = await advisorIdsForApplication(application);
+  await notifyAdmins({
+    subject: 'Verification document submitted',
+    type: 'exam_verification_submitted',
+    message: `A student uploaded their host university verification document (${application.country}). It is waiting for advisor review.`,
+    metadata: { applicationId: application._id, studentId },
+    action: { label: 'View results', url: appUrl('/admin/results') },
+  });
   await Promise.all(
     advisorIds.map((advisorId) =>
       notifyUserSafely({
