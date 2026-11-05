@@ -136,11 +136,11 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 w-80 ${theme.sidebarBg} z-[101] lg:hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
+        className={`fixed inset-y-0 left-0 w-80 max-w-[85vw] flex flex-col ${theme.sidebarBg} z-[101] lg:hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         } border-r border-white/10 shadow-2xl ${theme.sidebarShadow}`}
       >
-        <div className="h-28 flex items-center justify-between px-8 border-b border-white/10">
+        <div className="h-28 shrink-0 flex items-center justify-between px-8 border-b border-white/10">
            <Link to={navItems[0]?.path || '/'} className="flex items-center gap-4">
             <div className="flex flex-col">
               <span className="text-white font-bold text-xl tracking-tight leading-tight">Xchango</span>
@@ -151,7 +151,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
             <X className="h-6 w-6" />
           </button>
         </div>
-        <nav className="p-4 space-y-2 mt-4 overflow-y-auto h-[calc(100vh-140px)]">
+        <nav className="p-4 space-y-2 mt-4 overflow-y-auto flex-1 min-h-0">
           {navItems.map((item) => {
              const isActive = location.pathname === item.path || (item.path !== navItems[0].path && location.pathname.startsWith(item.path));
              const Icon = item.icon;
@@ -171,6 +171,19 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
              );
           })}
         </nav>
+        <div className="p-4 border-t border-white/10 shrink-0">
+          <Link
+            to="/login"
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              logout();
+            }}
+            className={`flex items-center gap-4 px-5 py-4 rounded-2xl ${theme.signOut} transition-all`}
+          >
+            <LogOut className="h-5 w-5" />
+            <span className="text-sm font-semibold">Sign Out</span>
+          </Link>
+        </div>
       </aside>
 
       {/* ── Main Content Area ── */}
