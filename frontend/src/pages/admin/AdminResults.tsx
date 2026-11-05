@@ -3,9 +3,10 @@ import { FileDown } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import SearchFilter from '../../components/admin/SearchFilter';
 import { useAuth } from '../../context/AuthContext';
-import { resultsApi } from '../../lib/api';
+import { resultsApi, verificationApi } from '../../lib/api';
 import { resolveUploadUrl } from '../../lib/studentProfileApi';
-import type { StudentResult } from '../../types/result';
+import type { ExamVerification, StudentResult } from '../../types/result';
+import { formatDisplayDate, getVerificationClasses, verificationLabels } from '../../utils/result';
 import Notice from '../../components/Notice';
 
 const getName = (value: StudentResult['studentId']) => (typeof value === 'string' ? value : value?.name || 'Unknown');
@@ -17,6 +18,7 @@ export default function AdminResults() {
   const { user } = useAuth();
   const [data, setData] = useState<StudentResult[]>([]);
   const [filteredData, setFilteredData] = useState<StudentResult[]>([]);
+  const [verifications, setVerifications] = useState<ExamVerification[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
@@ -29,9 +31,13 @@ export default function AdminResults() {
 
       try {
         setLoadError('');
-        const response = await resultsApi.getAdminResults(user.token);
+        const [response, verificationResponse] = await Promise.all([
+          resultsApi.getAdminResults(user.token),
+          verificationApi.getAdminVerifications(user.token),
+        ]);
         setData(response);
         setFilteredData(response);
+        setVerifications(verificationResponse);
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : 'Failed to load results');
       } finally {
@@ -92,6 +98,37 @@ export default function AdminResults() {
     },
   ];
 
+  const verificationColumns = [
+    { header: 'Student', accessor: 'studentId', render: (val: ExamVerification['studentId']) => getName(val) },
+    { header: 'Email', accessor: 'studentId', render: (val: ExamVerification['studentId']) => getEmail(val) },
+    { header: 'Country', accessor: 'country' },
+    { header: 'Uploaded', accessor: 'submittedAt', render: (val: string) => formatDisplayDate(val) },
+    {
+      header: 'Status',
+      accessor: 'status',
+      render: (val: string) => (
+        <span className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] ${getVerificationClasses(val)}`}>
+          {verificationLabels[val] || val}
+        </span>
+      ),
+    },
+    {
+      header: 'Reviewed by',
+      accessor: 'reviewedBy',
+      render: (val: ExamVerification['reviewedBy']) => (val ? (typeof val === 'string' ? val : val.name) : '-'),
+    },
+    {
+      header: 'Document',
+      accessor: 'fileUrl',
+      render: (val: string) => (
+        <a href={resolveUploadUrl(val)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-maroon">
+          <FileDown className="h-3.5 w-3.5" />
+          View
+        </a>
+      ),
+    },
+  ];
+
   const statusOptions = [
     { label: 'All Status', value: 'all' },
     { label: 'Draft', value: 'draft' },
@@ -112,6 +149,17 @@ export default function AdminResults() {
       {loadError && (
         <Notice tone="error">Failed to load: {loadError}</Notice>
       )}
+
+      <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">
+        <h3 className="mb-4 text-xl font-bold text-maroon">Verification documents</h3>
+        {verifications.length === 0 ? (
+          <p className="text-sm font-medium text-body-text">No students have uploaded a verification document yet.</p>
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-light-color/50">
+            <DataTable columns={verificationColumns} data={verifications} />
+          </div>
+        )}
+      </div>
 
       <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">
         <div className="mb-6">

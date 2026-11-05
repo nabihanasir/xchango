@@ -1,5 +1,11 @@
 import type { AdvisorDecisionPayload, CourseRequest, CourseSummary } from '../types/equivalency';
-import type { GradableItem, ResultFormPayload, StudentResult } from '../types/result';
+import type {
+  ExamVerification,
+  GradableItem,
+  ResultFormPayload,
+  StudentResult,
+  StudentVerificationState,
+} from '../types/result';
 import type { AdminVisaRow, StudentVisaProcess, VisaUpdatePayload } from '../types/visa';
 import { parseApiError } from './errorUtils';
 
@@ -124,6 +130,26 @@ export const resultsApi = {
 
     return apiFormRequest<StudentResult>(`/results/advisor/${courseRequestItemId}`, token, formData);
   },
+};
+
+export const verificationApi = {
+  getStudentVerification: (token: string) =>
+    apiRequest<StudentVerificationState>('/results/verification/student', token),
+  submitStudentVerification: (token: string, file: File, note: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('note', note);
+    return apiFormRequest<ExamVerification>('/results/verification/student', token, formData, 'POST');
+  },
+  getAdvisorVerifications: (token: string) =>
+    apiRequest<ExamVerification[]>('/results/verification/advisor', token),
+  reviewVerification: (token: string, id: string, payload: { action: 'verify' | 'return'; reason?: string }) =>
+    apiRequest<ExamVerification>(`/results/verification/advisor/${id}`, token, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+  getAdminVerifications: (token: string) =>
+    apiRequest<ExamVerification[]>('/results/verification/admin', token),
 };
 
 export const visaApi = {

@@ -4,8 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { resultsApi } from '../../lib/api';
 import { resolveUploadUrl } from '../../lib/studentProfileApi';
 import type { GradableItem, ResultStatus } from '../../types/result';
-import { formatDisplayDate, getResultStatusClasses } from '../../utils/result';
+import { formatDisplayDate, getResultStatusClasses, getVerificationClasses, verificationLabels } from '../../utils/result';
 import Notice from '../../components/Notice';
+import AdvisorVerificationPanel from '../../components/results/AdvisorVerificationPanel';
 
 interface Draft {
   grade: string;
@@ -101,6 +102,8 @@ export default function AdvisorResults() {
         </p>
       </section>
 
+      <AdvisorVerificationPanel onReviewed={() => void loadItems()} />
+
       {error ? (
         <Notice tone="error">{error}</Notice>
       ) : null}
@@ -135,6 +138,9 @@ export default function AdvisorResults() {
                           Updated {formatDisplayDate(item.result.updatedAt)}
                         </span>
                       ) : null}
+                      <span className={`rounded-full px-3 py-2 text-xs font-bold uppercase tracking-[0.25em] ${getVerificationClasses(item.verificationStatus || 'none')}`}>
+                        Document: {verificationLabels[item.verificationStatus || 'none']}
+                      </span>
                     </div>
                     <h2 className="mt-4 text-xl font-bold text-slate-800">
                       {item.hostCourseId.code} · {getCourseTitle(item.hostCourseId)}

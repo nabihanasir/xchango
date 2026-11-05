@@ -6,6 +6,7 @@ import { resolveUploadUrl } from '../../lib/studentProfileApi';
 import type { StudentResult } from '../../types/result';
 import { formatDisplayDate, getResultStatusClasses } from '../../utils/result';
 import Notice from '../../components/Notice';
+import StudentVerificationPanel from '../../components/results/StudentVerificationPanel';
 
 const getCourseTitle = (course: StudentResult['hostCourseId']) => course?.title || course?.name || course?.code || 'Untitled course';
 
@@ -45,6 +46,8 @@ export default function StudentResults() {
           Grades published by your advisor for the courses you are enrolled in abroad.
         </p>
       </section>
+
+      <StudentVerificationPanel />
 
       {error ? (
         <Notice tone="error">{error}</Notice>

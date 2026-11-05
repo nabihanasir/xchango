@@ -31,11 +31,34 @@ export interface StudentResult {
   updatedAt: string;
 }
 
+export type VerificationStatus = 'submitted' | 'returned' | 'verified';
+
+export interface ExamVerification {
+  _id: string;
+  studentId: StudentSummary | string;
+  applicationId: { _id: string; country: string; university: string; program: string } | string;
+  country: string;
+  fileUrl: string;
+  fileName: string;
+  note?: string;
+  status: VerificationStatus;
+  returnReason?: string;
+  reviewedBy?: AdvisorSummary | string | null;
+  reviewedAt?: string | null;
+  submittedAt: string;
+}
+
+export interface StudentVerificationState {
+  application: { _id: string; country: string; university: string; program: string } | null;
+  verification: ExamVerification | null;
+}
+
 export interface GradableItem {
   courseRequestItemId: string;
   hostCourseId: CourseSummary;
   student: StudentSummary;
   result: StudentResult | null;
+  verificationStatus?: VerificationStatus | 'none';
 }
 
 export interface ResultFormPayload {
