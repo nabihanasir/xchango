@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
-import Application from '../models/Application';
+import AdvisorProfile from '../models/AdvisorProfile';
+import Application, { ApplicationStatus } from '../models/Application';
 import CourseRequest, { CourseRequestItemStatus } from '../models/CourseRequest';
+import ExamVerification from '../models/ExamVerification';
 import { appUrl, notifyUser } from './notificationService';
 import Result, { IResult, ResultStatus } from '../models/Result';
-import { advisorCanAccessStudent } from './applicationService';
+import { advisorCanReviewStudent } from './examVerificationService';
 
 interface UpsertResultInput {
   grade: string;
@@ -41,7 +43,11 @@ export const getStudentResults = async (studentId: string) =>
     .sort({ updatedAt: -1 });
 
 export const getAdvisorGradableItems = async (advisorId: string) => {
-  const studentIds = await Application.distinct('studentId', { advisorId });
+  const profile = await AdvisorProfile.findOne({ userId: advisorId }).select('countries');
+  const studentIds = await Application.distinct('studentId', {
+    $or: [{ advisorId }, { country: { $in: profile?.countries ?? [] } }],
+    status: { $nin: [ApplicationStatus.DRAFT, ApplicationStatus.REJECTED] },
+  });
   if (!studentIds.length) {
     return [];
   }
@@ -65,11 +71,20 @@ export const getAdvisorGradableItems = async (advisorId: string) => {
   }).lean();
   const resultByItemId = new Map(results.map((result) => [result.courseRequestItemId.toString(), result]));
 
+  const verifications = await ExamVerification.find({
+    studentId: { $in: studentIds },
+  }).lean();
+  const verificationByStudent = new Map(
+    verifications.map((verification) => [verification.studentId.toString(), verification.status])
+  );
+
   return approvedItems.map(({ request, item }) => ({
     courseRequestItemId: item._id,
     hostCourseId: item.hostCourseId,
     student: request.studentId,
     result: resultByItemId.get(String(item._id)) || null,
+    verificationStatus:
+      verificationByStudent.get(String((request.studentId as any)._id ?? request.studentId)) || 'none',
   }));
 };
 
@@ -94,7 +109,7 @@ export const upsertResult = async (
     throw new Error('This course is not an approved enrollment yet.');
   }
 
-  const canAccess = await advisorCanAccessStudent(advisorId, request.studentId.toString());
+  const canAccess = await advisorCanReviewStudent(advisorId, request.studentId.toString());
   if (!canAccess) {
     throw new Error('You are not assigned to this student.');
   }

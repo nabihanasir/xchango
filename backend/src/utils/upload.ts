@@ -87,6 +87,9 @@ export const transcriptUpload = createUploader('transcripts', ['.xlsx', '.xls', 
 export const documentUpload = createUploader('documents', ['.pdf', '.jpg', '.jpeg', '.png'], {
   fileSize: 5 * 1024 * 1024,
 });
+export const verificationUpload = createUploader('verifications', ['.pdf', '.jpg', '.jpeg', '.png'], {
+  fileSize: 10 * 1024 * 1024,
+});
 export const resultUpload = createUploader('results', ['.pdf', '.jpg', '.jpeg', '.png'], {
   fileSize: 5 * 1024 * 1024,
 });
