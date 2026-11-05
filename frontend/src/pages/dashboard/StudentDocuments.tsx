@@ -1,5 +1,5 @@
 import { startTransition, useEffect, useState } from 'react';
-import { FileCheck2, FileText, UploadCloud } from 'lucide-react';
+import { FileCheck2, FileText } from 'lucide-react';
 import DocumentList from '../../components/DocumentList';
 import DocumentUploadForm from '../../components/DocumentUploadForm';
 import { useAuth } from '../../context/AuthContext';
@@ -147,10 +147,6 @@ export default function StudentDocuments() {
             <p className="mt-2 text-sm text-slate-500">
               Work down the checklist: pick a document, then upload or drop the file. Completed items turn grey.
             </p>
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
-            <UploadCloud className="h-4 w-4" />
-            Separate from student profile
           </div>
         </div>
 

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ApplicationStepper from '../../components/ApplicationStepper';
-import PostShortlistSteps from '../../components/PostShortlistSteps';
 import InterviewDecisionBanner from '../../components/InterviewDecisionBanner';
 import CountryStep from '../../components/steps/CountryStep';
 import UniversityStep from '../../components/steps/UniversityStep';
@@ -44,13 +43,6 @@ const createEmptyDraft = (): WorkflowDraft => ({
   registrationNumber: '',
   accommodationPreference: 'UNIVERSITY',
 });
-
-const postShortlistStatuses = [
-  'SHORTLISTED',
-  'DOCUMENT_PENDING',
-  'COURSE_SELECTION_PENDING',
-  'READY_FOR_SUBMISSION',
-] as const;
 
 export default function ApplicationWorkflowPage() {
   const { id } = useParams();
@@ -400,10 +392,6 @@ export default function ApplicationWorkflowPage() {
           )}
         </div>
       </section>
-
-      {application && postShortlistStatuses.some((status) => status === application.status) ? (
-        <PostShortlistSteps />
-      ) : null}
     </div>
   );
 }

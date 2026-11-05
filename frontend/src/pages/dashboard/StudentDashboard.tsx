@@ -1,5 +1,6 @@
 import { ArrowRight, Globe, FileCheck, CheckCircle2, TrendingUp, Sparkles, Zap, Award, Building2, Video } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import StudentProgressTracker from '../../components/student/StudentProgressTracker';
 
 const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass, delay }: any) => (
   <div
@@ -77,6 +78,8 @@ export default function StudentDashboard() {
           </div>
         </div>
       </div>
+
+      <StudentProgressTracker />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

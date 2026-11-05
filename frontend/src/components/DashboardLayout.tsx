@@ -22,12 +22,12 @@ const DashboardLayout = () => {
     { name: 'University & Programmes', path: '/dashboard/programmes',   icon: School },
     { name: 'International Office',    path: '/dashboard/international-office', icon: Building2 },
     { name: 'Student Profile',         path: '/dashboard/profile',      icon: UserRoundCog },
-    { name: 'Your Application',        path: '/dashboard/applications', icon: FileText },
+    { name: 'Registration',            path: '/dashboard/applications', icon: FileText },
     { name: 'Documents',               path: '/dashboard/documents',    icon: FileText },
-    { name: 'Online Classes',          path: '/dashboard/online-classes', icon: Video },
     { name: 'Courses',                 path: '/dashboard/courses', icon: BookOpenCheck },
-    { name: 'Results',                 path: '/dashboard/results', icon: GraduationCap },
     { name: 'Visa Status',             path: '/dashboard/visa', icon: Stamp },
+    { name: 'Online Classes',          path: '/dashboard/online-classes', icon: Video },
+    { name: 'Results',                 path: '/dashboard/results', icon: GraduationCap },
   ];
 
   const initials = (user?.name || 'Student Name')
