@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
-  Menu, X, Bell, ChevronRight, LogOut
+  Menu, X, ChevronRight, LogOut
 } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 import { useAuth } from '../context/AuthContext';
 import { roleThemes, type RoleThemeKey } from '../lib/roleTheme';
 
@@ -193,10 +194,9 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
           </div>
 
           <div className="flex items-center gap-3 lg:gap-6">
-            <button className={`relative p-3.5 text-slate-500 ${theme.chromeHoverText} bg-slate-100/50 hover:bg-slate-100 rounded-[1.25rem] transition-all`}>
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-3 right-3 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white" />
-            </button>
+            <NotificationBell
+              buttonClassName={`relative p-3.5 text-slate-500 ${theme.chromeHoverText} bg-slate-100/50 hover:bg-slate-100 rounded-[1.25rem] transition-all`}
+            />
             
             <div className="h-8 w-px bg-slate-200 hidden sm:block" />
             

@@ -152,6 +152,24 @@ export const verificationApi = {
     apiRequest<ExamVerification[]>('/results/verification/admin', token),
 };
 
+export interface AppNotification {
+  _id: string;
+  subject?: string;
+  message: string;
+  type?: string;
+  link?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export const notificationsApi = {
+  list: (token: string) =>
+    apiRequest<{ notifications: AppNotification[]; unreadCount: number }>('/notifications', token),
+  markRead: (token: string, id: string) =>
+    apiRequest<null>(`/notifications/${id}/read`, token, { method: 'PUT' }),
+  markAllRead: (token: string) => apiRequest<null>('/notifications/read-all', token, { method: 'PUT' }),
+};
+
 export const visaApi = {
   /** `null` when the office has not started this student's visa process yet. */
   getStudentVisa: (token: string) => apiRequest<StudentVisaProcess | null>('/visa/student', token),
