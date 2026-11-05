@@ -5,7 +5,7 @@ import CourseRequest, { CourseRequestItemStatus } from '../models/CourseRequest'
 import User, { UserRole } from '../models/User';
 import { ForbiddenError, NotFoundError, ValidationError } from '../errors/AppError';
 import { isEmailConfigured, sendEmail } from './emailService';
-import { appUrl, formatDate, notifyUserSafely } from './notificationService';
+import { appUrl, formatDate, notifyAdmins, notifyUserSafely } from './notificationService';
 import { getApplicationById } from './applicationService';
 
 export interface ArrivalInput {
@@ -126,6 +126,96 @@ const buildInstructorEmail = (
     subject: `Student taking your course online: ${student.name}`,
     text: `${greeting}\n\nOur student ${studentLine} arrived at ${university} for their exchange semester on ${formatDate(arrivedAt)}. They will continue the following course(s) online from abroad:\n\n${courseList}\n\nPlease share the online class access and any schedule changes with the student at ${student.email}.\n\nThank you.`,
   };
+};
+
+/**
+ * The student says they have reached the host country. This only notifies the advisor: the arrival itself
+ * (and the instructor emails and outline unlock that come with it) is still recorded by the advisor.
+ */
+export const reportArrival = async (applicationId: string, studentId: string) => {
+  if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+    throw new ValidationError(
+      'Invalid application.',
+      'The application identifier is not valid.',
+      'Refresh the page and try again.',
+      'INVALID_APPLICATION_ID'
+    );
+  }
+
+  const application = await Application.findById(applicationId);
+  if (!application) {
+    throw new NotFoundError(
+      'Application not found.',
+      'No application exists for the provided identifier.',
+      'Refresh the page and try again.',
+      'APPLICATION_NOT_FOUND'
+    );
+  }
+
+  if (application.studentId.toString() !== studentId) {
+    throw new ForbiddenError(
+      'You are not authorized to access this application.',
+      'This application belongs to another student.',
+      'Open your own application.',
+      'APPLICATION_ACCESS_DENIED'
+    );
+  }
+
+  if (application.arrival?.arrivedAt) {
+    throw new ValidationError(
+      'Arrival already recorded.',
+      `Your arrival was already recorded on ${formatDate(application.arrival.arrivedAt)}.`,
+      'No further action is needed.',
+      'ARRIVAL_ALREADY_RECORDED'
+    );
+  }
+
+  if (application.arrivalReport?.reportedAt) {
+    throw new ValidationError(
+      'Arrival already reported.',
+      `You reported your arrival on ${formatDate(application.arrivalReport.reportedAt)}. Your advisor has been notified.`,
+      'Wait for your advisor to confirm it, or contact them if it is taking long.',
+      'ARRIVAL_ALREADY_REPORTED'
+    );
+  }
+
+  if (!ARRIVAL_STATUSES.includes(application.status)) {
+    throw new ValidationError(
+      'Arrival cannot be reported yet.',
+      `Applications in status ${application.status} cannot report an arrival.`,
+      'You can report your arrival once you have been shortlisted.',
+      'ARRIVAL_NOT_ALLOWED'
+    );
+  }
+
+  application.arrivalReport = { reportedAt: new Date() };
+  await application.save();
+
+  const student = await User.findById(application.studentId).select('name');
+  const studentName = student?.name || 'A student';
+  const message = `${studentName} reports having arrived at ${application.university}. Please confirm it by marking the student as arrived.`;
+  const metadata = { applicationId: application._id, studentId };
+
+  if (application.advisorId) {
+    await notifyUserSafely({
+      userId: application.advisorId,
+      subject: 'Student reported their arrival',
+      type: 'arrival_reported',
+      message,
+      metadata,
+      action: { label: 'Open applications', url: appUrl('/advisor/applications') },
+    });
+  } else {
+    await notifyAdmins({
+      subject: 'Student reported their arrival',
+      type: 'arrival_reported',
+      message,
+      metadata,
+      action: { label: 'Open applications', url: appUrl('/admin/applications') },
+    });
+  }
+
+  return { reportedAt: application.arrivalReport.reportedAt };
 };
 
 export const recordArrival = async (applicationId: string, actor: Actor, input: ArrivalInput) => {

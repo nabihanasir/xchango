@@ -65,6 +65,7 @@ router.post(
   applicationController.uploadDocuments
 );
 router.post('/:id/courses', authorizeRoles(UserRole.STUDENT), applicationController.selectCourses);
+router.post('/:id/arrival-report', authorizeRoles(UserRole.STUDENT), applicationController.reportStudentArrival);
 router.post(
   '/:id/arrival',
   authorizeRoles(UserRole.ADVISOR, UserRole.ADMIN),

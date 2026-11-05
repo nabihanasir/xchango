@@ -5,7 +5,7 @@ import CourseRequest from '../models/CourseRequest';
 import User, { UserRole } from '../models/User';
 import { sendEmail } from './emailService';
 import { notifyUserSafely } from './notificationService';
-import { recordArrival } from './arrivalService';
+import { recordArrival, reportArrival } from './arrivalService';
 
 jest.mock('../models/Application');
 jest.mock('../models/Course');
@@ -143,5 +143,41 @@ describe('recordArrival', () => {
       recordArrival(applicationId, advisor, { onlineHomeCourseIds: [homeCourseId] })
     ).rejects.toMatchObject({ code: 'ARRIVAL_INVALID_COURSE' });
     expect(mockedSendEmail).not.toHaveBeenCalled();
+  });
+});
+
+describe('reportArrival', () => {
+  const studentIdString = studentId.toString();
+
+  it('stores the report and notifies the assigned advisor without recording the arrival', async () => {
+    const application = givenApplication({ status: ApplicationStatus.SHORTLISTED });
+    MockedUser.findById.mockReturnValue({ select: jest.fn().mockResolvedValue({ name: 'Sara Khan' }) } as never);
+
+    const result = await reportArrival(applicationId, studentIdString);
+
+    expect(application.arrivalReport.reportedAt).toBeInstanceOf(Date);
+    expect(application.arrival).toBeUndefined();
+    expect(application.save).toHaveBeenCalled();
+    expect(result.reportedAt).toBe(application.arrivalReport.reportedAt);
+    expect(notifyUserSafely).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: application.advisorId, type: 'arrival_reported' })
+    );
+    expect(mockedSendEmail).not.toHaveBeenCalled();
+  });
+
+  it('rejects another student, a repeat report, a recorded arrival and an early report', async () => {
+    givenApplication({ status: ApplicationStatus.SHORTLISTED });
+    await expect(reportArrival(applicationId, new mongoose.Types.ObjectId().toString())).rejects.toMatchObject({
+      code: 'APPLICATION_ACCESS_DENIED',
+    });
+
+    givenApplication({ status: ApplicationStatus.SHORTLISTED, arrivalReport: { reportedAt: new Date() } });
+    await expect(reportArrival(applicationId, studentIdString)).rejects.toMatchObject({ code: 'ARRIVAL_ALREADY_REPORTED' });
+
+    givenApplication({ status: ApplicationStatus.SHORTLISTED, arrival: { arrivedAt: new Date() } });
+    await expect(reportArrival(applicationId, studentIdString)).rejects.toMatchObject({ code: 'ARRIVAL_ALREADY_RECORDED' });
+
+    givenApplication({ status: ApplicationStatus.PENDING });
+    await expect(reportArrival(applicationId, studentIdString)).rejects.toMatchObject({ code: 'ARRIVAL_NOT_ALLOWED' });
   });
 });

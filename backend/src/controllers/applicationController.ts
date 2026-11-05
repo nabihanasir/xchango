@@ -3,7 +3,7 @@ import { ForbiddenError, ValidationError } from '../errors/AppError';
 import { ApplicationStatus } from '../models/Application';
 import { UserRole } from '../models/User';
 import * as applicationService from '../services/applicationService';
-import { recordArrival } from '../services/arrivalService';
+import { recordArrival, reportArrival } from '../services/arrivalService';
 import { sendResponse } from '../utils/response';
 import { toPublicFileUrl } from '../utils/upload';
 
@@ -165,6 +165,11 @@ export const updateCourseDecision = async (req: any, res: Response) => {
     req.body
   );
   sendResponse(res, 200, 'Course decision updated successfully', application);
+};
+
+export const reportStudentArrival = async (req: any, res: Response) => {
+  const result = await reportArrival(req.params.id, req.user._id.toString());
+  sendResponse(res, 200, 'Your advisor has been notified of your arrival', result);
 };
 
 export const recordStudentArrival = async (req: any, res: Response) => {

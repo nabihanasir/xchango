@@ -678,6 +678,12 @@ export default function AdvisorApplicationsWorkspace({
                     </p>
                   </div>
                 ) : canMarkArrival(selectedApplication) ? (
+                  <>
+                  {selectedApplication.arrivalReport?.reportedAt ? (
+                    <p className="mb-3 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+                      The student reported arriving on {new Date(selectedApplication.arrivalReport.reportedAt).toLocaleDateString()}. Confirm it below.
+                    </p>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => setArrivalModalOpen(true)}
@@ -686,6 +692,7 @@ export default function AdvisorApplicationsWorkspace({
                     <PlaneLanding className="h-4 w-4" />
                     Mark student arrived
                   </button>
+                  </>
                 ) : null}
               </div>
             </div>

@@ -132,6 +132,8 @@ export interface WorkflowApplication {
   interview?: WorkflowApplicationInterview;
   interviewDecision?: WorkflowInterviewDecision;
   arrival?: WorkflowApplicationArrival;
+  /** Set when the student says they have arrived; the advisor still confirms it. */
+  arrivalReport?: { reportedAt: string };
   documents: WorkflowApplicationDocument[];
   selectedCourses: WorkflowApplicationCourse[];
   aiRecommendations: WorkflowApplicationAIRecommendation[];

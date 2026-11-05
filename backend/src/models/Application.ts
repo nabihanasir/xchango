@@ -72,6 +72,11 @@ export interface IArrival {
   notices: IArrivalNotice[];
 }
 
+/** The student's own "I have arrived" report. The advisor still confirms it by recording the arrival. */
+export interface IArrivalReport {
+  reportedAt: Date;
+}
+
 export interface IApplication extends Document {
   studentId: mongoose.Types.ObjectId;
   advisorId?: mongoose.Types.ObjectId;
@@ -97,6 +102,7 @@ export interface IApplication extends Document {
   interview?: IApplicationInterview;
   interviewDecision?: IInterviewDecision;
   arrival?: IArrival;
+  arrivalReport?: IArrivalReport;
   documents: IApplicationDocument[];
   selectedCourses: ISelectedCourse[];
   aiRecommendations: IAIRecommendation[];
@@ -175,6 +181,13 @@ const ArrivalSchema = new Schema<IArrival>(
   { _id: false }
 );
 
+const ArrivalReportSchema = new Schema<IArrivalReport>(
+  {
+    reportedAt: { type: Date, required: true },
+  },
+  { _id: false }
+);
+
 const ApplicationSchema = new Schema<IApplication>(
   {
     studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -213,6 +226,7 @@ const ApplicationSchema = new Schema<IApplication>(
     interview: { type: ApplicationInterviewSchema, required: false },
     interviewDecision: { type: InterviewDecisionSchema, required: false },
     arrival: { type: ArrivalSchema, required: false },
+    arrivalReport: { type: ArrivalReportSchema, required: false },
     documents: { type: [ApplicationDocumentSchema], default: [] },
     selectedCourses: { type: [SelectedCourseSchema], default: [] },
     aiRecommendations: { type: [AIRecommendationSchema], default: [] },

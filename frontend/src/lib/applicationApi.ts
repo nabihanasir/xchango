@@ -80,6 +80,8 @@ export const applicationApi = {
     applicationId: string,
     payload: { courseId: string; status: Exclude<SelectedCourseStatus, 'pending'>; advisorComment?: string }
   ) => unwrap<WorkflowApplication>(apiClient.put(`/applications/${applicationId}/course-decision`, payload)),
+  reportArrival: (applicationId: string) =>
+    unwrap<{ reportedAt: string }>(apiClient.post(`/applications/${applicationId}/arrival-report`)),
   recordArrival: (applicationId: string, payload: { arrivedAt: string; onlineHomeCourseIds: string[] }) =>
     unwrap<ArrivalResult>(apiClient.post(`/applications/${applicationId}/arrival`, payload)),
 };
