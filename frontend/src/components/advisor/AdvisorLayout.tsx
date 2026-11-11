@@ -36,6 +36,7 @@ const AdvisorLayout = () => {
       role="advisor"
       navItems={navItems}
       userProfile={userProfile}
+      profilePath="/advisor/profile"
     />
   );
 };

@@ -25,7 +25,17 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
   sendResponse(res, 200, 'Password reset successfully', result);
 });
 
-export const getMe = asyncHandler(async (req: any, res: Response) => {
+export const updateMe = asyncHandler(async (req: any, res: Response) => {
+  const result = await authService.updateOwnName(req.user._id.toString(), req.body);
+  sendResponse(res, 200, 'Profile updated', result);
+});
+
+export const changePassword = asyncHandler(async (req: any, res: Response) => {
+  const result = await authService.changeOwnPassword(req.user._id.toString(), req.body);
+  sendResponse(res, 200, 'Password changed', result);
+});
+
+export const getMe =asyncHandler(async (req: any, res: Response) => {
   if (!req.user) {
     throw new NotFoundError(
       'User not found',

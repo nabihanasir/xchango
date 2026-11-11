@@ -269,6 +269,109 @@ export const requestPasswordReset = async (payload: any) => {
   };
 };
 
+export const updateOwnName = async (userId: string, payload: any) => {
+  const name = typeof payload?.name === 'string' ? payload.name.trim() : '';
+
+  if (!name) {
+    throw new ValidationError(
+      'Name is required',
+      'The profile update did not include a name.',
+      'Please enter your name and try again.',
+      'NAME_REQUIRED',
+    );
+  }
+
+  if (name.length > 100) {
+    throw new ValidationError(
+      'Name is too long',
+      'The name must be 100 characters or fewer.',
+      'Please shorten your name and try again.',
+      'NAME_TOO_LONG',
+    );
+  }
+
+  const user = await User.findByIdAndUpdate(userId, { name }, { new: true });
+  if (!user) {
+    throw new AuthenticationError(
+      'Account not found',
+      'The signed-in account no longer exists.',
+      'Please log in again.',
+      'AUTH_USER_NOT_FOUND',
+    );
+  }
+
+  return { _id: user._id, name: user.name, email: user.email, role: user.role };
+};
+
+export const changeOwnPassword = async (userId: string, payload: any) => {
+  const currentPassword = payload?.currentPassword;
+  const newPassword = payload?.newPassword;
+  const confirmPassword = payload?.confirmPassword;
+
+  if (!currentPassword) {
+    throw new ValidationError(
+      'Current password is required',
+      'The request did not include your current password.',
+      'Enter your current password and try again.',
+      'CURRENT_PASSWORD_REQUIRED',
+    );
+  }
+
+  if (!newPassword || newPassword.length < 8) {
+    throw new ValidationError(
+      'Password is too short',
+      'The new password must be at least 8 characters long.',
+      'Please choose a stronger password with at least 8 characters.',
+      'PASSWORD_TOO_SHORT',
+    );
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new ValidationError(
+      'Passwords do not match',
+      'The password confirmation does not match the new password.',
+      'Re-enter both password fields and try again.',
+      'PASSWORD_CONFIRMATION_MISMATCH',
+    );
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AuthenticationError(
+      'Account not found',
+      'The signed-in account no longer exists.',
+      'Please log in again.',
+      'AUTH_USER_NOT_FOUND',
+    );
+  }
+
+  if (!(await bcrypt.compare(currentPassword, user.password))) {
+    throw new AuthenticationError(
+      'Current password is incorrect',
+      'The current password you entered does not match your account.',
+      'Re-enter your current password and try again.',
+      'INVALID_CURRENT_PASSWORD',
+    );
+  }
+
+  if (await bcrypt.compare(newPassword, user.password)) {
+    throw new ValidationError(
+      'Password unchanged',
+      'The new password is the same as your current password.',
+      'Choose a different password.',
+      'PASSWORD_UNCHANGED',
+    );
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(newPassword, salt);
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+
+  return { message: 'Your password has been changed.' };
+};
+
 export const resetPassword = async (token: string, payload: any) => {
   if (!token?.trim()) {
     throw new ValidationError(

@@ -35,6 +35,7 @@ const AdminLayout = () => {
     <GlobalLayout 
       panelName="Admin Panel"
       role="admin"
+      profilePath="/admin/profile"
       navItems={navItems}
       userProfile={userProfile}
     />

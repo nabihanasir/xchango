@@ -30,6 +30,7 @@ import AdvisorLayout from './components/advisor/AdvisorLayout';
 import AdvisorDashboard from './pages/advisor/AdvisorDashboard';
 import AdvisorApplications from './pages/advisor/AdvisorApplications';
 import AdvisorProfile from './pages/advisor/AdvisorProfile';
+import AdminProfile from './pages/admin/AdminProfile';
 import AdvisorEquivalencyRequests from './pages/advisor/AdvisorEquivalencyRequests';
 import AdvisorEquivalencyRequestDetail from './pages/advisor/AdvisorEquivalencyRequestDetail';
 import AdvisorStudents from './pages/advisor/AdvisorStudents';
@@ -91,6 +92,7 @@ function App() {
             <Route path="courses" element={<AdminCourses />} />
             <Route path="results" element={<AdminResults />} />
             <Route path="visa" element={<AdminVisa />} />
+            <Route path="profile" element={<AdminProfile />} />
             <Route path="llm-models" element={<AdminAiModelConfig />} />
             <Route path="settings" element={<Navigate to="/admin/llm-models" replace />} />
           </Route>

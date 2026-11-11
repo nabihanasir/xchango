@@ -49,6 +49,7 @@ const DashboardLayout = () => {
       role="student"
       navItems={navItems}
       userProfile={userProfile}
+      profilePath="/dashboard/profile"
       notice={
         offboarded
           ? 'Your exchange semester is complete. Your account is now read-only: you can view your records but not make changes. Contact the International Office if you need access restored.'

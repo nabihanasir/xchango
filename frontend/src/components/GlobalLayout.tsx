@@ -27,9 +27,11 @@ interface GlobalLayoutProps {
   role: RoleThemeKey;
   /** Optional banner shown above the page content. */
   notice?: string;
+  /** Where the header name/avatar button navigates. */
+  profilePath: string;
 }
 
-const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: GlobalLayoutProps) => {
+const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profilePath }: GlobalLayoutProps) => {
   const theme = roleThemes[role];
   const location = useLocation();
   const { logout } = useAuth();
@@ -213,7 +215,12 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
             
             <div className="h-8 w-px bg-slate-200 hidden sm:block" />
             
-            <div className="flex items-center gap-3 bg-white border border-slate-100 py-1.5 pl-1.5 pr-5 rounded-full shadow-sm hover:shadow-soft transition-all cursor-pointer select-none group">
+            <Link
+              to={profilePath}
+              title="Open my profile"
+              aria-label="Open my profile"
+              className="flex items-center gap-3 bg-white border border-slate-100 py-1.5 pl-1.5 pr-5 rounded-full shadow-sm hover:shadow-soft transition-all cursor-pointer select-none group"
+            >
               <div className={`bg-gradient-to-br ${theme.avatar} h-11 w-11 rounded-full flex items-center justify-center font-bold text-white text-base ring-2 ring-white shadow-md group-hover:scale-105 transition-transform`}>
                 {userProfile.initials}
               </div>
@@ -221,7 +228,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice }: Global
                 <p className={`text-base font-bold text-slate-800 leading-none ${theme.groupHoverText} transition-colors`}>{userProfile.name}</p>
                 <p className={`text-xs font-bold ${theme.roleCaption} uppercase tracking-widest mt-1.5 leading-none`}>{userProfile.role}</p>
               </div>
-            </div>
+            </Link>
           </div>
         </header>
 

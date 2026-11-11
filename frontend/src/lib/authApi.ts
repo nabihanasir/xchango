@@ -41,6 +41,16 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+  updateMe: (payload: { name: string }) =>
+    apiFetch<{ _id: string; name: string; email: string; role: string }>('/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+  changePassword: (payload: { currentPassword: string; newPassword: string; confirmPassword: string }) =>
+    apiFetch<{ message: string }>('/auth/change-password', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
   register: (payload: RegisterPayload) => apiFetch<AuthUser>('/auth/register', {
     method: 'POST',
     body: JSON.stringify(payload),
