@@ -1,10 +1,9 @@
-import { Check, LoaderCircle, Stamp } from 'lucide-react';
+import { Check, LoaderCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import VisaStatusBadge from '../../components/visa/VisaStatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { visaApi } from '../../lib/api';
 import type { StudentVisaProcess } from '../../types/visa';
-import { formatVisaDate, getReachedStageIndex, VISA_STAGES, VISA_STATUS_META } from '../../utils/visa';
+import { getReachedStageIndex, VISA_STAGES, VISA_STATUS_META } from '../../utils/visa';
 import Notice from '../../components/Notice';
 
 type StepState = 'done' | 'current' | 'stopped' | 'upcoming';
@@ -45,7 +44,6 @@ export default function StudentVisa() {
   const status = visa?.status ?? 'not_started';
   const reachedIndex = getReachedStageIndex(visa);
   const isRejected = status === 'rejected';
-  const history = visa ? [...visa.history].reverse() : [];
 
   return (
     <div className="space-y-8">
@@ -68,33 +66,14 @@ export default function StudentVisa() {
         </div>
       ) : (
         <>
-          <section className="glass-card rounded-[2.25rem] p-6 md:p-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-600">Current status</p>
-                <div className="mt-3">
-                  <VisaStatusBadge status={status} />
-                </div>
-                <p className="mt-4 max-w-xl text-sm font-medium leading-6 text-slate-600">
-                  {VISA_STATUS_META[status].description}
-                </p>
-              </div>
-              {visa ? (
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
-                  Updated {formatVisaDate(visa.updatedAt)}
-                </p>
-              ) : null}
-            </div>
-
-            {visa?.remarks ? (
-              <div className="mt-6 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
-                  Note from the International Office
-                </p>
-                <p className="mt-2 whitespace-pre-line text-sm font-medium leading-6 text-slate-700">{visa.remarks}</p>
-              </div>
-            ) : null}
-          </section>
+          {visa?.remarks ? (
+            <section className="glass-card rounded-[2.25rem] p-6 md:p-8">
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
+                Note from the International Office
+              </p>
+              <p className="mt-2 whitespace-pre-line text-sm font-medium leading-6 text-slate-700">{visa.remarks}</p>
+            </section>
+          ) : null}
 
           <section className="glass-card rounded-[2.25rem] p-6 md:p-8" aria-label="Visa progress">
             <h2 className="text-lg font-bold text-slate-800">Progress</h2>
@@ -132,40 +111,6 @@ export default function StudentVisa() {
               })}
             </ol>
           </section>
-
-          {history.length ? (
-            <section className="glass-card rounded-[2.25rem] p-6 md:p-8">
-              <h2 className="text-lg font-bold text-slate-800">Update history</h2>
-              <ul className="mt-6 space-y-5">
-                {history.map((entry) => (
-                  <li key={entry._id} className="flex gap-4">
-                    <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-accent-yellow" />
-                    <div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <VisaStatusBadge status={entry.status} />
-                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
-                          {formatVisaDate(entry.updatedAt)}
-                        </span>
-                      </div>
-                      {entry.remarks ? (
-                        <p className="mt-2 whitespace-pre-line text-sm font-medium leading-6 text-slate-600">
-                          {entry.remarks}
-                        </p>
-                      ) : null}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : (
-            <div className="glass-card rounded-[2rem] px-6 py-12 text-center">
-              <Stamp className="mx-auto h-8 w-8 text-slate-400" />
-              <h2 className="mt-4 text-2xl font-bold text-slate-800">Nothing to report yet</h2>
-              <p className="mt-3 text-sm font-medium text-slate-500">
-                Once the International Office begins your visa process, each update will appear here.
-              </p>
-            </div>
-          )}
         </>
       )}
     </div>
