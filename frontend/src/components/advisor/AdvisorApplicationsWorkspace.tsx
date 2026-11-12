@@ -1,4 +1,5 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
+import CountryHeroCarousel from '../CountryHeroCarousel';
 import {
   Check,
   Eye,
@@ -320,21 +321,13 @@ export default function AdvisorApplicationsWorkspace({
   return (
     <div className="space-y-6">
       {showHero ? (
-        <section className="relative overflow-hidden rounded-[2.5rem] bg-advisor-hero p-8 text-white shadow-2xl shadow-advisor-side/10 md:p-10">
-          <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-teal-300/15 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-1/4 translate-y-1/4 rounded-full bg-accent-yellow/20 blur-3xl" />
-          <div className="relative z-10 max-w-4xl">
-            <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">
-              Advisor Review Queue
-            </p>
-            <h1 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
-              Review assigned applications and AI-assisted course recommendations.
-            </h1>
-            <p className="mt-4 max-w-2xl text-base text-slate-200 md:text-lg">
-              AI suggests course matches and reasons, but the final approval or rejection remains with the advisor.
-            </p>
-          </div>
-        </section>
+        <CountryHeroCarousel
+          title="Review assigned applications"
+          description="AI suggests course matches and reasons, but the final approval or rejection remains with the advisor."
+          scrimClass="bg-advisor-side/60"
+          minHeightClass="min-h-[200px]"
+          showTicker={false}
+        />
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
