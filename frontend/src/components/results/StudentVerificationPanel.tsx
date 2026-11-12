@@ -7,7 +7,8 @@ import type { StudentVerificationState } from '../../types/result';
 import { formatDisplayDate, getVerificationClasses, verificationLabels } from '../../utils/result';
 import Notice from '../Notice';
 
-export default function StudentVerificationPanel() {
+/** `embedded` drops the card chrome so the panel can sit inside another card. */
+export default function StudentVerificationPanel({ embedded = false }: { embedded?: boolean }) {
   const { user } = useAuth();
   const [state, setState] = useState<StudentVerificationState | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -58,7 +59,7 @@ export default function StudentVerificationPanel() {
 
   if (isLoading) {
     return (
-      <div className="glass-card rounded-[2rem] p-8 text-slate-500">
+      <div className={embedded ? 'mt-6 text-slate-500' : 'glass-card rounded-[2rem] p-8 text-slate-500'}>
         <LoaderCircle className="h-5 w-5 animate-spin" />
       </div>
     );
@@ -68,7 +69,7 @@ export default function StudentVerificationPanel() {
   const canUpload = Boolean(state?.application) && verification?.status !== 'verified';
 
   return (
-    <section className="glass-card rounded-[2.25rem] p-6 md:p-8">
+    <section className={embedded ? 'mt-6 border-t border-slate-100 pt-6' : 'glass-card rounded-[2.25rem] p-6 md:p-8'}>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {success ? <Notice tone="success">{success}</Notice> : null}
 

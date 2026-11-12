@@ -45,9 +45,9 @@ export default function StudentResults() {
         <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-slate-500">
           Grades published by your advisor for the courses you are enrolled in abroad.
         </p>
-      </section>
 
-      <StudentVerificationPanel />
+        <StudentVerificationPanel embedded />
+      </section>
 
       {error ? (
         <Notice tone="error">{error}</Notice>
