@@ -61,7 +61,7 @@ export interface RoleTheme {
 const sharedChrome = {
   navInactive: 'text-white/55 hover:text-white hover:bg-white/5',
   footerButton: 'text-white/40 hover:text-white hover:bg-white/5',
-  signOut: 'text-white/40 hover:text-red-400 hover:bg-red-500/10',
+  signOut: 'text-white/40 hover:text-white hover:bg-white/5',
   panelLabel: 'text-accent-yellow/80',
   navActive: 'bg-white/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
   navActiveMobile: 'bg-white/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
