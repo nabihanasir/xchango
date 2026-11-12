@@ -1,7 +1,5 @@
 import { startTransition, useEffect, useState } from 'react';
-import { FileCheck2, FileText } from 'lucide-react';
-import DocumentList from '../../components/DocumentList';
-import DocumentUploadForm from '../../components/DocumentUploadForm';
+import StudentDocumentChecklist from '../../components/student/StudentDocumentChecklist';
 import { useAuth } from '../../context/AuthContext';
 import { documentApi } from '../../lib/documentApi';
 import type { StudentDocument } from '../../types/document';
@@ -105,78 +103,23 @@ export default function StudentDocuments() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-student-hero p-8 text-white shadow-2xl shadow-dark-blue/20 md:p-10">
-        <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-cyan-300/15 blur-[80px]" />
-        <div className="relative z-10 max-w-4xl">
-          <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">
-            Student Documents
-          </p>
-          <h1 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
-            Submit and manage your supporting documents
-          </h1>
-          <p className="mt-4 max-w-2xl text-base text-slate-200 md:text-lg">
-            Upload transcripts, passports, and supporting files in one dedicated module. Advisors can review and approve submissions separately.
-          </p>
-        </div>
-      </section>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="glass-card rounded-[2rem] p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-600">Uploaded Files</p>
-          <p className="mt-3 text-4xl font-bold text-dark-blue">{documents.length}</p>
-        </div>
-        <div className="glass-card rounded-[2rem] p-6">
-          <div className="inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
-            <FileCheck2 className="h-5 w-5" />
-          </div>
-          <p className="mt-4 text-sm font-semibold text-slate-500">Status updates are handled separately by advisors and admins.</p>
-        </div>
-        <div className="glass-card rounded-[2rem] p-6">
-          <div className="inline-flex rounded-2xl bg-accent-yellow/20 p-3 text-dark-blue">
-            <FileText className="h-5 w-5" />
-          </div>
-          <p className="mt-4 text-sm font-semibold text-slate-500">Accepted files: PDF, JPG, and PNG.</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold text-dark-blue">My documents</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Upload the documents below so your advisor can review your application.
+        </p>
       </div>
 
-      <section className="glass-card rounded-[2rem] p-7 md:p-8">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Upload Documents</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Submit supporting files</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Work down the checklist: pick a document, then upload or drop the file. Completed items turn grey.
-            </p>
-          </div>
-        </div>
+      <StudentDocumentChecklist
+        documents={loading ? [] : documents}
+        uploading={uploading}
+        deletingId={deletingId}
+        onUpload={handleUpload}
+        onDelete={handleDelete}
+      />
 
-        <div className="mt-6 space-y-4">
-          <DocumentUploadForm documents={documents} uploading={uploading} onUpload={handleUpload} />
-
-          {errorMessage ? (
-            <Notice tone="error">{errorMessage}</Notice>
-          ) : null}
-
-          {successMessage ? (
-            <Notice tone="success">{successMessage}</Notice>
-          ) : null}
-
-          {loading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="h-20 animate-pulse rounded-[1.75rem] bg-slate-100" />
-              ))}
-            </div>
-          ) : (
-          <DocumentList
-            documents={documents}
-            deletingId={deletingId}
-            emptyMessage="No documents uploaded yet."
-            onDelete={handleDelete}
-            />
-          )}
-        </div>
-      </section>
+      {errorMessage ? <Notice tone="error">{errorMessage}</Notice> : null}
+      {successMessage ? <Notice tone="success">{successMessage}</Notice> : null}
     </div>
   );
 }

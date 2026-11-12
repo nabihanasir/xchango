@@ -6,7 +6,7 @@ import type { StudentVisaProcess } from '../types/visa';
 import { getCourseStepState } from './courseStep';
 import { VISA_STATUS_META } from './visa';
 
-export const REQUIRED_DOCUMENT_TYPES = ['transcript', 'cv', 'passport'];
+export const REQUIRED_DOCUMENT_TYPES = ['transcript'];
 
 export type JourneyStepKey =
   | 'registration'
@@ -165,8 +165,8 @@ export const buildStudentJourney = ({ application, requests, documents, visa, re
     done: documentsDone,
     to: '/dashboard/documents',
     description: documentsDone
-      ? 'All required documents are uploaded.'
-      : `Upload your transcript, CV and passport (${uploadedCount} of ${REQUIRED_DOCUMENT_TYPES.length} uploaded).`,
+      ? 'Your transcript is uploaded.'
+      : 'Upload your transcript. A CV and passport are optional.',
     actionLabel: 'Upload documents',
   };
 
