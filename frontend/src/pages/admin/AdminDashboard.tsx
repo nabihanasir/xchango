@@ -60,7 +60,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <AdminHeroCarousel stats={metrics.adminStats} />
+      <AdminHeroCarousel />
 
       {error ? (
         <Notice tone="error">{error}</Notice>
