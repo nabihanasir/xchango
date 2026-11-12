@@ -430,7 +430,7 @@ function CourseCard({
                 <>
                   <p className="mt-2 text-sm font-medium text-slate-600">
                     {item.uploadedOutline.fileUrl ? (
-                      <a href={resolveUploadUrl(item.uploadedOutline.fileUrl)} target="_blank" rel="noreferrer" className="font-bold text-emerald-700 underline">
+                      <a href={resolveUploadUrl(item.uploadedOutline.fileUrl)} target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">
                         {item.uploadedOutline.fileName || 'View uploaded file'}
                       </a>
                     ) : (
@@ -764,7 +764,7 @@ export default function AdvisorEquivalencyRequestDetail() {
 
   return (
     <div className="space-y-6 pb-28">
-      <Link to="/advisor/requests" className="inline-flex items-center text-sm font-bold text-emerald-700 transition hover:text-emerald-900">
+      <Link to="/advisor/requests" className="inline-flex items-center text-sm font-bold text-teal-700 transition hover:text-teal-900">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to course approval
       </Link>
@@ -838,7 +838,7 @@ export default function AdvisorEquivalencyRequestDetail() {
         <button
           type="button"
           onClick={() => setExpandedItemIds(allExpanded ? [] : request.items.map((item) => item._id))}
-          className="text-sm font-bold text-emerald-700 transition hover:text-emerald-900"
+          className="text-sm font-bold text-teal-700 transition hover:text-teal-900"
         >
           {allExpanded ? 'Collapse all' : 'Expand all'}
         </button>
@@ -893,7 +893,7 @@ export default function AdvisorEquivalencyRequestDetail() {
               type="button"
               onClick={() => void handleWholeDecision('approved')}
               disabled={isSaving}
-              className="inline-flex items-center rounded-[1.25rem] bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+              className="inline-flex items-center rounded-[1.25rem] bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-700 disabled:opacity-60"
             >
               <CheckCircle2 className="mr-2 h-4 w-4" />
               Approve all

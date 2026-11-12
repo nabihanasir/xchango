@@ -27,7 +27,7 @@ const emptyForm = (): CourseFormState => ({
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const inputClassName =
-  'w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-maroon transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50';
+  'w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50';
 
 function InstructorCell({ course }: { course: ApplicationCourseSummary }) {
   if (!course.instructorEmail) {
@@ -196,7 +196,7 @@ export default function AdminCourses() {
       accessor: 'title',
       render: (_value: string, row: ApplicationCourseSummary) => (
         <div>
-          <p className="font-bold text-maroon">{getCourseDisplayTitle(row)}</p>
+          <p className="font-bold text-admin">{getCourseDisplayTitle(row)}</p>
           <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-slate-900">
             {row.isHomeCourse ? 'Home Course' : 'Course'}
           </p>
@@ -215,7 +215,7 @@ export default function AdminCourses() {
     {
       header: 'Credit Hours',
       accessor: 'creditHours',
-      render: (value: number) => <span className="font-bold text-maroon">{value}</span>,
+      render: (value: number) => <span className="font-bold text-admin">{value}</span>,
     },
     {
       header: 'Instructor',
@@ -245,7 +245,7 @@ export default function AdminCourses() {
           <button
             type="button"
             onClick={() => openEditModal(row)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-maroon transition hover:bg-slate-200"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-admin transition hover:bg-slate-200"
           >
             <Pencil className="h-3.5 w-3.5" />
             Edit
@@ -268,7 +268,7 @@ export default function AdminCourses() {
     <div className="relative z-0 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between rounded-[2rem] border-b border-light-color/50 bg-white p-6 md:p-8 glass-card">
         <div>
-          <h2 className="mb-2 text-3xl font-bold text-maroon">Manage Home Courses</h2>
+          <h2 className="mb-2 text-3xl font-bold text-admin">Manage Home Courses</h2>
           <p className="mt-1 text-body-text font-medium md:text-lg">
             Maintain the central list of home courses used by advisors during equivalency review.
           </p>
@@ -276,7 +276,7 @@ export default function AdminCourses() {
         <button
           type="button"
           onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-xl bg-maroon-gradient px-5 py-2.5 font-bold text-white shadow-lg shadow-maroon/20 transition-all hover:brightness-110"
+          className="flex items-center gap-2 rounded-xl bg-admin hover:bg-admin-hover px-5 py-2.5 font-bold text-white shadow-lg shadow-admin/20 transition-all hover:brightness-110"
         >
           <Plus className="h-5 w-5" />
           Add Course
@@ -290,7 +290,7 @@ export default function AdminCourses() {
       <div className="glass-card rounded-[2rem] bg-white p-6 shadow-sm md:p-8">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h3 className="text-xl font-bold text-maroon">Home Course Catalog</h3>
+            <h3 className="text-xl font-bold text-admin">Home Course Catalog</h3>
             <p className="mt-1 text-sm font-medium text-body-text">
               Search, update, and remove home courses used by the advisor equivalency workflow.
             </p>
@@ -302,7 +302,7 @@ export default function AdminCourses() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by title or description"
-              className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-maroon placeholder:text-body-text focus:border-maroon/20 focus:outline-none"
+              className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-admin placeholder:text-body-text focus:border-admin/20 focus:outline-none"
             />
           </div>
         </div>
@@ -316,7 +316,7 @@ export default function AdminCourses() {
         ) : filteredCourses.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-light-color bg-slate-50 px-6 py-12 text-center">
             <BookOpen className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-            <h3 className="text-xl font-bold text-maroon">
+            <h3 className="text-xl font-bold text-admin">
               {courses.length ? 'No matching courses' : 'No home courses yet'}
             </h3>
             <p className="mt-2 text-body-text">
@@ -338,11 +338,11 @@ export default function AdminCourses() {
         <Modal onClose={closeModal} widthClass="max-w-2xl" locked={submitting}>
             <header className="sticky top-0 z-10 flex items-center justify-between border-b border-light-color/60 bg-white/80 px-8 py-6 backdrop-blur-md">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-maroon">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-admin">
                   <BookOpen className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-maroon">
+                  <h2 className="text-2xl font-bold text-admin">
                     {editingCourseId ? 'Edit Home Course' : 'New Home Course'}
                   </h2>
                   <p className="text-sm font-medium text-body-text">
@@ -354,7 +354,7 @@ export default function AdminCourses() {
                 type="button"
                 onClick={closeModal}
                 disabled={submitting}
-                className="rounded-xl p-2 text-maroon/40 transition-all hover:bg-slate-100 hover:text-maroon disabled:opacity-50"
+                className="rounded-xl p-2 text-admin/40 transition-all hover:bg-slate-100 hover:text-admin disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -362,7 +362,7 @@ export default function AdminCourses() {
 
             <form onSubmit={handleSubmit} className="space-y-5 overflow-y-auto p-8">
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
                   Title
                 </label>
                 <input
@@ -370,14 +370,14 @@ export default function AdminCourses() {
                   value={form.title}
                   onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
                   placeholder="e.g. Data Structures"
-                  className="w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-maroon transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                  className="w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
                     Description
                   </label>
                   <textarea
@@ -385,12 +385,12 @@ export default function AdminCourses() {
                     value={form.description}
                     onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                     placeholder="Short description of the course..."
-                    className="w-full resize-none rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-maroon transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                    className="w-full resize-none rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                   />
                 </div>
 
                 <div className="md:col-span-1">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
                     Credit Hours
                   </label>
                   <input
@@ -399,13 +399,13 @@ export default function AdminCourses() {
                     step="1"
                     value={form.creditHours}
                     onChange={(event) => setForm((current) => ({ ...current, creditHours: event.target.value }))}
-                    className="w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-maroon transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                    className="w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                     required
                   />
                 </div>
 
                 <div className="md:col-span-1">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
                     Instructor Name
                   </label>
                   <input
@@ -418,7 +418,7 @@ export default function AdminCourses() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-maroon/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
                     Instructor Email
                   </label>
                   <input
@@ -449,7 +449,7 @@ export default function AdminCourses() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-xl bg-accent-yellow px-6 py-2.5 font-bold text-maroon shadow-lg shadow-accent-yellow/20 transition-all hover:bg-yellow-default disabled:opacity-50"
+                  className="rounded-xl bg-accent-yellow px-6 py-2.5 font-bold text-admin shadow-lg shadow-accent-yellow/20 transition-all hover:bg-yellow-default disabled:opacity-50"
                 >
                   {submitting ? 'Saving...' : 'Save Course'}
                 </button>

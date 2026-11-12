@@ -139,7 +139,7 @@ export default function StudentVerificationPanel() {
             type="button"
             onClick={() => void handleSubmit()}
             disabled={isSaving || !file}
-            className="inline-flex items-center justify-center rounded-[1.25rem] bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-[1.25rem] bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-navy-hover disabled:opacity-60"
           >
             {isSaving ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
             {verification ? 'Resubmit' : 'Submit'}

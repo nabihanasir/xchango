@@ -71,7 +71,7 @@ export default function AdminVisa() {
       accessor: 'student',
       render: (student: AdminVisaRow['student']) => (
         <div>
-          <p className="font-bold text-maroon">{student.name}</p>
+          <p className="font-bold text-admin">{student.name}</p>
           <p className="text-xs text-slate-500">{student.sapId || student.email}</p>
         </div>
       ),
@@ -106,7 +106,7 @@ export default function AdminVisa() {
             setSavedFor('');
             setSelected(row);
           }}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-maroon transition-all hover:bg-maroon hover:text-white"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-admin transition-all hover:bg-admin hover:text-white"
         >
           <Pencil className="h-3.5 w-3.5" />
           Update
@@ -119,7 +119,7 @@ export default function AdminVisa() {
     <div className="space-y-6 animate-fade-in">
       <div className="glass-card flex items-center justify-between rounded-[2rem] border-b border-light-color/50 bg-white p-6 pb-6 md:p-8">
         <div>
-          <h2 className="mb-2 text-3xl font-bold text-maroon">Visa Process</h2>
+          <h2 className="mb-2 text-3xl font-bold text-admin">Visa Process</h2>
           <p className="mt-1 font-medium text-body-text md:text-lg">
             Update each student&apos;s visa status. They see it on their own dashboard and are notified of changes.
           </p>
@@ -152,7 +152,7 @@ export default function AdminVisa() {
           </div>
         ) : rows.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-light-color bg-slate-50 px-6 py-12 text-center">
-            <h3 className="text-xl font-bold text-maroon">No students to process</h3>
+            <h3 className="text-xl font-bold text-admin">No students to process</h3>
             <p className="mt-2 text-body-text">
               Students appear here once they have an active (non-draft, non-rejected) application.
             </p>

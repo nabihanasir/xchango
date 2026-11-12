@@ -60,7 +60,7 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">Visa process</p>
-            <h3 id="visa-modal-title" className="mt-2 text-2xl font-bold text-maroon">
+            <h3 id="visa-modal-title" className="mt-2 text-2xl font-bold text-admin">
               {row.student.name}
             </h3>
             <p className="mt-1 text-sm font-medium text-slate-500">
@@ -71,7 +71,7 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:text-maroon"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:text-admin"
           >
             <X className="h-5 w-5" />
           </button>
@@ -83,7 +83,7 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
             <select
               value={status}
               onChange={(event) => setStatus(event.target.value as VisaStatus)}
-              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-maroon focus:border-maroon focus:outline-none"
+              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-admin focus:border-admin focus:outline-none"
             >
               {VISA_STATUSES.map((value) => (
                 <option key={value} value={value}>
@@ -106,7 +106,7 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
               maxLength={MAX_REMARKS}
               rows={4}
               placeholder="e.g. Please bring your original passport to the appointment on 12 March."
-              className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 focus:border-maroon focus:outline-none"
+              className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 focus:border-admin focus:outline-none"
             />
             <span className="mt-1 block text-right text-xs font-medium text-slate-500">
               {remarks.length}/{MAX_REMARKS}
@@ -126,14 +126,14 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-maroon transition hover:bg-slate-50"
+            className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-admin transition hover:bg-slate-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-maroon-gradient px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-maroon/20 transition hover:brightness-110 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-admin hover:bg-admin-hover px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-admin/20 transition hover:brightness-110 disabled:opacity-60"
           >
             {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
             {saving ? 'Saving...' : 'Save update'}

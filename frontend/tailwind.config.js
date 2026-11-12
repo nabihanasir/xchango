@@ -25,11 +25,26 @@ export default {
         'dark-blue-deep': '#060424',
         'dark-blue-light': '#1A1558',
         'accent-yellow': '#FBD213',
-        // Admin portal brand red, toned down from the Riphah logo red (#E31E24) to a softer, slightly dark red (taken from the Riphah Healthcare Services logo)
-        maroon: {
-          DEFAULT: '#B3202A',
-          hover: '#8F1820',
-          deep: '#5E0F15',
+        // Role colors: one flat hue per portal. The gold accent, neutrals and status colors are shared.
+        // student = navy (dark-blue above is its primary), advisor = teal, admin = amber-brown.
+        student: {
+          side: '#09081C',
+          hero: '#181452',
+          tint: '#EAE9FB',
+        },
+        advisor: {
+          DEFAULT: '#0F766E',
+          hover: '#115E59',
+          side: '#081C1A',
+          hero: '#14524D',
+          tint: '#E9FBFA',
+        },
+        admin: {
+          DEFAULT: '#A16207',
+          hover: '#854D0E',
+          deep: '#1C1408',
+          hero: '#523914',
+          tint: '#FBF4E9',
         },
         'head-text': '#090638',
         'body-text': '#64748B', // Softer, more modern slate
@@ -40,9 +55,6 @@ export default {
         'blue-faded': '#8B8BA7',
         'yellow-default': '#FFB84D',
         'yellow-faded': '#FFD699',
-      },
-      backgroundImage: {
-        'maroon-gradient': 'linear-gradient(135deg, #C2262F 0%, #B3202A 55%, #94181F 100%)',
       },
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
@@ -59,8 +71,13 @@ export default {
         'pop-in': 'popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both',
         'shimmer': 'shimmer 1.6s linear infinite',
         'glow-pulse': 'glowPulse 2.6s ease-in-out infinite',
+        'marquee': 'marquee 40s linear infinite',
       },
       keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },

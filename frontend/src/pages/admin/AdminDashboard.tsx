@@ -10,8 +10,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { ArrowRight, BookOpen, Globe, Sparkles, TrendingUp } from 'lucide-react';
+import { ArrowRight, BookOpen, Globe, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import AdminHeroCarousel from '../../components/admin/AdminHeroCarousel';
 import StatCard from '../../components/admin/StatCard';
 import { adminApi, type AdminDashboardMetrics } from '../../lib/adminApi';
 import Notice from '../../components/Notice';
@@ -59,31 +60,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#A81E27] to-[#6E1017] p-8 shadow-2xl shadow-maroon/20 lg:p-10">
-        <div className="absolute right-0 top-0 h-[400px] w-[400px] -translate-y-1/2 translate-x-1/4 rounded-full bg-accent-yellow/10 blur-[80px] pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-yellow/20 bg-accent-yellow/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-accent-yellow">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Overview Report</span>
-            </div>
-            <h2 className="mb-2 text-[2.5rem] font-bold leading-none tracking-tight text-white">
-              Welcome Back, Admin!
-            </h2>
-            <p className="text-base font-medium text-red-100/80">
-              Live metrics from the current backend state.
-            </p>
-          </div>
-          <div className="relative z-10 hidden items-center gap-4 rounded-[1.25rem] border border-white/10 bg-white/10 p-5 backdrop-blur-sm md:flex">
-            <div className="text-right">
-              <p className="mb-0.5 text-xs font-bold uppercase tracking-widest text-red-100/60">System Status</p>
-              <p className="text-base font-bold text-emerald-300">Admin API Connected</p>
-            </div>
-            <div className="h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-          </div>
-        </div>
-      </div>
+      <AdminHeroCarousel stats={metrics.adminStats} />
 
       {error ? (
         <Notice tone="error">{error}</Notice>
@@ -104,8 +81,8 @@ export default function AdminDashboard() {
         <div className="glass-card relative overflow-hidden rounded-[2rem] p-6 lg:p-8">
           <div className="mb-8 flex items-center justify-between">
             <h3 className="flex items-center gap-3 text-xl font-bold text-slate-800">
-              <div className="rounded-xl bg-maroon/10 p-2">
-                <TrendingUp className="h-5 w-5 text-maroon" />
+              <div className="rounded-xl bg-admin/10 p-2">
+                <TrendingUp className="h-5 w-5 text-admin" />
               </div>
               Monthly Trend
             </h3>
@@ -116,20 +93,14 @@ export default function AdminDashboard() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={metrics.monthlyTrend}>
-                  <defs>
-                    <linearGradient id="colorApps" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#B3202A" stopOpacity={0.1} />
-                      <stop offset="95%" stopColor="#B3202A" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid stroke="#F1F5F9" strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="month" axisLine={false} dy={10} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} tickLine={false} />
                   <YAxis axisLine={false} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} tickLine={false} />
                   <Tooltip
                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                    itemStyle={{ color: '#B3202A', fontWeight: 800 }}
+                    itemStyle={{ color: '#A16207', fontWeight: 800 }}
                   />
-                  <Area type="monotone" dataKey="apps" stroke="#B3202A" strokeWidth={4} fill="url(#colorApps)" fillOpacity={1} />
+                  <Area type="monotone" dataKey="apps" stroke="#A16207" strokeWidth={4} fill="#A16207" fillOpacity={0.12} />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -156,7 +127,7 @@ export default function AdminDashboard() {
                   <YAxis
                     axisLine={false}
                     dataKey="name"
-                    tick={{ fill: '#B3202A', fontSize: 11, fontWeight: 800 }}
+                    tick={{ fill: '#334155', fontSize: 11, fontWeight: 800 }}
                     tickLine={false}
                     type="category"
                   />
@@ -164,7 +135,7 @@ export default function AdminDashboard() {
                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                     cursor={{ fill: '#F8FAFC' }}
                   />
-                  <Bar dataKey="applications" fill="#FBD213" radius={[0, 10, 10, 0]} barSize={24} />
+                  <Bar dataKey="applications" fill="#A16207" radius={[0, 10, 10, 0]} barSize={24} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -186,7 +157,7 @@ export default function AdminDashboard() {
           </div>
           <Link
             to="/admin/courses"
-            className="inline-flex items-center gap-2 rounded-[1.25rem] bg-maroon-gradient px-5 py-3 text-sm font-bold text-white transition hover:brightness-110"
+            className="inline-flex items-center gap-2 rounded-[1.25rem] bg-admin hover:bg-admin-hover px-5 py-3 text-sm font-bold text-white transition hover:brightness-110"
           >
             Open Home Courses
             <ArrowRight className="h-4 w-4" />

@@ -30,7 +30,7 @@ import Notice from '../Notice';
 const SummaryCard = ({ title, value }: { title: string; value: string }) => (
   <div className="glass-card rounded-[2rem] p-6">
     <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-600">{title}</p>
-    <p className="mt-3 text-4xl font-bold text-emerald-700">{value}</p>
+    <p className="mt-3 text-4xl font-bold text-teal-700">{value}</p>
   </div>
 );
 
@@ -320,8 +320,8 @@ export default function AdvisorApplicationsWorkspace({
   return (
     <div className="space-y-6">
       {showHero ? (
-        <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-600 p-8 text-white shadow-2xl shadow-emerald-950/10 md:p-10">
-          <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-emerald-300/15 blur-3xl" />
+        <section className="relative overflow-hidden rounded-[2.5rem] bg-advisor-hero p-8 text-white shadow-2xl shadow-advisor-side/10 md:p-10">
+          <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 rounded-full bg-teal-300/15 blur-3xl" />
           <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-1/4 translate-y-1/4 rounded-full bg-accent-yellow/20 blur-3xl" />
           <div className="relative z-10 max-w-4xl">
             <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">
@@ -411,7 +411,7 @@ export default function AdvisorApplicationsWorkspace({
                           <button
                             type="button"
                             onClick={() => handleOpen(application._id, 'application')}
-                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-700 transition hover:border-emerald-700 hover:text-emerald-700"
+                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-700 transition hover:border-teal-700 hover:text-teal-700"
                           >
                             <Eye className="h-3.5 w-3.5" />
                             <span>View Application</span>
@@ -419,7 +419,7 @@ export default function AdvisorApplicationsWorkspace({
                           <button
                             type="button"
                             onClick={() => handleOpen(application._id, 'student')}
-                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-700 transition hover:border-emerald-700 hover:text-emerald-700"
+                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-700 transition hover:border-teal-700 hover:text-teal-700"
                           >
                             <UserRound className="h-3.5 w-3.5" />
                             <span>View Student Profile</span>
@@ -474,7 +474,7 @@ export default function AdvisorApplicationsWorkspace({
               </div>
 
               <div className="space-y-4 rounded-[1.75rem] border border-slate-200 p-6">
-                <div className="inline-flex rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
+                <div className="inline-flex rounded-full bg-teal-700 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
                   {getApplicationStatusLabel(selectedApplication)}
                 </div>
                 <p className="text-sm text-slate-600"><span className="font-bold text-slate-900">Student:</span> {selectedStudent?.name || 'Student record'}</p>
@@ -498,7 +498,7 @@ export default function AdvisorApplicationsWorkspace({
                             date: event.target.value,
                           }))
                         }
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10"
                       />
                     </label>
                     <label className="space-y-2 text-sm font-semibold text-slate-700">
@@ -512,7 +512,7 @@ export default function AdvisorApplicationsWorkspace({
                             location: event.target.value,
                           }))
                         }
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10"
                         placeholder="Advisor office or meeting link"
                       />
                     </label>
@@ -525,7 +525,7 @@ export default function AdvisorApplicationsWorkspace({
                         schedulingInterview ||
                         !['ASSIGNED', 'INTERVIEW_SCHEDULED'].includes(selectedApplication.status)
                       }
-                      className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-full bg-teal-700 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <span>{schedulingInterview ? 'Saving...' : 'Schedule Interview'}</span>
                     </button>
@@ -535,7 +535,7 @@ export default function AdvisorApplicationsWorkspace({
                       disabled={
                         completingInterview || selectedApplication.status !== 'INTERVIEW_SCHEDULED'
                       }
-                      className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Check className="h-4 w-4" />
                       <span>
@@ -561,7 +561,7 @@ export default function AdvisorApplicationsWorkspace({
                         onChange={(event) => setDecisionNotes(event.target.value)}
                         maxLength={1000}
                         rows={3}
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
+                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10"
                         placeholder="Add feedback from the interview"
                       />
                     </label>
@@ -570,7 +570,7 @@ export default function AdvisorApplicationsWorkspace({
                         type="button"
                         onClick={() => void handleInterviewDecision(true)}
                         disabled={Boolean(submittingDecision)}
-                        className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center gap-2 rounded-full bg-teal-700 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <Check className="h-4 w-4" />
                         <span>{submittingDecision === 'recommend' ? 'Saving...' : 'Recommend'}</span>
@@ -598,7 +598,7 @@ export default function AdvisorApplicationsWorkspace({
                   >
                     <p
                       className={`text-xs font-bold uppercase tracking-[0.2em] ${
-                        selectedApplication.interviewDecision.recommended ? 'text-emerald-700' : 'text-rose-700'
+                        selectedApplication.interviewDecision.recommended ? 'text-teal-700' : 'text-rose-700'
                       }`}
                     >
                       {selectedApplication.interviewDecision.recommended
@@ -616,7 +616,7 @@ export default function AdvisorApplicationsWorkspace({
 
                 {selectedApplication.arrival?.arrivedAt ? (
                   <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/70 p-4">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">Arrived at host university</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-700">Arrived at host university</p>
                     <p className="mt-2 text-sm text-slate-700">
                       {new Date(selectedApplication.arrival.arrivedAt).toLocaleDateString()} ·{' '}
                       {selectedApplication.arrival.notices.filter((notice) => notice.sent).length} instructor email(s) sent
@@ -686,7 +686,7 @@ export default function AdvisorApplicationsWorkspace({
                   href={resolveUploadUrl(studentProfile.transcript.fileUrl)}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 transition hover:text-emerald-900"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 transition hover:text-teal-900"
                 >
                   <Eye className="h-4 w-4" />
                   <span>Open Transcript</span>

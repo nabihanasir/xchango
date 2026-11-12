@@ -221,7 +221,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
               aria-label="Open my profile"
               className="flex items-center gap-3 bg-white border border-slate-100 py-1.5 pl-1.5 pr-5 rounded-full shadow-sm hover:shadow-soft transition-all cursor-pointer select-none group"
             >
-              <div className={`bg-gradient-to-br ${theme.avatar} h-11 w-11 rounded-full flex items-center justify-center font-bold text-white text-base ring-2 ring-white shadow-md group-hover:scale-105 transition-transform`}>
+              <div className={`${theme.avatar} h-11 w-11 rounded-full flex items-center justify-center font-bold text-white text-base ring-2 ring-white shadow-md group-hover:scale-105 transition-transform`}>
                 {userProfile.initials}
               </div>
               <div className="hidden sm:block">

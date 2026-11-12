@@ -85,11 +85,11 @@ export default function HostCourseInstructors() {
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-3">
-            <h3 className="text-xl font-bold text-maroon">Host Courses & Instructors</h3>
+            <h3 className="text-xl font-bold text-admin">Host Courses & Instructors</h3>
             <button
               type="button"
               onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-maroon-gradient px-4 py-2 text-sm font-bold text-white shadow-md shadow-maroon/20 transition hover:brightness-110"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-admin hover:bg-admin-hover px-4 py-2 text-sm font-bold text-white shadow-md shadow-admin/20 transition hover:brightness-110"
             >
               <Plus className="h-4 w-4" /> Add Host Course
             </button>
@@ -107,7 +107,7 @@ export default function HostCourseInstructors() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by course, university or instructor"
-              className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-maroon placeholder:text-body-text placeholder:opacity-40 focus:border-maroon/20 focus:outline-none"
+              className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-admin placeholder:text-body-text placeholder:opacity-40 focus:border-admin/20 focus:outline-none"
             />
           </div>
           <label className="flex items-center gap-2 text-sm font-semibold text-body-text">
@@ -115,7 +115,7 @@ export default function HostCourseInstructors() {
               type="checkbox"
               checked={showMissingOnly}
               onChange={(event) => setShowMissingOnly(event.target.checked)}
-              className="h-4 w-4 accent-maroon"
+              className="h-4 w-4 accent-admin"
             />
             Only show courses without an instructor email
           </label>
@@ -141,7 +141,7 @@ export default function HostCourseInstructors() {
           {filtered.map((course) => (
             <li key={course._id} className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
               <div className="min-w-0">
-                <p className="font-bold text-maroon">
+                <p className="font-bold text-admin">
                   {course.code ? `${course.code} · ` : ''}
                   {getCourseDisplayTitle(course)}
                 </p>
@@ -157,21 +157,21 @@ export default function HostCourseInstructors() {
                     value={draft.instructorName}
                     onChange={(event) => setDraft((current) => ({ ...current, instructorName: event.target.value }))}
                     placeholder="Instructor name"
-                    className="rounded-lg border border-light-color bg-slate-50 px-3 py-2 text-sm font-medium text-maroon focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                    className="rounded-lg border border-light-color bg-slate-50 px-3 py-2 text-sm font-medium text-admin focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                   />
                   <input
                     type="email"
                     value={draft.instructorEmail}
                     onChange={(event) => setDraft((current) => ({ ...current, instructorEmail: event.target.value }))}
                     placeholder="instructor@host.edu"
-                    className="rounded-lg border border-light-color bg-slate-50 px-3 py-2 text-sm font-medium text-maroon focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                    className="rounded-lg border border-light-color bg-slate-50 px-3 py-2 text-sm font-medium text-admin focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                   />
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => void save(course._id)}
                       disabled={saving}
-                      className="inline-flex items-center gap-1 rounded-lg bg-accent-yellow px-3 py-2 text-xs font-bold text-maroon disabled:opacity-50"
+                      className="inline-flex items-center gap-1 rounded-lg bg-accent-yellow px-3 py-2 text-xs font-bold text-admin disabled:opacity-50"
                     >
                       <Check className="h-3.5 w-3.5" />
                       {saving ? 'Saving...' : 'Save'}
@@ -191,7 +191,7 @@ export default function HostCourseInstructors() {
                 <div className="flex items-center justify-between gap-4 md:justify-end">
                   {course.instructorEmail ? (
                     <span className="flex min-w-0 items-center gap-2 text-sm text-slate-600">
-                      <Mail className="h-4 w-4 shrink-0 text-maroon/50" />
+                      <Mail className="h-4 w-4 shrink-0 text-admin/50" />
                       <span className="truncate">
                         {course.instructorName ? `${course.instructorName} · ` : ''}
                         {course.instructorEmail}
@@ -203,7 +203,7 @@ export default function HostCourseInstructors() {
                   <button
                     type="button"
                     onClick={() => startEditing(course)}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-maroon transition hover:bg-slate-200"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-admin transition hover:bg-slate-200"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     {course.instructorEmail ? 'Edit' : 'Add'}

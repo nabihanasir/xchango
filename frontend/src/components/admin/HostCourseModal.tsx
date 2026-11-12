@@ -72,11 +72,11 @@ export default function HostCourseModal({ onClose, onCreated }: HostCourseModalP
     <Modal onClose={onClose} widthClass="max-w-2xl" locked={submitting} labelledBy="host-course-title">
       <header className="flex items-center justify-between border-b border-light-color/60 px-8 py-6">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-maroon">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-admin">
             <BookOpen className="h-6 w-6" />
           </div>
           <div>
-            <h2 id="host-course-title" className="text-2xl font-bold text-maroon">
+            <h2 id="host-course-title" className="text-2xl font-bold text-admin">
               New Host Course
             </h2>
             <p className="text-sm font-medium text-body-text">A course taught at a partner university.</p>
@@ -87,7 +87,7 @@ export default function HostCourseModal({ onClose, onCreated }: HostCourseModalP
           onClick={onClose}
           disabled={submitting}
           aria-label="Close"
-          className="rounded-xl p-2 text-maroon/40 transition-all hover:bg-slate-100 hover:text-maroon disabled:opacity-50"
+          className="rounded-xl p-2 text-admin/40 transition-all hover:bg-slate-100 hover:text-admin disabled:opacity-50"
         >
           <X className="h-5 w-5" />
         </button>
@@ -195,7 +195,7 @@ export default function HostCourseModal({ onClose, onCreated }: HostCourseModalP
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-xl bg-accent-yellow px-6 py-2.5 font-bold text-maroon shadow-lg shadow-accent-yellow/20 transition-all hover:bg-yellow-default disabled:opacity-50"
+            className="rounded-xl bg-accent-yellow px-6 py-2.5 font-bold text-admin shadow-lg shadow-accent-yellow/20 transition-all hover:bg-yellow-default disabled:opacity-50"
           >
             {submitting ? 'Saving...' : 'Save Course'}
           </button>

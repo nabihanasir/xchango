@@ -44,7 +44,7 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-10 animate-fade-in">
       {/* Welcome Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#060424] via-[#090638] to-[#1A1558] rounded-[2.5rem] p-10 md:p-14 shadow-2xl shadow-dark-blue/20 border border-white/10">
+      <div className="relative overflow-hidden bg-student-hero rounded-[2.5rem] p-10 md:p-14 shadow-2xl shadow-dark-blue/20 border border-white/10">
         <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[500px] h-[500px] bg-accent-yellow/15 rounded-full blur-[100px] pointer-events-none animate-float" />
         <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[400px] h-[400px] bg-blue-500/15 rounded-full blur-[100px] pointer-events-none animate-float" style={{ animationDelay: '2s' }} />
 

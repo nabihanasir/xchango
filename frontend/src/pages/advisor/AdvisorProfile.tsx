@@ -18,7 +18,7 @@ const toForm = (profile: AdvisorProfileData | null, fallbackName: string): Advis
 });
 
 const inputClass =
-  'w-full rounded-xl border border-light-color/60 bg-white px-4 py-2.5 text-sm font-semibold text-body-text outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/20';
+  'w-full rounded-xl border border-light-color/60 bg-white px-4 py-2.5 text-sm font-semibold text-body-text outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/20';
 
 export default function AdvisorProfile() {
   const { user, login } = useAuth();
@@ -100,12 +100,12 @@ export default function AdvisorProfile() {
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
       <div className="glass-card rounded-[2rem] p-8 shadow-md">
         <div className="mb-8 flex items-center justify-between gap-4">
-          <h2 className="text-2xl font-bold text-emerald-700">My Profile</h2>
+          <h2 className="text-2xl font-bold text-teal-700">My Profile</h2>
           {!editing && (
             <button
               type="button"
               onClick={startEditing}
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-800"
+              className="inline-flex items-center gap-2 rounded-xl bg-teal-700 px-4 py-2 text-sm font-bold text-white hover:bg-teal-800"
             >
               <Pencil className="h-4 w-4" /> Edit profile
             </button>
@@ -120,7 +120,7 @@ export default function AdvisorProfile() {
           <form onSubmit={handleSave} className="space-y-5">
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <label className="block space-y-1.5">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">Name</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-teal-700">Name</span>
                 <input
                   className={inputClass}
                   value={form.name}
@@ -130,7 +130,7 @@ export default function AdvisorProfile() {
                 />
               </label>
               <label className="block space-y-1.5">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">Email</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-teal-700">Email</span>
                 <input
                   className={`${inputClass} cursor-not-allowed bg-slate-100`}
                   value={profile?.userId.email || user?.email || ''}
@@ -139,7 +139,7 @@ export default function AdvisorProfile() {
                 />
               </label>
               <label className="block space-y-1.5">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">Designation</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-teal-700">Designation</span>
                 <input
                   className={inputClass}
                   value={form.designation}
@@ -149,7 +149,7 @@ export default function AdvisorProfile() {
                 />
               </label>
               <label className="block space-y-1.5">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">Department</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-teal-700">Department</span>
                 <input
                   className={inputClass}
                   value={form.department}
@@ -159,7 +159,7 @@ export default function AdvisorProfile() {
                 />
               </label>
               <label className="block space-y-1.5">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">Phone</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-teal-700">Phone</span>
                 <input
                   className={inputClass}
                   type="tel"
@@ -169,7 +169,7 @@ export default function AdvisorProfile() {
                 />
               </label>
               <label className="block space-y-1.5">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">Office hours</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-teal-700">Office hours</span>
                 <input
                   className={inputClass}
                   value={form.officeHours}
@@ -180,7 +180,7 @@ export default function AdvisorProfile() {
               </label>
             </div>
             <label className="block space-y-1.5">
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">Bio</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-teal-700">Bio</span>
               <textarea
                 className={`${inputClass} min-h-28`}
                 value={form.bio}
@@ -197,7 +197,7 @@ export default function AdvisorProfile() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-60"
+                className="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800 disabled:opacity-60"
               >
                 {saving ? 'Saving…' : 'Save changes'}
               </button>
@@ -215,11 +215,11 @@ export default function AdvisorProfile() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="space-y-6">
               <div className="flex items-center gap-4">
-                <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-emerald-700 text-white">
+                <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-teal-700 text-white">
                   <User className="h-10 w-10" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-emerald-700">{profile?.userId.name || user?.name || 'Advisor'}</h3>
+                  <h3 className="text-xl font-bold text-teal-700">{profile?.userId.name || user?.name || 'Advisor'}</h3>
                   <p className="text-body-text">{profile?.designation || 'Advisor'}</p>
                 </div>
               </div>
@@ -250,13 +250,13 @@ export default function AdvisorProfile() {
 
             <div className="space-y-6">
               <div className="rounded-2xl border border-light-color/50 bg-slate-50 p-6">
-                <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-emerald-700">About</h4>
+                <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-teal-700">About</h4>
                 <p className="whitespace-pre-line text-sm leading-relaxed text-body-text">
                   {profile?.bio || 'No bio added yet.'}
                 </p>
               </div>
               <div className="rounded-2xl border border-light-color/50 bg-slate-50 p-6">
-                <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-emerald-700">Advisor scope</h4>
+                <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-teal-700">Advisor scope</h4>
                 <p className="text-sm leading-relaxed text-body-text">
                   Your account can review only applications assigned by an admin and can access only the student profiles connected to those assigned applications.
                 </p>

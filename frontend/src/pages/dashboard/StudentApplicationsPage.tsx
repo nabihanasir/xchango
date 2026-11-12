@@ -123,7 +123,7 @@ export default function StudentApplicationsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2.5rem] bg-gradient-to-br from-[#060424] via-[#0c174f] to-[#17387b] p-8 text-white shadow-2xl shadow-dark-blue/20">
+      <section className="rounded-[2.5rem] bg-student-hero p-8 text-white shadow-2xl shadow-dark-blue/20">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Application Workflow</p>

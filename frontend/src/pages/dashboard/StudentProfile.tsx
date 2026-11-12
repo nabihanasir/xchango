@@ -179,7 +179,7 @@ export default function StudentProfile() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#060424] via-[#0c174f] to-[#17387b] p-8 text-white shadow-2xl shadow-dark-blue/20 md:p-10">
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-student-hero p-8 text-white shadow-2xl shadow-dark-blue/20 md:p-10">
         <div className="absolute right-0 top-0 h-64 w-64 translate-x-1/3 -translate-y-1/3 rounded-full bg-accent-yellow/20 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-1/4 translate-y-1/4 rounded-full bg-cyan-400/15 blur-3xl" />
         <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">

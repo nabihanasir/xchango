@@ -139,7 +139,7 @@ export default function ProgramOutlinePanel({ studentId, summary, outline, onSav
                 href={resolveUploadUrl(outline.fileUrl)}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 transition hover:text-emerald-900"
+                className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 transition hover:text-teal-900"
               >
                 <FileText className="h-4 w-4" />
                 {outline.fileName || 'View uploaded outline'}
@@ -193,7 +193,7 @@ export default function ProgramOutlinePanel({ studentId, summary, outline, onSav
                   type="button"
                   onClick={() => void handleSave()}
                   disabled={isSaving || (outline.categoriesReviewed && !isDirty)}
-                  className="inline-flex items-center rounded-[1.25rem] bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center rounded-[1.25rem] bg-teal-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSaving ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   {outline.categoriesReviewed ? 'Save changes' : 'Confirm course types'}

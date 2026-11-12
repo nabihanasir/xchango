@@ -90,7 +90,7 @@ export default function InternationalOffice() {
 
   return (
     <div className="space-y-12 pb-12">
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#060424] via-[#0c174f] to-[#17387b] p-8 text-white shadow-2xl shadow-dark-blue/20 md:p-12">
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-student-hero p-8 text-white shadow-2xl shadow-dark-blue/20 md:p-12">
         <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 animate-pulse rounded-full bg-accent-yellow/20 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-1/4 translate-y-1/4 animate-pulse rounded-full bg-cyan-400/15 blur-3xl" />
         <Reveal className="relative z-10 max-w-3xl">

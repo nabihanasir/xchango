@@ -5,10 +5,10 @@ import { authApi } from '../../lib/authApi';
 import Notice from '../../components/Notice';
 
 const inputClass =
-  'w-full rounded-xl border border-light-color/60 bg-white px-4 py-2.5 text-sm font-semibold text-body-text outline-none focus:border-maroon focus:ring-2 focus:ring-maroon/20';
-const labelClass = 'text-xs font-bold uppercase tracking-widest text-maroon';
+  'w-full rounded-xl border border-light-color/60 bg-white px-4 py-2.5 text-sm font-semibold text-body-text outline-none focus:border-admin focus:ring-2 focus:ring-admin/20';
+const labelClass = 'text-xs font-bold uppercase tracking-widest text-admin';
 const primaryButton =
-  'rounded-xl bg-maroon px-5 py-2.5 text-sm font-bold text-white hover:bg-maroon-hover disabled:opacity-60';
+  'rounded-xl bg-admin px-5 py-2.5 text-sm font-bold text-white hover:bg-admin-hover disabled:opacity-60';
 const secondaryButton =
   'rounded-xl border border-light-color/60 px-5 py-2.5 text-sm font-bold text-body-text hover:bg-slate-50';
 
@@ -79,7 +79,7 @@ export default function AdminProfile() {
 
       <div className="glass-card rounded-[2rem] p-8 shadow-md">
         <div className="mb-8 flex items-center justify-between gap-4">
-          <h2 className="text-2xl font-bold text-maroon">My Profile</h2>
+          <h2 className="text-2xl font-bold text-admin">My Profile</h2>
           {!editingName && (
             <button
               type="button"
@@ -87,7 +87,7 @@ export default function AdminProfile() {
                 setName(user?.name || '');
                 setEditingName(true);
               }}
-              className="inline-flex items-center gap-2 rounded-xl bg-maroon px-4 py-2 text-sm font-bold text-white hover:bg-maroon-hover"
+              className="inline-flex items-center gap-2 rounded-xl bg-admin px-4 py-2 text-sm font-bold text-white hover:bg-admin-hover"
             >
               <Pencil className="h-4 w-4" /> Edit name
             </button>
@@ -95,11 +95,11 @@ export default function AdminProfile() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-maroon text-white">
+          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-admin text-white">
             <User className="h-10 w-10" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-maroon">{user?.name || 'Admin'}</h3>
+            <h3 className="text-xl font-bold text-admin">{user?.name || 'Admin'}</h3>
             <p className="inline-flex items-center gap-1.5 text-body-text">
               <ShieldCheck className="h-4 w-4" /> Super Admin
             </p>
@@ -141,7 +141,7 @@ export default function AdminProfile() {
       </div>
 
       <div className="glass-card rounded-[2rem] p-8 shadow-md">
-        <h2 className="mb-6 inline-flex items-center gap-2 text-2xl font-bold text-maroon">
+        <h2 className="mb-6 inline-flex items-center gap-2 text-2xl font-bold text-admin">
           <KeyRound className="h-6 w-6" /> Change password
         </h2>
         <form onSubmit={handleChangePassword} className="space-y-5">

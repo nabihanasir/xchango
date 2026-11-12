@@ -60,7 +60,7 @@ export default function OutlineUploadPanel({ item, onUpload }: OutlineUploadPane
           <button
             type="button"
             onClick={() => setIsOpen((current) => !current)}
-            className="text-xs font-bold text-emerald-700 transition hover:text-emerald-900"
+            className="text-xs font-bold text-teal-700 transition hover:text-teal-900"
           >
             {isOpen ? 'Cancel' : 'Replace outline'}
           </button>
@@ -134,7 +134,7 @@ export default function OutlineUploadPanel({ item, onUpload }: OutlineUploadPane
             type="button"
             onClick={() => void handleSubmit()}
             disabled={isSubmitting}
-            className="inline-flex items-center rounded-[1.25rem] bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60"
+            className="inline-flex items-center rounded-[1.25rem] bg-teal-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800 disabled:opacity-60"
           >
             {isSubmitting ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
             Upload outline

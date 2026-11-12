@@ -83,7 +83,7 @@ export default function CourseBrowser({ onSubmitted, resubmitting = false }: Cou
 
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#060424] via-[#090638] to-[#1A1558] p-8 md:p-10 text-white shadow-2xl shadow-dark-blue/20">
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-student-hero p-8 md:p-10 text-white shadow-2xl shadow-dark-blue/20">
         <div className="absolute inset-y-0 right-0 w-72 bg-accent-yellow/10 blur-[90px]" />
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl space-y-4">

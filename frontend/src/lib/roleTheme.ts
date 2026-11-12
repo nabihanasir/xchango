@@ -5,8 +5,7 @@
  * by interpolation — Tailwind's JIT scans source text, so a class assembled at
  * runtime (`text-${color}-300`) is never emitted into the stylesheet.
  *
- * `student` intentionally reproduces the original accent-yellow chrome exactly,
- * so the student panel renders unchanged.
+ * Colors come from the role tokens in tailwind.config.js (student, advisor, admin).
  */
 
 export type RoleThemeKey = 'student' | 'advisor' | 'admin';
@@ -54,71 +53,62 @@ export interface RoleTheme {
   avatar: string;
 }
 
+
+/**
+ * Shared chrome: every portal uses the same gold active indicator and the same white-on-dark nav states, so the
+ * three portals read as one app. Only the sidebar base, avatar and role caption change per role.
+ */
+const sharedChrome = {
+  navInactive: 'text-white/55 hover:text-white hover:bg-white/5',
+  footerButton: 'text-white/40 hover:text-white hover:bg-white/5',
+  signOut: 'text-white/40 hover:text-red-400 hover:bg-red-500/10',
+  panelLabel: 'text-accent-yellow/80',
+  navActive: 'bg-white/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
+  navActiveMobile: 'bg-white/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
+  navIndicator: 'bg-accent-yellow shadow-[0_0_10px_rgba(251,210,19,0.5)]',
+  navActiveIconGlow: 'drop-shadow-[0_0_8px_rgba(251,210,19,0.3)]',
+  navChevron: 'text-accent-yellow',
+  navActiveIconMobile: 'text-accent-yellow drop-shadow-[0_0_8px_rgba(251,210,19,0.3)]',
+} as const;
+
 export const roleThemes: Record<RoleThemeKey, RoleTheme> = {
   student: {
-    sidebarBg: 'bg-[#060424]/95',
-    sidebarShadow: 'shadow-dark-blue',
+    ...sharedChrome,
+    sidebarBg: 'bg-student-side',
+    sidebarShadow: 'shadow-student-side',
     mesh: 'bg-accent-yellow/5',
     meshSecondary: 'bg-dark-blue/5',
-    backdrop: 'bg-dark-blue/80',
+    backdrop: 'bg-student-side/80',
     chromeText: 'text-dark-blue',
     chromeHoverText: 'hover:text-dark-blue',
     groupHoverText: 'group-hover:text-dark-blue',
-    navInactive: 'text-white/50 hover:text-white hover:bg-white/5',
-    footerButton: 'text-white/40 hover:text-white hover:bg-white/5',
-    signOut: 'text-white/40 hover:text-red-400 hover:bg-red-500/10',
-    panelLabel: 'text-accent-yellow/80',
-    navActive: 'bg-accent-yellow/10 text-accent-yellow shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
-    navActiveMobile: 'bg-accent-yellow/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
-    navIndicator: 'bg-accent-yellow shadow-[0_0_10px_rgba(251,210,19,0.5)]',
-    navActiveIconGlow: 'drop-shadow-[0_0_8px_rgba(251,210,19,0.3)]',
-    navChevron: 'text-accent-yellow',
-    navActiveIconMobile: 'text-accent-yellow drop-shadow-[0_0_8px_rgba(251,210,19,0.3)]',
-    roleCaption: 'text-accent-yellow',
-    avatar: 'from-dark-blue to-[#1A1558]',
+    roleCaption: 'text-dark-blue',
+    avatar: 'bg-dark-blue',
   },
   advisor: {
-    sidebarBg: 'bg-[#03110c]/95',
-    sidebarShadow: 'shadow-emerald-950',
-    mesh: 'bg-emerald-400/5',
+    ...sharedChrome,
+    sidebarBg: 'bg-advisor-side',
+    sidebarShadow: 'shadow-advisor-side',
+    mesh: 'bg-advisor/5',
     meshSecondary: 'bg-dark-blue/5',
-    backdrop: 'bg-dark-blue/80',
-    chromeText: 'text-dark-blue',
-    chromeHoverText: 'hover:text-dark-blue',
-    groupHoverText: 'group-hover:text-dark-blue',
-    navInactive: 'text-white/50 hover:text-white hover:bg-white/5',
-    footerButton: 'text-white/40 hover:text-white hover:bg-white/5',
-    signOut: 'text-white/40 hover:text-red-400 hover:bg-red-500/10',
-    panelLabel: 'text-emerald-300/80',
-    navActive: 'bg-emerald-400/10 text-emerald-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
-    navActiveMobile: 'bg-emerald-400/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
-    navIndicator: 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]',
-    navActiveIconGlow: 'drop-shadow-[0_0_8px_rgba(52,211,153,0.35)]',
-    navChevron: 'text-emerald-300',
-    navActiveIconMobile: 'text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.35)]',
-    roleCaption: 'text-emerald-700',
-    avatar: 'from-emerald-600 to-emerald-900',
+    backdrop: 'bg-advisor-side/80',
+    chromeText: 'text-advisor',
+    chromeHoverText: 'hover:text-advisor',
+    groupHoverText: 'group-hover:text-advisor',
+    roleCaption: 'text-advisor',
+    avatar: 'bg-advisor',
   },
   admin: {
-    sidebarBg: 'bg-gradient-to-b from-[#A81E27] to-[#6E1017]',
-    sidebarShadow: 'shadow-maroon-deep',
-    mesh: 'bg-red-400/5',
-    meshSecondary: 'bg-maroon/5',
-    backdrop: 'bg-maroon/80',
-    chromeText: 'text-maroon',
-    chromeHoverText: 'hover:text-maroon',
-    groupHoverText: 'group-hover:text-maroon',
-    navInactive: 'text-white/80 hover:text-white hover:bg-white/10',
-    footerButton: 'text-white/70 hover:text-white hover:bg-white/10',
-    signOut: 'text-white/70 hover:text-white hover:bg-white/15',
-    panelLabel: 'text-white/80',
-    navActive: 'bg-white/20 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
-    navActiveMobile: 'bg-white/20 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]',
-    navIndicator: 'bg-accent-yellow shadow-[0_0_10px_rgba(251,210,19,0.5)]',
-    navActiveIconGlow: 'drop-shadow-[0_0_8px_rgba(251,210,19,0.4)]',
-    navChevron: 'text-accent-yellow',
-    navActiveIconMobile: 'text-accent-yellow drop-shadow-[0_0_8px_rgba(251,210,19,0.4)]',
-    roleCaption: 'text-maroon',
-    avatar: 'from-maroon to-maroon-deep',
+    ...sharedChrome,
+    sidebarBg: 'bg-admin-deep',
+    sidebarShadow: 'shadow-admin-deep',
+    mesh: 'bg-admin/5',
+    meshSecondary: 'bg-admin/5',
+    backdrop: 'bg-admin-deep/80',
+    chromeText: 'text-admin',
+    chromeHoverText: 'hover:text-admin',
+    groupHoverText: 'group-hover:text-admin',
+    roleCaption: 'text-admin',
+    avatar: 'bg-admin',
   },
 };

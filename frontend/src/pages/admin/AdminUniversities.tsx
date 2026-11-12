@@ -284,7 +284,7 @@ function CountryPicker({
   if (value && (locked || !open)) {
     return (
       <div className="flex items-center justify-between gap-3 rounded-xl border border-light-color bg-slate-50 px-4 py-2.5">
-        <span className="flex items-center gap-3 text-sm font-bold text-maroon">
+        <span className="flex items-center gap-3 text-sm font-bold text-admin">
           <CountryFlag code={value.code} emoji={value.flag} />
           {value.name}
           <span className="text-xs font-semibold text-slate-400">{value.code}</span>
@@ -298,7 +298,7 @@ function CountryPicker({
               setQuery('');
               setOpen(true);
             }}
-            className="text-xs font-bold text-maroon hover:underline"
+            className="text-xs font-bold text-admin hover:underline"
           >
             Change
           </button>
@@ -333,7 +333,7 @@ function CountryPicker({
                   setOpen(false);
                   setQuery('');
                 }}
-                className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm font-semibold text-maroon hover:bg-maroon/5"
+                className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm font-semibold text-admin hover:bg-admin/5"
               >
                 <CountryFlag code={country.code} emoji={country.flag} />
                 {country.name}
@@ -502,7 +502,7 @@ export default function AdminUniversities() {
       accessor: 'name',
       render: (_: unknown, row: UniversityRecord) => (
         <div>
-          <p className="font-bold text-maroon">{row.name}</p>
+          <p className="font-bold text-admin">{row.name}</p>
           <p className="text-xs font-semibold text-slate-400">{[row.shortName, row.city].filter(Boolean).join(' · ') || '-'}</p>
         </div>
       ),
@@ -558,7 +558,7 @@ export default function AdminUniversities() {
         <button
           type="button"
           onClick={() => openEdit(row)}
-          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-maroon transition hover:bg-maroon/5"
+          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-admin transition hover:bg-admin/5"
         >
           <Pencil className="h-3.5 w-3.5" /> Edit
         </button>
@@ -570,14 +570,14 @@ export default function AdminUniversities() {
     <div className="relative z-0 space-y-6 animate-fade-in">
       <div className="glass-card flex flex-col gap-4 rounded-[2rem] border-b border-light-color/50 bg-white p-6 md:flex-row md:items-center md:justify-between md:p-8">
         <div>
-          <h2 className="mb-2 text-3xl font-bold text-maroon">Universities Catalog</h2>
+          <h2 className="mb-2 text-3xl font-bold text-admin">Universities Catalog</h2>
           <p className="mt-1 font-medium text-body-text md:text-lg">
             Add partner universities, publish them to students and set which advisors supervise each country.
           </p>
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center justify-center gap-2 rounded-xl bg-maroon-gradient px-5 py-2.5 font-bold text-white shadow-lg shadow-maroon/20 transition-all hover:brightness-110"
+          className="flex items-center justify-center gap-2 rounded-xl bg-admin hover:bg-admin-hover px-5 py-2.5 font-bold text-white shadow-lg shadow-admin/20 transition-all hover:brightness-110"
         >
           <Plus className="h-5 w-5" /> Add University
         </button>
@@ -598,7 +598,7 @@ export default function AdminUniversities() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by university, short code or country"
-            className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-maroon placeholder:text-body-text placeholder:opacity-40 focus:border-maroon/20 focus:outline-none"
+            className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-admin placeholder:text-body-text placeholder:opacity-40 focus:border-admin/20 focus:outline-none"
           />
         </div>
 
@@ -611,7 +611,7 @@ export default function AdminUniversities() {
         ) : data.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-light-color bg-slate-50 px-6 py-12 text-center">
             <Building className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-            <h3 className="text-xl font-bold text-maroon">No Universities Found</h3>
+            <h3 className="text-xl font-bold text-admin">No Universities Found</h3>
             <p className="mt-2 text-body-text">Add your first partner university to the system.</p>
           </div>
         ) : (
@@ -625,11 +625,11 @@ export default function AdminUniversities() {
         <Modal onClose={closeForm} widthClass="max-w-4xl" locked={saving !== null} labelledBy="university-form-title">
           <header className="flex items-center justify-between border-b border-light-color/60 px-6 py-5 md:px-8">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-maroon">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-admin">
                 <GraduationCap className="h-6 w-6" />
               </div>
               <div>
-                <h2 id="university-form-title" className="text-2xl font-bold text-maroon">
+                <h2 id="university-form-title" className="text-2xl font-bold text-admin">
                   {form.id ? 'Edit University' : 'New University'}
                 </h2>
                 <p className="text-sm font-medium text-body-text">
@@ -642,7 +642,7 @@ export default function AdminUniversities() {
               onClick={closeForm}
               disabled={saving !== null}
               aria-label="Close"
-              className="rounded-xl p-2 text-maroon/40 transition-all hover:bg-slate-100 hover:text-maroon disabled:opacity-50"
+              className="rounded-xl p-2 text-admin/40 transition-all hover:bg-slate-100 hover:text-admin disabled:opacity-50"
             >
               <X className="h-5 w-5" />
             </button>
@@ -676,7 +676,7 @@ export default function AdminUniversities() {
                   type="button"
                   onClick={() => void runScrape()}
                   disabled={scraping || !scrapeUrl.trim()}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-maroon px-5 py-2.5 text-sm font-bold text-white transition hover:bg-maroon-hover disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-admin px-5 py-2.5 text-sm font-bold text-white transition hover:bg-admin-hover disabled:opacity-50"
                 >
                   {scraping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {scraping ? 'Reading website...' : 'Auto-fill from website'}
@@ -735,12 +735,12 @@ export default function AdminUniversities() {
                           <label
                             key={advisor._id}
                             className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-                              checked ? 'border-maroon bg-maroon/5 text-maroon' : 'border-light-color bg-slate-50 text-slate-600'
+                              checked ? 'border-admin bg-admin/5 text-admin' : 'border-light-color bg-slate-50 text-slate-600'
                             }`}
                           >
                             <input
                               type="checkbox"
-                              className="accent-maroon"
+                              className="accent-admin"
                               checked={checked}
                               onChange={() =>
                                 patch({
@@ -1073,7 +1073,7 @@ export default function AdminUniversities() {
                 type="button"
                 onClick={() => void save('draft')}
                 disabled={saving !== null}
-                className="rounded-xl border border-maroon/30 px-6 py-2.5 font-bold text-maroon transition-all hover:bg-maroon/5 disabled:opacity-50"
+                className="rounded-xl border border-admin/30 px-6 py-2.5 font-bold text-admin transition-all hover:bg-admin/5 disabled:opacity-50"
               >
                 {saving === 'draft' ? 'Saving...' : 'Save as draft'}
               </button>
@@ -1082,7 +1082,7 @@ export default function AdminUniversities() {
                 onClick={() => void save('published')}
                 disabled={saving !== null || issues.length > 0}
                 title={issues.length ? 'Finish the items listed above first' : undefined}
-                className="rounded-xl bg-accent-yellow px-6 py-2.5 font-bold text-maroon shadow-lg shadow-accent-yellow/20 transition-all hover:bg-yellow-default disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-accent-yellow px-6 py-2.5 font-bold text-admin shadow-lg shadow-accent-yellow/20 transition-all hover:bg-yellow-default disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving === 'published' ? 'Publishing...' : 'Publish'}
               </button>

@@ -88,7 +88,7 @@ export default function AdminResults() {
       accessor: 'resultFileUrl',
       render: (val: string) =>
         val ? (
-          <a href={resolveUploadUrl(val)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-maroon">
+          <a href={resolveUploadUrl(val)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-admin">
             <FileDown className="h-3.5 w-3.5" />
             View
           </a>
@@ -121,7 +121,7 @@ export default function AdminResults() {
       header: 'Document',
       accessor: 'fileUrl',
       render: (val: string) => (
-        <a href={resolveUploadUrl(val)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-maroon">
+        <a href={resolveUploadUrl(val)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-admin">
           <FileDown className="h-3.5 w-3.5" />
           View
         </a>
@@ -139,7 +139,7 @@ export default function AdminResults() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between border-b border-light-color/50 pb-6 glass-card p-6 md:p-8 rounded-[2rem] bg-white">
         <div>
-          <h2 className="text-3xl font-bold text-maroon mb-2">Student Results</h2>
+          <h2 className="text-3xl font-bold text-admin mb-2">Student Results</h2>
           <p className="text-body-text font-medium mt-1 md:text-lg">
             View every result advisors have entered for enrolled host courses.
           </p>
@@ -151,7 +151,7 @@ export default function AdminResults() {
       )}
 
       <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">
-        <h3 className="mb-4 text-xl font-bold text-maroon">Verification documents</h3>
+        <h3 className="mb-4 text-xl font-bold text-admin">Verification documents</h3>
         {verifications.length === 0 ? (
           <p className="text-sm font-medium text-body-text">No students have uploaded a verification document yet.</p>
         ) : (
@@ -174,7 +174,7 @@ export default function AdminResults() {
           </div>
         ) : data.length === 0 ? (
           <div className="text-center py-12 px-6 border-2 border-dashed border-light-color rounded-2xl bg-slate-50">
-            <h3 className="text-xl font-bold text-maroon">No Results Found</h3>
+            <h3 className="text-xl font-bold text-admin">No Results Found</h3>
             <p className="text-body-text mt-2">No results have been entered yet.</p>
           </div>
         ) : (

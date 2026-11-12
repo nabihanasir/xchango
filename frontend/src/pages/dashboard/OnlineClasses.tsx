@@ -184,7 +184,7 @@ export default function OnlineClasses() {
 
       <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
         <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className={`${isHost ? 'bg-emerald-950' : 'bg-[#071133]'} p-7 text-white md:p-10`}>
+          <div className={`${isHost ? 'bg-advisor-hero' : 'bg-student-hero'} p-7 text-white md:p-10`}>
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-widest text-accent-yellow">
               <Video className="h-4 w-4" />
               {isHost ? 'Host Online Classes' : 'Online Classes'}

@@ -2,9 +2,9 @@ import type { ReactNode } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 
 export const fieldClass =
-  'w-full rounded-xl border border-light-color bg-slate-50 px-4 py-2.5 text-sm font-medium text-maroon transition-all focus:border-accent-yellow focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 disabled:cursor-not-allowed disabled:opacity-60';
+  'w-full rounded-xl border border-light-color bg-slate-50 px-4 py-2.5 text-sm font-medium text-admin transition-all focus:border-accent-yellow focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 disabled:cursor-not-allowed disabled:opacity-60';
 
-export const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-widest text-maroon/60';
+export const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-widest text-admin/60';
 
 export type Confidence = 'found' | 'review' | 'empty';
 
@@ -38,7 +38,7 @@ export function Section({
   return (
     <section className="rounded-2xl border border-light-color/70 bg-white p-5">
       <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h3 className="text-base font-bold text-maroon">{title}</h3>
+        <h3 className="text-base font-bold text-admin">{title}</h3>
         <ConfidenceBadge value={confidence} />
       </div>
       {hint ? <p className="-mt-2 mb-4 text-xs font-medium text-body-text">{hint}</p> : null}
@@ -195,7 +195,7 @@ export function AddButton({ onClick, children }: { onClick: () => void; children
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-maroon/30 px-3.5 py-2 text-xs font-bold text-maroon transition hover:border-maroon hover:bg-maroon/5"
+      className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-admin/30 px-3.5 py-2 text-xs font-bold text-admin transition hover:border-admin hover:bg-admin/5"
     >
       <Plus className="h-3.5 w-3.5" /> {children}
     </button>

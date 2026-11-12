@@ -145,7 +145,7 @@ export default function AdvisorVerificationPanel({ onReviewed }: Props) {
                           type="button"
                           disabled={busy}
                           onClick={() => void review(item._id, 'verify')}
-                          className="inline-flex items-center rounded-[1.25rem] bg-emerald-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60"
+                          className="inline-flex items-center rounded-[1.25rem] bg-teal-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-teal-800 disabled:opacity-60"
                         >
                           {busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
                           Mark as verified

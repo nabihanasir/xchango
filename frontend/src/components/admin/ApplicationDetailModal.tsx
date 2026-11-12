@@ -143,7 +143,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
 
   return createPortal(
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 lg:p-10 animate-fade-in text-slate-800">
-      <div className="absolute inset-0 bg-maroon/80 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-admin/80 backdrop-blur-md" onClick={onClose} />
 
       <div
         className="bg-slate-50 w-full max-w-6xl h-full max-h-[90vh] rounded-[40px] shadow-2xl relative z-10 overflow-hidden flex flex-col animate-fade-in-up border border-white/20"
@@ -151,22 +151,22 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
       >
         <header className="bg-white px-8 py-6 border-b border-light-color/60 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-5">
-            <div className="bg-maroon-gradient h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg shadow-maroon/10">
+            <div className="bg-admin hover:bg-admin-hover h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg shadow-admin/10">
               <span className="text-white font-bold text-xl italic leading-none">{studentName.charAt(0)}</span>
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-maroon">{studentName}</h2>
+                <h2 className="text-2xl font-bold text-admin">{studentName}</h2>
                 <StatusBadge status={app.status.toLowerCase()} />
               </div>
               <p className="text-body-text font-bold text-sm opacity-60 mt-1">
-                Application ID: <span className="text-maroon">#{app._id.slice(-6).toUpperCase()}</span> · Created {new Date(app.createdAt).toLocaleDateString()}
+                Application ID: <span className="text-admin">#{app._id.slice(-6).toUpperCase()}</span> · Created {new Date(app.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-maroon/40 hover:text-maroon border border-transparent hover:border-light-color"
+            className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-admin/40 hover:text-admin border border-transparent hover:border-light-color"
           >
             <X className="h-6 w-6" />
           </button>
@@ -192,15 +192,15 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                 <div className="space-y-4">
                   <div>
                     <span className="text-xs font-bold text-slate-900 uppercase tracking-widest block mb-1">Country of Choice</span>
-                    <div className="flex items-center gap-2 text-sm font-bold text-maroon">
+                    <div className="flex items-center gap-2 text-sm font-bold text-admin">
                       <MapPin className="h-4 w-4 text-accent-yellow" />
                       {app.country || 'N/A'}
                     </div>
                   </div>
                   <div>
                     <span className="text-xs font-bold text-slate-900 uppercase tracking-widest block mb-1">University of Choice</span>
-                    <div className="flex items-center gap-2 text-sm font-bold text-maroon">
-                      <GraduationCap className="h-4 w-4 text-maroon" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-admin">
+                      <GraduationCap className="h-4 w-4 text-admin" />
                       {app.university || 'N/A'}
                     </div>
                   </div>
@@ -210,14 +210,14 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               <div className="bg-white p-6 rounded-3xl border border-light-color/40 shadow-sm space-y-4">
                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Semester End Date</h4>
                 {app.status === 'COMPLETED' ? (
-                  <p className="text-sm font-bold text-maroon">Completed. The student account is off-boarded (read-only).</p>
+                  <p className="text-sm font-bold text-admin">Completed. The student account is off-boarded (read-only).</p>
                 ) : canSetEndDate ? (
                   <>
                     <input
                       type="date"
                       value={endDate}
                       onChange={(event) => setEndDate(event.target.value)}
-                      className="w-full rounded-xl border border-light-color px-4 py-2 text-sm font-bold text-maroon"
+                      className="w-full rounded-xl border border-light-color px-4 py-2 text-sm font-bold text-admin"
                     />
                     <p className="text-xs font-medium text-body-text">
                       Once this date passes the application is completed and the student is off-boarded to read-only access.
@@ -225,7 +225,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                     <button
                       onClick={() => void handleSaveEndDate()}
                       disabled={submitting}
-                      className="px-4 py-2 bg-maroon-gradient text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                      className="px-4 py-2 bg-admin hover:bg-admin-hover text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
                     >
                       Save end date
                     </button>
@@ -238,7 +238,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               {arrival?.arrivedAt ? (
                 <div className="bg-white p-6 rounded-3xl border border-emerald-200 shadow-sm space-y-2">
                   <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-[0.2em]">Arrived</h4>
-                  <p className="text-sm font-bold text-maroon">{new Date(arrival.arrivedAt).toLocaleDateString()}</p>
+                  <p className="text-sm font-bold text-admin">{new Date(arrival.arrivedAt).toLocaleDateString()}</p>
                   <p className="text-xs font-medium text-body-text">
                     {arrival.notices.filter((notice) => notice.sent).length} of {arrival.notices.length} instructor email(s) sent
                   </p>
@@ -251,7 +251,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                   <div className="flex justify-between items-end">
                     <div className="flex flex-col">
                         <span className="text-xs font-bold text-body-text opacity-60">Status Mapped Level</span>
-                        <span className="text-2xl font-bold text-maroon">{Math.round(progressPercent)}%</span>
+                        <span className="text-2xl font-bold text-admin">{Math.round(progressPercent)}%</span>
                     </div>
                     <span className="text-xs font-bold text-body-text opacity-60">Level {currentStage} of 5</span>
                   </div>
@@ -275,7 +275,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
             </div>
 
             <div className="lg:col-span-2 space-y-8">
-              <div className="bg-maroon-gradient p-8 rounded-[32px] text-white relative overflow-hidden shadow-2xl shadow-maroon/20">
+              <div className="bg-admin-hero p-8 rounded-[32px] text-white relative overflow-hidden shadow-2xl shadow-admin/20">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-accent-yellow/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
                 <div className="relative z-10 flex justify-between items-center">
                   <div>
@@ -294,7 +294,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                 {selectedCourseNames.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                     {selectedCourseNames.map((course, i) => (
-                        <span key={i} className="px-3 py-1.5 bg-maroon/5 text-maroon font-bold text-xs rounded-lg border border-maroon/10 italic">
+                        <span key={i} className="px-3 py-1.5 bg-admin/5 text-admin font-bold text-xs rounded-lg border border-admin/10 italic">
                         {course}
                         </span>
                     ))}
@@ -346,7 +346,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
           {canMarkArrival({ ...app, arrival }) && (
             <button
               onClick={() => setArrivalModalOpen(true)}
-              className="px-6 py-3 bg-white border border-maroon/20 text-maroon font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-white border border-admin/20 text-admin font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
             >
               <PlaneLanding className="h-4 w-4" />
               Mark Arrived
@@ -356,7 +356,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
             <button 
               onClick={handleIssueOfferLetter}
               disabled={submitting}
-              className="px-6 py-3 bg-accent-yellow text-maroon font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 disabled:opacity-50"
+              className="px-6 py-3 bg-accent-yellow text-admin font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 disabled:opacity-50"
             >
               {submitting ? 'Issuing...' : 'Issue Offer Letter'}
             </button>
@@ -390,13 +390,13 @@ function ProfileItem({ icon: Icon, label, value, highlighted = false }: any) {
   return (
     <div className="flex items-center gap-4 group">
       <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-colors ${
-        highlighted ? 'bg-accent-yellow text-maroon' : 'bg-slate-50 text-maroon/40 group-hover:bg-slate-100'
+        highlighted ? 'bg-accent-yellow text-admin' : 'bg-slate-50 text-admin/40 group-hover:bg-slate-100'
       }`}>
         <Icon className="h-4 w-4" />
       </div>
       <div>
         <span className="text-xs font-bold text-slate-900 uppercase tracking-widest block">{label}</span>
-        <span className={`text-sm font-bold ${highlighted ? 'text-maroon' : 'text-body-text'}`}>{value}</span>
+        <span className={`text-sm font-bold ${highlighted ? 'text-admin' : 'text-body-text'}`}>{value}</span>
       </div>
     </div>
   );
