@@ -5,7 +5,7 @@ import { MapPin, BookOpen, ChevronRight, Globe, Search } from 'lucide-react';
 import CountryFlag from '../../components/CountryFlag';
 import { useCatalog } from '../../hooks/useCatalog';
 
-const FALLBACK_BACKGROUND = 'bg-gradient-to-br from-dark-blue via-dark-blue-light to-dark-blue';
+const FALLBACK_BACKGROUND = 'bg-dark-blue';
 
 export default function UniversityProgrammes() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,21 +22,22 @@ export default function UniversityProgrammes() {
     );
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
-      <div className="bg-white rounded-3xl p-8 shadow-sm border border-light-color/50 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-accent-yellow/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div className="space-y-6 animate-fade-in pb-12">
+      <div className="bg-white rounded-3xl p-6 shadow-sm border border-light-color/50">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h2 className="text-3xl font-bold text-dark-blue flex items-center gap-3 mb-2">
               <Globe className="h-8 w-8 text-accent-yellow" />
               University & Programmes
             </h2>
-            <p className="text-body-text max-w-xl">
-              Explore our partner universities. Select a university to open its page with programmes, fees and application details.
+            <p className="text-body-text max-w-3xl text-sm leading-relaxed">
+              The <strong className="text-dark-blue">Student Exchange Program at Riphah International University</strong> lets you
+              study abroad at partner institutions, build global exposure and academic experience, and connect with peers and
+              professionals worldwide. Select a university to see its programmes, fees and application details.
             </p>
           </div>
 
-          <div className="w-full md:w-auto relative">
+          <div className="w-full md:w-auto relative flex-shrink-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
             </div>
@@ -49,17 +50,6 @@ export default function UniversityProgrammes() {
             />
           </div>
         </div>
-      </div>
-
-      <div className="bg-white rounded-3xl p-8 border border-light-color/50 shadow-sm">
-        <p className="text-body-text leading-relaxed mb-4">
-          The <strong className="text-dark-blue">Student Exchange Program at Riphah International University</strong> offers
-          students a unique opportunity to study abroad at partner institutions, gaining global exposure and academic enrichment.
-        </p>
-        <p className="text-body-text leading-relaxed">
-          This program enables students to immerse themselves in diverse cultures, engage with international academic
-          environments, and build networks with peers and professionals worldwide.
-        </p>
       </div>
 
       <div>
