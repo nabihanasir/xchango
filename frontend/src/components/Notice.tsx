@@ -66,7 +66,7 @@ export default function Notice({ tone, title, resetKey, onClose, children }: Not
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-900/40 p-4"
+      className="fixed inset-0 z-[90] flex items-center justify-center bg-transparent p-4 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) close();
       }}

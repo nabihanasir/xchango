@@ -294,7 +294,7 @@ export default function StudentProfile() {
 
       {transcriptError
         ? createPortal(
-            <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm">
+            <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto p-4 backdrop-blur-md">
               <div
                 role="alertdialog"
                 aria-modal="true"
@@ -325,7 +325,7 @@ export default function StudentProfile() {
 
       {showSavedPopup
         ? createPortal(
-            <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm">
+            <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto p-4 backdrop-blur-md">
               <div
                 role="dialog"
                 aria-modal="true"

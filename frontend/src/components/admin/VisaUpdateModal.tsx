@@ -49,7 +49,7 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
   // Portalled to <body>: the dashboard shell wraps pages in a transformed element, which would
   // otherwise trap this `fixed` overlay inside the content area instead of covering the viewport.
   return createPortal(
-    <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center overflow-y-auto p-4 backdrop-blur-md">
       <form
         onSubmit={handleSubmit}
         role="dialog"

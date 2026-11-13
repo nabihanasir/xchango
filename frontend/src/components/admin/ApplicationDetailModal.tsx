@@ -143,7 +143,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
 
   return createPortal(
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 lg:p-10 animate-fade-in text-slate-800">
-      <div className="absolute inset-0 bg-admin/80 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-transparent backdrop-blur-md" onClick={onClose} />
 
       <div
         className="bg-slate-50 w-full max-w-6xl h-full max-h-[90vh] rounded-[40px] shadow-2xl relative z-10 overflow-hidden flex flex-col animate-fade-in-up border border-white/20"

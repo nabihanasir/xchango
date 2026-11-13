@@ -32,7 +32,7 @@ export default function Modal({ onClose, children, widthClass = 'max-w-lg', lock
 
   return createPortal(
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => !locked && onClose()} />
+      <div className="absolute inset-0 bg-transparent backdrop-blur-md" onClick={() => !locked && onClose()} />
       <div
         role="dialog"
         aria-modal="true"

@@ -137,7 +137,7 @@ export default function Partners() {
       </div>
 
       {selectedPartner ? (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md">
           <div className="w-full max-w-2xl rounded-[2rem] bg-white p-6 shadow-2xl shadow-slate-950/20 sm:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
