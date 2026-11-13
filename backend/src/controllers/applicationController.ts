@@ -4,6 +4,9 @@ import { ApplicationStatus } from '../models/Application';
 import { UserRole } from '../models/User';
 import * as applicationService from '../services/applicationService';
 import { recordArrival, reportArrival } from '../services/arrivalService';
+import * as courseEquivalencyService from '../services/courseEquivalencyService';
+import * as resultService from '../services/resultService';
+import * as visaService from '../services/visaService';
 import { sendResponse } from '../utils/response';
 import { toPublicFileUrl } from '../utils/upload';
 
@@ -40,6 +43,22 @@ export const getApplication = async (req: any, res: Response) => {
     role: req.user.role,
   });
   sendResponse(res, 200, 'Application fetched successfully', application);
+};
+
+/** What the advisor needs to draw the student's progress bar: course requests, visa and published results. */
+export const getApplicationJourney = async (req: any, res: Response) => {
+  // Throws unless the application belongs to this advisor (admins pass too).
+  const application: any = await applicationService.getApplicationById(req.params.id, {
+    _id: req.user._id.toString(),
+    role: req.user.role,
+  });
+  const studentId = String(application.studentId?._id ?? application.studentId);
+  const [requests, visa, results] = await Promise.all([
+    courseEquivalencyService.getStudentRequests(studentId),
+    visaService.getStudentVisaProcess(studentId),
+    resultService.getStudentResults(studentId),
+  ]);
+  sendResponse(res, 200, 'Application journey fetched successfully', { requests, visa, results });
 };
 
 export const getStudentApplications = async (req: any, res: Response) => {

@@ -27,6 +27,11 @@ router.get(
 router.get('/advisor', authorizeRoles(UserRole.ADVISOR), applicationController.getAdvisorApplications);
 router.get('/:id', applicationController.getApplication);
 router.get(
+  '/:id/journey',
+  authorizeRoles(UserRole.ADVISOR, UserRole.ADMIN),
+  applicationController.getApplicationJourney
+);
+router.get(
   '/:id/available-courses',
   authorizeRoles(UserRole.STUDENT, UserRole.ADVISOR, UserRole.ADMIN),
   applicationController.getAvailableCourses
