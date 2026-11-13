@@ -81,8 +81,8 @@ export default function ProgramOutlinePanel({ studentId, summary, outline, onSav
   };
 
   const overCap = summary?.withinCap === false;
-  const missingOutline = !summary?.outlineAvailable;
-  const missingTranscript = !summary?.transcriptAvailable;
+  const missingOutline = Boolean(summary) && !summary?.outlineAvailable;
+  const missingTranscript = Boolean(summary) && !summary?.transcriptAvailable;
 
   const title = (
     <span className="flex flex-wrap items-center gap-2">

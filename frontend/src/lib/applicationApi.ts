@@ -8,6 +8,8 @@ import type {
   WorkflowApplication,
 } from '../types/application';
 
+import type { JourneyInput } from '../utils/studentJourney';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
 
@@ -41,6 +43,8 @@ export const applicationApi = {
     unwrap<WorkflowApplication>(apiClient.patch(`/applications/${applicationId}`, payload)),
   getApplication: (applicationId: string) =>
     unwrap<WorkflowApplication>(apiClient.get(`/applications/${applicationId}`)),
+  getApplicationJourney: (applicationId: string) =>
+    unwrap<Pick<JourneyInput, 'requests' | 'visa' | 'results'>>(apiClient.get(`/applications/${applicationId}/journey`)),
   getStudentApplications: (studentId: string) =>
     unwrap<WorkflowApplication[]>(apiClient.get(`/applications/student/${studentId}`)),
   getAdvisorApplications: () =>
