@@ -706,6 +706,7 @@ export default function AdvisorApplicationsWorkspace({
       </section>
       {arrivalModalOpen && selectedApplication ? (
         <MarkArrivalModal
+          role="advisor"
           application={selectedApplication}
           onClose={() => setArrivalModalOpen(false)}
           onRecorded={(result) => syncApplication(result.application)}

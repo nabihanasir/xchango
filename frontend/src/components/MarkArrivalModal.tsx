@@ -12,11 +12,32 @@ interface MarkArrivalModalProps {
   application: WorkflowApplication;
   onClose: () => void;
   onRecorded?: (result: ArrivalResult) => void;
+  /** Portal the modal is opened from; drives its colours. */
+  role?: 'advisor' | 'admin';
 }
+
+// Literal class strings so Tailwind's JIT emits them.
+const roleStyles = {
+  admin: {
+    text: 'text-admin',
+    textFaint: 'text-admin/40 hover:text-admin',
+    label: 'text-admin/60',
+    solid: 'bg-admin hover:bg-admin-hover',
+    accent: 'accent-admin',
+  },
+  advisor: {
+    text: 'text-advisor',
+    textFaint: 'text-advisor/40 hover:text-advisor',
+    label: 'text-advisor/60',
+    solid: 'bg-advisor hover:bg-advisor-hover',
+    accent: 'accent-advisor',
+  },
+} as const;
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export default function MarkArrivalModal({ application, onClose, onRecorded }: MarkArrivalModalProps) {
+export default function MarkArrivalModal({ application, onClose, onRecorded, role = 'admin' }: MarkArrivalModalProps) {
+  const c = roleStyles[role];
   const [arrivedAt, setArrivedAt] = useState(today);
   const [homeCourses, setHomeCourses] = useState<ApplicationCourseSummary[]>([]);
   const [onlineCourseIds, setOnlineCourseIds] = useState<string[]>([]);
@@ -67,15 +88,15 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
 
   return createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-admin/80 backdrop-blur-md" onClick={() => !submitting && onClose()} />
+      <div className="absolute inset-0 bg-transparent backdrop-blur-md" onClick={() => !submitting && onClose()} />
       <div className="relative z-10 flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-[32px] border border-white/20 bg-white shadow-2xl animate-fade-in-up">
         <header className="flex items-center justify-between border-b border-light-color/60 px-6 py-5 sm:px-8">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-admin">
+            <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 ${c.text}`}>
               <PlaneLanding className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-admin">Mark student arrived</h2>
+              <h2 className={`text-xl font-bold ${c.text}`}>Mark student arrived</h2>
               <p className="text-sm font-medium text-body-text">
                 {student?.name || 'Student'} · {application.university}
               </p>
@@ -85,7 +106,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="rounded-xl p-2 text-admin/40 transition-all hover:bg-slate-100 hover:text-admin disabled:opacity-50"
+            className={`rounded-xl p-2 ${c.textFaint} transition-all hover:bg-slate-100 disabled:opacity-50`}
           >
             <X className="h-5 w-5" />
           </button>
@@ -116,7 +137,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
                 {result.notices.map((notice) => (
                   <li key={notice.email} className="rounded-xl border border-light-color/60 p-3 text-sm">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="flex min-w-0 items-center gap-2 font-bold text-admin">
+                      <span className={`flex min-w-0 items-center gap-2 font-bold ${c.text}`}>
                         <Mail className="h-4 w-4 shrink-0" />
                         <span className="truncate">{notice.name || notice.email}</span>
                       </span>
@@ -134,7 +155,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
 
             {result.coursesWithoutInstructorEmail.length ? (
               <p className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-body-text">
-                <span className="font-bold text-admin">No instructor email on file for:</span>{' '}
+                <span className={`font-bold ${c.text}`}>No instructor email on file for:</span>{' '}
                 {result.coursesWithoutInstructorEmail.join(', ')}. An admin can add it under Courses.
               </p>
             ) : null}
@@ -143,7 +164,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl bg-admin hover:bg-admin-hover px-6 py-2.5 font-bold text-white transition-all hover:brightness-110"
+                className={`rounded-xl ${c.solid} px-6 py-2.5 font-bold text-white transition-all hover:brightness-110`}
               >
                 Done
               </button>
@@ -157,19 +178,19 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
             </p>
 
             <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">Arrival date</label>
+              <label className={`mb-2 block text-xs font-bold uppercase tracking-widest ${c.label}`}>Arrival date</label>
               <input
                 type="date"
                 value={arrivedAt}
                 max={today()}
                 onChange={(event) => setArrivedAt(event.target.value)}
-                className="w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-admin focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                className={`w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium ${c.text} focus:outline-none focus:ring-2 focus:ring-accent-yellow/50`}
                 required
               />
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-admin/60">
+              <p className={`mb-2 text-xs font-bold uppercase tracking-widest ${c.label}`}>
                 Home courses taken online (optional)
               </p>
               {loadingCourses ? (
@@ -187,9 +208,9 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
                         type="checkbox"
                         checked={onlineCourseIds.includes(course._id)}
                         onChange={() => toggleCourse(course._id)}
-                        className="h-4 w-4 accent-admin"
+                        className={`h-4 w-4 ${c.accent}`}
                       />
-                      <span className="min-w-0 flex-1 font-semibold text-admin">{getCourseDisplayTitle(course)}</span>
+                      <span className={`min-w-0 flex-1 font-semibold ${c.text}`}>{getCourseDisplayTitle(course)}</span>
                       <span className="truncate text-xs text-body-text">
                         {course.instructorEmail ? course.instructorName || course.instructorEmail : 'No instructor email'}
                       </span>
@@ -214,7 +235,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded }: M
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-xl bg-accent-yellow px-6 py-2.5 font-bold text-admin shadow-lg shadow-accent-yellow/20 transition-all hover:bg-yellow-default disabled:opacity-50"
+                className={`rounded-xl ${c.solid} px-6 py-2.5 font-bold text-white shadow-lg transition-all disabled:opacity-50`}
               >
                 {submitting ? 'Sending...' : 'Mark arrived & notify'}
               </button>
