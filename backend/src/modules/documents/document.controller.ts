@@ -13,7 +13,8 @@ import {
 } from './document.service';
 import type { DocumentStatus } from './document.model';
 
-const isDocumentOwner = (req: any, studentId: string) =>
+/** True when a student is trying to reach another student's records. */
+const isOtherStudent = (req: any, studentId: string) =>
   req.user.role === UserRole.STUDENT && req.user._id.toString() !== studentId;
 
 const assertViewAccess = async (req: any, studentId: string) => {
@@ -22,7 +23,7 @@ const assertViewAccess = async (req: any, studentId: string) => {
   }
 
   if (req.user.role === UserRole.STUDENT) {
-    if (isDocumentOwner(req, studentId)) {
+    if (isOtherStudent(req, studentId)) {
       throw new ForbiddenError(
         'You are not authorized to access these documents.',
         'The requested document records belong to another student.',
@@ -65,7 +66,7 @@ const assertWriteAccess = async (req: any, studentId: string) => {
     return;
   }
 
-  if (req.user.role === UserRole.STUDENT && !isDocumentOwner(req, studentId)) {
+  if (isOtherStudent(req, studentId)) {
     throw new ForbiddenError(
       'You are not authorized to access these documents.',
       'The requested document records belong to another student.',
