@@ -6,8 +6,6 @@ import type { StudentVisaProcess } from '../types/visa';
 import { getCourseStepState } from './courseStep';
 import { VISA_STATUS_META } from './visa';
 
-export const REQUIRED_DOCUMENT_TYPES = ['transcript'];
-
 export type JourneyStepKey =
   | 'registration'
   | 'interview'
@@ -40,6 +38,8 @@ export interface JourneyInput {
   application: WorkflowApplication | null;
   requests: CourseRequest[];
   documents: StudentDocument[];
+  /** The transcript is uploaded on the Student Profile page. */
+  transcriptUploaded?: boolean;
   visa: StudentVisaProcess | null;
   results: StudentResult[];
 }
@@ -66,7 +66,14 @@ interface Draft extends Omit<JourneyStep, 'state'> {
   stopped?: boolean;
 }
 
-export const buildStudentJourney = ({ application, requests, documents, visa, results }: JourneyInput): JourneyStep[] => {
+export const buildStudentJourney = ({
+  application,
+  requests,
+  documents,
+  transcriptUploaded,
+  visa,
+  results,
+}: JourneyInput): JourneyStep[] => {
   const applicationHome = '/dashboard/applications';
   const applicationPage = application ? `${applicationHome}/${application._id}` : `${applicationHome}/new`;
   const submitted = Boolean(application) && application!.status !== 'DRAFT';
@@ -157,17 +164,17 @@ export const buildStudentJourney = ({ application, requests, documents, visa, re
 
   // Documents
   const uploadedTypes = new Set(documents.map((document) => document.type));
-  const uploadedCount = REQUIRED_DOCUMENT_TYPES.filter((type) => uploadedTypes.has(type)).length;
-  const documentsDone = uploadedCount === REQUIRED_DOCUMENT_TYPES.length;
+  // The transcript counts when it is on the profile page, or as a document uploaded before it moved there.
+  const documentsDone = Boolean(transcriptUploaded) || uploadedTypes.has('transcript');
   const documentStep: Draft = {
     key: 'documents',
     title: 'Documents',
     done: documentsDone,
-    to: '/dashboard/documents',
+    to: documentsDone ? '/dashboard/documents' : '/dashboard/profile',
     description: documentsDone
-      ? 'Your transcript is uploaded.'
-      : 'Upload your transcript. A CV and passport are optional.',
-    actionLabel: 'Upload documents',
+      ? 'Your transcript is uploaded. A CV and passport are optional.'
+      : 'Upload your transcript on your Student Profile page. A CV and passport are optional.',
+    actionLabel: 'Upload transcript',
   };
 
   // Visa

@@ -46,6 +46,23 @@ describe('buildStudentJourney', () => {
     expect(states({ application: shortlisted, requests: [request('approved')] }).documents).toBe('current');
   });
 
+  it('counts the transcript on the profile page as the documents step', () => {
+    const shortlisted = app({ status: 'SHORTLISTED', interviewDecision: { recommended: true, notes: '', decidedAt: '' } });
+    const input = { application: shortlisted, requests: [request('approved')] };
+
+    const missing = buildStudentJourney({ ...base, ...input }).find((step) => step.key === 'documents');
+    expect(missing).toMatchObject({ state: 'current', to: '/dashboard/profile', actionLabel: 'Upload transcript' });
+
+    const onProfile = buildStudentJourney({ ...base, ...input, transcriptUploaded: true }).find((step) => step.key === 'documents');
+    expect(onProfile?.state).toBe('done');
+  });
+
+  it('still accepts a transcript document uploaded before it moved to the profile page', () => {
+    const shortlisted = app({ status: 'SHORTLISTED', interviewDecision: { recommended: true, notes: '', decidedAt: '' } });
+    const documents = [{ type: 'transcript' }] as never;
+    expect(states({ application: shortlisted, requests: [request('approved')], documents }).documents).toBe('done');
+  });
+
   it('keeps arrival as a waiting step until it is recorded, then opens outline upload', () => {
     const shortlisted = app({ status: 'SHORTLISTED', interviewDecision: { recommended: true, notes: '', decidedAt: '' } });
     const requests = [request('approved', [{ status: 'approved' }, { status: 'approved', uploadedOutline: { text: 'x' } }])];

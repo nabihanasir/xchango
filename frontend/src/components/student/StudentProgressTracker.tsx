@@ -6,6 +6,7 @@ import { applicationApi } from '../../lib/applicationApi';
 import { equivalencyApi, resultsApi, visaApi } from '../../lib/api';
 import { documentApi } from '../../lib/documentApi';
 import { parseApiError } from '../../lib/errorUtils';
+import { studentProfileApi } from '../../lib/studentProfileApi';
 import Notice from '../Notice';
 import {
   buildStudentJourney,
@@ -77,11 +78,19 @@ export default function StudentProgressTracker() {
       applicationApi.getStudentApplications(studentId).catch(() => []),
       equivalencyApi.getStudentRequests(token).catch(() => []),
       documentApi.getStudentDocuments(studentId).catch(() => []),
+      studentProfileApi.getStudentProfile(studentId).catch(() => null),
       visaApi.getStudentVisa(token).catch(() => null),
       resultsApi.getStudentResults(token).catch(() => []),
-    ]).then(([applications, requests, documents, visa, results]) => {
+    ]).then(([applications, requests, documents, profile, visa, results]) => {
       if (!cancelled) {
-        setJourney({ application: pickJourneyApplication(applications), requests, documents, visa, results });
+        setJourney({
+          application: pickJourneyApplication(applications),
+          requests,
+          documents,
+          transcriptUploaded: Boolean(profile?.transcript?.fileUrl),
+          visa,
+          results,
+        });
       }
     });
 

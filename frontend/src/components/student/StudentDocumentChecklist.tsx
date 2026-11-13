@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   AlertCircle,
+  ArrowRight,
   Check,
   CheckCircle2,
   Clock3,
@@ -25,7 +27,7 @@ const documentKinds: DocumentKind[] = [
     value: 'transcript',
     label: 'Academic transcript',
     short: 'Transcript',
-    help: 'Your latest official transcript, showing your courses and grades.',
+    help: 'Your transcript is uploaded on your Student Profile page, where it is read to work out your courses, grades and CGPA.',
     required: true,
   },
   {
@@ -57,12 +59,13 @@ const maxSizeMb = 10;
 const byNewest = (a: StudentDocument, b: StudentDocument) =>
   new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
 
-type KindState = 'missing' | 'pending' | 'approved' | 'rejected';
+type KindState = 'missing' | 'pending' | 'approved' | 'rejected' | 'onProfile';
 
 const stateStyles: Record<KindState, { label: string; chip: string; icon: typeof Clock3 }> = {
   missing: { label: 'Not uploaded yet', chip: 'bg-slate-100 text-slate-600', icon: FileText },
   pending: { label: 'Uploaded, waiting for advisor review', chip: 'bg-amber-50 text-amber-700', icon: Clock3 },
   approved: { label: 'Approved', chip: 'bg-emerald-50 text-emerald-700', icon: CheckCircle2 },
+  onProfile: { label: 'Uploaded on your profile page', chip: 'bg-emerald-50 text-emerald-700', icon: CheckCircle2 },
   rejected: { label: 'Rejected, please upload a corrected file', chip: 'bg-red-50 text-red-700', icon: AlertCircle },
 };
 
@@ -72,6 +75,8 @@ interface StudentDocumentChecklistProps {
   deletingId: string | null;
   onUpload: (type: string, file: File) => Promise<void>;
   onDelete: (documentId: string) => Promise<void>;
+  /** The transcript lives on the Student Profile page, so it is not uploaded here. */
+  transcriptOnProfile: boolean;
 }
 
 /**
@@ -84,6 +89,7 @@ export default function StudentDocumentChecklist({
   deletingId,
   onUpload,
   onDelete,
+  transcriptOnProfile,
 }: StudentDocumentChecklistProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const pendingKind = useRef<string>('transcript');
@@ -99,13 +105,16 @@ export default function StudentDocumentChecklist({
 
   const stateFor = (kind: DocumentKind): KindState => {
     const latest = docsFor(kind.value)[0];
-    return latest ? latest.status : 'missing';
+    if (latest) return latest.status;
+    return kind.value === 'transcript' && transcriptOnProfile ? 'onProfile' : 'missing';
   };
 
-  const nextMissing = documentKinds.find((kind) => kind.required && docsFor(kind.value).length === 0);
+  const isUploaded = (kind: DocumentKind) =>
+    docsFor(kind.value).length > 0 || (kind.value === 'transcript' && transcriptOnProfile);
+  const nextMissing = documentKinds.find((kind) => kind.required && !isUploaded(kind));
 
   const handleFile = async (kind: string, file: File | undefined) => {
-    if (!file || uploading) return;
+    if (!file || uploading || kind === 'transcript') return;
 
     const extension = `.${file.name.split('.').pop()?.toLowerCase() ?? ''}`;
     if (!allowedExtensions.includes(extension)) {
@@ -139,13 +148,15 @@ export default function StudentDocumentChecklist({
         </h2>
         <p className="mt-1 text-sm text-slate-500">
           {nextMissing
-            ? 'Your advisor needs this document to review your application.'
+            ? nextMissing.value === 'transcript'
+              ? 'Upload it on your Student Profile page. It is also used to check which courses you can take.'
+              : 'Your advisor needs this document to review your application.'
             : 'A CV and passport are optional, but they help your advisor.'}
         </p>
 
         <ol className="mt-6 grid grid-cols-4">
           {documentKinds.map((kind, index) => {
-            const done = docsFor(kind.value).length > 0;
+            const done = isUploaded(kind);
             const current = nextMissing?.value === kind.value;
             const isLast = index === documentKinds.length - 1;
 
@@ -232,6 +243,19 @@ export default function StudentDocumentChecklist({
                   </span>
                 </div>
 
+                {kind.value === 'transcript' ? (
+                  <Link
+                    to="/dashboard/profile"
+                    className={`inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition ${
+                      transcriptOnProfile
+                        ? 'border border-slate-300 bg-white text-dark-blue hover:border-dark-blue'
+                        : 'bg-dark-blue text-white hover:bg-navy-hover'
+                    }`}
+                  >
+                    {transcriptOnProfile ? 'View on profile' : 'Upload on profile'}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : (
                 <button
                   type="button"
                   disabled={uploading}
@@ -245,6 +269,7 @@ export default function StudentDocumentChecklist({
                   <UploadCloud className="h-4 w-4" />
                   {buttonLabel}
                 </button>
+                )}
               </div>
 
               {isDragging ? <p className="mt-3 text-sm font-semibold text-dark-blue">Drop the file here to upload it.</p> : null}

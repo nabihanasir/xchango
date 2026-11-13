@@ -2,6 +2,7 @@ import { startTransition, useEffect, useState } from 'react';
 import StudentDocumentChecklist from '../../components/student/StudentDocumentChecklist';
 import { useAuth } from '../../context/AuthContext';
 import { documentApi } from '../../lib/documentApi';
+import { studentProfileApi } from '../../lib/studentProfileApi';
 import type { StudentDocument } from '../../types/document';
 import Notice from '../../components/Notice';
 
@@ -11,6 +12,7 @@ export default function StudentDocuments() {
 
   const [documents, setDocuments] = useState<StudentDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [transcriptOnProfile, setTranscriptOnProfile] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -29,10 +31,14 @@ export default function StudentDocuments() {
       setErrorMessage('');
 
       try {
-        const data = await documentApi.getStudentDocuments(studentId);
+        const [data, profile] = await Promise.all([
+          documentApi.getStudentDocuments(studentId),
+          studentProfileApi.getStudentProfile(studentId).catch(() => null),
+        ]);
         if (!cancelled) {
           startTransition(() => {
             setDocuments(data);
+            setTranscriptOnProfile(Boolean(profile?.transcript?.fileUrl));
           });
         }
       } catch (error) {
@@ -116,6 +122,7 @@ export default function StudentDocuments() {
         deletingId={deletingId}
         onUpload={handleUpload}
         onDelete={handleDelete}
+        transcriptOnProfile={transcriptOnProfile}
       />
 
       {errorMessage ? <Notice tone="error">{errorMessage}</Notice> : null}
