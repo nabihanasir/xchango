@@ -4,6 +4,7 @@ import AdvisorProfile from '../models/AdvisorProfile';
 import Notification from '../models/Notification';
 import User from '../models/User';
 import {
+  createApplication,
   findAdvisorForApplication,
   recordInterviewDecision,
   selectCourses,
@@ -214,5 +215,29 @@ describe('findAdvisorForApplication', () => {
     (MockedApplication.countDocuments as jest.Mock).mockResolvedValue(9);
 
     await expect(findAdvisorForApplication(application)).resolves.toBe(advisorA);
+  });
+});
+
+describe('createApplication', () => {
+  const payload = { country: 'Germany', university: 'TU Berlin', program: 'CS' };
+
+  it('refuses a new application while another one is still open', async () => {
+    (MockedApplication.findOne as jest.Mock).mockReturnValue({
+      select: jest.fn().mockResolvedValue({ university: 'TU Munich', status: ApplicationStatus.ASSIGNED }),
+    });
+
+    await expect(createApplication(studentId, payload)).rejects.toMatchObject({ code: 'ACTIVE_APPLICATION_EXISTS' });
+
+    const filter = (MockedApplication.findOne as jest.Mock).mock.calls[0][0];
+    expect(filter.status.$nin).toEqual([ApplicationStatus.REJECTED, ApplicationStatus.COMPLETED]);
+    expect(MockedApplication.create).not.toHaveBeenCalled();
+  });
+
+  it('treats an unfinished draft as active too', async () => {
+    (MockedApplication.findOne as jest.Mock).mockReturnValue({
+      select: jest.fn().mockResolvedValue({ university: 'TU Munich', status: ApplicationStatus.DRAFT }),
+    });
+
+    await expect(createApplication(studentId, payload)).rejects.toMatchObject({ code: 'ACTIVE_APPLICATION_EXISTS' });
   });
 });

@@ -118,6 +118,8 @@ export default function StudentApplicationsPage() {
     };
   }, [studentId]);
 
+  const activeApplication = applications.find((item) => !['REJECTED', 'COMPLETED'].includes(item.status));
+
   const refreshApplications = async () => {
     try {
       setApplications(await applicationApi.getStudentApplications(studentId));
@@ -142,13 +144,33 @@ export default function StudentApplicationsPage() {
             </p>
           </div>
 
-          <Link
-            to="/dashboard/applications/new"
-            className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-5 py-4 text-sm font-bold text-dark-blue"
-          >
-            <PlusCircle className="h-4 w-4" />
-            New Application
-          </Link>
+          <div className="flex flex-col items-start gap-2 lg:items-end">
+            {activeApplication ? (
+              <button
+                type="button"
+                disabled
+                title="Finish or close your current application first"
+                className="inline-flex cursor-not-allowed items-center gap-2 rounded-2xl bg-white/20 px-5 py-4 text-sm font-bold text-white/60"
+              >
+                <PlusCircle className="h-4 w-4" />
+                New Application
+              </button>
+            ) : (
+              <Link
+                to="/dashboard/applications/new"
+                className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-5 py-4 text-sm font-bold text-dark-blue"
+              >
+                <PlusCircle className="h-4 w-4" />
+                New Application
+              </Link>
+            )}
+            {activeApplication ? (
+              <p className="max-w-xs text-xs text-slate-200 lg:text-right">
+                You can have one active application at a time. Your application for {activeApplication.university} is
+                still open.
+              </p>
+            ) : null}
+          </div>
         </div>
       </section>
 
