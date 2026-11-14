@@ -17,6 +17,8 @@ import OnlineClasses from './pages/dashboard/OnlineClasses';
 import StudentCourses from './pages/dashboard/StudentCourses';
 import StudentResults from './pages/dashboard/StudentResults';
 import StudentVisa from './pages/dashboard/StudentVisa';
+import StudentInterview from './pages/dashboard/StudentInterview';
+import StudentArrival from './pages/dashboard/StudentArrival';
 import StudentProfile from './pages/dashboard/StudentProfile';
 import ApplicationWorkflowPage from './pages/dashboard/ApplicationWorkflowPage';
 
@@ -82,6 +84,8 @@ function App() {
             <Route path="equivalency/requests" element={<Navigate to="/dashboard/courses" replace />} />
             <Route path="results" element={<StudentResults />} />
             <Route path="visa" element={<StudentVisa />} />
+            <Route path="interview" element={<StudentInterview />} />
+            <Route path="arrival" element={<StudentArrival />} />
           </Route>
         </Route>
 

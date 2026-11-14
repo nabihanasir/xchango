@@ -11,7 +11,6 @@ import {
   type WorkflowApplication,
 } from '../../types/application';
 import Notice from '../../components/Notice';
-import InterviewScheduler from '../../components/interview/InterviewScheduler';
 
 const workflowStages = [
   { label: 'Profile', statuses: [] as string[] },
@@ -120,14 +119,6 @@ export default function StudentApplicationsPage() {
 
   const activeApplication = applications.find((item) => !['REJECTED', 'COMPLETED'].includes(item.status));
 
-  const refreshApplications = async () => {
-    try {
-      setApplications(await applicationApi.getStudentApplications(studentId));
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to refresh applications.');
-    }
-  };
-
   if (loading) {
     return <div className="glass-card h-48 rounded-[2rem] animate-pulse" />;
   }
@@ -202,9 +193,15 @@ export default function StudentApplicationsPage() {
             </div>
 
             {['ASSIGNED', 'INTERVIEW_SCHEDULED'].includes(application.status) && application.advisorId ? (
-              <div className="mt-5">
-                <InterviewScheduler application={application} onChanged={() => void refreshApplications()} />
-              </div>
+              <Link
+                to="/dashboard/interview"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-dark-blue"
+              >
+                {application.interviewRequest?.status === 'accepted' || application.interviewRequest?.status === 'requested'
+                  ? 'View your interview'
+                  : 'Book your interview'}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             ) : null}
 
             <div className="mt-5 empty:hidden">

@@ -80,6 +80,8 @@ export const buildStudentJourney = ({
   results,
 }: JourneyInput): JourneyStep[] => {
   const applicationHome = '/dashboard/applications';
+  const interviewPage = '/dashboard/interview';
+  const arrivalPage = '/dashboard/arrival';
   const applicationPage = application ? `${applicationHome}/${application._id}` : `${applicationHome}/new`;
   const submitted = Boolean(application) && application!.status !== 'DRAFT';
   const status = application?.status;
@@ -115,15 +117,13 @@ export const buildStudentJourney = ({
     key: 'interview',
     title: 'Interview',
     done: interviewDone,
-    to: applicationHome,
+    to: interviewPage,
     description: interviewDescription,
-    actionLabel: submitted && !interviewDone ? 'View registration' : undefined,
+    actionLabel: submitted && !interviewDone ? 'View interview' : undefined,
   };
-  if (interview.actionLabel) interview.to = applicationPage;
-  // Once an advisor is assigned the student books the interview slot on the Registration page.
+  // Once an advisor is assigned the student books the interview slot on the Interview page.
   if (status === 'ASSIGNED') {
     interview.actionLabel = application!.interviewRequest?.status === 'requested' ? 'View your request' : 'Book your interview';
-    interview.to = applicationHome;
   }
 
   // Shortlisting (the advisor's decision after the interview)
@@ -218,7 +218,7 @@ export const buildStudentJourney = ({
     key: 'arrival',
     title: 'Arrival',
     done: arrived,
-    to: applicationHome,
+    to: arrivalPage,
     description: arrived
       ? `Your arrival was recorded${application?.arrival?.arrivedAt ? ` on ${formatDate(application.arrival.arrivedAt)}` : ''}.`
       : reportedAt

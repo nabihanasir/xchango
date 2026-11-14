@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
-  Menu, X, ChevronRight, LogOut
+  Menu, X, ChevronRight, LogOut, Lock, Check
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { useAuth } from '../context/AuthContext';
@@ -11,6 +11,10 @@ interface NavItem {
   name: string;
   path: string;
   icon: any;
+  /** 'locked' dims the item and shows a lock (it is not available yet); 'done' shows a check. The link still opens. */
+  state?: 'locked' | 'done';
+  /** Explains why an item is locked. Shown as a tooltip. */
+  hint?: string;
 }
 
 interface UserProfile {
@@ -91,8 +95,8 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
                   isActive
                     ? theme.navActive
                     : theme.navInactive
-                } ${collapsed ? 'justify-center' : ''}`}
-                title={collapsed ? item.name : undefined}
+                } ${item.state === 'locked' && !isActive ? 'opacity-60' : ''} ${collapsed ? 'justify-center' : ''}`}
+                title={item.state === 'locked' && item.hint ? item.hint : collapsed ? item.name : undefined}
               >
                 {isActive && (
                   <div className={`absolute left-0 w-1.5 h-8 rounded-r-full ${theme.navIndicator}`} />
@@ -109,6 +113,9 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
                 {!collapsed && isActive && (
                   <ChevronRight className={`h-4 w-4 ml-auto ${theme.navChevron} transition-transform`} />
                 )}
+
+                {!collapsed && !isActive && item.state === 'locked' && <Lock className="h-4 w-4 ml-auto" aria-label="Not available yet" />}
+                {!collapsed && !isActive && item.state === 'done' && <Check className="h-4 w-4 ml-auto" aria-label="Completed" />}
               </Link>
             );
           })}
@@ -166,13 +173,16 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
                  key={item.name}
                  to={item.path}
                  onClick={() => setIsMobileMenuOpen(false)}
+                 title={item.state === 'locked' ? item.hint : undefined}
                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl font-semibold transition-all ${
                    isActive ? theme.navActiveMobile : theme.navInactive
-                 }`}
+                 } ${item.state === 'locked' && !isActive ? 'opacity-60' : ''}`}
                >
                  {isActive && <div className={`absolute left-0 w-1.5 h-8 rounded-r-full ${theme.navIndicator}`} />}
                  <Icon className={`h-5 w-5 ${isActive ? theme.navActiveIconMobile : ''}`} />
                  <span>{item.name}</span>
+                 {!isActive && item.state === 'locked' && <Lock className="h-4 w-4 ml-auto" aria-label="Not available yet" />}
+                 {!isActive && item.state === 'done' && <Check className="h-4 w-4 ml-auto" aria-label="Completed" />}
                </Link>
              );
           })}

@@ -26,9 +26,9 @@ export default function NextStepBar() {
     return null;
   }
 
-  // "I have arrived" is a button on the dashboard tracker, so send the student there.
+  // "I have arrived" is reported on the Arrival page.
   const reportsArrival = step.actionKind === 'report-arrival';
-  const target = reportsArrival ? '/dashboard' : step.to;
+  const target = reportsArrival ? '/dashboard/arrival' : step.to;
   if (trimPath(target) === here) {
     return null;
   }
@@ -54,7 +54,7 @@ export default function NextStepBar() {
           to={target}
           className="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-2xl bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#0e1550]"
         >
-          {reportsArrival ? 'Go to your progress' : step.actionLabel}
+          {step.actionLabel}
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
