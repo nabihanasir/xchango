@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
 import { updateVisaStatus } from './visaService';
+import { assertJourneyReady } from './journeyGateService';
 import Application from '../models/Application';
 import Notification from '../models/Notification';
 import User from '../models/User';
 import VisaProcess, { VisaStatus } from '../models/VisaProcess';
 
+jest.mock('./journeyGateService', () => ({ assertJourneyReady: jest.fn().mockResolvedValue(undefined) }));
 jest.mock('../models/User');
 jest.mock('../models/Application');
 jest.mock('../models/Notification');
@@ -118,6 +120,20 @@ describe('updateVisaStatus', () => {
     ).rejects.toMatchObject({ code: 'VISA_DECISION_FINAL', status: 400 });
 
     expect(existing.save).not.toHaveBeenCalled();
+    expect(MockedNotification.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses a visa update until the earlier journey steps are done', async () => {
+    givenStudentWithActiveApplication();
+    (assertJourneyReady as jest.Mock).mockRejectedValueOnce(
+      Object.assign(new Error('Visa is not available yet.'), { code: 'JOURNEY_STEP_LOCKED' })
+    );
+
+    await expect(updateVisaStatus(adminId, studentId, { status: VisaStatus.APPROVED })).rejects.toMatchObject({
+      code: 'JOURNEY_STEP_LOCKED',
+    });
+    expect(assertJourneyReady).toHaveBeenCalledWith(studentId, 'visa');
+    expect(MockedVisaProcess).not.toHaveBeenCalled();
     expect(MockedNotification.create).not.toHaveBeenCalled();
   });
 });

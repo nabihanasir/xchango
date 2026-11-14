@@ -14,6 +14,7 @@ import University from '../models/University';
 import StudentProfile from '../models/StudentProfile';
 import { ValidationError } from '../errors/AppError';
 import { appUrl, notifyUser } from './notificationService';
+import { assertJourneyReady } from './journeyGateService';
 import { logger } from '../utils/logger';
 import { toPublicFileUrl } from '../utils/upload';
 import { discardUploadedFile } from '../utils/storedFiles';
@@ -455,6 +456,9 @@ export const createCourseRequest = async (studentId: string, hostCourseIds: stri
     throw new Error('Select at least one host course to submit a request.');
   }
 
+  // Courses can only be chosen after the advisor has shortlisted the student, and never on a stopped application.
+  await assertJourneyReady(studentId, 'course-selection');
+
   // One request at a time: a new one is only allowed after the previous one was rejected.
   const activeRequest = await CourseRequest.findOne({
     studentId,
@@ -547,6 +551,8 @@ export const uploadCourseOutline = async (
     if (String(request.studentId) !== studentId) {
       throw new Error('Course request not found.');
     }
+
+    await assertJourneyReady(studentId, 'outline');
 
     if (!(await hasArrivedAtHostUniversity(studentId))) {
       throw new Error('You can upload course outlines once your arrival at the host university has been recorded.');

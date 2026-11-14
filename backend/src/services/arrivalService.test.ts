@@ -6,7 +6,9 @@ import User, { UserRole } from '../models/User';
 import { sendEmail } from './emailService';
 import { notifyUserSafely } from './notificationService';
 import { recordArrival, reportArrival } from './arrivalService';
+import { assertJourneyReady } from './journeyGateService';
 
+jest.mock('./journeyGateService', () => ({ assertJourneyReady: jest.fn().mockResolvedValue(undefined) }));
 jest.mock('../models/Application');
 jest.mock('../models/Course');
 jest.mock('../models/CourseRequest');
@@ -179,5 +181,30 @@ describe('reportArrival', () => {
 
     givenApplication({ status: ApplicationStatus.PENDING });
     await expect(reportArrival(applicationId, studentIdString)).rejects.toMatchObject({ code: 'ARRIVAL_NOT_ALLOWED' });
+  });
+});
+
+describe('arrival gating', () => {
+  const blocked = Object.assign(new Error('Arrival is not available yet.'), { code: 'JOURNEY_STEP_LOCKED' });
+
+  it('refuses to record an arrival until the earlier steps are done', async () => {
+    const application = givenApplication();
+    (assertJourneyReady as jest.Mock).mockRejectedValueOnce(blocked);
+
+    await expect(recordArrival(applicationId, advisor, { arrivedAt: '2026-09-01' })).rejects.toMatchObject({
+      code: 'JOURNEY_STEP_LOCKED',
+    });
+    expect(assertJourneyReady).toHaveBeenCalledWith(String(application.studentId), 'arrival');
+    expect(application.save).not.toHaveBeenCalled();
+  });
+
+  it('refuses a student arrival report until the earlier steps are done', async () => {
+    const application = givenApplication();
+    (assertJourneyReady as jest.Mock).mockRejectedValueOnce(blocked);
+
+    await expect(reportArrival(applicationId, String(application.studentId))).rejects.toMatchObject({
+      code: 'JOURNEY_STEP_LOCKED',
+    });
+    expect(application.save).not.toHaveBeenCalled();
   });
 });

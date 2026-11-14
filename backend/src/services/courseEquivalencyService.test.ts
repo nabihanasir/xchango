@@ -14,8 +14,10 @@ import {
   updatePairedHomeCourse,
   uploadCourseOutline,
 } from './courseEquivalencyService';
+import { assertJourneyReady } from './journeyGateService';
 import { extractOutlineText } from './outlineTextService';
 
+jest.mock('./journeyGateService', () => ({ assertJourneyReady: jest.fn().mockResolvedValue(undefined) }));
 jest.mock('../models/Course');
 jest.mock('../models/CourseMatchResult');
 jest.mock('../models/CourseRequest', () => {
@@ -444,5 +446,19 @@ describe('final advisor decisions', () => {
       code: 'COURSE_DECISION_FINAL',
     });
     expect(request.save).not.toHaveBeenCalled();
+  });
+});
+
+describe('course request gating', () => {
+  it('refuses a course request until the student is shortlisted', async () => {
+    (assertJourneyReady as jest.Mock).mockRejectedValueOnce(
+      Object.assign(new Error('Course selection is not available yet.'), { code: 'JOURNEY_STEP_LOCKED' })
+    );
+
+    await expect(createCourseRequest(String(studentId), [String(hostCourse._id)])).rejects.toMatchObject({
+      code: 'JOURNEY_STEP_LOCKED',
+    });
+    expect(assertJourneyReady).toHaveBeenCalledWith(String(studentId), 'course-selection');
+    expect(MockedRequest.create).not.toHaveBeenCalled();
   });
 });

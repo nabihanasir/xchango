@@ -6,6 +6,7 @@ import ExamVerification from '../models/ExamVerification';
 import { appUrl, notifyUser } from './notificationService';
 import Result, { IResult, ResultStatus } from '../models/Result';
 import { advisorCanReviewStudent } from './examVerificationService';
+import { assertJourneyReady } from './journeyGateService';
 import { GRADE_PATTERN, MAX_COMMENT_LENGTH, assertObjectId, readNumber, readString } from '../utils/validators';
 
 interface UpsertResultInput {
@@ -123,6 +124,9 @@ export const upsertResult = async (
   if (!canAccess) {
     throw new Error('You are not assigned to this student.');
   }
+
+  // Grades come last: the visa, arrival and outline steps must be done, and a stopped application has no results.
+  await assertJourneyReady(request.studentId.toString(), 'results');
 
   const update: Record<string, unknown> = {
     studentId: request.studentId,

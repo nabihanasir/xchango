@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { NotFoundError, ValidationError } from '../errors/AppError';
 import Application, { ApplicationStatus } from '../models/Application';
 import { appUrl, notifyUser } from './notificationService';
+import { assertJourneyReady } from './journeyGateService';
 import User, { UserRole } from '../models/User';
 import VisaProcess, { IVisaProcess, VisaStatus } from '../models/VisaProcess';
 
@@ -144,6 +145,9 @@ export const updateVisaStatus = async (adminId: string, studentId: string, input
       'NO_ACTIVE_APPLICATION'
     );
   }
+
+  // The visa step follows approved courses and documents, and a stopped application cannot go any further.
+  await assertJourneyReady(studentId, 'visa');
 
   const existing = await VisaProcess.findOne({ studentId });
   if (existing && existing.status === input.status && existing.remarks === remarks) {

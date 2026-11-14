@@ -7,6 +7,7 @@ import { ForbiddenError, NotFoundError, ValidationError } from '../errors/AppErr
 import { isEmailConfigured, sendEmail } from './emailService';
 import { appUrl, formatDate, notifyAdmins, notifyUserSafely } from './notificationService';
 import { getApplicationById } from './applicationService';
+import { assertJourneyReady } from './journeyGateService';
 
 export interface ArrivalInput {
   arrivedAt?: string;
@@ -188,6 +189,9 @@ export const reportArrival = async (applicationId: string, studentId: string) =>
     );
   }
 
+  // Arrival follows an approved visa, and never happens on an application that has stopped.
+  await assertJourneyReady(studentId, 'arrival');
+
   application.arrivalReport = { reportedAt: new Date() };
   await application.save();
 
@@ -264,6 +268,9 @@ export const recordArrival = async (applicationId: string, actor: Actor, input: 
       'ARRIVAL_NOT_ALLOWED'
     );
   }
+
+  // Arrival follows an approved visa, and never happens on an application that has stopped.
+  await assertJourneyReady(application.studentId.toString(), 'arrival');
 
   const arrivedAt = input.arrivedAt ? new Date(input.arrivedAt) : new Date();
   if (Number.isNaN(arrivedAt.getTime()) || arrivedAt.getTime() > Date.now() + 24 * 60 * 60 * 1000) {
