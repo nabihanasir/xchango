@@ -72,8 +72,22 @@ export const getAllStats = async () => {
   );
 
   // Monthly Trend matching frontend monthlyTrend
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-  const monthlyTrend = months.map((month) => ({ month, apps: 0 })); 
+  // Applications submitted in each of the last 6 months (including the current one).
+  const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const now = new Date();
+  const buckets = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    return { year: d.getFullYear(), month: d.getMonth(), label: MONTH_NAMES[d.getMonth()] };
+  });
+  const rangeStart = new Date(buckets[0].year, buckets[0].month, 1);
+  const monthlyCounts = await Application.aggregate([
+    { $match: { createdAt: { $gte: rangeStart } } },
+    { $group: { _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } }, apps: { $sum: 1 } } },
+  ]);
+  const monthlyTrend = buckets.map((bucket) => {
+    const found = monthlyCounts.find((row) => row._id.year === bucket.year && row._id.month === bucket.month + 1);
+    return { month: bucket.label, apps: found?.apps ?? 0 };
+  });
 
   return {
     adminStats,
