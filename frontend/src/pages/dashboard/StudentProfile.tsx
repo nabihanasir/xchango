@@ -180,37 +180,6 @@ export default function StudentProfile() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-student-hero p-8 text-white shadow-2xl shadow-dark-blue/20 md:p-10">
-        <div className="absolute right-0 top-0 h-64 w-64 translate-x-1/3 -translate-y-1/3 rounded-full bg-accent-yellow/20 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-1/4 translate-y-1/4 rounded-full bg-cyan-400/15 blur-3xl" />
-        <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">
-              Student Profile Hub
-            </p>
-            <h1 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
-              Student Profile Module
-            </h1>
-            <p className="mt-4 max-w-2xl text-base text-slate-200 md:text-lg">
-              Manage profile details, review transcripts, and track application progress in one place.
-            </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-[1.75rem] border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-300">Student</p>
-              <p className="mt-2 text-xl font-bold">{profile.basicInfo.fullName || user.name}</p>
-              <p className="mt-1 text-sm text-slate-200">{profile.basicInfo.department || 'Department pending'}</p>
-            </div>
-            <div className="rounded-[1.75rem] border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-slate-300">Current Semester</p>
-              <p className="mt-2 text-xl font-bold">{profile.basicInfo.semester || 0}</p>
-              <p className="mt-1 text-sm text-slate-200">CMS ID {profile.basicInfo.cmsId || 'Not added'}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className={summaryCardClassName}>
           <div

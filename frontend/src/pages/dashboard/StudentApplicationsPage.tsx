@@ -134,45 +134,33 @@ export default function StudentApplicationsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[2.5rem] bg-student-hero p-8 text-white shadow-2xl shadow-dark-blue/20">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent-yellow">Application Workflow</p>
-            <h1 className="mt-3 text-4xl font-bold">University Applications</h1>
-            <p className="mt-3 max-w-2xl text-slate-200">
-              Start a new mobility application, continue drafts, and monitor workflow states after submission.
-            </p>
-          </div>
-
-          <div className="flex flex-col items-start gap-2 lg:items-end">
-            {activeApplication ? (
-              <button
-                type="button"
-                disabled
-                title="Finish or close your current application first"
-                className="inline-flex cursor-not-allowed items-center gap-2 rounded-2xl bg-white/20 px-5 py-4 text-sm font-bold text-white/60"
-              >
-                <PlusCircle className="h-4 w-4" />
-                New Application
-              </button>
-            ) : (
-              <Link
-                to="/dashboard/applications/new"
-                className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-5 py-4 text-sm font-bold text-dark-blue"
-              >
-                <PlusCircle className="h-4 w-4" />
-                New Application
-              </Link>
-            )}
-            {activeApplication ? (
-              <p className="max-w-xs text-xs text-slate-200 lg:text-right">
-                You can have one active application at a time. Your application for {activeApplication.university} is
-                still open.
-              </p>
-            ) : null}
-          </div>
-        </div>
-      </section>
+      <div className="flex flex-col items-start gap-2 sm:items-end">
+        {activeApplication ? (
+          <button
+            type="button"
+            disabled
+            title="Finish or close your current application first"
+            className="inline-flex cursor-not-allowed items-center gap-2 rounded-2xl bg-slate-200 px-5 py-3 text-sm font-bold text-slate-500"
+          >
+            <PlusCircle className="h-4 w-4" />
+            New Application
+          </button>
+        ) : (
+          <Link
+            to="/dashboard/applications/new"
+            className="inline-flex items-center gap-2 rounded-2xl bg-dark-blue px-5 py-3 text-sm font-bold text-white"
+          >
+            <PlusCircle className="h-4 w-4" />
+            New Application
+          </Link>
+        )}
+        {activeApplication ? (
+          <p className="max-w-sm text-xs text-slate-500 sm:text-right">
+            You can have one active application at a time. Your application for {activeApplication.university} is
+            still open.
+          </p>
+        ) : null}
+      </div>
 
       {errorMessage ? (
         <Notice tone="error">{errorMessage}</Notice>

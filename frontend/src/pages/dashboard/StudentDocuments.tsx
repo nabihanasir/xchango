@@ -109,13 +109,6 @@ export default function StudentDocuments() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-dark-blue">My documents</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Upload the documents below so your advisor can review your application.
-        </p>
-      </div>
-
       <StudentDocumentChecklist
         documents={loading ? [] : documents}
         uploading={uploading}

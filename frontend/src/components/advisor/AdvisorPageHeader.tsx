@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom';
+import PageBanner from '../PageBanner';
 
 interface PageInfo {
   title: string;
@@ -25,11 +26,5 @@ export default function AdvisorPageHeader() {
     return null;
   }
 
-  return (
-    <header className="mb-6 rounded-[1.75rem] bg-advisor-hero px-6 py-5 text-white shadow-lg shadow-advisor-side/10 md:px-8">
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-yellow">{page.title}</p>
-      <h1 className="mt-1 text-2xl font-bold md:text-3xl">{page.title}</h1>
-      <p className="mt-1 max-w-2xl text-sm text-slate-200">{page.description}</p>
-    </header>
-  );
+  return <PageBanner {...page} toneClass="bg-advisor-hero shadow-advisor-side/10" />;
 }

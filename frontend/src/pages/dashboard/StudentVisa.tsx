@@ -47,15 +47,6 @@ export default function StudentVisa() {
 
   return (
     <div className="space-y-8">
-      <section className="glass-card rounded-[2.5rem] p-8 md:p-10">
-        <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">Visa Process</p>
-        <h1 className="mt-3 text-3xl font-bold text-slate-800 md:text-4xl">Your visa status</h1>
-        <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-slate-500">
-          Follow your visa application from document collection to approval. The International Office updates this
-          page as your case moves forward.
-        </p>
-      </section>
-
       {error ? (
         <Notice tone="error">{error}</Notice>
       ) : null}

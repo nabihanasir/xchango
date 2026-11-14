@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, BookOpen, ChevronRight, Globe, Search } from 'lucide-react';
+import { MapPin, BookOpen, ChevronRight, Search } from 'lucide-react';
 
 import CountryFlag from '../../components/CountryFlag';
 import { useCatalog } from '../../hooks/useCatalog';
@@ -26,10 +26,6 @@ export default function UniversityProgrammes() {
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-light-color/50">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-dark-blue flex items-center gap-3 mb-2">
-              <Globe className="h-8 w-8 text-accent-yellow" />
-              University & Programmes
-            </h2>
             <p className="text-body-text max-w-3xl text-sm leading-relaxed">
               The <strong className="text-dark-blue">Student Exchange Program at Riphah International University</strong> lets you
               study abroad at partner institutions, build global exposure and academic experience, and connect with peers and

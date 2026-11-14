@@ -3,6 +3,7 @@ import {
 } from 'lucide-react';
 import GlobalLayout from './GlobalLayout';
 import NextStepBar from './student/NextStepBar';
+import StudentPageHeader from './student/StudentPageHeader';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/httpClient';
@@ -51,6 +52,7 @@ const DashboardLayout = () => {
       navItems={navItems}
       userProfile={userProfile}
       profilePath="/dashboard/profile"
+      header={<StudentPageHeader />}
       footer={<NextStepBar />}
       notice={
         offboarded

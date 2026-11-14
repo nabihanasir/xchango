@@ -39,13 +39,7 @@ export default function StudentResults() {
 
   return (
     <div className="space-y-8">
-      <section className="glass-card rounded-[2.5rem] p-8 md:p-10">
-        <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">Academic Results</p>
-        <h1 className="mt-3 text-3xl font-bold text-slate-800 md:text-4xl">Your host university results</h1>
-        <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-slate-500">
-          Grades published by your advisor for the courses you are enrolled in abroad.
-        </p>
-
+      <section className="glass-card rounded-[2.5rem] p-6 md:p-8">
         <StudentVerificationPanel embedded />
       </section>
 
