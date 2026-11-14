@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Application from '../models/Application';
+import Application, { ApplicationStatus } from '../models/Application';
 import Course, { CourseType, ICourse } from '../models/Course';
 import CourseMatchResult, { ICourseMatchCandidate, ICourseMatchResult, MatchSource } from '../models/CourseMatchResult';
 import CourseRequest, {
@@ -382,17 +382,19 @@ const createStudentNotification = async (request: Record<string, any>) => {
 export const listHostCourses = async () =>
   Course.find({ type: CourseType.HOST }).populate('universityId', 'name').sort({ code: 1 });
 
-/** Ids of the universities a student has applied to (rejected applications do not count). */
+/**
+ * Ids of the universities a student has applied to (rejected applications do not count). An application stores the
+ * university's short name (e.g. "MMU"), so match on either the short name or the full name.
+ */
 const getChosenUniversityIds = async (studentId: string) => {
   const names: string[] = await Application.distinct('university', {
     studentId,
-    status: { $ne: 'rejected' },
+    status: { $ne: ApplicationStatus.REJECTED },
   });
   const wanted = new Set(names.map((name) => String(name).trim().toLowerCase()).filter(Boolean));
   if (!wanted.size) {
     return [];
   }
-  // Applications store the university's short code (e.g. "MMU"); older data may hold the full name.
   const universities = await University.find().select('name shortName');
   return universities
     .filter(
