@@ -451,14 +451,6 @@ export default function AdvisorInterviews() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-xs font-bold uppercase tracking-[0.35em] text-slate-500">Advisor</p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">Interviews</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Answer booking requests, run your interviews, and set when you’re unavailable.
-        </p>
-      </header>
-
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-9">
           {error && !cancelTarget && !recommendTarget ? <InlineMessage tone="error">{error}</InlineMessage> : null}

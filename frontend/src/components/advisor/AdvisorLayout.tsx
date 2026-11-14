@@ -3,6 +3,7 @@ import {
 } from 'lucide-react';
 import GlobalLayout from '../GlobalLayout';
 import AdvisorNextStepBar from './AdvisorNextStepBar';
+import AdvisorPageHeader from './AdvisorPageHeader';
 import { useAuth } from '../../context/AuthContext';
 
 const AdvisorLayout = () => {
@@ -39,6 +40,7 @@ const AdvisorLayout = () => {
       navItems={navItems}
       userProfile={userProfile}
       profilePath="/advisor/profile"
+      header={<AdvisorPageHeader />}
       footer={<AdvisorNextStepBar />}
     />
   );

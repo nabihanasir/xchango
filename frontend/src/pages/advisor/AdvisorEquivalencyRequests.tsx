@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, ClipboardCheck, LoaderCircle, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowRight, ClipboardCheck, LoaderCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { equivalencyApi } from '../../lib/api';
@@ -34,49 +34,8 @@ export default function AdvisorEquivalencyRequests() {
     void loadRequests();
   }, [user?.token]);
 
-  const stats = useMemo(
-    () => ({
-      incoming: requests.filter((request) => request.status === 'pending').length,
-      reviewing: requests.filter((request) => request.status === 'under_review').length,
-      completed: requests.filter((request) => ['approved', 'rejected'].includes(request.status)).length,
-    }),
-    [requests]
-  );
-
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-advisor-hero p-8 text-white shadow-2xl shadow-advisor-side/20">
-        <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-accent-yellow/10 blur-[90px]" />
-        <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">
-              <Sparkles className="h-4 w-4" />
-              Advisor Workflow
-            </div>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-5xl">Course approval queue</h1>
-            <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-slate-300">
-              Each request is checked against the student's semester, credit limit and program plan, and every course is matched to the
-              closest home course. Review the result and approve or reject with student-facing comments.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent-yellow">Incoming</p>
-              <p className="mt-3 text-3xl font-bold">{stats.incoming}</p>
-            </div>
-            <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent-yellow">Reviewing</p>
-              <p className="mt-3 text-3xl font-bold">{stats.reviewing}</p>
-            </div>
-            <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-accent-yellow">Completed</p>
-              <p className="mt-3 text-3xl font-bold">{stats.completed}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {error ? (
         <Notice tone="error">{error}</Notice>
       ) : null}

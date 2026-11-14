@@ -31,9 +31,11 @@ interface GlobalLayoutProps {
   profilePath: string;
   /** Optional content shown below the page, e.g. a sticky call to action. */
   footer?: ReactNode;
+  /** Optional page header shown above the page content. */
+  header?: ReactNode;
 }
 
-const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profilePath, footer }: GlobalLayoutProps) => {
+const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profilePath, footer, header }: GlobalLayoutProps) => {
   const theme = roleThemes[role];
   const location = useLocation();
   const { logout } = useAuth();
@@ -242,6 +244,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
                 {notice}
               </div>
             ) : null}
+            {header}
             <Outlet />
             {footer}
           </div>

@@ -100,8 +100,7 @@ export default function AdvisorProfile() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
       <div className="glass-card rounded-[2rem] p-8 shadow-md">
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <h2 className="text-2xl font-bold text-teal-700">My Profile</h2>
+        <div className="mb-8 flex items-center justify-end gap-4">
           {!editing && (
             <button
               type="button"
