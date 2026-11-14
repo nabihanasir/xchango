@@ -30,6 +30,8 @@ import ProgramOutlinePanel from './ProgramOutlinePanel';
 import Pagination, { usePagination } from '../Pagination';
 import Notice from '../Notice';
 import Modal from '../Modal';
+import { Link } from 'react-router-dom';
+import { formatSlotFull } from '../interview/interviewTime';
 
 type Tab = 'overview' | 'interview' | 'transcript' | 'curriculum' | 'student' | 'documents' | 'arrival';
 type JourneyExtras = Pick<JourneyInput, 'requests' | 'visa' | 'results'>;
@@ -68,8 +70,6 @@ export default function AdvisorApplicationsWorkspace() {
   const [documentsError, setDocumentsError] = useState('');
   const [actionError, setActionError] = useState('');
   const [updatingDocumentId, setUpdatingDocumentId] = useState('');
-  const [interviewForm, setInterviewForm] = useState({ date: '', location: 'Advisor Office' });
-  const [schedulingInterview, setSchedulingInterview] = useState(false);
   const [completingInterview, setCompletingInterview] = useState(false);
   const [decisionNotes, setDecisionNotes] = useState('');
   const [submittingDecision, setSubmittingDecision] = useState<'recommend' | 'not-recommend' | ''>('');
@@ -199,22 +199,6 @@ export default function AdvisorApplicationsWorkspace() {
   }, [selectedApplicationId]);
 
   useEffect(() => {
-    if (!selectedApplication) {
-      setInterviewForm({ date: '', location: 'Advisor Office' });
-      return;
-    }
-
-    setInterviewForm({
-      date: selectedApplication.interviewDate
-        ? new Date(selectedApplication.interviewDate).toISOString().slice(0, 10)
-        : selectedApplication.interview?.date
-          ? new Date(selectedApplication.interview.date).toISOString().slice(0, 10)
-          : '',
-      location: selectedApplication.interview?.location || 'Advisor Office',
-    });
-  }, [selectedApplication]);
-
-  useEffect(() => {
     setDecisionNotes('');
   }, [selectedApplicationId]);
 
@@ -252,38 +236,6 @@ export default function AdvisorApplicationsWorkspace() {
       setDocumentsError(error instanceof Error ? error.message : 'Unable to update document status.');
     } finally {
       setUpdatingDocumentId('');
-    }
-  };
-
-  const handleScheduleInterview = async () => {
-    if (!selectedApplicationId || !interviewForm.date.trim()) {
-      setActionError('Select an interview date before scheduling.');
-      return;
-    }
-    const todayIso = new Date().toISOString().slice(0, 10);
-    if (interviewForm.date < todayIso) {
-      setActionError('The interview date cannot be in the past.');
-      return;
-    }
-    if (interviewForm.location.trim().length > 200) {
-      setActionError('The interview location must be 200 characters or fewer.');
-      return;
-    }
-
-    setSchedulingInterview(true);
-    setActionError('');
-
-    try {
-      const updatedApplication = await applicationApi.scheduleInterview(selectedApplicationId, {
-        date: interviewForm.date,
-        location: interviewForm.location.trim() || 'Advisor Office',
-        stakeholders: user?._id ? [user._id] : [],
-      });
-      syncApplication(updatedApplication);
-    } catch (error) {
-      setActionError(error instanceof Error ? error.message : 'Unable to schedule interview.');
-    } finally {
-      setSchedulingInterview(false);
     }
   };
 
@@ -533,54 +485,28 @@ export default function AdvisorApplicationsWorkspace() {
 
             {activeTab === 'interview' ? (
               <div className="space-y-5">
-                <dl className="grid gap-5 sm:grid-cols-2">
-                  <Field
-                    label="Interview date"
-                    value={
-                      selectedApplication.interviewDate
-                        ? new Date(selectedApplication.interviewDate).toLocaleDateString()
-                        : selectedApplication.interview
-                          ? new Date(selectedApplication.interview.date).toLocaleDateString()
-                          : 'Not scheduled'
-                    }
-                  />
-                  <Field label="Location" value={selectedApplication.interview?.location || 'Not scheduled'} />
-                </dl>
-
                 <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
-                  <p className="text-sm font-bold text-slate-900">Schedule interview</p>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <label className="space-y-1 text-sm font-semibold text-slate-700">
-                      <span>Date</span>
-                      <input
-                        type="date"
-                        min={new Date().toISOString().slice(0, 10)}
-                        value={interviewForm.date}
-                        onChange={(event) => setInterviewForm((current) => ({ ...current, date: event.target.value }))}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10"
-                      />
-                    </label>
-                    <label className="space-y-1 text-sm font-semibold text-slate-700">
-                      <span>Location</span>
-                      <input
-                        type="text"
-                        value={interviewForm.location}
-                        maxLength={200}
-                        onChange={(event) => setInterviewForm((current) => ({ ...current, location: event.target.value }))}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10"
-                        placeholder="Advisor office or meeting link"
-                      />
-                    </label>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={() => void handleScheduleInterview()}
-                      disabled={schedulingInterview || !['ASSIGNED', 'INTERVIEW_SCHEDULED'].includes(selectedApplication.status)}
-                      className="rounded-full bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {schedulingInterview ? 'Saving...' : 'Schedule interview'}
-                    </button>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Interview</p>
+                  {selectedApplication.interviewRequest &&
+                  ['requested', 'accepted'].includes(selectedApplication.interviewRequest.status) ? (
+                    <>
+                      <p className="text-lg font-bold text-slate-900">
+                        {formatSlotFull(selectedApplication.interviewRequest.start, selectedApplication.interviewRequest.durationMinutes)}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        {selectedApplication.interviewRequest.status === 'requested'
+                          ? 'The student requested this time. Answer it on the Interviews page.'
+                          : `Scheduled${selectedApplication.interview?.location ? ` · ${selectedApplication.interview.location}` : ''}.`}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-slate-600">
+                      {selectedApplication.interviewDecision || selectedApplication.status === 'INTERVIEW_COMPLETED'
+                        ? 'The interview has taken place.'
+                        : 'The student has not booked an interview time yet.'}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-3">
                     <button
                       type="button"
                       onClick={() => void handleCompleteInterview()}
@@ -590,6 +516,9 @@ export default function AdvisorApplicationsWorkspace() {
                       <Check className="h-4 w-4" />
                       {completingInterview ? 'Completing...' : 'Mark interview completed'}
                     </button>
+                    <Link to="/advisor/interviews" className="text-sm font-bold text-teal-700 transition hover:text-teal-900">
+                      Manage in Interviews →
+                    </Link>
                   </div>
                 </div>
 
