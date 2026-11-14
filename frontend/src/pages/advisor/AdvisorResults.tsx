@@ -6,6 +6,7 @@ import { resolveUploadUrl } from '../../lib/studentProfileApi';
 import type { GradableItem, ResultStatus } from '../../types/result';
 import { formatDisplayDate, getResultStatusClasses, getVerificationClasses, verificationLabels } from '../../utils/result';
 import Notice from '../../components/Notice';
+import Pagination, { usePagination } from '../../components/Pagination';
 import AdvisorVerificationPanel from '../../components/results/AdvisorVerificationPanel';
 
 interface Draft {
@@ -27,6 +28,7 @@ const buildDraft = (item: GradableItem): Draft => ({
 export default function AdvisorResults() {
   const { user } = useAuth();
   const [items, setItems] = useState<GradableItem[]>([]);
+  const itemPaging = usePagination(items, 5);
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [savingId, setSavingId] = useState('');
@@ -129,7 +131,7 @@ export default function AdvisorResults() {
         </div>
       ) : items.length ? (
         <div className="space-y-6">
-          {items.map((item) => {
+          {itemPaging.pageItems.map((item) => {
             const draft = drafts[item.courseRequestItemId] || buildDraft(item);
             const isSavingDraft = savingId === `${item.courseRequestItemId}-draft`;
             const isPublishing = savingId === `${item.courseRequestItemId}-published`;
@@ -247,6 +249,13 @@ export default function AdvisorResults() {
               </article>
             );
           })}
+          <Pagination
+            page={itemPaging.page}
+            totalPages={itemPaging.totalPages}
+            total={itemPaging.total}
+            pageSize={itemPaging.pageSize}
+            onPageChange={itemPaging.setPage}
+          />
         </div>
       ) : (
         <div className="glass-card rounded-[2rem] px-6 py-12 text-center">
