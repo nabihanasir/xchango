@@ -14,6 +14,7 @@ import type {
   StudentProfile as StudentProfileType,
   StudentTranscript,
 } from '../../types/studentProfile';
+import DeactivateAccountCard from '../../components/DeactivateAccountCard';
 import Notice from '../../components/Notice';
 
 const summaryCardClassName = 'glass-card rounded-[2rem] p-6';
@@ -352,6 +353,7 @@ export default function StudentProfile() {
             document.body
           )
         : null}
+      <DeactivateAccountCard allowDelete />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/authService';
+import * as accountService from '../services/accountService';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { NotFoundError } from '../errors/AppError';
 import { sendResponse } from '../utils/response';
@@ -33,6 +34,16 @@ export const updateMe = asyncHandler(async (req: any, res: Response) => {
 export const changePassword = asyncHandler(async (req: any, res: Response) => {
   const result = await authService.changeOwnPassword(req.user._id.toString(), req.body);
   sendResponse(res, 200, 'Password changed', result);
+});
+
+export const deactivateMe = asyncHandler(async (req: any, res: Response) => {
+  const result = await accountService.deactivateOwnAccount(req.user._id.toString(), req.body);
+  sendResponse(res, 200, 'Account deactivated', result);
+});
+
+export const deleteMe = asyncHandler(async (req: any, res: Response) => {
+  const result = await accountService.deleteOwnStudentAccount(req.user._id.toString(), req.body);
+  sendResponse(res, 200, 'Account deleted', result);
 });
 
 export const getMe =asyncHandler(async (req: any, res: Response) => {

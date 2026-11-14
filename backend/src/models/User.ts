@@ -16,6 +16,8 @@ export interface IUser extends Document {
   sapId?: string;
   isActive: boolean;
   offboardedAt?: Date;
+  deactivatedAt?: Date;
+  deactivatedBy?: 'self' | 'admin';
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   createdAt: Date;
@@ -33,6 +35,9 @@ const UserSchema: Schema = new Schema(
     isActive: { type: Boolean, default: true },
     // Set once the student's exchange semester is over; the account stays but is read-only.
     offboardedAt: { type: Date },
+    // isActive=false blocks login entirely (unlike off-boarding, which is read-only access).
+    deactivatedAt: { type: Date },
+    deactivatedBy: { type: String, enum: ['self', 'admin'] },
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },
   },

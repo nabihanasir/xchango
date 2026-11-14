@@ -51,6 +51,16 @@ export const authApi = {
       method: 'PUT',
       body: JSON.stringify(payload),
     }),
+  deactivateAccount: (password: string) =>
+    apiFetch<{ deactivated: boolean }>('/auth/deactivate', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }),
+  deleteAccount: (password: string, confirm: string) =>
+    apiFetch<{ deleted: boolean }>('/auth/delete-account', {
+      method: 'POST',
+      body: JSON.stringify({ password, confirm }),
+    }),
   register: (payload: RegisterPayload) => apiFetch<AuthUser>('/auth/register', {
     method: 'POST',
     body: JSON.stringify(payload),

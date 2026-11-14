@@ -179,6 +179,15 @@ export const loginUser = async (credentials: any) => {
   }
 
   if (user && (await bcrypt.compare(password, user.password))) {
+    if (user.isActive === false) {
+      throw new AuthenticationError(
+        'Account deactivated',
+        'This account has been deactivated.',
+        'Contact an administrator to have it reactivated.',
+        'ACCOUNT_DEACTIVATED',
+      );
+    }
+
     if (user.role === UserRole.STUDENT && !user.offboardedAt) {
       await offboardDueStudents(user._id.toString());
       user = (await User.findById(user._id)) ?? user;

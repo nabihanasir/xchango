@@ -6,6 +6,7 @@ import {
   type AdvisorProfileData,
   type AdvisorProfileInput,
 } from '../../lib/advisorApi';
+import DeactivateAccountCard from '../../components/DeactivateAccountCard';
 import Notice from '../../components/Notice';
 
 const toForm = (profile: AdvisorProfileData | null, fallbackName: string): AdvisorProfileInput => ({
@@ -267,6 +268,7 @@ export default function AdvisorProfile() {
           </div>
         )}
       </div>
+      <DeactivateAccountCard />
     </div>
   );
 }

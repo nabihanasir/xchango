@@ -132,6 +132,10 @@ export const adminApi = {
     unwrap<WorkflowApplication[]>(apiClient.get('/admin/applications/pending')),
   setSemesterEndDate: (applicationId: string, semesterEndDate: string | null) =>
     unwrap<WorkflowApplication>(apiClient.put(`/admin/applications/${applicationId}/semester-end`, { semesterEndDate })),
+  deactivateUser: (userId: string) =>
+    unwrap<Pick<AdminUserRecord, '_id' | 'isActive'>>(apiClient.post(`/admin/users/${userId}/deactivate`)),
+  activateUser: (userId: string) =>
+    unwrap<AdminUserRecord>(apiClient.post(`/admin/users/${userId}/activate`)),
   reactivateStudent: (userId: string) =>
     unwrap<AdminUserRecord>(apiClient.post(`/admin/users/${userId}/reactivate`)),
   uploadOfferLetter: (payload: { applicationId: string; offerLetterUrl: string }) =>

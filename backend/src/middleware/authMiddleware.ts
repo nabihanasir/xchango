@@ -29,6 +29,15 @@ export const protect = asyncHandler(async (req: any, _res: Response, next: NextF
       );
     }
 
+    if (req.user.isActive === false) {
+      throw new AuthenticationError(
+        'Account deactivated',
+        'This account has been deactivated.',
+        'Contact an administrator to have it reactivated.',
+        'ACCOUNT_DEACTIVATED',
+      );
+    }
+
     if (req.user.role === 'student') {
       if (!req.user.offboardedAt) {
         await offboardDueStudents(req.user._id.toString());
