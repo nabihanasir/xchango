@@ -31,7 +31,7 @@ import ProgramOutlinePanel from './ProgramOutlinePanel';
 import Pagination, { usePagination } from '../Pagination';
 import Notice from '../Notice';
 
-type Tab = 'overview' | 'interview' | 'transcript' | 'student' | 'documents';
+type Tab = 'overview' | 'interview' | 'transcript' | 'curriculum' | 'student' | 'documents' | 'arrival';
 type JourneyExtras = Pick<JourneyInput, 'requests' | 'visa' | 'results'>;
 
 const SummaryCard = ({ title, value }: { title: string; value: string }) => (
@@ -488,9 +488,11 @@ export default function AdvisorApplicationsWorkspace({
                 [
                   ['overview', 'Overview'],
                   ['interview', 'Interview'],
-                  ['transcript', 'Transcript & outline'],
+                  ['transcript', 'Transcript'],
+                  ['curriculum', 'Curriculum'],
                   ['student', 'Student profile'],
                   ['documents', `Documents (${studentDocuments.length})`],
+                  ['arrival', 'Arrival'],
                 ] as const
               ).map(([key, label]) => (
                 <button
@@ -653,22 +655,49 @@ export default function AdvisorApplicationsWorkspace({
                     </p>
                   </div>
                 ) : null}
+              </div>
+            ) : null}
 
+            {activeTab === 'arrival' ? (
+              <div className="space-y-4">
                 {selectedApplication.arrival?.arrivedAt ? (
-                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5">
-                    <p className="text-sm font-bold text-teal-700">Arrived at host university</p>
-                    <p className="mt-1 text-sm text-slate-700">
-                      {new Date(selectedApplication.arrival.arrivedAt).toLocaleDateString()} ·{' '}
-                      {selectedApplication.arrival.notices.filter((notice) => notice.sent).length} instructor email(s) sent
-                    </p>
-                  </div>
+                  <>
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5">
+                      <p className="text-sm font-bold text-teal-700">Arrived at host university</p>
+                      <p className="mt-1 text-sm text-slate-700">
+                        {new Date(selectedApplication.arrival.arrivedAt).toLocaleDateString()} ·{' '}
+                        {selectedApplication.arrival.notices.filter((notice) => notice.sent).length} of {selectedApplication.arrival.notices.length} instructor
+                        email(s) sent
+                      </p>
+                    </div>
+                    {selectedApplication.arrival.notices.length ? (
+                      <ul className="divide-y divide-slate-100 rounded-2xl border border-slate-200">
+                        {selectedApplication.arrival.notices.map((notice) => (
+                          <li key={`${notice.side}-${notice.email}`} className="flex flex-wrap items-start justify-between gap-2 px-4 py-3 text-sm">
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-900">
+                                {notice.name || notice.email}{' '}
+                                <span className="text-xs font-semibold text-slate-500">{notice.side === 'host' ? 'Host instructor' : 'Home instructor (online)'}</span>
+                              </p>
+                              <p className="text-xs text-slate-500">{notice.courses.join(', ')}</p>
+                            </div>
+                            <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${notice.sent ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {notice.sent ? 'Email sent' : 'Not sent'}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </>
                 ) : canMarkArrival(selectedApplication) ? (
                   <div className="space-y-3">
                     {selectedApplication.arrivalReport?.reportedAt ? (
                       <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
                         The student reported arriving on {new Date(selectedApplication.arrivalReport.reportedAt).toLocaleDateString()}. Confirm it below.
                       </p>
-                    ) : null}
+                    ) : (
+                      <p className="text-sm text-slate-500">The student has not reported their arrival yet. You can still record it yourself.</p>
+                    )}
                     <button
                       type="button"
                       onClick={() => setArrivalModalOpen(true)}
@@ -678,7 +707,11 @@ export default function AdvisorApplicationsWorkspace({
                       Mark student arrived
                     </button>
                   </div>
-                ) : null}
+                ) : (
+                  <p className="rounded-2xl border border-dashed border-slate-300 px-6 py-8 text-center text-sm text-slate-500">
+                    Arrival can be recorded once the student is shortlisted and has an approved visa. It is closed once the application stops.
+                  </p>
+                )}
               </div>
             ) : null}
 
@@ -767,13 +800,21 @@ export default function AdvisorApplicationsWorkspace({
                     </p>
                   )}
                 </div>
+              </div>
+            ) : null}
 
+            {activeTab === 'curriculum' ? (
+              <div className="space-y-6">
                 <div className="space-y-3">
-                  <h3 className="text-base font-bold text-slate-900">Program outline</h3>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Curriculum</h3>
+                    <p className="text-sm text-slate-500">The semester-wise course offering plan the student uploaded.</p>
+                  </div>
                   {programOutline ? (
                     <ProgramOutlinePanel
                       studentId={getApplicationUserId(selectedApplication.studentId)}
                       outline={programOutline}
+                      defaultOpen
                       onSaved={async () => {
                         const refreshed = await programOutlineApi
                           .getForStudent(getApplicationUserId(selectedApplication.studentId))
@@ -783,7 +824,7 @@ export default function AdvisorApplicationsWorkspace({
                     />
                   ) : (
                     <p className="rounded-2xl border border-dashed border-slate-300 px-6 py-8 text-center text-sm text-slate-500">
-                      The student has not uploaded a program outline.
+                      The student has not uploaded their curriculum (semester-wise course offering plan).
                     </p>
                   )}
                 </div>

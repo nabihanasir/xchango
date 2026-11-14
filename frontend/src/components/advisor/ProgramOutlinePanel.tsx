@@ -22,6 +22,8 @@ interface ProgramOutlinePanelProps {
   outline?: ProgramOutline | null;
   /** Called after the advisor saves, so the request can be reloaded with the new checks. */
   onSaved: () => Promise<void> | void;
+  /** Starts open, for when the panel is the main content of its tab. */
+  defaultOpen?: boolean;
 }
 
 const cloneSemesters = (semesters: OutlineSemester[]): OutlineSemester[] =>
@@ -42,7 +44,7 @@ const Chip = ({ children, tone = 'slate' }: { children: React.ReactNode; tone?: 
  * limit, and the semester-wise plan the student uploaded. Course types are set per student here, because
  * the plan only marks them by colour. It stays closed, with the things that need attention in its header.
  */
-export default function ProgramOutlinePanel({ studentId, summary, outline, onSaved }: ProgramOutlinePanelProps) {
+export default function ProgramOutlinePanel({ studentId, summary, outline, onSaved, defaultOpen = false }: ProgramOutlinePanelProps) {
   const [semesters, setSemesters] = useState<OutlineSemester[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
@@ -74,7 +76,7 @@ export default function ProgramOutlinePanel({ studentId, summary, outline, onSav
       await programOutlineApi.update(studentId, semesters);
       await onSaved();
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'Unable to save the program outline.');
+      setError(saveError instanceof Error ? saveError.message : 'Unable to save the curriculum.');
     } finally {
       setIsSaving(false);
     }
@@ -87,7 +89,7 @@ export default function ProgramOutlinePanel({ studentId, summary, outline, onSav
   const title = (
     <span className="flex flex-wrap items-center gap-2">
       <ListChecks className="h-4 w-4 text-slate-500" />
-      <span>Program plan</span>
+      <span>Curriculum</span>
       {summary?.currentSemester != null ? <Chip tone="blue">Semester {summary.currentSemester}</Chip> : null}
       {summary?.allowedCredits != null ? (
         <Chip tone={overCap ? 'red' : 'slate'}>
@@ -101,16 +103,16 @@ export default function ProgramOutlinePanel({ studentId, summary, outline, onSav
   );
 
   return (
-    <Collapsible variant="card" title={title}>
+    <Collapsible variant="card" title={title} defaultOpen={defaultOpen}>
       <div className="space-y-4 pt-2">
         {missingOutline || missingTranscript ? (
           <div className="flex items-start gap-3 rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <p>
               {missingOutline && missingTranscript
-                ? 'No program outline or transcript is uploaded, so eligibility could not be checked.'
+                ? 'No curriculum or transcript is uploaded, so eligibility could not be checked.'
                 : missingOutline
-                  ? 'No program outline is uploaded, so plan, course type and credit limit could not be checked.'
+                  ? 'No curriculum is uploaded, so plan, course type and credit limit could not be checked.'
                   : 'No transcript is uploaded, so the semester and passed courses are unknown.'}{' '}
               Matches are based on course content only.
             </p>
