@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import Button from '../../components/Button';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import Collapsible, { CollapsePanel } from '../../components/advisor/Collapsible';
 import CourseChip from '../../components/advisor/CourseChip';
 import EligibilityChecklist from '../../components/advisor/EligibilityChecklist';
@@ -178,6 +179,8 @@ interface CourseCardProps {
   filteredHomeCourses: CourseSummary[];
   courseSearch: string;
   courseLoadError: string;
+  /** The request has been approved or rejected, so the decision and re-pairing controls are read-only. */
+  locked: boolean;
   onToggle: () => void;
   onStatus: (status: ItemStatus) => void;
   onComment: (value: string) => void;
@@ -198,6 +201,7 @@ function CourseCard({
   filteredHomeCourses,
   courseSearch,
   courseLoadError,
+  locked,
   onToggle,
   onStatus,
   onComment,
@@ -212,6 +216,8 @@ function CourseCard({
   const activeStatus = basis === 'outline' ? item.outlineMatchStatus : item.aiMatchStatus;
   const isMatching = activeStatus === 'in_progress';
   const isBusy = loadingActionId.endsWith(`-${item._id}`);
+  // The outline match after arrival is a separate check, so only the description match and pairing are locked.
+  const rerunLocked = locked && basis === 'description';
   const checks = getChecks(item, activeMatch);
   const { failed, warned } = countConcerns(checks);
   const score = activeMatch?.matchScore;
@@ -280,7 +286,8 @@ function CourseCard({
               type="button"
               onClick={() => onStatus(status === target ? 'pending' : target)}
               aria-pressed={status === target}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-200 ${
+              disabled={locked}
+              className={`inline-flex disabled:cursor-not-allowed items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-200 ${
                 status === target ? `${ITEM_STATUS_STYLES[target]} scale-105 shadow` : 'border-transparent text-slate-500 hover:bg-white'
               }`}
             >
@@ -325,7 +332,7 @@ function CourseCard({
           <button
             type="button"
             onClick={basis === 'outline' ? onRerunOutline : onRerunAuto}
-            disabled={isBusy}
+            disabled={isBusy || rerunLocked}
             className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-dark-blue px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-navy-hover disabled:opacity-60 motion-safe:animate-pop-in"
           >
             {isBusy ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
@@ -396,7 +403,7 @@ function CourseCard({
                       <button
                         type="button"
                         onClick={() => onChangeHome(candidate.homeCourseId._id)}
-                        disabled={isBusy || isMatching}
+                        disabled={isBusy || isMatching || locked}
                         className="shrink-0 rounded-[1rem] border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-700 transition hover:bg-violet-100 disabled:opacity-60"
                       >
                         Use this instead
@@ -459,7 +466,7 @@ function CourseCard({
               <MatchScoreTile label="Outline match · final" match={getOutlineMatch(item)} status={item.outlineMatchStatus} isActive={basis === 'outline'} emptyText="Waiting for the student's outline" />
             </div>
             <div className="mt-3">
-              <Button type="button" variant="secondary" onClick={basis === 'outline' ? onRerunOutline : onRerunAuto} disabled={isBusy || isMatching}>
+              <Button type="button" variant="secondary" onClick={basis === 'outline' ? onRerunOutline : onRerunAuto} disabled={isBusy || isMatching || rerunLocked}>
                 {isBusy || isMatching ? <LoaderCircle className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
                 {isMatching ? 'Matching…' : basis === 'outline' ? 'Re-run outline match' : 'Re-run auto-match'}
               </Button>
@@ -494,7 +501,7 @@ function CourseCard({
                 value={item.homeCourseId?._id || ''}
                 onChange={(event) => onChangeHome(event.target.value)}
                 className="w-full rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10 sm:flex-1"
-                disabled={!filteredHomeCourses.length || isBusy}
+                disabled={!filteredHomeCourses.length || isBusy || locked}
               >
                 <option value="" disabled>
                   {filteredHomeCourses.length ? 'Select a home course' : 'No home courses available'}
@@ -525,6 +532,7 @@ function CourseCard({
               id={`comment-${item._id}`}
               value={comment}
               onChange={(event) => onComment(event.target.value)}
+              readOnly={locked}
               rows={2}
               className="mt-2 w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
               placeholder="Optional feedback for this specific course pair."
@@ -556,6 +564,7 @@ export default function AdvisorEquivalencyRequestDetail() {
   const [loadingActionId, setLoadingActionId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [pendingDecision, setPendingDecision] = useState<'approved' | 'rejected' | 'items' | null>(null);
   const [error, setError] = useState('');
   const [courseLoadError, setCourseLoadError] = useState('');
 
@@ -708,6 +717,30 @@ export default function AdvisorEquivalencyRequestDetail() {
       setError(saveError instanceof Error ? saveError.message : 'Unable to submit the request decision.');
     } finally {
       setIsSaving(false);
+      setPendingDecision(null);
+    }
+  };
+
+  /** Checks the per-course choices, then asks the advisor to confirm because the decision is final. */
+  const askToConfirmItemDecisions = () => {
+    if (!request) {
+      return;
+    }
+
+    if (request.items.some((item) => statusDrafts[item._id] === 'pending')) {
+      setError('Set every course to approved or rejected before saving the per-course decisions.');
+      return;
+    }
+
+    setError('');
+    setPendingDecision('items');
+  };
+
+  const confirmDecision = () => {
+    if (pendingDecision === 'items') {
+      void handleSubmitItemDecisions();
+    } else if (pendingDecision) {
+      void handleWholeDecision(pendingDecision);
     }
   };
 
@@ -738,6 +771,7 @@ export default function AdvisorEquivalencyRequestDetail() {
       setError(saveError instanceof Error ? saveError.message : 'Unable to submit item decisions.');
     } finally {
       setIsSaving(false);
+      setPendingDecision(null);
     }
   };
 
@@ -757,6 +791,7 @@ export default function AdvisorEquivalencyRequestDetail() {
     );
   }
 
+  const isFinal = request.status === 'approved' || request.status === 'rejected';
   const allExpanded = expandedItemIds.length === request.items.length;
   const decided = summary.approved + summary.rejected;
   const decidedPercent = summary.total ? Math.round((decided / summary.total) * 100) : 0;
@@ -857,6 +892,7 @@ export default function AdvisorEquivalencyRequestDetail() {
             filteredHomeCourses={filteredHomeCourses}
             courseSearch={courseSearch}
             courseLoadError={courseLoadError}
+            locked={isFinal}
             onToggle={() => toggleExpanded(item._id)}
             onStatus={(status) => setStatusDrafts((current) => ({ ...current, [item._id]: status }))}
             onComment={(value) => setCommentDrafts((current) => ({ ...current, [item._id]: value }))}
@@ -888,37 +924,58 @@ export default function AdvisorEquivalencyRequestDetail() {
             <span className="mx-2 text-slate-300">·</span>
             <span className="text-slate-500">{summary.total - decided} undecided</span>
           </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => void handleWholeDecision('approved')}
-              disabled={isSaving}
-              className="inline-flex items-center rounded-[1.25rem] bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-700 disabled:opacity-60"
-            >
-              <CheckCircle2 className="mr-2 h-4 w-4" />
-              Approve all
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleWholeDecision('rejected')}
-              disabled={isSaving}
-              className="inline-flex items-center rounded-[1.25rem] bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
-            >
-              <XCircle className="mr-2 h-4 w-4" />
-              Reject all
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleSubmitItemDecisions()}
-              disabled={isSaving}
-              className="inline-flex items-center rounded-[1.25rem] bg-dark-blue px-4 py-2.5 text-sm font-bold text-white transition hover:bg-navy-hover disabled:opacity-60"
-            >
-              {isSaving ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              Save per-course decisions
-            </button>
-          </div>
+          {isFinal ? (
+            <p className="text-sm font-bold text-slate-600">Decision recorded. It is final and cannot be changed.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setPendingDecision('approved')}
+                disabled={isSaving}
+                className="inline-flex items-center rounded-[1.25rem] bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-700 disabled:opacity-60"
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Approve all
+              </button>
+              <button
+                type="button"
+                onClick={() => setPendingDecision('rejected')}
+                disabled={isSaving}
+                className="inline-flex items-center rounded-[1.25rem] bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Reject all
+              </button>
+              <button
+                type="button"
+                onClick={askToConfirmItemDecisions}
+                disabled={isSaving}
+                className="inline-flex items-center rounded-[1.25rem] bg-dark-blue px-4 py-2.5 text-sm font-bold text-white transition hover:bg-navy-hover disabled:opacity-60"
+              >
+                {isSaving ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save per-course decisions
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {pendingDecision ? (
+        <ConfirmDialog
+          title="Submit this decision?"
+          message={
+            pendingDecision === 'approved'
+              ? "You are approving all of this student's courses. This decision is final and cannot be changed afterwards."
+              : pendingDecision === 'rejected'
+                ? "You are rejecting all of this student's courses. This decision is final and cannot be changed afterwards. The student can send a new request."
+                : "You are saving your decision for each course. This decision is final and cannot be changed afterwards."
+          }
+          confirmLabel="Confirm decision"
+          busy={isSaving}
+          onConfirm={confirmDecision}
+          onCancel={() => setPendingDecision(null)}
+        />
+      ) : null}
     </div>
   );
 }

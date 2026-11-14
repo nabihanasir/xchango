@@ -8,6 +8,9 @@ import { evaluateCourseMatch, rankHomeCourseMatches } from './aiCourseMatcherSer
 import {
   autoMatchRequestItems,
   createCourseRequest,
+  rerunAutoMatch,
+  runCourseMatch,
+  submitAdvisorDecision,
   updatePairedHomeCourse,
   uploadCourseOutline,
 } from './courseEquivalencyService';
@@ -397,5 +400,49 @@ describe('createCourseRequest', () => {
       code: 'COURSE_REQUEST_ALREADY_ACTIVE',
     });
     expect(MockedRequest.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('final advisor decisions', () => {
+  it.each(['approved', 'rejected'])('refuses a second decision on a request that is already %s', async (status) => {
+    const { request, item } = buildRequest();
+    Object.assign(request, { status });
+    mockFindById(request);
+
+    await expect(
+      submitAdvisorDecision(String(requestId), '', [{ itemId: String(itemId), status: 'approved' as never }])
+    ).rejects.toMatchObject({ code: 'COURSE_DECISION_FINAL' });
+    await expect(submitAdvisorDecision(String(requestId), '', [], 'rejected' as never)).rejects.toMatchObject({
+      code: 'COURSE_DECISION_FINAL',
+    });
+
+    expect(request.save).not.toHaveBeenCalled();
+    expect(item).not.toHaveProperty('decidedAt');
+  });
+
+  it('still lets an advisor decide a request that is under review', async () => {
+    const { request, item } = buildRequest();
+    Object.assign(request, { status: 'under_review' });
+    mockFindById(request);
+
+    await submitAdvisorDecision(String(requestId), '', [{ itemId: String(itemId), status: 'approved' as never }]);
+
+    expect(item).toMatchObject({ status: 'approved' });
+    expect(request).toMatchObject({ status: 'approved' });
+  });
+
+  it('does not let an advisor reopen a decided request by re-pairing or re-running a match', async () => {
+    const { request } = buildRequest({ status: 'approved' });
+    Object.assign(request, { status: 'approved' });
+    mockFindById(request);
+
+    await expect(updatePairedHomeCourse(String(requestId), String(itemId), String(altHome._id))).rejects.toMatchObject({
+      code: 'COURSE_DECISION_FINAL',
+    });
+    await expect(runCourseMatch(String(requestId), String(itemId))).rejects.toMatchObject({ code: 'COURSE_DECISION_FINAL' });
+    await expect(rerunAutoMatch(String(requestId), String(itemId), 'description')).rejects.toMatchObject({
+      code: 'COURSE_DECISION_FINAL',
+    });
+    expect(request.save).not.toHaveBeenCalled();
   });
 });

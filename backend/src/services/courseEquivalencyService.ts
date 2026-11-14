@@ -626,6 +626,23 @@ const loadRequestItem = async (requestId: string, itemId: string) => {
   return { request, item };
 };
 
+/**
+ * Once an advisor has approved or rejected a request, the decision is final. A rejected student sends a new
+ * request instead, and the outline check after arrival is the only thing that can reopen an approved item.
+ */
+const assertNotDecided = (request: ICourseRequest) => {
+  if (request.status === CourseRequestStatus.APPROVED || request.status === CourseRequestStatus.REJECTED) {
+    throw new ValidationError(
+      `This request has already been ${request.status}.`,
+      'An advisor decision on a course request is final and cannot be changed.',
+      request.status === CourseRequestStatus.REJECTED
+        ? 'The student can submit a new course request if they want to try again.'
+        : 'No further action is needed on this request.',
+      'COURSE_DECISION_FINAL'
+    );
+  }
+};
+
 /** Scores the item's currently paired course pair and stores it as the item's active match, keeping earlier candidates. */
 const scorePairedCourse = async (
   request: ICourseRequest,
@@ -688,6 +705,7 @@ const scorePairedCourse = async (
 export const updatePairedHomeCourse = async (requestId: string, itemId: string, homeCourseId: string) => {
   assertObjectId(homeCourseId, 'Home course', 'HOME_COURSE_INVALID');
   const { request, item } = await loadRequestItem(requestId, itemId);
+  assertNotDecided(request);
 
   const homeCourse = await Course.findOne({ _id: homeCourseId, ...homeCourseFilter });
   if (!homeCourse) {
@@ -724,6 +742,7 @@ export const updatePairedHomeCourse = async (requestId: string, itemId: string, 
 
 export const runCourseMatch = async (requestId: string, itemId: string) => {
   const { request, item } = await loadRequestItem(requestId, itemId);
+  assertNotDecided(request);
 
   if (!item.homeCourseId) {
     throw new Error('Select a home course before running the AI match.');
@@ -740,6 +759,9 @@ export const runCourseMatch = async (requestId: string, itemId: string) => {
  */
 export const rerunAutoMatch = async (requestId: string, itemId: string, basis: MatchBasis = 'description') => {
   const { request, item } = await loadRequestItem(requestId, itemId);
+  if (basis === 'description') {
+    assertNotDecided(request);
+  }
 
   if (basis === 'outline' && !item.uploadedOutline?.text) {
     throw new Error('The student has not uploaded an outline for this course yet.');
@@ -781,6 +803,7 @@ export const submitAdvisorDecision = async (
   if (!request) {
     throw new Error('Course request not found.');
   }
+  assertNotDecided(request);
 
   if (wholeRequestDecision) {
     request.items.forEach((item) => {
