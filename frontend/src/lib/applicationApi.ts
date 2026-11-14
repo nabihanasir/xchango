@@ -4,6 +4,7 @@ import type {
   ArrivalResult,
   ApplicationDraftPayload,
   ApplicationStatus,
+  InterviewSlotsResponse,
   SelectedCourseStatus,
   WorkflowApplication,
 } from '../types/application';
@@ -66,6 +67,20 @@ export const applicationApi = {
     applicationId: string,
     payload: { date: string; location: string; stakeholders: string[] }
   ) => unwrap<WorkflowApplication>(apiClient.patch(`/applications/${applicationId}/schedule-interview`, payload)),
+  getInterviewSlots: (applicationId: string) =>
+    unwrap<InterviewSlotsResponse>(apiClient.get(`/applications/${applicationId}/interview-slots`)),
+  requestInterview: (applicationId: string, payload: { start: string; durationMinutes: 30 | 60 }) =>
+    unwrap<WorkflowApplication>(apiClient.post(`/applications/${applicationId}/interview-request`, payload)),
+  cancelInterviewRequest: (applicationId: string, payload: { reason?: string; details?: string } = {}) =>
+    unwrap<WorkflowApplication>(apiClient.post(`/applications/${applicationId}/interview-request/cancel`, payload)),
+  respondToInterviewRequest: (
+    applicationId: string,
+    payload: { accept: boolean; note?: string; location?: string }
+  ) => unwrap<WorkflowApplication>(apiClient.post(`/applications/${applicationId}/interview-request/respond`, payload)),
+  getAdvisorAvailability: () =>
+    unwrap<InterviewSlotsResponse>(apiClient.get('/applications/advisor/availability')),
+  setAdvisorAvailability: (slots: string[], unavailable: boolean) =>
+    unwrap<InterviewSlotsResponse>(apiClient.put('/applications/advisor/availability', { slots, unavailable })),
   completeInterview: (applicationId: string) =>
     unwrap<WorkflowApplication>(apiClient.patch(`/applications/${applicationId}/complete-interview`)),
   recordInterviewDecision: (applicationId: string, payload: { recommended: boolean; notes?: string }) =>

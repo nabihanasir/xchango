@@ -46,6 +46,24 @@ export interface IApplicationInterview {
   date: Date;
   location: string;
   stakeholders: string[];
+  /** 30 or 60. Absent on interviews scheduled before slot booking existed. */
+  durationMinutes?: number;
+}
+
+export type InterviewRequestStatus = 'requested' | 'accepted' | 'declined' | 'cancelled';
+
+/** The student's chosen slot. Held for the advisor while 'requested' or 'accepted'. */
+export interface IInterviewRequest {
+  start: Date;
+  durationMinutes: number;
+  status: InterviewRequestStatus;
+  requestedAt: Date;
+  respondedAt?: Date;
+  /** Advisor's note when declining. */
+  note?: string;
+  cancelledBy?: 'student' | 'advisor';
+  cancelReason?: string;
+  cancelDetails?: string;
 }
 
 export interface IInterviewDecision {
@@ -100,6 +118,7 @@ export interface IApplication extends Document {
   semesterEndDate?: Date;
   interviewDate?: Date;
   interview?: IApplicationInterview;
+  interviewRequest?: IInterviewRequest;
   interviewDecision?: IInterviewDecision;
   arrival?: IArrival;
   arrivalReport?: IArrivalReport;
@@ -145,6 +164,22 @@ const ApplicationInterviewSchema = new Schema<IApplicationInterview>(
     date: { type: Date, required: true },
     location: { type: String, required: true, trim: true },
     stakeholders: { type: [String], default: [] },
+    durationMinutes: { type: Number, enum: [30, 60], required: false },
+  },
+  { _id: false }
+);
+
+const InterviewRequestSchema = new Schema<IInterviewRequest>(
+  {
+    start: { type: Date, required: true },
+    durationMinutes: { type: Number, enum: [30, 60], required: true },
+    status: { type: String, enum: ['requested', 'accepted', 'declined', 'cancelled'], required: true },
+    requestedAt: { type: Date, required: true },
+    respondedAt: { type: Date },
+    note: { type: String, trim: true },
+    cancelledBy: { type: String, enum: ['student', 'advisor'] },
+    cancelReason: { type: String, trim: true },
+    cancelDetails: { type: String, trim: true },
   },
   { _id: false }
 );
@@ -224,6 +259,7 @@ const ApplicationSchema = new Schema<IApplication>(
     semesterEndDate: { type: Date, required: false },
     interviewDate: { type: Date, required: false },
     interview: { type: ApplicationInterviewSchema, required: false },
+    interviewRequest: { type: InterviewRequestSchema, required: false },
     interviewDecision: { type: InterviewDecisionSchema, required: false },
     arrival: { type: ArrivalSchema, required: false },
     arrivalReport: { type: ArrivalReportSchema, required: false },

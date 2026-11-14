@@ -70,6 +70,7 @@ export default function AdminUsers() {
   const countryNames = useMemo(() => catalogCountries.map((country) => country.name), [catalogCountries]);
   const [users, setUsers] = useState<AdminUserRecord[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [deactivateTarget, setDeactivateTarget] = useState<AdminUserRecord | null>(null);
   const [form, setForm] = useState<CreateUserFormState>(defaultForm);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -138,18 +139,32 @@ export default function AdminUsers() {
     {
       header: 'Status',
       accessor: 'status',
-      render: (_value: string, row: AdminUserRecord) => (row.offboardedAt ? 'off-boarded' : row.isActive ? 'active' : 'inactive'),
+      render: (_value: string, row: AdminUserRecord) => (row.isActive === false ? 'deactivated' : row.offboardedAt ? 'off-boarded' : 'active'),
     },
     {
       header: 'Actions',
       accessor: 'actions',
       render: (_value: string, row: AdminUserRecord) =>
-        row.offboardedAt ? (
+        row.isActive === false ? (
+          <button
+            onClick={() => void handleSetActive(row, true)}
+            className="px-4 py-2 bg-admin hover:bg-admin-hover text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all"
+          >
+            Activate
+          </button>
+        ) : row.offboardedAt ? (
           <button
             onClick={() => void handleReactivate(row._id)}
             className="px-4 py-2 bg-admin hover:bg-admin-hover text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all"
           >
             Re-activate
+          </button>
+        ) : row.role !== 'admin' ? (
+          <button
+            onClick={() => setDeactivateTarget(row)}
+            className="px-4 py-2 border border-rose-300 text-rose-700 text-xs font-bold rounded-lg hover:bg-rose-50 transition-all"
+          >
+            Deactivate
           </button>
         ) : null,
     },
@@ -166,6 +181,21 @@ export default function AdminUsers() {
     { label: 'Admin', value: 'admin' },
     { label: 'Student', value: 'student' },
   ];
+
+  const handleSetActive = async (target: AdminUserRecord, active: boolean) => {
+    try {
+      if (active) {
+        await adminApi.activateUser(target._id);
+      } else {
+        await adminApi.deactivateUser(target._id);
+      }
+      setUsers((current) => current.map((record) => (record._id === target._id ? { ...record, isActive: active } : record)));
+    } catch (toggleError) {
+      setError(toggleError instanceof Error ? toggleError.message : 'Unable to update the account.');
+    } finally {
+      setDeactivateTarget(null);
+    }
+  };
 
   const handleReactivate = async (userId: string) => {
     try {
@@ -375,6 +405,34 @@ export default function AdminUsers() {
                 className="flex-1 px-6 py-3 bg-accent-yellow text-admin font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 text-sm disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? 'Creating...' : 'Create User'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+
+      {deactivateTarget ? (
+        <Modal onClose={() => setDeactivateTarget(null)} widthClass="max-w-md">
+          <div className="space-y-4 p-6">
+            <h2 className="text-xl font-bold text-slate-900">Deactivate {deactivateTarget.name}?</h2>
+            <p className="text-sm text-slate-600">
+              They will be signed out and unable to log in until you activate the account again. Their records are kept.
+              {deactivateTarget.role === 'advisor'
+                ? ' Reassign their students first — applications assigned to a deactivated advisor stay stuck.'
+                : ' Any pending or confirmed interview will be cancelled.'}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeactivateTarget(null)}
+                className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void handleSetActive(deactivateTarget, false)}
+                className="rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-bold text-white"
+              >
+                Deactivate
               </button>
             </div>
           </div>

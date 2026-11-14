@@ -28,7 +28,25 @@ router.get(
   applicationController.getStudentApplications
 );
 router.get('/advisor', authorizeRoles(UserRole.ADVISOR), applicationController.getAdvisorApplications);
+router.get('/advisor/availability', authorizeRoles(UserRole.ADVISOR), applicationController.getAdvisorAvailability);
+router.put('/advisor/availability', authorizeRoles(UserRole.ADVISOR), applicationController.setAdvisorAvailability);
 router.get('/:id', applicationController.getApplication);
+router.get(
+  '/:id/interview-slots',
+  authorizeRoles(UserRole.STUDENT, UserRole.ADVISOR, UserRole.ADMIN),
+  applicationController.getInterviewSlots
+);
+router.post('/:id/interview-request', authorizeRoles(UserRole.STUDENT), applicationController.requestInterview);
+router.post(
+  '/:id/interview-request/cancel',
+  authorizeRoles(UserRole.STUDENT, UserRole.ADVISOR),
+  applicationController.cancelInterviewRequest
+);
+router.post(
+  '/:id/interview-request/respond',
+  authorizeRoles(UserRole.ADVISOR),
+  applicationController.respondToInterviewRequest
+);
 router.get(
   '/:id/journey',
   authorizeRoles(UserRole.ADVISOR, UserRole.ADMIN),

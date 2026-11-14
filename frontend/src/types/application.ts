@@ -75,7 +75,43 @@ export interface WorkflowApplicationInterview {
   date: string;
   location: string;
   stakeholders: string[];
+  durationMinutes?: number;
 }
+
+export type InterviewRequestStatus = 'requested' | 'accepted' | 'declined' | 'cancelled';
+
+export interface WorkflowInterviewRequest {
+  start: string;
+  durationMinutes: 30 | 60;
+  status: InterviewRequestStatus;
+  requestedAt: string;
+  respondedAt?: string;
+  note?: string;
+  cancelledBy?: 'student' | 'advisor';
+  cancelReason?: string;
+  cancelDetails?: string;
+}
+
+export type InterviewSlotState = 'available' | 'unavailable' | 'held' | 'booked';
+
+export interface InterviewSlot {
+  start: string;
+  state: InterviewSlotState;
+}
+
+export interface InterviewSlotsResponse {
+  timezone: string;
+  slots: InterviewSlot[];
+  request?: WorkflowInterviewRequest | null;
+}
+
+export const interviewCancelReasons = [
+  { value: 'schedule_conflict', label: 'Schedule conflict' },
+  { value: 'illness', label: 'Illness' },
+  { value: 'emergency', label: 'Emergency' },
+  { value: 'technical_issue', label: 'Technical issue' },
+  { value: 'other', label: 'Other' },
+] as const;
 
 export interface WorkflowInterviewDecision {
   recommended: boolean;
@@ -130,6 +166,7 @@ export interface WorkflowApplication {
   semesterEndDate?: string;
   interviewDate?: string;
   interview?: WorkflowApplicationInterview;
+  interviewRequest?: WorkflowInterviewRequest;
   interviewDecision?: WorkflowInterviewDecision;
   arrival?: WorkflowApplicationArrival;
   /** Set when the student says they have arrived; the advisor still confirms it. */

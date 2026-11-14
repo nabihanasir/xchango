@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as adminService from '../services/adminService';
 import { scrapeUniversityWebsite } from '../services/universityScraperService';
+import * as accountService from '../services/accountService';
 import * as offboardingService from '../services/offboardingService';
 import { sendResponse } from '../utils/response';
 import { parsePagination } from '../utils/pagination';
@@ -95,6 +96,16 @@ export const updateAiModelConfig = async (req: any, res: Response) => {
 export const setSemesterEndDate = async (req: Request, res: Response) => {
   const application = await offboardingService.setSemesterEndDate(String(req.params.id), req.body?.semesterEndDate ?? null);
   sendResponse(res, 200, 'Semester end date updated', application);
+};
+
+export const deactivateUser = async (req: Request, res: Response) => {
+  const user = await accountService.deactivateUserByAdmin(String(req.params.id));
+  sendResponse(res, 200, 'Account deactivated', user);
+};
+
+export const activateUser = async (req: Request, res: Response) => {
+  const user = await accountService.activateUser(String(req.params.id));
+  sendResponse(res, 200, 'Account activated', user);
 };
 
 export const reactivateStudent = async (req: Request, res: Response) => {

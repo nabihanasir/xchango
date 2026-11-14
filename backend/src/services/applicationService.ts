@@ -240,6 +240,25 @@ export const validateUniversitySelection = async (country: string, university: s
   return countryDoc.name;
 };
 
+/** A student may have only one open application at a time; rejected and completed ones are closed. */
+const assertNoActiveApplication = async (studentId: string) => {
+  const active = await Application.findOne({
+    studentId,
+    status: { $nin: [ApplicationStatus.REJECTED, ApplicationStatus.COMPLETED] },
+  }).select('university status');
+
+  if (active) {
+    throw new ValidationError(
+      'You already have an active application.',
+      `Your application for ${active.university} is still open, and only one application can be active at a time.`,
+      active.status === ApplicationStatus.DRAFT
+        ? 'Continue your draft application, or wait until it is completed or rejected before starting another.'
+        : 'Wait until your current application is completed or rejected before starting another.',
+      'ACTIVE_APPLICATION_EXISTS'
+    );
+  }
+};
+
 const assertNoDuplicateUniversityApplication = async (
   studentId: string,
   university: string,
@@ -530,6 +549,7 @@ const getAvailableCoursesForApplication = async (application: IApplication): Pro
 
 export const createApplication = async (studentId: string, rawPayload: ApplicationStepInput) => {
   await assertProfileComplete(studentId);
+  await assertNoActiveApplication(studentId);
   const payload = sanitizeStepInput(rawPayload);
 
   if (!payload.country || !payload.university || !payload.program) {

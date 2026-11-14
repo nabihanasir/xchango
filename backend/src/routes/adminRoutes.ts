@@ -16,6 +16,8 @@ router.get('/users', adminController.getUsers);
 router.post('/users', adminController.createUser);
 router.put('/applications/:id/semester-end', adminController.setSemesterEndDate);
 router.put('/users/:id/countries', adminController.updateAdvisorCountries);
+router.post('/users/:id/deactivate', adminController.deactivateUser);
+router.post('/users/:id/activate', adminController.activateUser);
 router.post('/users/:id/reactivate', adminController.reactivateStudent);
 router.post('/offer-letter', adminController.uploadOfferLetter);
 router.get('/mappings', adminController.getCourseMappings);
