@@ -147,26 +147,73 @@ function MatchScoreTile({ label, match, status, isActive, emptyText }: MatchScor
   );
 }
 
-const TopicColumn = ({ title, topics, tone }: { title: string; topics: string[]; tone: string }) => (
-  <div>
-    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{title}</p>
-    <div className="mt-2 flex flex-wrap gap-1.5">
+const VISIBLE_TOPICS = 5;
+const CLAMP_SUMMARY_AFTER = 240;
+
+/** One column of topics as a plain list, showing the first few so the page stays short. */
+const TOPIC_TONES = {
+  red: { panel: 'border-red-100 bg-red-50/50', dot: 'bg-red-500', heading: 'text-red-700' },
+  sky: { panel: 'border-sky-100 bg-sky-50/50', dot: 'bg-sky-500', heading: 'text-sky-700' },
+  emerald: { panel: 'border-emerald-100 bg-emerald-50/50', dot: 'bg-emerald-500', heading: 'text-emerald-700' },
+} as const;
+
+function TopicColumn({ title, topics, tone }: { title: string; topics: string[]; tone: keyof typeof TOPIC_TONES }) {
+  const [showAll, setShowAll] = useState(false);
+  const shown = showAll ? topics : topics.slice(0, VISIBLE_TOPICS);
+  const hidden = topics.length - VISIBLE_TOPICS;
+  const styles = TOPIC_TONES[tone];
+
+  return (
+    <div className={`min-w-0 rounded-[1.1rem] border p-3 ${styles.panel}`}>
+      <div className='flex items-center justify-between gap-2'>
+        <p className={`text-sm font-bold ${styles.heading}`}>{title}</p>
+        <span className='shrink-0 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-600'>{topics.length}</span>
+      </div>
       {topics.length ? (
-        topics.map((topic) => (
-          <span key={topic} className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${tone}`}>
-            {topic}
-          </span>
-        ))
+        <ul className='mt-2 space-y-2'>
+          {shown.map((topic) => (
+            <li key={topic} className='flex gap-2 text-sm font-medium leading-5 text-slate-700'>
+              <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${styles.dot}`} aria-hidden='true' />
+              <span className='min-w-0'>{topic}</span>
+            </li>
+          ))}
+        </ul>
       ) : (
-        <span className="text-xs font-medium text-slate-400">None</span>
+        <p className='mt-2 text-sm font-medium text-slate-400'>None</p>
       )}
+      {hidden > 0 ? (
+        <button
+          type='button'
+          onClick={() => setShowAll((current) => !current)}
+          className='mt-2 text-sm font-bold text-slate-600 underline-offset-2 transition hover:text-slate-900 hover:underline'
+        >
+          {showAll ? 'Show fewer' : `+${hidden} more`}
+        </button>
+      ) : null}
     </div>
-  </div>
-);
+  );
+}
+
+/** A long AI summary cut to three lines, with a link to read the rest. */
+function ClampedSummary({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = text.length > CLAMP_SUMMARY_AFTER;
+
+  return (
+    <div className="mt-2">
+      <p className={`text-sm font-medium leading-6 text-slate-700 ${isLong && !expanded ? 'line-clamp-3' : ''}`}>{text}</p>
+      {isLong ? (
+        <button type="button" onClick={() => setExpanded((current) => !current)} className="mt-1 text-xs font-bold text-teal-700 hover:text-teal-900">
+          {expanded ? 'Show less' : 'Read more'}
+        </button>
+      ) : null}
+    </div>
+  );
+}
 
 type PaneTab = 'comparison' | 'eligibility' | 'details' | 'tools';
 
-const LABEL_CLASS = 'text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500';
+const LABEL_CLASS = 'text-xs font-bold uppercase tracking-[0.2em] text-slate-500';
 const INPUT_CLASS =
   'w-full rounded-[1.25rem] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10';
 
@@ -185,7 +232,7 @@ function DescriptionBox({ label, text, emptyText, asText, boxClass, labelClass }
 
   return (
     <div className={`min-w-0 rounded-[1.1rem] border p-3 ${boxClass}`}>
-      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${labelClass}`}>{label}</p>
+      <p className={`text-xs font-bold uppercase tracking-[0.16em] ${labelClass}`}>{label}</p>
       {!text ? (
         <p className="mt-2 text-sm font-medium italic text-slate-400">{emptyText}</p>
       ) : bullets ? (
@@ -217,7 +264,7 @@ interface CourseRailProps {
 /** The list of requested courses: score, home course and decision for each, so progress is visible at a glance. */
 function CourseRail({ items, statusDrafts, activeId, onSelect }: CourseRailProps) {
   return (
-    <nav aria-label="Requested courses" className="space-y-2 lg:sticky lg:top-4">
+    <nav aria-label="Requested courses" className="space-y-2 lg:sticky lg:top-4 lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto">
       {items.map((item, index) => {
         const match = getActiveMatch(item);
         const { failed } = countConcerns(getChecks(item, match));
@@ -347,9 +394,9 @@ function CourseDetailPane({
 
   return (
     <article
-      className={`rounded-[1.75rem] border border-l-4 border-slate-200 bg-white/90 shadow-soft ${tier ? tier.accent : 'border-l-slate-300'}`}
+      className={`flex flex-col overflow-hidden rounded-[1.75rem] border border-l-4 border-slate-200 bg-white/90 shadow-soft lg:h-[calc(100vh-10rem)] lg:min-h-[36rem] ${tier ? tier.accent : 'border-l-slate-300'}`}
     >
-      <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-center">
+      <div className="flex shrink-0 flex-col gap-3 p-4 lg:flex-row lg:items-center">
         <div className="grid min-w-0 flex-1 items-center gap-2 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
           <CourseChip kind="host" name={getCourseTitle(item.hostCourseId)} code={item.hostCourseId.code} creditHours={item.hostCourseId.creditHours} />
           <ArrowRight
@@ -391,7 +438,7 @@ function CourseDetailPane({
       </div>
 
       {/* One-line summary, always visible: what the match is worth and what needs attention. */}
-      <div className="flex flex-wrap items-center gap-2 px-4 pb-4 text-xs font-semibold">
+      <div className="flex shrink-0 flex-wrap items-center gap-2 px-4 pb-4 text-sm font-semibold">
         {tier ? <span className={`rounded-full border px-2.5 py-1 ${tier.soft} ${tier.text}`}>{tier.label}</span> : null}
         {failed ? (
           <button
@@ -445,7 +492,7 @@ function CourseDetailPane({
         ) : null}
       </div>
 
-      <div role="tablist" aria-label="Course review sections" className="flex gap-1 overflow-x-auto border-t border-slate-100 px-4">
+      <div role="tablist" aria-label="Course review sections" className="flex shrink-0 gap-1 overflow-x-auto overflow-y-hidden border-t border-slate-100 px-4">
         {tabs.map((entry) => (
           <button
             key={entry.key}
@@ -455,7 +502,7 @@ function CourseDetailPane({
             aria-selected={tab === entry.key}
             aria-controls={`panel-${item._id}`}
             onClick={() => onTab(entry.key)}
-            className={`-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 px-3 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-yellow/60 ${
+            className={`inline-flex shrink-0 items-center gap-2 border-b-2 px-3 py-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-yellow/60 ${
               tab === entry.key ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -465,7 +512,7 @@ function CourseDetailPane({
         ))}
       </div>
 
-      <div role="tabpanel" id={`panel-${item._id}`} aria-labelledby={`tab-${item._id}-${tab}`} className="space-y-4 border-t border-slate-100 p-4">
+      <div role="tabpanel" id={`panel-${item._id}`} aria-labelledby={`tab-${item._id}-${tab}`} className="max-h-[70vh] min-h-0 flex-1 space-y-4 overflow-y-auto border-t border-slate-100 p-4 lg:max-h-none">
         {tab === 'comparison' ? (
           <>
             {tier && activeMatch ? (
@@ -478,15 +525,15 @@ function CourseDetailPane({
                     <p className="text-xs font-semibold text-slate-500">Content match {activeMatch.contentScore}, lowered by eligibility</p>
                   ) : null}
                 </div>
-                {activeMatch.reasoning ? <p className="mt-2 text-sm font-medium leading-6 text-slate-700">{activeMatch.reasoning.summary}</p> : null}
+                {activeMatch.reasoning ? <ClampedSummary text={activeMatch.reasoning.summary} /> : null}
               </div>
             ) : null}
             {activeMatch?.reasoning ? (
               <>
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <TopicColumn title="Only in Home University" topics={activeMatch.reasoning.missingTopics} tone="border-red-200 bg-red-50 text-red-700" />
-                  <TopicColumn title="Only in Host University" topics={activeMatch.reasoning.additionalTopics} tone="border-sky-200 bg-sky-50 text-sky-700" />
-                  <TopicColumn title="Topics common in both" topics={activeMatch.reasoning.overlappingTopics} tone="border-emerald-200 bg-emerald-50 text-emerald-700" />
+                  <TopicColumn title="Only in Home University" topics={activeMatch.reasoning.missingTopics} tone="red" />
+                  <TopicColumn title="Only in Host University" topics={activeMatch.reasoning.additionalTopics} tone="sky" />
+                  <TopicColumn title="Topics common in both" topics={activeMatch.reasoning.overlappingTopics} tone="emerald" />
                 </div>
                 <p className="text-sm font-medium leading-6 text-slate-600">
                   <span className="font-bold text-slate-700">Credit hours: </span>
@@ -680,9 +727,7 @@ function CourseDetailPane({
             </section>
           </div>
         ) : null}
-      </div>
 
-      <div className="space-y-3 border-t border-slate-100 p-4">
         <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/70 p-4">
           <label className={LABEL_CLASS} htmlFor={`comment-${item._id}`}>
             Advisor comment for this course
@@ -697,20 +742,31 @@ function CourseDetailPane({
             placeholder="Optional feedback for this specific course pair."
           />
         </div>
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-bold text-slate-500">
-            Course {position} of {total}
-          </p>
-          <div className="flex gap-2">
-            <Button type="button" variant="secondary" onClick={() => onStep(-1)} disabled={position <= 1}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Previous
-            </Button>
-            <Button type="button" onClick={() => onStep(1)} disabled={position >= total}>
-              Next course
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
+      </div>
+
+      <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-100 px-4 py-2.5">
+        <p className="text-sm font-bold text-slate-500">
+          Course {position} of {total}
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => onStep(-1)}
+            disabled={position <= 1}
+            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Previous
+          </button>
+          <button
+            type="button"
+            onClick={() => onStep(1)}
+            disabled={position >= total}
+            className="inline-flex items-center gap-1 rounded-full bg-dark-blue px-3.5 py-1.5 text-sm font-bold text-white transition hover:bg-navy-hover disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Next
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
     </article>
