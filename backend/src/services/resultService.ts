@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 import AdvisorProfile from '../models/AdvisorProfile';
 import Application, { ApplicationStatus } from '../models/Application';
 import CourseRequest, { CourseRequestItemStatus } from '../models/CourseRequest';
-import ExamVerification from '../models/ExamVerification';
+import { ValidationError } from '../errors/AppError';
+import ExamVerification, { ExamVerificationStatus } from '../models/ExamVerification';
 import { appUrl, notifyUser } from './notificationService';
 import Result, { IResult, ResultStatus } from '../models/Result';
 import { advisorCanReviewStudent } from './examVerificationService';
@@ -43,6 +44,25 @@ export const getStudentResults = async (studentId: string) =>
     .populate('hostCourseId')
     .populate('advisorId', 'name email')
     .sort({ updatedAt: -1 });
+
+/**
+ * Grades are entered from the document the student brings back from the host university, so nothing can be graded
+ * until one is uploaded. A returned document does not count: the student has to upload a corrected one.
+ */
+export const assertVerificationDocumentUploaded = async (studentId: string) => {
+  const uploaded = await ExamVerification.exists({
+    studentId,
+    status: { $in: [ExamVerificationStatus.SUBMITTED, ExamVerificationStatus.VERIFIED] },
+  });
+  if (!uploaded) {
+    throw new ValidationError(
+      'The verification document is missing.',
+      'The student has not uploaded a usable verification document from the host university.',
+      'Ask the student to upload it (or upload a corrected one if it was returned), then enter the grades.',
+      'RESULT_DOCUMENT_MISSING'
+    );
+  }
+};
 
 export const getAdvisorGradableItems = async (advisorId: string) => {
   const profile = await AdvisorProfile.findOne({ userId: advisorId }).select('countries');
@@ -127,6 +147,7 @@ export const upsertResult = async (
 
   // Grades come last: the visa, arrival and outline steps must be done, and a stopped application has no results.
   await assertJourneyReady(request.studentId.toString(), 'results');
+  await assertVerificationDocumentUploaded(request.studentId.toString());
 
   const update: Record<string, unknown> = {
     studentId: request.studentId,
