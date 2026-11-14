@@ -14,27 +14,12 @@ const TASK_STYLES: Record<AdvisorTask['key'], { edge: string; count: string }> =
   grading: { edge: 'border-l-violet-500', count: 'bg-violet-100 text-violet-700' },
 };
 
-const getInitials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join('') || '?';
-
 const formatDay = (iso: string) => {
   const date = new Date(iso);
   return { day: String(date.getDate()), month: date.toLocaleDateString(undefined, { month: 'short' }) };
 };
 
 const formatTime = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-
-const formatAgo = (iso: string) => {
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / (24 * 60 * 60 * 1000));
-  if (days <= 0) return 'today';
-  if (days === 1) return 'yesterday';
-  return `${days} days ago`;
-};
 
 const StatTile = ({ label, value, hint }: { label: string; value: number; hint: string }) => (
   <div className="glass-card rounded-[1.5rem] border border-slate-200 px-5 py-4">
@@ -80,15 +65,10 @@ function InterviewRow({ interview }: { interview: UpcomingInterview }) {
 function ActivityRow({ entry }: { entry: ActivityEntry }) {
   return (
     <li className="border-t border-slate-100 first:border-t-0">
-      <Link to={entry.to} className="flex items-center gap-4 py-3 transition hover:bg-slate-50/70 first:pt-0 last:pb-0">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-700 to-teal-500 text-sm font-bold text-white">
-          {getInitials(entry.studentName)}
-        </span>
+      <Link to={entry.to} className="flex items-center gap-4 py-4 transition hover:bg-slate-50/70 first:pt-0 last:pb-0">
         <div className="min-w-0 flex-1">
           <p className="truncate font-bold text-slate-900">{entry.studentName}</p>
-          <p className="truncate text-sm text-slate-500">
-            {entry.text} · {formatAgo(entry.at)}
-          </p>
+          <p className="mt-0.5 truncate text-sm text-slate-500">{entry.text}</p>
         </div>
         <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${entry.badgeClasses}`}>{entry.badge}</span>
       </Link>
@@ -188,7 +168,7 @@ export default function AdvisorDashboard() {
               <SectionTitle title="Recent activity" />
               {dashboard.overview.recentActivity.length ? (
                 <ul>
-                  {dashboard.overview.recentActivity.map((entry) => (
+                  {dashboard.overview.recentActivity.slice(0, 4).map((entry) => (
                     <ActivityRow key={entry.key} entry={entry} />
                   ))}
                 </ul>
