@@ -75,6 +75,11 @@ export const submitApplication = async (req: any, res: Response) => {
   sendResponse(res, 200, `Application submitted successfully.${warningSuffix}`, result.application);
 };
 
+export const unassignAdvisor = async (req: any, res: Response) => {
+  const application = await applicationService.unassignAdvisor(req.params.id);
+  sendResponse(res, 200, 'Advisor removed from the application', application);
+};
+
 export const assignAdvisor = async (req: any, res: Response) => {
   const application = await applicationService.assignAdvisor(req.params.id, req.body.advisorId);
   sendResponse(res, 200, 'Advisor assigned successfully', application);

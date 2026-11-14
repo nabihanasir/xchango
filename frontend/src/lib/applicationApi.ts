@@ -33,7 +33,14 @@ export const resolveApplicationFileUrl = (fileUrl?: string) => {
     return fileUrl;
   }
 
-  return `${API_ORIGIN}${fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`}`;
+  const url = `${API_ORIGIN}${fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`}`;
+  // Uploaded files are private; plain links cannot send headers, so the login token goes in the query string.
+  try {
+    const token = JSON.parse(localStorage.getItem('user') || 'null')?.token;
+    return token ? `${url}?token=${encodeURIComponent(token)}` : url;
+  } catch {
+    return url;
+  }
 };
 
 export const applicationApi = {

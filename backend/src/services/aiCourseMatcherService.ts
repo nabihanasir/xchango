@@ -411,7 +411,12 @@ export const evaluateCourseMatch = async (
     throw new Error('The home course has no outline or description to compare against.');
   }
 
-  const llmResult = await callConfiguredLLM(host, homeCourse, basis);
+  let llmResult: MatchResponse | null = null;
+  try {
+    llmResult = await callConfiguredLLM(host, homeCourse, basis);
+  } catch (error: any) {
+    logger.warn('LLM course match failed; falling back to keyword matching', { error: error?.message });
+  }
   if (llmResult) {
     return { ...llmResult, matchedBy: MatchSource.LLM };
   }

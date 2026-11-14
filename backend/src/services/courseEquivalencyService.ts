@@ -392,9 +392,14 @@ const getChosenUniversityIds = async (studentId: string) => {
   if (!wanted.size) {
     return [];
   }
-  const universities = await University.find().select('name');
+  // Applications store the university's short code (e.g. "MMU"); older data may hold the full name.
+  const universities = await University.find().select('name shortName');
   return universities
-    .filter((university) => wanted.has(String(university.name).trim().toLowerCase()))
+    .filter(
+      (university) =>
+        wanted.has(String(university.name).trim().toLowerCase()) ||
+        wanted.has(String(university.shortName ?? '').trim().toLowerCase())
+    )
     .map((university) => university._id);
 };
 

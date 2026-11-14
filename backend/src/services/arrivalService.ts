@@ -321,6 +321,15 @@ export const recordArrival = async (applicationId: string, actor: Actor, input: 
     action: { label: 'View application', url: appUrl(`/dashboard/applications/${application._id}`) },
   });
 
+  const arrivedStudent = await User.findById(application.studentId).select('name');
+  await notifyAdmins({
+    subject: 'Student arrival confirmed',
+    type: 'arrival_recorded',
+    message: `${arrivedStudent?.name || 'A student'}'s arrival at ${application.university} on ${formatDate(arrivedAt)} has been confirmed.`,
+    metadata: { applicationId: application._id, arrivedAt },
+    action: { label: 'Open applications', url: appUrl('/admin/applications') },
+  }).catch(() => undefined);
+
   return {
     application: await getApplicationById(applicationId, actor),
     emailConfigured: isEmailConfigured(),

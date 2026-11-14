@@ -499,7 +499,11 @@ const getAvailableCoursesForApplication = async (application: IApplication): Pro
   const universities = await University.find().populate('countryId', 'name');
 
   const exactUniversityIds = universities
-    .filter((university: any) => normalizeText(university.name) === applicationUniversity)
+    .filter(
+      (university: any) =>
+        normalizeText(university.name) === applicationUniversity ||
+        normalizeText(university.shortName) === applicationUniversity
+    )
     .map((university) => university._id);
 
   const countryUniversityIds = universities
@@ -826,6 +830,48 @@ export const assignAdvisor = async (applicationId: string, advisorId: string) =>
   await applyAdvisorAssignment(application, advisor);
 
   return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
+};
+
+/** Admin removes the advisor from an application that has not started its interview yet. */
+export const unassignAdvisor = async (applicationId: string) => {
+  assertObjectId(applicationId, 'Application', 'INVALID_APPLICATION_ID');
+  const application = ensureApplicationExists(await Application.findById(applicationId));
+
+  if (!application.advisorId) {
+    throw new ValidationError(
+      'No advisor is assigned.',
+      'This application does not have an advisor to remove.',
+      'Choose an application that is currently assigned.',
+      'ADVISOR_NOT_ASSIGNED'
+    );
+  }
+
+  if (application.status !== ApplicationStatus.ASSIGNED) {
+    throw new ValidationError(
+      'Advisor cannot be removed now.',
+      `Applications in status ${application.status} are already being handled by their advisor.`,
+      'Only applications that are assigned but not yet interviewed can be unassigned.',
+      'ADVISOR_UNASSIGN_NOT_ALLOWED'
+    );
+  }
+
+  const previousAdvisorId = String(application.advisorId);
+  application.advisorId = null as any;
+  application.status = ApplicationStatus.PENDING;
+  await application.save();
+
+  await notifyUserSafely({
+    userId: previousAdvisorId as any,
+    subject: 'Student unassigned',
+    type: 'advisor_unassigned',
+    message: `An admin removed you from the application to ${application.university} (${application.program}).`,
+    metadata: { applicationId: application._id },
+    action: { label: 'Open applications', url: appUrl('/advisor/applications') },
+  });
+  const assignedStudentIds = await Application.distinct('studentId', { advisorId: previousAdvisorId });
+  await AdvisorProfile.findOneAndUpdate({ userId: previousAdvisorId }, { assignedStudents: assignedStudentIds });
+
+  return Application.findById(applicationId);
 };
 
 export const scheduleInterview = async (

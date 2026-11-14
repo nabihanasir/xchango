@@ -83,6 +83,15 @@ const buildError = (err: unknown): AppError => {
     );
   }
 
+  if (err instanceof SyntaxError && (err as any).type === 'entity.parse.failed') {
+    return new ValidationError(
+      'Malformed request body.',
+      'The request body is not valid JSON.',
+      'Check the request body and try again.',
+      'INVALID_JSON_BODY'
+    );
+  }
+
   if (err instanceof Error && err.name === 'JsonWebTokenError') {
     return new AuthenticationError(
       'Authentication failed',

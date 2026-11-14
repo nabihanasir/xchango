@@ -7,6 +7,7 @@ import path from 'path';
 import { attachRequestContext } from './middleware/requestContext';
 import { corsOptions } from './config/cors';
 import { serveStoredFile } from './utils/storedFiles';
+import { requireFileAccess } from './middleware/fileAccess';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.get('/health', (_req, res) => {
 app.use('/api', routes);
 
 // Uploaded files are stored in MongoDB GridFS; the static folder only serves legacy local files.
+app.use('/uploads', requireFileAccess);
 app.get('/uploads/:folder/:name', serveStoredFile);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
