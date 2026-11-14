@@ -2,6 +2,7 @@ import {
   Home, FileText, User as UserIcon, ClipboardCheck, Users, Video, GraduationCap, CalendarClock
 } from 'lucide-react';
 import GlobalLayout from '../GlobalLayout';
+import AdvisorNextStepBar from './AdvisorNextStepBar';
 import { useAuth } from '../../context/AuthContext';
 
 const AdvisorLayout = () => {
@@ -38,6 +39,7 @@ const AdvisorLayout = () => {
       navItems={navItems}
       userProfile={userProfile}
       profilePath="/advisor/profile"
+      footer={<AdvisorNextStepBar />}
     />
   );
 };
