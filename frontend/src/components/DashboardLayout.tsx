@@ -2,6 +2,7 @@ import {
   Home, School, FileText, BookOpenCheck, UserRoundCog, Video, GraduationCap, Stamp, Building2
 } from 'lucide-react';
 import GlobalLayout from './GlobalLayout';
+import NextStepBar from './student/NextStepBar';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/httpClient';
@@ -50,6 +51,7 @@ const DashboardLayout = () => {
       navItems={navItems}
       userProfile={userProfile}
       profilePath="/dashboard/profile"
+      footer={<NextStepBar />}
       notice={
         offboarded
           ? 'Your exchange semester is complete. Your account is now read-only: you can view your records but not make changes. Contact the International Office if you need access restored.'

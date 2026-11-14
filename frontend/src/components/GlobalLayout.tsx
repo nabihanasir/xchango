@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   Menu, X, ChevronRight, LogOut
@@ -29,9 +29,11 @@ interface GlobalLayoutProps {
   notice?: string;
   /** Where the header name/avatar button navigates. */
   profilePath: string;
+  /** Optional content shown below the page, e.g. a sticky call to action. */
+  footer?: ReactNode;
 }
 
-const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profilePath }: GlobalLayoutProps) => {
+const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profilePath, footer }: GlobalLayoutProps) => {
   const theme = roleThemes[role];
   const location = useLocation();
   const { logout } = useAuth();
@@ -241,6 +243,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
               </div>
             ) : null}
             <Outlet />
+            {footer}
           </div>
         </main>
       </div>
