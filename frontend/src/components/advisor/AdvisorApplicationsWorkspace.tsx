@@ -76,13 +76,10 @@ export default function AdvisorApplicationsWorkspace() {
   const [arrivalModalOpen, setArrivalModalOpen] = useState(false);
 
   const stats = useMemo(() => {
-    const pending = applications.filter((item) =>
-      ['ASSIGNED', 'INTERVIEW_SCHEDULED'].includes(item.status)
-    ).length;
     const shortlisted = applications.filter((item) => item.status === 'SHORTLISTED').length;
     const rejected = applications.filter((item) => item.status === 'REJECTED').length;
 
-    return { pending, shortlisted, rejected };
+    return { shortlisted, rejected };
   }, [applications]);
 
   useEffect(() => {
@@ -306,8 +303,8 @@ export default function AdvisorApplicationsWorkspace() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
         <SummaryCard title="Assigned Applications" value={String(applications.length)} />
-        <SummaryCard title="Pending Interview" value={String(stats.pending)} />
-        <SummaryCard title="Shortlisted / Rejected" value={`${stats.shortlisted} / ${stats.rejected}`} />
+        <SummaryCard title="Shortlisted Applications" value={String(stats.shortlisted)} />
+        <SummaryCard title="Rejected Applications" value={String(stats.rejected)} />
       </div>
 
       {pageError ? (
