@@ -4,11 +4,13 @@ import { useAuth } from '../../context/AuthContext';
 import { advisorApi, type AdvisorProfileData } from '../../lib/advisorApi';
 import type { StudentProfile } from '../../types/studentProfile';
 import Notice from '../../components/Notice';
+import Pagination, { usePagination } from '../../components/Pagination';
 
 export default function AdvisorStudents() {
   const { user } = useAuth();
   const [, setProfile] = useState<AdvisorProfileData | null>(null);
   const [students, setStudents] = useState<StudentProfile[]>([]);
+  const studentPaging = usePagination(students, 9);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -85,7 +87,7 @@ export default function AdvisorStudents() {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {students.map((student) => (
+            {studentPaging.pageItems.map((student) => (
               <article
                 key={student._id || student.userId}
                 className="glass-card flex border border-light-color/40 flex-col overflow-hidden rounded-[2rem] transition-shadow hover:shadow-lg dark:hover:shadow-white/5"
@@ -138,6 +140,13 @@ export default function AdvisorStudents() {
             ))}
           </div>
         )}
+        <Pagination
+          page={studentPaging.page}
+          totalPages={studentPaging.totalPages}
+          total={studentPaging.total}
+          pageSize={studentPaging.pageSize}
+          onPageChange={studentPaging.setPage}
+        />
       </div>
     </div>
   );

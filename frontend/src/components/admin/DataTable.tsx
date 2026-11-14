@@ -1,5 +1,6 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
+import Pagination, { DEFAULT_PAGE_SIZE, usePagination } from '../Pagination';
 
 interface Column {
   header: string;
@@ -11,10 +12,16 @@ interface DataTableProps {
   columns: Column[];
   data: any[];
   onRowClick?: (row: any) => void;
+  /** Rows per page; pass 0 to show every row. */
+  pageSize?: number;
 }
 
-export default function DataTable({ columns, data, onRowClick }: DataTableProps) {
+export default function DataTable({ columns, data, onRowClick, pageSize = DEFAULT_PAGE_SIZE }: DataTableProps) {
+  const paging = usePagination(data, pageSize > 0 ? pageSize : Math.max(data.length, 1));
+  const rows = pageSize > 0 ? paging.pageItems : data;
+
   return (
+    <div>
     <div className="w-full overflow-x-auto bg-white rounded-2xl border border-light-color/50 shadow-sm">
       <table className="w-full text-left border-collapse">
         <thead className="bg-light-color/20 border-b border-light-color/50">
@@ -27,7 +34,7 @@ export default function DataTable({ columns, data, onRowClick }: DataTableProps)
           </tr>
         </thead>
         <tbody className="divide-y divide-light-color/30">
-          {data.map((row, rowIdx) => (
+          {rows.map((row, rowIdx) => (
             <tr
               key={rowIdx}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
@@ -51,6 +58,17 @@ export default function DataTable({ columns, data, onRowClick }: DataTableProps)
           )}
         </tbody>
       </table>
+    </div>
+    {pageSize > 0 && (
+      <Pagination
+        page={paging.page}
+        totalPages={paging.totalPages}
+        total={paging.total}
+        pageSize={paging.pageSize}
+        onPageChange={paging.setPage}
+        className="px-2"
+      />
+    )}
     </div>
   );
 }

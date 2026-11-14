@@ -5,20 +5,28 @@ import User from '../models/User';
 import { NotFoundError, ValidationError } from '../errors/AppError';
 import * as applicationService from './applicationService';
 import { NAME_PATTERN, PHONE_PATTERN } from '../utils/validators';
+import { paginateQuery, type PageRequest } from '../utils/pagination';
 
-export const getAssignedApplications = async (advisorId: string) => {
-  return await Application.find({
-    advisorId,
-  }).populate('studentId', 'name email sapId');
+export const getAssignedApplications = async (advisorId: string, page: PageRequest | null = null) => {
+  return paginateQuery(
+    Application.find({ advisorId }).sort({ createdAt: -1, _id: -1 }).populate('studentId', 'name email sapId'),
+    () => Application.countDocuments({ advisorId }),
+    page,
+  );
 };
 
-export const getAssignedStudents = async (advisorId: string) => {
+export const getAssignedStudents = async (advisorId: string, page: PageRequest | null = null) => {
   const applications = await Application.find({ advisorId }).select('studentId');
   const studentIds = Array.from(
     new Set(applications.map((application) => application.studentId.toString()))
   );
 
-  return StudentProfile.find({ userId: { $in: studentIds } }).sort({ updatedAt: -1 });
+  const filter = { userId: { $in: studentIds } };
+  return paginateQuery(
+    StudentProfile.find(filter).sort({ updatedAt: -1, _id: -1 }),
+    () => StudentProfile.countDocuments(filter),
+    page,
+  );
 };
 
 export const reviewApplication = async (

@@ -28,6 +28,7 @@ import type { JourneyInput } from '../../utils/studentJourney';
 import { programOutlineApi } from '../../lib/programOutlineApi';
 import ApplicationJourney from './ApplicationJourney';
 import ProgramOutlinePanel from './ProgramOutlinePanel';
+import Pagination, { usePagination } from '../Pagination';
 import Notice from '../Notice';
 
 type Tab = 'overview' | 'interview' | 'transcript' | 'student' | 'documents';
@@ -59,6 +60,7 @@ export default function AdvisorApplicationsWorkspace({
   const [programOutline, setProgramOutline] = useState<ProgramOutline | null>(null);
 
   const [applications, setApplications] = useState<WorkflowApplication[]>([]);
+  const applicationPaging = usePagination(applications);
   const [selectedApplicationId, setSelectedApplicationId] = useState('');
   const [selectedApplication, setSelectedApplication] = useState<WorkflowApplication | null>(null);
   const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null);
@@ -398,7 +400,7 @@ export default function AdvisorApplicationsWorkspace({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {applications.map((application) => {
+                {applicationPaging.pageItems.map((application) => {
                   const student = getApplicationUserSummary(application.studentId);
                   const isSelected = application._id === selectedApplicationId;
 
@@ -437,6 +439,14 @@ export default function AdvisorApplicationsWorkspace({
                 })}
               </tbody>
             </table>
+            <Pagination
+              page={applicationPaging.page}
+              totalPages={applicationPaging.totalPages}
+              total={applicationPaging.total}
+              pageSize={applicationPaging.pageSize}
+              onPageChange={applicationPaging.setPage}
+              className="px-6 pb-4"
+            />
           </div>
         )}
       </section>

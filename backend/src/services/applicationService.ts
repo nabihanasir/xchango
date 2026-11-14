@@ -29,6 +29,7 @@ import {
   readIsoDate,
   readString,
 } from '../utils/validators';
+import { paginateQuery, type PageRequest } from '../utils/pagination';
 
 interface ApplicationStepInput {
   country?: string;
@@ -625,8 +626,12 @@ export const getApplicationById = async (
 export const getStudentApplications = async (studentId: string) =>
   populateApplication(Application.find({ studentId }).sort({ createdAt: -1 }));
 
-export const getAdvisorApplications = async (advisorId: string) =>
-  populateApplication(Application.find({ advisorId }).sort({ createdAt: -1 }));
+export const getAdvisorApplications = async (advisorId: string, page: PageRequest | null = null) =>
+  paginateQuery(
+    populateApplication(Application.find({ advisorId }).sort({ createdAt: -1, _id: -1 })),
+    () => Application.countDocuments({ advisorId }),
+    page,
+  );
 
 export const submitApplication = async (applicationId: string, studentId: string) => {
   await assertProfileComplete(studentId);
