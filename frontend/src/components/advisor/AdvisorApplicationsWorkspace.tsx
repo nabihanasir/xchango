@@ -1,5 +1,4 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
-import CountryHeroCarousel from '../CountryHeroCarousel';
 import {
   Check,
   Eye,
@@ -48,11 +47,7 @@ const Field = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-export default function AdvisorApplicationsWorkspace({
-  showHero = false,
-}: {
-  showHero?: boolean;
-}) {
+export default function AdvisorApplicationsWorkspace() {
   const { user } = useAuth();
   const applicationRef = useRef<HTMLElement | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -351,16 +346,6 @@ export default function AdvisorApplicationsWorkspace({
 
   return (
     <div className="space-y-6">
-      {showHero ? (
-        <CountryHeroCarousel
-          title="Review assigned applications"
-          description="AI suggests course matches and reasons, but the final approval or rejection remains with the advisor."
-          scrimClass="bg-advisor-side/60"
-          minHeightClass="min-h-[200px]"
-          showTicker={false}
-        />
-      ) : null}
-
       <div className="grid gap-4 md:grid-cols-3">
         <SummaryCard title="Assigned Applications" value={String(applications.length)} />
         <SummaryCard title="Pending Interview" value={String(stats.pending)} />
