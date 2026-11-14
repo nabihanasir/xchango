@@ -109,4 +109,69 @@ describe('buildStudentJourney', () => {
       'stopped'
     );
   });
+
+  describe('strict order', () => {
+    const shortlisted = app({ status: 'SHORTLISTED', interviewDecision: { recommended: true, notes: '', decidedAt: '' } });
+
+    it('never shows a later step as done while an earlier one is open', () => {
+      // Transcript uploaded and visa approved, but the registration was never submitted.
+      const result = states({ application: app({ status: 'DRAFT' }), transcriptUploaded: true, visa: { status: 'approved' } as never });
+
+      expect(result.registration).toBe('current');
+      expect(result.documents).toBe('locked');
+      expect(result.visa).toBe('locked');
+    });
+
+    it('keeps documents locked until the courses are approved, even with a transcript on file', () => {
+      const result = states({ application: shortlisted, requests: [request('pending')], transcriptUploaded: true });
+
+      expect(result['course-approval']).toBe('current');
+      expect(result.documents).toBe('locked');
+    });
+
+    it('keeps course approval done after arrival even though an outline upload reopens the request', () => {
+      const result = states({
+        application: app({ ...shortlisted, arrival: { arrivedAt: '2026-03-01' } as never }),
+        requests: [request('under_review', [{ status: 'approved', uploadedOutline: { text: 'x' } }])],
+        transcriptUploaded: true,
+        visa: { status: 'approved' } as never,
+      });
+
+      expect(result['course-approval']).toBe('done');
+      expect(result.arrival).toBe('done');
+      expect(result.outline).toBe('done');
+      expect(result.results).toBe('current');
+    });
+
+    it('locks every step after a not-recommended decision, whatever else is on file', () => {
+      const result = states({
+        application: app({ status: 'REJECTED', interviewDecision: { recommended: false, notes: 'x', decidedAt: '' } }),
+        requests: [request('approved')],
+        transcriptUploaded: true,
+        visa: { status: 'approved' } as never,
+        results: [{ status: 'published' }] as never,
+      });
+
+      expect(result.shortlisting).toBe('stopped');
+      ['course-selection', 'course-approval', 'documents', 'visa', 'arrival', 'outline', 'results'].forEach((key) =>
+        expect(result[key]).toBe('locked')
+      );
+    });
+
+    it('locks arrival, outline and results after a rejected visa', () => {
+      const result = states({
+        application: shortlisted,
+        requests: [request('approved')],
+        transcriptUploaded: true,
+        visa: { status: 'rejected' } as never,
+        results: [{ status: 'published' }] as never,
+      });
+
+      expect(result.documents).toBe('done');
+      expect(result.visa).toBe('stopped');
+      expect(result.arrival).toBe('locked');
+      expect(result.outline).toBe('locked');
+      expect(result.results).toBe('locked');
+    });
+  });
 });

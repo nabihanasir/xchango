@@ -18,7 +18,12 @@ export type JourneyStepKey =
   | 'outline'
   | 'results';
 
-/** done: finished. current: the next thing to do. locked: not reachable yet. stopped: blocked, needs attention. */
+/**
+ * done: finished. current: the next thing to do. locked: not reachable yet. stopped: blocked, needs attention.
+ * Steps follow a strict order: a step is only ever done, current or stopped when every step before it is done, and a
+ * stopped step (not recommended, rejected, visa rejected) locks everything after it. The backend enforces the same
+ * rules (backend/src/services/journeyGateService.ts).
+ */
 export type JourneyStepState = 'done' | 'current' | 'locked' | 'stopped';
 
 export interface JourneyStep {
@@ -116,21 +121,24 @@ export const buildStudentJourney = ({
 
   // Shortlisting (the advisor's decision after the interview)
   const notRecommended = Boolean(application) && isNotRecommended(application!);
+  const rejected = status === 'REJECTED';
   const shortlistDone = Boolean(application) && (recommendedApplicationStatuses.includes(status!) || status === 'COMPLETED');
   const shortlisting: Draft = {
     key: 'shortlisting',
     title: 'Shortlisting',
     done: shortlistDone,
-    stopped: notRecommended,
+    stopped: rejected,
     to: applicationHome,
     description: notRecommended
       ? 'Your advisor did not recommend your application, so it cannot proceed.'
-      : shortlistDone
+      : rejected
+        ? 'Your application was rejected, so it cannot proceed.'
+        : shortlistDone
         ? 'Your advisor recommended you and you are shortlisted.'
         : interviewDone
           ? 'Waiting for your advisor to record their decision.'
           : 'Follows your interview.',
-    actionLabel: notRecommended || (interviewDone && !shortlistDone) ? 'View decision' : undefined,
+    actionLabel: rejected || (interviewDone && !shortlistDone) ? 'View decision' : undefined,
   };
   if (shortlisting.actionLabel) shortlisting.to = applicationPage;
 
@@ -148,13 +156,16 @@ export const buildStudentJourney = ({
         ? { description: 'Your request was not approved. Review the advisor comments and resubmit.', actionLabel: 'Resubmit request' }
         : { description: 'Choose the host courses you want approved and send them to your advisor.', actionLabel: 'Choose courses' }),
   };
+  // The student reports arriving; the advisor or International Office confirms by recording it.
+  const arrived = Boolean(application?.arrival?.arrivedAt) || requests.some((request) => request.outlineUploadOpen);
   const courseApproval: Draft = {
     key: 'course-approval',
     title: 'Course approval',
-    done: courseState === 'approved',
+    // Uploading an outline sends an approved request back to review, but arrival is only recorded after approval.
+    done: courseState === 'approved' || arrived,
     to: '/dashboard/courses',
     description:
-      courseState === 'approved'
+      courseState === 'approved' || arrived
         ? 'Your advisor approved your courses.'
         : courseState === 'in_review'
           ? 'Your request is with your advisor.'
@@ -194,8 +205,6 @@ export const buildStudentJourney = ({
     actionLabel: 'View visa status',
   };
 
-  // The student reports arriving; the advisor or International Office confirms by recording it.
-  const arrived = Boolean(application?.arrival?.arrivedAt) || requests.some((request) => request.outlineUploadOpen);
   const reportedAt = application?.arrivalReport?.reportedAt;
   const canReport = Boolean(application) && recommendedApplicationStatuses.includes(status!) && !reportedAt;
   const arrival: Draft = {
@@ -253,10 +262,27 @@ export const buildStudentJourney = ({
     resultsStep,
   ];
 
-  const firstOpen = drafts.findIndex((draft) => !draft.done);
+  const stoppedIndex = drafts.findIndex((draft) => draft.stopped);
+  let blocked = false;
 
-  return drafts.map(({ done, stopped, ...step }, index): JourneyStep => ({
-    ...step,
-    state: done ? 'done' : stopped ? 'stopped' : index === firstOpen ? 'current' : 'locked',
-  }));
+  return drafts.map(({ done, stopped, ...step }, index): JourneyStep => {
+    // A stopped step wins over everything, and every step after it stays locked.
+    if (stopped && index === stoppedIndex) {
+      blocked = true;
+      return { ...step, state: 'stopped' };
+    }
+
+    if (blocked) {
+      return { ...step, state: 'locked' };
+    }
+
+    // A step can only be done while every step before it is done, so the first open step is the current one and
+    // everything after it is locked, even if it already looks finished.
+    if (done) {
+      return { ...step, state: 'done' };
+    }
+
+    blocked = true;
+    return { ...step, state: 'current' };
+  });
 };
