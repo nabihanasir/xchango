@@ -168,3 +168,24 @@ export const adminApi = {
   updateAiModelConfig: (payload: AiModelConfigInput) =>
     unwrap<AiModelConfigRecord>(apiClient.put('/admin/ai-model-config', payload)),
 };
+
+export interface SemesterRecord {
+  _id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface SemesterInput {
+  name: string;
+  startDate: string;
+  endDate: string;
+}
+
+export const semesterApi = {
+  list: () => unwrap<SemesterRecord[]>(apiClient.get('/admin/semesters')),
+  create: (payload: SemesterInput) => unwrap<SemesterRecord>(apiClient.post('/admin/semesters', payload)),
+  update: (id: string, payload: SemesterInput) =>
+    unwrap<SemesterRecord>(apiClient.put(`/admin/semesters/${id}`, payload)),
+  remove: (id: string) => unwrap<null>(apiClient.delete(`/admin/semesters/${id}`)),
+};

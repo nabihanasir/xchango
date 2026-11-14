@@ -12,6 +12,7 @@ import University from '../models/University';
 import Country from '../models/Country';
 import { appUrl, formatDateTime, notifyAdmins, notifyUserSafely } from './notificationService';
 import { ensureStudentProfile } from './studentService';
+import { findSemesterContaining } from './semesterService';
 import {
   getCourseRecommendations,
   type RecommendationStudentProfile,
@@ -240,7 +241,10 @@ export const validateUniversitySelection = async (country: string, university: s
   return countryDoc.name;
 };
 
-/** A student may have only one open application at a time; rejected and completed ones are closed. */
+/**
+ * A student may have only one open application at a time. When one closes (rejected, not recommended or completed),
+ * they cannot start another until the semester it closed in has ended, using the dates the admin set.
+ */
 const assertNoActiveApplication = async (studentId: string) => {
   const active = await Application.findOne({
     studentId,
@@ -252,10 +256,32 @@ const assertNoActiveApplication = async (studentId: string) => {
       'You already have an active application.',
       `Your application for ${active.university} is still open, and only one application can be active at a time.`,
       active.status === ApplicationStatus.DRAFT
-        ? 'Continue your draft application, or wait until it is completed or rejected before starting another.'
-        : 'Wait until your current application is completed or rejected before starting another.',
+        ? 'Continue your draft application. Only one application is allowed at a time.'
+        : 'Only one application is allowed per semester. You can apply again in a later semester if this one closes.',
       'ACTIVE_APPLICATION_EXISTS'
     );
+  }
+
+  const closed = await Application.find({
+    studentId,
+    status: { $in: [ApplicationStatus.REJECTED, ApplicationStatus.COMPLETED] },
+  })
+    .select('status interviewDecision updatedAt')
+    .lean();
+
+  const now = Date.now();
+  for (const application of closed) {
+    const closedAt = application.interviewDecision?.decidedAt ?? application.updatedAt;
+    const semester = await findSemesterContaining(new Date(closedAt));
+    if (semester && new Date(semester.endDate).getTime() >= now) {
+      const endsOn = new Date(semester.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      throw new ValidationError(
+        'You cannot apply again this semester.',
+        `Your earlier application was closed during ${semester.name}, and only one application is allowed per semester.`,
+        `You can apply again once ${semester.name} ends on ${endsOn}.`,
+        'APPLICATION_SEMESTER_LOCKED'
+      );
+    }
   }
 };
 

@@ -270,4 +270,20 @@ const ApplicationSchema = new Schema<IApplication>(
   { timestamps: true }
 );
 
+// Backstop for the "one open application per student" rule, so two simultaneous requests cannot both succeed.
+// Rejected and completed applications are closed and are left out of the index.
+ApplicationSchema.index(
+  { studentId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      status: {
+        $in: Object.values(ApplicationStatus).filter(
+          (status) => status !== ApplicationStatus.REJECTED && status !== ApplicationStatus.COMPLETED
+        ),
+      },
+    },
+  }
+);
+
 export default mongoose.model<IApplication>('Application', ApplicationSchema);

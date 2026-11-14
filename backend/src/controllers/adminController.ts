@@ -3,6 +3,7 @@ import * as adminService from '../services/adminService';
 import { scrapeUniversityWebsite } from '../services/universityScraperService';
 import * as accountService from '../services/accountService';
 import * as offboardingService from '../services/offboardingService';
+import * as semesterService from '../services/semesterService';
 import { sendResponse } from '../utils/response';
 import { parsePagination } from '../utils/pagination';
 
@@ -111,4 +112,24 @@ export const activateUser = async (req: Request, res: Response) => {
 export const reactivateStudent = async (req: Request, res: Response) => {
   const user = await offboardingService.reactivateStudent(String(req.params.id));
   sendResponse(res, 200, 'Student account re-activated', user);
+};
+
+export const getSemesters = async (_req: Request, res: Response) => {
+  const semesters = await semesterService.listSemesters();
+  sendResponse(res, 200, 'Semesters fetched', semesters);
+};
+
+export const addSemester = async (req: Request, res: Response) => {
+  const semester = await semesterService.createSemester(req.body ?? {});
+  sendResponse(res, 201, 'Semester added', semester);
+};
+
+export const updateSemester = async (req: Request, res: Response) => {
+  const semester = await semesterService.updateSemester(String(req.params.id), req.body ?? {});
+  sendResponse(res, 200, 'Semester updated', semester);
+};
+
+export const deleteSemester = async (req: Request, res: Response) => {
+  await semesterService.deleteSemester(String(req.params.id));
+  sendResponse(res, 200, 'Semester deleted', null);
 };

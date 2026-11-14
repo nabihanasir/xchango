@@ -42,6 +42,7 @@ import AdminCourses from './pages/admin/AdminCourses';
 import AdminAiModelConfig from './pages/admin/AdminAiModelConfig';
 import AdminResults from './pages/admin/AdminResults';
 import AdminVisa from './pages/admin/AdminVisa';
+import AdminSemesters from './pages/admin/AdminSemesters';
 import FaqChatWidget from './components/FaqChatWidget';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import {
@@ -93,6 +94,7 @@ function App() {
             <Route path="courses" element={<AdminCourses />} />
             <Route path="results" element={<AdminResults />} />
             <Route path="visa" element={<AdminVisa />} />
+            <Route path="semesters" element={<AdminSemesters />} />
             <Route path="profile" element={<AdminProfile />} />
             <Route path="llm-models" element={<AdminAiModelConfig />} />
             <Route path="settings" element={<Navigate to="/admin/llm-models" replace />} />

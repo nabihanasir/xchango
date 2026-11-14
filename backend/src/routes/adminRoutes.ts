@@ -28,6 +28,10 @@ router.post('/universities', adminController.addUniversity);
 router.put('/universities/:id', adminController.updateUniversity);
 router.post('/host-courses', adminController.addHostCourse);
 router.post('/courses', adminController.addCourse);
+router.get('/semesters', adminController.getSemesters);
+router.post('/semesters', adminController.addSemester);
+router.put('/semesters/:id', adminController.updateSemester);
+router.delete('/semesters/:id', adminController.deleteSemester);
 router.get('/ai-model-config', adminController.getAiModelConfig);
 router.put('/ai-model-config', adminController.updateAiModelConfig);
 

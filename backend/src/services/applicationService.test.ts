@@ -11,6 +11,7 @@ import {
   studentCanRequestCourseApproval,
   submitApplication,
 } from './applicationService';
+import { findSemesterContaining } from './semesterService';
 
 jest.mock('../models/User');
 jest.mock('../models/Course');
@@ -23,6 +24,9 @@ jest.mock('./studentService', () => ({
   ensureStudentProfile: jest.fn().mockResolvedValue({ isProfileComplete: true, profileCompletionIssues: [] }),
 }));
 
+jest.mock('./semesterService', () => ({ findSemesterContaining: jest.fn() }));
+
+const mockedFindSemester = findSemesterContaining as jest.MockedFunction<typeof findSemesterContaining>;
 const MockedApplication = Application as jest.Mocked<typeof Application>;
 const MockedNotification = Notification as jest.Mocked<typeof Notification>;
 
@@ -239,5 +243,34 @@ describe('createApplication', () => {
     });
 
     await expect(createApplication(studentId, payload)).rejects.toMatchObject({ code: 'ACTIVE_APPLICATION_EXISTS' });
+  });
+
+  describe('after an earlier application closed', () => {
+    const givenClosedApplication = () => {
+      (MockedApplication.findOne as jest.Mock).mockReturnValue({ select: jest.fn().mockResolvedValue(null) });
+      (MockedApplication.find as jest.Mock).mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue([{ status: ApplicationStatus.REJECTED, updatedAt: new Date('2026-10-01') }]),
+        }),
+      });
+    };
+
+    it('blocks a new application until the semester it closed in has ended', async () => {
+      givenClosedApplication();
+      mockedFindSemester.mockResolvedValue({ name: 'Fall 2026', endDate: new Date(Date.now() + 86_400_000) } as never);
+
+      await expect(createApplication(studentId, payload)).rejects.toMatchObject({ code: 'APPLICATION_SEMESTER_LOCKED' });
+      expect(MockedApplication.create).not.toHaveBeenCalled();
+    });
+
+    it('does not block once that semester is over', async () => {
+      givenClosedApplication();
+      mockedFindSemester.mockResolvedValue({ name: 'Spring 2026', endDate: new Date(Date.now() - 86_400_000) } as never);
+
+      // Passing the lock moves on to payload validation, which fails fast on an empty country.
+      await expect(createApplication(studentId, { country: '', university: '', program: '' })).rejects.toMatchObject({
+        code: 'COUNTRY_REQUIRED',
+      });
+    });
   });
 });
