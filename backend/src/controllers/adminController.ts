@@ -66,7 +66,7 @@ export const updateAdvisorCountries = async (req: Request, res: Response) => {
 
 export const uploadOfferLetter = async (req: any, res: Response) => {
   const { applicationId, offerLetterUrl } = req.body;
-  const application = await adminService.updateApplicationOfferLetter(applicationId, offerLetterUrl);
+  const application = await adminService.updateApplicationOfferLetter(req.user._id.toString(), applicationId, offerLetterUrl);
   sendResponse(res, 200, 'Offer letter uploaded successfully', application);
 };
 

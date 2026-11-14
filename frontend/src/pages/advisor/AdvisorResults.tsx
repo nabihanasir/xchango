@@ -73,6 +73,21 @@ export default function AdvisorResults() {
       setError('Enter a grade before saving.');
       return;
     }
+    if (!/^(A\+?|A-|B\+?|B-|C\+?|C-|D\+?|D-|F|P|NP|W|I|[0-9]{1,3}(\.[0-9]{1,2})?%?)$/i.test(draft.grade.trim())) {
+      setError('Grade must be a letter grade such as A, B+ or F, or a numeric score.');
+      return;
+    }
+    if (draft.marks.trim()) {
+      const marks = Number(draft.marks);
+      if (!Number.isFinite(marks) || marks < 0 || marks > 100) {
+        setError('Marks must be a number between 0 and 100.');
+        return;
+      }
+    }
+    if (draft.remarks.trim().length > 1000) {
+      setError('Remarks must be 1000 characters or fewer.');
+      return;
+    }
 
     try {
       setSavingId(`${itemId}-${status}`);
@@ -160,6 +175,7 @@ export default function AdvisorResults() {
                       value={draft.grade}
                       onChange={(event) => updateDraft(item.courseRequestItemId, { grade: event.target.value })}
                       placeholder="e.g. A"
+                      maxLength={6}
                       className="mt-2 w-full rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-accent-yellow/60 focus:ring-4 focus:ring-accent-yellow/10"
                     />
                   </div>

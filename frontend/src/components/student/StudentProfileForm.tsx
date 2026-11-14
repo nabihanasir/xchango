@@ -10,7 +10,7 @@ export const STUDENT_PROFILE_FORM_ID = 'student-profile-form';
 
 const MAX_SEMESTER = 8;
 
-const clampSemester = (value: number | string) => Math.min(MAX_SEMESTER, Math.max(0, Math.floor(Number(value)) || 0));
+const clampSemester = (value: number | string) => Math.min(MAX_SEMESTER, Math.max(1, Math.floor(Number(value)) || 1));
 
 // Only Computing is open for exchange for now; the other faculties are listed but blocked.
 const DEPARTMENTS = [
@@ -71,6 +71,7 @@ const inputClassName =
 
 export default function StudentProfileForm({ basicInfo, preferences, onSubmit }: StudentProfileFormProps) {
   const [formState, setFormState] = useState(() => buildFormState(basicInfo, preferences));
+  const [formError, setFormError] = useState('');
   const { countries: catalogCountries, universities: catalogUniversities } = useCatalog();
   const destinationCountries = catalogCountries.map((country) => country.name);
 
@@ -99,8 +100,35 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
   const intakeIncomplete =
     Boolean(formState.preferences.intakeSeason) !== Boolean(formState.preferences.intakeYear);
 
+  const validateBasicInfo = (): string => {
+    const { fullName, cmsId, email, phone } = formState.basicInfo;
+    const name = fullName.trim();
+    if (name && (name.length < 2 || name.length > 100 || !/^[A-Za-z][A-Za-z .'-]*$/.test(name))) {
+      return 'Full name must be 2-100 characters and contain only letters, spaces, apostrophes, dots and hyphens.';
+    }
+    if (cmsId.trim() && !/^[A-Za-z0-9][A-Za-z0-9\-./ ]{2,29}$/.test(cmsId.trim())) {
+      return 'CMS ID may only contain letters, digits, dashes, dots and slashes (3-30 characters).';
+    }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) {
+      return 'Enter a valid email address, e.g. student@riphah.edu.pk.';
+    }
+    if (phone.trim()) {
+      const digits = phone.replace(/[^0-9]/g, '').length;
+      if (!/^\+?[0-9][0-9\s-]{6,17}$/.test(phone.trim()) || digits < 7 || digits > 15) {
+        return 'Enter a valid phone number (7-15 digits, may start with +).';
+      }
+    }
+    return '';
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const validationMessage = validateBasicInfo();
+    setFormError(validationMessage);
+    if (validationMessage) {
+      return;
+    }
 
     await onSubmit({
       basicInfo: {
@@ -128,7 +156,12 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
         </div>
       </div>
 
-      <form id={STUDENT_PROFILE_FORM_ID} className="mt-8 space-y-8" onSubmit={handleSubmit}>
+      <form id={STUDENT_PROFILE_FORM_ID} className="mt-8 space-y-8" onSubmit={handleSubmit} noValidate>
+        {formError ? (
+          <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {formError}
+          </p>
+        ) : null}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <label className="space-y-2">
             <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-600">
@@ -145,6 +178,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
                 }))
               }
               placeholder="Student full name"
+              maxLength={100}
             />
           </label>
 
@@ -160,6 +194,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
                 }))
               }
               placeholder="CMS / SAP ID"
+              maxLength={30}
             />
           </label>
 
@@ -179,6 +214,7 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
                 }))
               }
               placeholder="student@riphah.edu.pk"
+              maxLength={254}
             />
           </label>
 
@@ -197,6 +233,8 @@ export default function StudentProfileForm({ basicInfo, preferences, onSubmit }:
                 }))
               }
               placeholder="+92..."
+              type="tel"
+              maxLength={20}
             />
           </label>
 

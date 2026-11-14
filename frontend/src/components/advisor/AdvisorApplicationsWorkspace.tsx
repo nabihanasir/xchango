@@ -257,6 +257,15 @@ export default function AdvisorApplicationsWorkspace({
       setActionError('Select an interview date before scheduling.');
       return;
     }
+    const todayIso = new Date().toISOString().slice(0, 10);
+    if (interviewForm.date < todayIso) {
+      setActionError('The interview date cannot be in the past.');
+      return;
+    }
+    if (interviewForm.location.trim().length > 200) {
+      setActionError('The interview location must be 200 characters or fewer.');
+      return;
+    }
 
     setSchedulingInterview(true);
     setActionError('');
@@ -529,6 +538,7 @@ export default function AdvisorApplicationsWorkspace({
                       <span>Date</span>
                       <input
                         type="date"
+                        min={new Date().toISOString().slice(0, 10)}
                         value={interviewForm.date}
                         onChange={(event) => setInterviewForm((current) => ({ ...current, date: event.target.value }))}
                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10"
@@ -539,6 +549,7 @@ export default function AdvisorApplicationsWorkspace({
                       <input
                         type="text"
                         value={interviewForm.location}
+                        maxLength={200}
                         onChange={(event) => setInterviewForm((current) => ({ ...current, location: event.target.value }))}
                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10"
                         placeholder="Advisor office or meeting link"

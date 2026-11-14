@@ -6,6 +6,15 @@ import { AuthenticationError, DatabaseError, ValidationError } from '../errors/A
 import { logger } from '../utils/logger';
 import { offboardDueStudents } from './offboardingService';
 import { isEmailConfigured, sendEmail } from './emailService';
+import {
+  NAME_PATTERN,
+  PHONE_PATTERN,
+  SAP_ID_PATTERN,
+  MAX_PASSWORD_LENGTH,
+  readEmail,
+  readPassword,
+  readString,
+} from '../utils/validators';
 
 const generateToken = (id: string, role: string) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET || 'secret', {
@@ -26,44 +35,49 @@ export const registerUser = async (userData: any) => {
     );
   }
 
-  if (!phone?.trim() || !sapId?.trim()) {
+  const cleanName = readString(name, 'Full name', {
+    required: true,
+    max: 100,
+    pattern: NAME_PATTERN,
+    patternHint: 'Full name can only contain letters, spaces, apostrophes, dots and hyphens.',
+    code: 'NAME_REQUIRED',
+  });
+  if (cleanName.length < 2) {
     throw new ValidationError(
-      'Missing registration details',
-      'Phone number and SAP ID are required for student registration.',
-      'Please provide both phone number and SAP ID, then submit the form again.',
-      'MISSING_STUDENT_REGISTRATION_FIELDS',
-    );
-  }
-
-  if (!name?.trim()) {
-    throw new ValidationError(
-      'Name is required',
-      'The registration request did not include a full name.',
+      'Name is too short',
+      'The full name must be at least 2 characters.',
       'Please enter your full name and try again.',
-      'NAME_REQUIRED',
+      'NAME_TOO_SHORT',
     );
   }
-
-  if (!email?.trim()) {
+  const cleanEmail = readEmail(email, 'Email', true, 'EMAIL_REQUIRED');
+  const cleanPhone = readString(phone, 'Phone number', {
+    required: true,
+    max: 20,
+    pattern: PHONE_PATTERN,
+    patternHint: 'Phone number must be 7-15 digits and may start with +.',
+    code: 'MISSING_STUDENT_REGISTRATION_FIELDS',
+  });
+  const phoneDigits = cleanPhone.replace(/[^0-9]/g, '').length;
+  if (phoneDigits < 7 || phoneDigits > 15) {
     throw new ValidationError(
-      'Email is required',
-      'The registration request did not include an email address.',
-      'Please enter a valid university or personal email address.',
-      'EMAIL_REQUIRED',
+      'Phone number is invalid',
+      'Phone number must contain between 7 and 15 digits.',
+      'Please enter a valid phone number.',
+      'PHONE_INVALID',
     );
   }
+  const cleanSapId = readString(sapId, 'SAP ID', {
+    required: true,
+    max: 10,
+    pattern: SAP_ID_PATTERN,
+    patternHint: 'SAP ID must be 5-10 digits.',
+    code: 'MISSING_STUDENT_REGISTRATION_FIELDS',
+  });
+  readPassword(password, 'Password');
 
-  if (!password || password.length < 8) {
-    throw new ValidationError(
-      'Password is too short',
-      'The password must be at least 8 characters long.',
-      'Please choose a stronger password with at least 8 characters.',
-      'PASSWORD_TOO_SHORT',
-    );
-  }
-
-  const normalizedEmail = email.trim().toLowerCase();
-  const normalizedSapId = sapId.trim();
+  const normalizedEmail = cleanEmail;
+  const normalizedSapId = cleanSapId;
 
   let existingUser;
   try {
@@ -109,11 +123,11 @@ export const registerUser = async (userData: any) => {
   let user;
   try {
     user = await User.create({
-      name: name.trim(),
+      name: cleanName,
       email: normalizedEmail,
       password: hashedPassword,
       role: normalizedRole,
-      phone: phone.trim(),
+      phone: cleanPhone,
       sapId: normalizedSapId,
     });
   } catch (error) {
@@ -141,19 +155,12 @@ export const registerUser = async (userData: any) => {
 export const loginUser = async (credentials: any) => {
   const { email, password } = credentials;
 
-  if (!email?.trim()) {
-    throw new ValidationError(
-      'Email is required',
-      'The login request did not include an email address.',
-      'Please enter your email address and try again.',
-      'EMAIL_REQUIRED',
-    );
-  }
+  const loginEmail = readEmail(email, 'Email', true, 'EMAIL_REQUIRED');
 
-  if (!password) {
+  if (!password || typeof password !== 'string' || password.length > MAX_PASSWORD_LENGTH) {
     throw new ValidationError(
       'Password is required',
-      'The login request did not include a password.',
+      'The login request did not include a valid password.',
       'Please enter your password and try again.',
       'PASSWORD_REQUIRED',
     );
@@ -161,7 +168,7 @@ export const loginUser = async (credentials: any) => {
 
   let user;
   try {
-    user = await User.findOne({ email: email.trim().toLowerCase() });
+    user = await User.findOne({ email: loginEmail });
   } catch {
     throw new DatabaseError(
       'Unable to complete login',
@@ -201,16 +208,7 @@ const buildResetPasswordLink = (token: string) => {
 };
 
 export const requestPasswordReset = async (payload: any) => {
-  const normalizedEmail = payload?.email?.trim()?.toLowerCase();
-
-  if (!normalizedEmail) {
-    throw new ValidationError(
-      'Email is required',
-      'The password reset request did not include an email address.',
-      'Please enter your email address and try again.',
-      'EMAIL_REQUIRED',
-    );
-  }
+  const normalizedEmail = readEmail(payload?.email, 'Email', true, 'EMAIL_REQUIRED');
 
   let user: IUser | null;
   try {
@@ -270,25 +268,13 @@ export const requestPasswordReset = async (payload: any) => {
 };
 
 export const updateOwnName = async (userId: string, payload: any) => {
-  const name = typeof payload?.name === 'string' ? payload.name.trim() : '';
-
-  if (!name) {
-    throw new ValidationError(
-      'Name is required',
-      'The profile update did not include a name.',
-      'Please enter your name and try again.',
-      'NAME_REQUIRED',
-    );
-  }
-
-  if (name.length > 100) {
-    throw new ValidationError(
-      'Name is too long',
-      'The name must be 100 characters or fewer.',
-      'Please shorten your name and try again.',
-      'NAME_TOO_LONG',
-    );
-  }
+  const name = readString(payload?.name, 'Name', {
+    required: true,
+    max: 100,
+    pattern: NAME_PATTERN,
+    patternHint: 'Name can only contain letters, spaces, apostrophes, dots and hyphens.',
+    code: 'NAME_REQUIRED',
+  });
 
   const user = await User.findByIdAndUpdate(userId, { name }, { new: true });
   if (!user) {
@@ -308,7 +294,7 @@ export const changeOwnPassword = async (userId: string, payload: any) => {
   const newPassword = payload?.newPassword;
   const confirmPassword = payload?.confirmPassword;
 
-  if (!currentPassword) {
+  if (!currentPassword || typeof currentPassword !== 'string') {
     throw new ValidationError(
       'Current password is required',
       'The request did not include your current password.',
@@ -317,14 +303,7 @@ export const changeOwnPassword = async (userId: string, payload: any) => {
     );
   }
 
-  if (!newPassword || newPassword.length < 8) {
-    throw new ValidationError(
-      'Password is too short',
-      'The new password must be at least 8 characters long.',
-      'Please choose a stronger password with at least 8 characters.',
-      'PASSWORD_TOO_SHORT',
-    );
-  }
+  readPassword(newPassword, 'New password');
 
   if (newPassword !== confirmPassword) {
     throw new ValidationError(
@@ -373,7 +352,7 @@ export const changeOwnPassword = async (userId: string, payload: any) => {
 };
 
 export const resetPassword = async (token: string, payload: any) => {
-  if (!token?.trim()) {
+  if (typeof token !== 'string' || !token.trim()) {
     throw new ValidationError(
       'Reset token is required',
       'The password reset request did not include a valid reset token.',
@@ -385,14 +364,7 @@ export const resetPassword = async (token: string, payload: any) => {
   const password = payload?.password;
   const confirmPassword = payload?.confirmPassword;
 
-  if (!password || password.length < 8) {
-    throw new ValidationError(
-      'Password is too short',
-      'The new password must be at least 8 characters long.',
-      'Please choose a stronger password with at least 8 characters.',
-      'PASSWORD_TOO_SHORT',
-    );
-  }
+  readPassword(password, 'Password');
 
   if (password !== confirmPassword) {
     throw new ValidationError(

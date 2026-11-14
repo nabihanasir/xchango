@@ -9,7 +9,10 @@ import { createUploader } from '../utils/upload';
 import { UserRole } from '../models/User';
 
 const router = express.Router();
-const applicationDocumentUpload = createUploader('application-documents');
+const applicationDocumentUpload = createUploader('application-documents', ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'], {
+  fileSize: 10 * 1024 * 1024,
+  files: 10,
+});
 
 router.use(protect);
 

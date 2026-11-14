@@ -6,8 +6,8 @@ import University, { IUniversity } from '../models/University';
 import User, { UserRole } from '../models/User';
 import { NotFoundError, ValidationError } from '../errors/AppError';
 import { assignPendingApplicationsForCountry } from './applicationService';
+import { COURSE_CODE_PATTERN, readEmail, readString, readUrl } from '../utils/validators';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -115,10 +115,42 @@ const cleanIntakes = (value: unknown) => {
   });
 };
 
-const cleanProgrammes = (value: unknown) =>
-  pairList(value, ['name', 'level', 'duration', 'language', 'credits', 'description'] as const).filter(
+const cleanProgrammes = (value: unknown) => {
+  const programmes = pairList(value, ['name', 'level', 'duration', 'language', 'credits', 'description'] as const).filter(
     (programme) => programme.name
   );
+  programmes.forEach((programme, index) => {
+    if (programme.credits && !/\d/.test(programme.credits)) {
+      fail(
+        `Programme ${index + 1} has invalid credits.`,
+        'Credits must include a number, e.g. "130 credits".',
+        'Enter the number of credits for the programme.',
+        'UNIVERSITY_PROGRAMME_CREDITS_INVALID'
+      );
+    }
+  });
+  return programmes;
+};
+
+/** Rejects absurdly long text or lists anywhere in the cleaned university payload. */
+const assertFieldLimits = (value: unknown, path = 'university'): void => {
+  if (typeof value === 'string') {
+    if (value.length > 5000) {
+      fail('A field is too long.', `${path} has more than 5000 characters.`, 'Shorten the text and try again.', 'UNIVERSITY_FIELD_TOO_LONG');
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    if (value.length > 100) {
+      fail('A list is too long.', `${path} has more than 100 entries.`, 'Remove some entries and try again.', 'UNIVERSITY_LIST_TOO_LONG');
+    }
+    value.forEach((entry, index) => assertFieldLimits(entry, `${path}[${index}]`));
+    return;
+  }
+  if (value && typeof value === 'object') {
+    Object.entries(value as Record<string, unknown>).forEach(([key, entry]) => assertFieldLimits(entry, `${path}.${key}`));
+  }
+};
 
 const cleanFacilities = (value: unknown) =>
   pairList(value, ['title', 'description', 'icon'] as const)
@@ -132,16 +164,16 @@ const cleanVisa = (value: unknown) => {
 
 const cleanContact = (value: unknown, website: string) => {
   const contact = (value ?? {}) as Record<string, unknown>;
-  const email = text(contact.email).toLowerCase();
-  if (email && !EMAIL_PATTERN.test(email)) {
-    fail(
-      'Contact email is invalid.',
-      'The university contact email is not in a valid format.',
-      'Enter an address like exchange@university.edu or leave it empty.',
-      'UNIVERSITY_EMAIL_INVALID'
-    );
-  }
-  return { email, phone: text(contact.phone), address: text(contact.address), website: text(contact.website) || website };
+  const email = readEmail(contact.email, 'Contact email', false, 'UNIVERSITY_EMAIL_INVALID');
+  const phone = readString(contact.phone, 'Contact phone', {
+    max: 30,
+    pattern: /^\+?[0-9()\s.\-]{6,30}$/,
+    patternHint: 'Contact phone may only contain digits, spaces, dashes, dots, parentheses and a leading +.',
+    code: 'UNIVERSITY_PHONE_INVALID',
+  });
+  const address = readString(contact.address, 'Contact address', { max: 300, code: 'UNIVERSITY_ADDRESS_TOO_LONG' });
+  const contactWebsite = readUrl(contact.website, 'Contact website', false, 'UNIVERSITY_WEBSITE_INVALID');
+  return { email, phone, address, website: contactWebsite || website };
 };
 
 interface CountryInput {
@@ -278,6 +310,9 @@ export const saveUniversity = async (universityId: string | null, input: Univers
 
   const name = text(input.name);
   const shortName = text(input.shortName).toUpperCase();
+  if (name.length > 200) {
+    fail('University name is too long.', 'The name must be 200 characters or fewer.', 'Shorten the name.', 'UNIVERSITY_NAME_TOO_LONG');
+  }
   if (!name) {
     fail('University name is required.', 'The name was empty.', 'Enter the university name.', 'UNIVERSITY_NAME_REQUIRED');
   }
@@ -290,12 +325,22 @@ export const saveUniversity = async (universityId: string | null, input: Univers
     );
   }
 
+  if (!/^[A-Z0-9][A-Z0-9\-]{0,11}$/.test(shortName)) {
+    fail('Short code is invalid.', 'The short code may only contain letters, digits and dashes (max 12 characters).', 'Enter a code such as MMU.', 'UNIVERSITY_SHORT_NAME_INVALID');
+  }
+
   const seatLimit = Number(input.seatLimit ?? 0);
-  if (!Number.isFinite(seatLimit) || seatLimit < 0) {
+  if (!Number.isFinite(seatLimit) || seatLimit < 0 || seatLimit > 100000) {
     fail('Seat limit is invalid.', 'The seat limit must be zero or more.', 'Enter a whole number.', 'UNIVERSITY_SEATS_INVALID');
   }
 
-  const website = text(input.website);
+  const website = readUrl(input.website, 'Website', false, 'UNIVERSITY_WEBSITE_INVALID');
+  const imageUrl = readString(input.image, 'Image', {
+    max: 2048,
+    pattern: /^(\/uploads\/\S+|https?:\/\/\S+|data:image\/[a-z+.-]+;base64,\S+)$/i,
+    patternHint: 'Image must be an http(s) link or an uploaded file path.',
+    code: 'UNIVERSITY_IMAGE_INVALID',
+  });
   const { existing: existingCountry, draft } = await resolveCountry(input);
   const countryName = existingCountry?.name ?? draft!.name!;
 
@@ -333,10 +378,10 @@ export const saveUniversity = async (universityId: string | null, input: Univers
     shortName,
     website,
     seatLimit: Math.floor(seatLimit),
-    city: text(input.city),
-    region: text(input.region),
-    tagline: text(input.tagline),
-    image: text(input.image),
+    city: readString(input.city, 'City', { max: 100, code: 'UNIVERSITY_CITY_TOO_LONG' }),
+    region: readString(input.region, 'Region', { max: 100, code: 'UNIVERSITY_REGION_TOO_LONG' }),
+    tagline: readString(input.tagline, 'Tagline', { max: 200, code: 'UNIVERSITY_TAGLINE_TOO_LONG' }),
+    image: imageUrl,
     about: textList(input.about),
     facts: pairList(input.facts, ['label', 'value'] as const),
     highlights: textList(input.highlights),
@@ -352,6 +397,8 @@ export const saveUniversity = async (universityId: string | null, input: Univers
     faqs: pairList(input.faqs, ['question', 'answer'] as const),
     contact: cleanContact(input.contact, website),
   };
+
+  assertFieldLimits(fields);
 
   const hostCourseCount = universityId
     ? await Course.countDocuments({ universityId, type: CourseType.HOST })
@@ -447,7 +494,7 @@ export const createHostCourse = async (
     instructorEmail?: string;
   }
 ) => {
-  if (!payload.universityId || !mongoose.Types.ObjectId.isValid(payload.universityId)) {
+  if (!payload.universityId || typeof payload.universityId !== 'string' || !mongoose.Types.ObjectId.isValid(payload.universityId)) {
     fail('University is required.', 'A host course must belong to a university.', 'Choose a university.', 'COURSE_UNIVERSITY_REQUIRED');
   }
   const university = await University.findById(payload.universityId);
@@ -455,22 +502,31 @@ export const createHostCourse = async (
     throw new NotFoundError('University not found.', 'No university matches that id.', 'Refresh the list and try again.', 'UNIVERSITY_NOT_FOUND');
   }
 
-  const title = text(payload.title);
+  const title = readString(payload.title, 'Title', { max: 150, code: 'COURSE_TITLE_REQUIRED' });
   const creditHours = Number(payload.creditHours);
-  const code = text(payload.code).toUpperCase();
+  const code = readString(payload.code, 'Course code', {
+    max: 30,
+    pattern: COURSE_CODE_PATTERN,
+    patternHint: 'Course code may only contain letters, digits, dashes, underscores, dots and spaces.',
+    code: 'COURSE_CODE_INVALID',
+  }).toUpperCase();
   if (!title) {
     fail('Title is required.', 'The course title was not provided.', 'Enter a course title.', 'COURSE_TITLE_REQUIRED');
   }
   if (!code) {
     fail('Course code is required.', 'Host courses are identified by their code.', 'Enter a code such as MMU-CS101.', 'COURSE_CODE_REQUIRED');
   }
-  if (!Number.isFinite(creditHours) || creditHours <= 0) {
-    fail('Credit hours must be greater than zero.', 'The credit hours value is invalid.', 'Enter a positive number.', 'COURSE_CREDIT_HOURS_INVALID');
+  if (!Number.isFinite(creditHours) || creditHours <= 0 || creditHours > 12) {
+    fail('Credit hours must be between 1 and 12.', 'The credit hours value is invalid.', 'Enter a positive number.', 'COURSE_CREDIT_HOURS_INVALID');
   }
-  const email = text(payload.instructorEmail).toLowerCase();
-  if (email && !EMAIL_PATTERN.test(email)) {
-    fail('Instructor email is invalid.', 'The email is not in a valid format.', 'Enter name@university.edu or leave it empty.', 'COURSE_INSTRUCTOR_EMAIL_INVALID');
-  }
+  const email = readEmail(payload.instructorEmail, 'Instructor email', false, 'COURSE_INSTRUCTOR_EMAIL_INVALID');
+  const instructorName = readString(payload.instructorName, 'Instructor name', {
+    max: 100,
+    pattern: /^[A-Za-z][A-Za-z .'-]*$/,
+    patternHint: 'Instructor name can only contain letters, spaces, apostrophes, dots and hyphens.',
+    code: 'COURSE_INSTRUCTOR_NAME_INVALID',
+  });
+  const description = readString(payload.description, 'Description', { max: 5000 });
 
   if (await Course.exists({ universityId: university._id, type: CourseType.HOST, code })) {
     fail('Course code already exists.', 'This university already has a host course with that code.', 'Use a different code.', 'COURSE_CODE_DUPLICATE');
@@ -480,9 +536,9 @@ export const createHostCourse = async (
     title,
     name: title,
     code,
-    description: text(payload.description),
+    description,
     creditHours,
-    instructorName: text(payload.instructorName),
+    instructorName,
     instructorEmail: email,
     universityId: university._id,
     type: CourseType.HOST,

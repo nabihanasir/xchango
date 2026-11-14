@@ -12,6 +12,19 @@ import * as courseService from './courseService';
 import { assignPendingApplicationsForCountry } from './applicationService';
 import * as universityAdminService from './universityAdminService';
 import { appUrl, notifyUserSafely } from './notificationService';
+import { ValidationError } from '../errors/AppError';
+import {
+  NAME_PATTERN,
+  PHONE_PATTERN,
+  SAP_ID_PATTERN,
+  assertObjectId,
+  assertOneOf,
+  readEmail,
+  readNumber,
+  readPassword,
+  readString,
+  readUrl,
+} from '../utils/validators';
 
 const populateApplications = <T>(query: T) =>
   (query as any)
@@ -96,17 +109,26 @@ export const getAllUsers = async () => {
 
 /** Countries come from the database, so any country an admin has added can be assigned to an advisor. */
 const normalizeAdvisorCountries = async (countries: unknown): Promise<string[]> => {
-  const requested = Array.isArray(countries) ? countries.map((country) => String(country).trim()) : [];
+  if (countries !== undefined && (!Array.isArray(countries) || countries.length > 100)) {
+    throw new ValidationError('Countries are invalid.', 'Countries must be a list.', 'Select countries from the list.', 'ADVISOR_COUNTRIES_INVALID');
+  }
+  const requested = Array.isArray(countries) ? countries.map((country) => readString(country, 'Country', { required: true, max: 100 })) : [];
   const known = await Country.find({ isActive: { $ne: false } }).select('name');
   const allowed = known.map((country) => country.name);
   const invalid = requested.filter((country) => !allowed.includes(country));
   if (invalid.length) {
-    throw new Error(`Unsupported countries: ${invalid.join(', ')}. Allowed: ${allowed.join(', ')}.`);
+    throw new ValidationError(
+      'Unsupported country.',
+      `Unsupported countries: ${invalid.join(', ')}.`,
+      `Choose from: ${allowed.join(', ')}.`,
+      'ADVISOR_COUNTRIES_INVALID'
+    );
   }
   return [...new Set(requested)];
 };
 
-export const setAdvisorCountries = async (userId: string, countries: unknown) => {
+export const setAdvisorCountries = async (rawUserId: unknown, countries: unknown) => {
+  const userId = assertObjectId(rawUserId, 'Advisor', 'ADVISOR_INVALID');
   const normalized = await normalizeAdvisorCountries(countries);
   const profile = await AdvisorProfile.findOneAndUpdate({ userId }, { countries: normalized }, { new: true });
   if (!profile) {
@@ -153,48 +175,75 @@ export const createUser = async (userData: any) => {
     experience,
   } = userData;
 
-  if (!name?.trim() || !email?.trim() || !role) {
-    throw new Error('Name, email, and role are required.');
-  }
+  const cleanName = readString(name, 'Name', {
+    required: true,
+    max: 100,
+    pattern: NAME_PATTERN,
+    patternHint: 'Name can only contain letters, spaces, apostrophes, dots and hyphens.',
+  });
+  const cleanEmail = readEmail(email, 'Email');
+  const normalizedRole = assertOneOf(role, Object.values(UserRole) as UserRole[], 'Role', 'ROLE_INVALID');
 
-  const normalizedRole = role as UserRole;
-  const existingUser = await User.findOne({ email: email.trim().toLowerCase() });
+  const existingUser = await User.findOne({ email: cleanEmail });
   if (existingUser) {
-    throw new Error('User already exists.');
+    throw new ValidationError(
+      'User already exists.',
+      'An account with this email address already exists.',
+      'Use a different email address.',
+      'USER_ALREADY_EXISTS'
+    );
   }
 
+  const cleanPhone = readString(phone, 'Phone', {
+    required: normalizedRole === UserRole.STUDENT,
+    max: 20,
+    pattern: PHONE_PATTERN,
+    patternHint: 'Phone number must be 7-15 digits and may start with +.',
+  });
+  const cleanSapId = readString(sapId, 'SAP ID', {
+    required: normalizedRole === UserRole.STUDENT,
+    max: 10,
+    pattern: SAP_ID_PATTERN,
+    patternHint: 'SAP ID must be 5-10 digits.',
+  });
+
+  let cleanDesignation = '';
+  let cleanDepartment = '';
+  let cleanExperience = 0;
   if (normalizedRole === UserRole.ADVISOR) {
-    if (!designation?.trim() || !department?.trim()) {
-      throw new Error('Designation and department are required for advisors.');
-    }
+    cleanDesignation = readString(designation, 'Designation', { required: true, max: 100 });
+    cleanDepartment = readString(department, 'Department', { required: true, max: 100 });
+    cleanExperience = readNumber(experience, 'Experience', { min: 0, max: 60, integer: true, required: false }) ?? 0;
   }
 
-  if (normalizedRole === UserRole.STUDENT && (!phone?.trim() || !sapId?.trim())) {
-    throw new Error('Phone and SAP ID are required for student accounts.');
-  }
+  const advisorCountries = normalizedRole === UserRole.ADVISOR ? await normalizeAdvisorCountries(userData.countries) : [];
 
-  const plainPassword = password?.trim() || generateTemporaryPassword();
+  const suppliedPassword = typeof password === 'string' ? password.trim() : '';
+  if (suppliedPassword) {
+    readPassword(suppliedPassword, 'Password');
+  }
+  const plainPassword = suppliedPassword || generateTemporaryPassword();
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(plainPassword, salt);
 
   const user = await User.create({
-    name: name.trim(),
-    email: email.trim().toLowerCase(),
+    name: cleanName,
+    email: cleanEmail,
     password: hashedPassword,
     role: normalizedRole,
-    phone: phone?.trim() || undefined,
-    sapId: sapId?.trim() || undefined,
+    phone: cleanPhone || undefined,
+    sapId: cleanSapId || undefined,
   });
 
   try {
     if (normalizedRole === UserRole.ADVISOR) {
       await AdvisorProfile.create({
         userId: user._id,
-        designation: designation.trim(),
-        department: department.trim(),
+        designation: cleanDesignation,
+        department: cleanDepartment,
         assignedStudents: [],
-        experience: typeof experience === 'number' ? experience : 0,
-        countries: await normalizeAdvisorCountries(userData.countries),
+        experience: cleanExperience,
+        countries: advisorCountries,
       });
     }
   } catch (error) {
@@ -209,14 +258,21 @@ export const createUser = async (userData: any) => {
     role: user.role,
     phone: user.phone,
     sapId: user.sapId,
-    designation: normalizedRole === UserRole.ADVISOR ? designation?.trim() : undefined,
-    department: normalizedRole === UserRole.ADVISOR ? department?.trim() : undefined,
-    countries: normalizedRole === UserRole.ADVISOR ? normalizeAdvisorCountries(userData.countries) : undefined,
-    ...(password?.trim() ? {} : { password: plainPassword }),
+    designation: normalizedRole === UserRole.ADVISOR ? cleanDesignation : undefined,
+    department: normalizedRole === UserRole.ADVISOR ? cleanDepartment : undefined,
+    countries: normalizedRole === UserRole.ADVISOR ? advisorCountries : undefined,
+    ...(suppliedPassword ? {} : { password: plainPassword }),
   };
 };
 
-export const updateApplicationOfferLetter = async (applicationId: string, offerLetterUrl: string) => {
+export const updateApplicationOfferLetter = async (adminId: string, rawApplicationId: unknown, rawOfferLetterUrl: unknown) => {
+  const applicationId = assertObjectId(rawApplicationId, 'Application', 'APPLICATION_INVALID');
+  const offerLetterUrl = readString(rawOfferLetterUrl, 'Offer letter URL', {
+    required: true,
+    max: 2048,
+    pattern: /^(\/uploads\/[A-Za-z0-9._\-\/]+|https?:\/\/\S+)$/,
+    patternHint: 'Offer letter must be an uploaded file path or an http(s) link.',
+  });
   // In the new schema, we have a separate OfferLetter model
   const OfferLetter = require('../models/OfferLetter').default;
   
@@ -226,7 +282,7 @@ export const updateApplicationOfferLetter = async (applicationId: string, offerL
   const offerLetter = await OfferLetter.create({
     applicationId,
     fileUrl: offerLetterUrl,
-    issuedBy: application.studentId, // Placeholder, usually an admin
+    issuedBy: adminId,
   });
 
   await Application.findByIdAndUpdate(applicationId, { status: ApplicationStatus.READY_FOR_SUBMISSION });
@@ -243,7 +299,10 @@ export const updateApplicationOfferLetter = async (applicationId: string, offerL
   return offerLetter;
 };
 
-export const createMapping = async (homeCourseId: string, hostCourseId: string, applicationId: string) => {
+export const createMapping = async (rawHomeCourseId: unknown, rawHostCourseId: unknown, rawApplicationId: unknown) => {
+  const homeCourseId = assertObjectId(rawHomeCourseId, 'Home course', 'MAPPING_INVALID');
+  const hostCourseId = assertObjectId(rawHostCourseId, 'Host course', 'MAPPING_INVALID');
+  const applicationId = assertObjectId(rawApplicationId, 'Application', 'MAPPING_INVALID');
   const homeCourse = await Course.findById(homeCourseId);
   const hostCourse = await Course.findById(hostCourseId);
   if (!homeCourse || !hostCourse) throw new Error('Course not found');
@@ -291,29 +350,35 @@ export const getAiModelConfig = async () => {
 export const upsertAiModelConfig = async (adminId: string, payload: any) => {
   const { provider, baseUrl, apiKey, model, isEnabled } = payload;
 
-  if (!provider || !Object.values(AiProvider).includes(provider)) {
-    throw new Error('A valid provider is required.');
+  assertOneOf(provider, Object.values(AiProvider) as AiProvider[], 'Provider', 'AI_PROVIDER_INVALID');
+  const cleanBaseUrl = readUrl(baseUrl, 'Base URL', true);
+  const cleanModel = readString(model, 'Model name', {
+    required: true,
+    max: 200,
+    pattern: /^[A-Za-z0-9._:\/@+\-]+$/,
+    patternHint: 'Model name contains unsupported characters.',
+  });
+  const cleanApiKey = readString(apiKey, 'API key', { max: 500 });
+  if (cleanApiKey && /\s/.test(cleanApiKey)) {
+    throw new ValidationError('API key is invalid.', 'The API key must not contain spaces.', 'Paste the key exactly as issued.', 'AI_API_KEY_INVALID');
   }
-  if (!baseUrl?.trim()) {
-    throw new Error('Base URL is required.');
-  }
-  if (!model?.trim()) {
-    throw new Error('Model name is required.');
+  if (isEnabled !== undefined && typeof isEnabled !== 'boolean') {
+    throw new ValidationError('Enabled flag is invalid.', 'Enabled must be true or false.', 'Reload the page and try again.', 'AI_ENABLED_INVALID');
   }
 
   const existing = await AiModelConfig.findOne();
 
-  if (!existing && !apiKey?.trim()) {
-    throw new Error('API key is required.');
+  if (!existing && !cleanApiKey) {
+    throw new ValidationError('API key is required.', 'No API key has been saved yet.', 'Enter the provider API key.', 'AI_API_KEY_REQUIRED');
   }
 
   const update = {
     provider,
-    baseUrl: baseUrl.trim(),
-    modelName: model.trim(),
+    baseUrl: cleanBaseUrl,
+    modelName: cleanModel,
     isEnabled: isEnabled !== false,
     updatedBy: adminId,
-    ...(apiKey?.trim() ? { apiKey: apiKey.trim() } : {}),
+    ...(cleanApiKey ? { apiKey: cleanApiKey } : {}),
   };
 
   const saved = existing

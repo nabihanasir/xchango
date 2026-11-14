@@ -166,6 +166,8 @@ export default function AdvisorProfile() {
                   value={form.phone}
                   onChange={(e) => setField('phone', e.target.value)}
                   maxLength={30}
+                  pattern="\+?[0-9][0-9\s\-]{6,17}"
+                  title="7-15 digits, may start with +" 
                 />
               </label>
               <label className="block space-y-1.5">

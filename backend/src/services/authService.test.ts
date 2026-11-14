@@ -19,7 +19,7 @@ const MockedUser = User as jest.Mocked<typeof User>;
 const validPayload = {
   name: 'Ada Lovelace',
   email: 'Ada@Example.com',
-  password: 'supersecret',
+  password: 'supersecret1',
   role: UserRole.STUDENT,
   phone: '+92-300-1234567',
   sapId: '70000009',

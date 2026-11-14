@@ -36,6 +36,10 @@ export default function ResetPasswordPage() {
       nextFieldErrors.password = 'Password is required.';
     } else if (password.length < 8) {
       nextFieldErrors.password = 'Password must be at least 8 characters.';
+    } else if (password.length > 128) {
+      nextFieldErrors.password = 'Password must be 128 characters or fewer.';
+    } else if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      nextFieldErrors.password = 'Password must include both letters and numbers.';
     }
 
     if (!confirmPassword) {

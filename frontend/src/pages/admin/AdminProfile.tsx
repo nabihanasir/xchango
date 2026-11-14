@@ -53,6 +53,14 @@ export default function AdminProfile() {
       setError('The new password must be at least 8 characters long.');
       return;
     }
+    if (newPassword.length > 128) {
+      setError('The new password must be 128 characters or fewer.');
+      return;
+    }
+    if (!/[A-Za-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      setError('The new password must include both letters and numbers.');
+      return;
+    }
     if (newPassword !== confirmPassword) {
       setError('The new password and its confirmation do not match.');
       return;
