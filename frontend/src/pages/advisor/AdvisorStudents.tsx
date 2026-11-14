@@ -1,16 +1,31 @@
 import { useEffect, useState } from 'react';
-import { Mail, Phone, BookOpen, Clock } from 'lucide-react';
+import { ArrowRight, Mail, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { advisorApi, type AdvisorProfileData } from '../../lib/advisorApi';
 import type { StudentProfile } from '../../types/studentProfile';
 import Notice from '../../components/Notice';
+import StudentProfileModal from '../../components/advisor/StudentProfileModal';
 import Pagination, { usePagination } from '../../components/Pagination';
+
+const getInitials = (name?: string) =>
+  (name || '?')
+    .split(/s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('') || '?';
+
+const getCgpa = (student: StudentProfile) => student.cgpa || student.transcript?.cgpa || undefined;
+
+/** Colour the CGPA so strong and weak records stand out at a glance. */
+const getCgpaTone = (cgpa?: number) => (cgpa === undefined ? 'text-slate-400' : cgpa >= 3.5 ? 'text-emerald-600' : cgpa >= 2.5 ? 'text-slate-800' : 'text-amber-600');
 
 export default function AdvisorStudents() {
   const { user } = useAuth();
   const [, setProfile] = useState<AdvisorProfileData | null>(null);
   const [students, setStudents] = useState<StudentProfile[]>([]);
   const studentPaging = usePagination(students, 9);
+  const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -90,51 +105,78 @@ export default function AdvisorStudents() {
             {studentPaging.pageItems.map((student) => (
               <article
                 key={student._id || student.userId}
-                className="glass-card flex border border-light-color/40 flex-col overflow-hidden rounded-[2rem] transition-shadow hover:shadow-lg dark:hover:shadow-white/5"
+                role="button"
+                tabIndex={0}
+                aria-label={`Open profile of ${student.basicInfo?.fullName || 'student'}`}
+                onClick={() => setSelectedStudent(student)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedStudent(student);
+                  }
+                }}
+                className="group glass-card flex cursor-pointer flex-col overflow-hidden rounded-[2rem] border border-light-color/40 transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-yellow/60 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
-                <div className="border-b border-light-color/30 bg-slate-50/50 p-6">
-                  <h3 className="text-xl font-bold text-teal-700 truncate">
-                    {student.basicInfo?.fullName || 'Unnamed Student'}
-                  </h3>
-                  <p className="mt-1 text-sm font-medium text-body-text truncate">
-                    {student.basicInfo?.department || 'Department not set'}
-                  </p>
-                </div>
-                
-                <div className="flex-1 space-y-4 p-6">
-                  <div className="flex items-center gap-3 text-sm text-body-text">
-                    <Mail className="h-4 w-4 text-accent-yellow shrink-0" />
-                    <span className="truncate">{student.basicInfo?.email || 'No email provided'}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 text-sm text-body-text">
-                    <Phone className="h-4 w-4 text-accent-yellow shrink-0" />
-                    <span className="truncate">{student.basicInfo?.phone || 'No phone provided'}</span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-sm text-body-text">
-                    <BookOpen className="h-4 w-4 text-accent-yellow shrink-0" />
-                    <span className="truncate">CGPA: {student.cgpa?.toFixed(2) || student.transcript?.cgpa?.toFixed(2) || 'N/A'}</span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-sm text-body-text">
-                    <Clock className="h-4 w-4 text-accent-yellow shrink-0" />
-                    <span className="truncate">Semester: {student.basicInfo?.semester || 'N/A'}</span>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-light-color/30">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-600 mb-2">Interests</p>
-                    <div className="flex flex-wrap gap-2">
-                      {student.preferences?.preferredCountries?.slice(0, 3).map((country) => (
-                        <span key={country} className="rounded-full bg-teal-700/5 border border-teal-700/10 px-3 py-1 text-xs font-semibold text-teal-700">
-                          {country}
-                        </span>
-                      ))}
-                      {(!student.preferences?.preferredCountries || student.preferences.preferredCountries.length === 0) && (
-                        <span className="text-xs text-slate-500 italic">None specified</span>
-                      )}
+                <div className="flex items-start gap-4 p-6 pb-4">
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-700 to-teal-500 text-lg font-bold text-white shadow-md shadow-teal-700/20">
+                    {getInitials(student.basicInfo?.fullName)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-xl font-bold text-slate-900">{student.basicInfo?.fullName || 'Unnamed Student'}</h3>
+                    <p className="mt-0.5 truncate text-sm font-medium text-slate-500">
+                      {student.basicInfo?.department || 'Department not set'}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-bold">
+                      <span className="rounded-full bg-sky-100 px-2.5 py-1 text-sky-700">Semester {student.basicInfo?.semester || 'N/A'}</span>
+                      {student.isProfileComplete === false ? (
+                        <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-700">Profile incomplete</span>
+                      ) : null}
                     </div>
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 px-6">
+                  <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">CGPA</p>
+                    <p className={`mt-0.5 text-2xl font-bold ${getCgpaTone(getCgpa(student))}`}>{getCgpa(student)?.toFixed(2) ?? 'N/A'}</p>
+                  </div>
+                  <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Credits</p>
+                    <p className="mt-0.5 text-2xl font-bold text-slate-800">{student.transcript?.totalCredits ?? 'N/A'}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5 px-6 pt-4 text-sm text-slate-600">
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 shrink-0 text-accent-yellow" />
+                    <span className="truncate">{student.basicInfo?.email || 'No email provided'}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-4 w-4 shrink-0 text-accent-yellow" />
+                    <span className="truncate">{student.basicInfo?.phone || 'No phone provided'}</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex-1 px-6">
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Interested in</p>
+                  <div className="flex flex-wrap gap-2">
+                    {student.preferences?.preferredCountries?.slice(0, 3).map((country) => (
+                      <span key={country} className="rounded-full border border-teal-700/15 bg-teal-700/5 px-3 py-1 text-sm font-semibold text-teal-700">
+                        {country}
+                      </span>
+                    ))}
+                    {(student.preferences?.preferredCountries?.length ?? 0) > 3 ? (
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-500">
+                        +{(student.preferences?.preferredCountries?.length ?? 0) - 3}
+                      </span>
+                    ) : null}
+                    {!student.preferences?.preferredCountries?.length ? <span className="text-sm italic text-slate-500">None specified</span> : null}
+                  </div>
+                </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-light-color/30 px-6 py-3.5 text-sm font-bold text-teal-700">
+                  <span>View profile</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" />
                 </div>
               </article>
             ))}
@@ -148,6 +190,8 @@ export default function AdvisorStudents() {
           onPageChange={studentPaging.setPage}
         />
       </div>
+
+      {selectedStudent ? <StudentProfileModal student={selectedStudent} onClose={() => setSelectedStudent(null)} /> : null}
     </div>
   );
 }
