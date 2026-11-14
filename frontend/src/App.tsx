@@ -29,6 +29,7 @@ import AdminApplications from './pages/admin/AdminApplications';
 import AdvisorLayout from './components/advisor/AdvisorLayout';
 import AdvisorDashboard from './pages/advisor/AdvisorDashboard';
 import AdvisorApplications from './pages/advisor/AdvisorApplications';
+import AdvisorInterviews from './pages/advisor/AdvisorInterviews';
 import AdvisorProfile from './pages/advisor/AdvisorProfile';
 import AdminProfile from './pages/admin/AdminProfile';
 import AdvisorEquivalencyRequests from './pages/advisor/AdvisorEquivalencyRequests';
@@ -102,6 +103,7 @@ function App() {
           <Route path="/advisor" element={<AdvisorLayout />}>
             <Route index element={<AdvisorDashboard />} />
             <Route path="applications" element={<AdvisorApplications />} />
+            <Route path="interviews" element={<AdvisorInterviews />} />
             <Route path="requests" element={<AdvisorEquivalencyRequests />} />
             <Route path="requests/:id" element={<AdvisorEquivalencyRequestDetail />} />
             <Route path="results" element={<AdvisorResults />} />

@@ -11,6 +11,7 @@ import {
   type WorkflowApplication,
 } from '../../types/application';
 import Notice from '../../components/Notice';
+import InterviewScheduler from '../../components/interview/InterviewScheduler';
 
 const workflowStages = [
   { label: 'Profile', statuses: [] as string[] },
@@ -117,6 +118,14 @@ export default function StudentApplicationsPage() {
     };
   }, [studentId]);
 
+  const refreshApplications = async () => {
+    try {
+      setApplications(await applicationApi.getStudentApplications(studentId));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to refresh applications.');
+    }
+  };
+
   if (loading) {
     return <div className="glass-card h-48 rounded-[2rem] animate-pulse" />;
   }
@@ -181,6 +190,12 @@ export default function StudentApplicationsPage() {
                 </Link>
               </div>
             </div>
+
+            {['ASSIGNED', 'INTERVIEW_SCHEDULED'].includes(application.status) && application.advisorId ? (
+              <div className="mt-5">
+                <InterviewScheduler application={application} onChanged={() => void refreshApplications()} />
+              </div>
+            ) : null}
 
             <div className="mt-5 empty:hidden">
               <InterviewDecisionBanner application={application} />

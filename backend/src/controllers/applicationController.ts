@@ -5,6 +5,7 @@ import { UserRole } from '../models/User';
 import * as applicationService from '../services/applicationService';
 import { recordArrival, reportArrival } from '../services/arrivalService';
 import * as courseEquivalencyService from '../services/courseEquivalencyService';
+import * as interviewSlots from '../services/interviewSlotService';
 import * as resultService from '../services/resultService';
 import * as visaService from '../services/visaService';
 import { sendResponse } from '../utils/response';
@@ -91,6 +92,35 @@ export const scheduleInterview = async (req: any, res: Response) => {
     req.body
   );
   sendResponse(res, 200, 'Interview scheduled successfully', application);
+};
+
+const actorOf = (req: any) => ({ _id: req.user._id.toString(), role: req.user.role });
+
+export const getInterviewSlots = async (req: any, res: Response) => {
+  sendResponse(res, 200, 'Interview slots fetched successfully', await interviewSlots.getApplicationSlots(req.params.id, actorOf(req)));
+};
+
+export const requestInterview = async (req: any, res: Response) => {
+  const application = await interviewSlots.requestInterview(req.params.id, req.user._id.toString(), req.body ?? {});
+  sendResponse(res, 201, 'Interview requested successfully', application);
+};
+
+export const cancelInterviewRequest = async (req: any, res: Response) => {
+  const application = await interviewSlots.cancelInterviewRequest(req.params.id, actorOf(req), req.body ?? {});
+  sendResponse(res, 200, 'Interview cancelled successfully', application);
+};
+
+export const respondToInterviewRequest = async (req: any, res: Response) => {
+  const application = await interviewSlots.respondToInterviewRequest(req.params.id, req.user._id.toString(), req.body ?? {});
+  sendResponse(res, 200, 'Interview request answered successfully', application);
+};
+
+export const getAdvisorAvailability = async (req: any, res: Response) => {
+  sendResponse(res, 200, 'Availability fetched successfully', await interviewSlots.getAdvisorAvailability(req.user._id.toString()));
+};
+
+export const setAdvisorAvailability = async (req: any, res: Response) => {
+  sendResponse(res, 200, 'Availability updated successfully', await interviewSlots.setAdvisorAvailability(req.user._id.toString(), req.body ?? {}));
 };
 
 export const completeInterview = async (req: any, res: Response) => {
