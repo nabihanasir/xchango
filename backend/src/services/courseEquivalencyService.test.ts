@@ -421,9 +421,6 @@ describe('final advisor decisions', () => {
     await expect(
       submitAdvisorDecision(String(requestId), '', [{ itemId: String(itemId), status: 'approved' as never }])
     ).rejects.toMatchObject({ code: 'COURSE_DECISION_FINAL' });
-    await expect(submitAdvisorDecision(String(requestId), '', [], 'rejected' as never)).rejects.toMatchObject({
-      code: 'COURSE_DECISION_FINAL',
-    });
 
     expect(request.save).not.toHaveBeenCalled();
     expect(item).not.toHaveProperty('decidedAt');

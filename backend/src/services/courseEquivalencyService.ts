@@ -790,15 +790,11 @@ export const rerunAutoMatch = async (requestId: string, itemId: string, basis: M
 export const submitAdvisorDecision = async (
   requestId: string,
   advisorComment: string,
-  itemDecisions: DecisionInput[],
-  wholeRequestDecision?: CourseRequestItemStatus
+  itemDecisions: DecisionInput[]
 ) => {
   assertObjectId(requestId, 'Course request', 'COURSE_REQUEST_INVALID');
   const decisionStatuses = Object.values(CourseRequestItemStatus) as CourseRequestItemStatus[];
   advisorComment = readString(advisorComment, 'Advisor comment', { max: MAX_COMMENT_LENGTH });
-  if (wholeRequestDecision !== undefined && wholeRequestDecision !== null) {
-    assertOneOf(wholeRequestDecision, decisionStatuses, 'Decision', 'COURSE_DECISION_INVALID');
-  }
   if (!Array.isArray(itemDecisions) || itemDecisions.length > 100) {
     throw new ValidationError('Item decisions are invalid.', 'Item decisions must be a list.', 'Reload the page and try again.', 'COURSE_DECISION_INVALID');
   }
@@ -813,30 +809,20 @@ export const submitAdvisorDecision = async (
   }
   assertNotDecided(request);
 
-  if (wholeRequestDecision) {
-    request.items.forEach((item) => {
-      item.status = wholeRequestDecision;
-      item.decidedAt = new Date();
-      if (advisorComment) {
-        item.advisorComment = advisorComment;
-      }
-    });
-  } else {
-    if (!itemDecisions.length) {
-      throw new Error('Provide item decisions or a whole-request decision.');
+  if (!itemDecisions.length) {
+    throw new Error('Provide a decision for each course.');
+  }
+
+  itemDecisions.forEach((decision) => {
+    const item = request.items.id(decision.itemId);
+    if (!item) {
+      throw new Error(`Course request item ${decision.itemId} was not found.`);
     }
 
-    itemDecisions.forEach((decision) => {
-      const item = request.items.id(decision.itemId);
-      if (!item) {
-        throw new Error(`Course request item ${decision.itemId} was not found.`);
-      }
-
-      item.status = decision.status;
-      item.advisorComment = decision.advisorComment || item.advisorComment || '';
-      item.decidedAt = new Date();
-    });
-  }
+    item.status = decision.status;
+    item.advisorComment = decision.advisorComment || item.advisorComment || '';
+    item.decidedAt = new Date();
+  });
 
   request.advisorComment = advisorComment || request.advisorComment || '';
   request.status = computeRequestStatus(request.items);

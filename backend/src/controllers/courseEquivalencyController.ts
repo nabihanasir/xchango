@@ -75,12 +75,10 @@ export const uploadCourseOutline = async (req: any, res: Response) => {
 };
 
 export const submitAdvisorDecision = async (req: any, res: Response) => {
-  const wholeRequestDecision = req.body.wholeRequestDecision as CourseRequestItemStatus | undefined;
   const request = await courseEquivalencyService.submitAdvisorDecision(
     req.params.id,
     req.body.advisorComment || '',
-    req.body.itemDecisions || [],
-    wholeRequestDecision
+    req.body.itemDecisions || []
   );
   sendResponse(res, 200, 'Advisor decision submitted successfully', request);
 };

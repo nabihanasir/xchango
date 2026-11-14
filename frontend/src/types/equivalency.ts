@@ -191,7 +191,6 @@ export interface CourseRequest {
 
 export interface AdvisorDecisionPayload {
   advisorComment?: string;
-  wholeRequestDecision?: 'approved' | 'rejected';
   itemDecisions?: Array<{
     itemId: string;
     status: ItemStatus;
