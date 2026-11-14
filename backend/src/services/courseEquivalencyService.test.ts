@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import mongoose from 'mongoose';
 import Application from '../models/Application';
 import Course from '../models/Course';
+import University from '../models/University';
 import CourseMatchResult, { MatchSource } from '../models/CourseMatchResult';
 import CourseRequest, { AIMatchStatus } from '../models/CourseRequest';
 import { evaluateCourseMatch, rankHomeCourseMatches } from './aiCourseMatcherService';
@@ -11,6 +12,7 @@ import {
   rerunAutoMatch,
   runCourseMatch,
   submitAdvisorDecision,
+  listHostCoursesForStudent,
   updatePairedHomeCourse,
   uploadCourseOutline,
 } from './courseEquivalencyService';
@@ -33,7 +35,12 @@ jest.mock('../models/ProgramOutline', () => {
   return { ...actual, __esModule: true, default: { findOne: jest.fn(() => ({ lean: jest.fn().mockResolvedValue(null) })) } };
 });
 jest.mock('./notificationService', () => ({ appUrl: jest.fn(), notifyUser: jest.fn() }));
-jest.mock('../models/Application', () => ({ __esModule: true, default: { exists: jest.fn() } }));
+jest.mock('../models/Application', () => ({
+  ...jest.requireActual('../models/Application'),
+  __esModule: true,
+  default: { exists: jest.fn(), distinct: jest.fn() },
+}));
+jest.mock('../models/University');
 jest.mock('./outlineTextService', () => ({ extractOutlineText: jest.fn() }));
 jest.mock('fs/promises', () => ({ __esModule: true, default: { unlink: jest.fn().mockResolvedValue(undefined) } }));
 jest.mock('./aiCourseMatcherService', () => ({ evaluateCourseMatch: jest.fn(), rankHomeCourseMatches: jest.fn() }));
@@ -460,5 +467,47 @@ describe('course request gating', () => {
     });
     expect(assertJourneyReady).toHaveBeenCalledWith(String(studentId), 'course-selection');
     expect(MockedRequest.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('listHostCoursesForStudent', () => {
+  const mmuId = id();
+  const iauId = id();
+  const universities = [
+    { _id: mmuId, name: 'Multimedia University (MMU)', shortName: 'MMU' },
+    { _id: iauId, name: 'Istanbul Aydın University (IAU)', shortName: 'IAU' },
+  ];
+
+  const givenAppliedTo = (names: string[]) => {
+    (Application as unknown as { distinct: jest.Mock }).distinct.mockResolvedValue(names);
+    (University.find as jest.Mock).mockReturnValue({ select: jest.fn().mockResolvedValue(universities) });
+    const sort = jest.fn().mockResolvedValue([{ code: 'CS1' }]);
+    const populate = jest.fn().mockReturnValue({ sort });
+    (MockedCourse.find as jest.Mock).mockReturnValue({ populate });
+  };
+
+  it('finds courses when the application stores the university short name', async () => {
+    givenAppliedTo(['MMU']);
+
+    const courses = await listHostCoursesForStudent(String(id()));
+
+    expect(courses).toEqual([{ code: 'CS1' }]);
+    const filter = (MockedCourse.find as jest.Mock).mock.calls[0][0];
+    expect(filter.universityId.$in).toEqual([mmuId]);
+  });
+
+  it('still matches a full university name, ignoring case', async () => {
+    givenAppliedTo(['istanbul aydın university (iau)']);
+
+    await listHostCoursesForStudent(String(id()));
+
+    expect((MockedCourse.find as jest.Mock).mock.calls[0][0].universityId.$in).toEqual([iauId]);
+  });
+
+  it('returns nothing when the student has not applied anywhere', async () => {
+    (Application as unknown as { distinct: jest.Mock }).distinct.mockResolvedValue([]);
+
+    expect(await listHostCoursesForStudent(String(id()))).toEqual([]);
+    expect(MockedCourse.find).not.toHaveBeenCalled();
   });
 });

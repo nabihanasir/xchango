@@ -1,20 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowRight, Check, Lock, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import { applicationApi } from '../../lib/applicationApi';
-import { equivalencyApi, resultsApi, visaApi } from '../../lib/api';
-import { documentApi } from '../../lib/documentApi';
 import { parseApiError } from '../../lib/errorUtils';
-import { studentProfileApi } from '../../lib/studentProfileApi';
+import { useStudentJourney } from '../../hooks/useStudentJourney';
 import Notice from '../Notice';
-import {
-  buildStudentJourney,
-  pickJourneyApplication,
-  type JourneyInput,
-  type JourneyStep,
-  type JourneyStepState,
-} from '../../utils/studentJourney';
+import { buildStudentJourney, type JourneyStep, type JourneyStepState } from '../../utils/studentJourney';
 
 const circleClasses: Record<JourneyStepState, string> = {
   done: 'border-slate-300 bg-slate-300 text-white',
@@ -38,8 +29,7 @@ const NodeIcon = ({ state, index }: { state: JourneyStepState; index: number }) 
 };
 
 export default function StudentProgressTracker() {
-  const { user } = useAuth();
-  const [journey, setJourney] = useState<JourneyInput | null>(null);
+  const [journey, setJourney] = useStudentJourney();
   const [reporting, setReporting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -64,40 +54,6 @@ export default function StudentProgressTracker() {
       setReporting(false);
     }
   };
-
-  useEffect(() => {
-    if (!user?._id || !user.token) {
-      return;
-    }
-
-    let cancelled = false;
-    const { _id: studentId, token } = user;
-
-    // Each source is optional: a failed request just leaves that step unfinished.
-    Promise.all([
-      applicationApi.getStudentApplications(studentId).catch(() => []),
-      equivalencyApi.getStudentRequests(token).catch(() => []),
-      documentApi.getStudentDocuments(studentId).catch(() => []),
-      studentProfileApi.getStudentProfile(studentId).catch(() => null),
-      visaApi.getStudentVisa(token).catch(() => null),
-      resultsApi.getStudentResults(token).catch(() => []),
-    ]).then(([applications, requests, documents, profile, visa, results]) => {
-      if (!cancelled) {
-        setJourney({
-          application: pickJourneyApplication(applications),
-          requests,
-          documents,
-          transcriptUploaded: Boolean(profile?.transcript?.fileUrl),
-          visa,
-          results,
-        });
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user?._id, user?.token]);
 
   if (!journey) {
     return <div className="glass-card h-44 animate-pulse rounded-[2rem]" />;

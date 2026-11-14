@@ -108,7 +108,9 @@ export const buildStudentJourney = ({
         ? `Your interview is scheduled${application!.interviewDate ? ` for ${formatDate(application!.interviewDate)}` : ''}.`
         : status === 'PENDING'
           ? 'Waiting for an advisor to be assigned for your country.'
-          : 'Your advisor will schedule your interview.';
+          : application!.interviewRequest?.status === 'requested'
+            ? 'You asked for an interview time. Waiting for your advisor to confirm it.'
+            : 'Pick a time for your interview with your advisor.';
   const interview: Draft = {
     key: 'interview',
     title: 'Interview',
@@ -118,6 +120,11 @@ export const buildStudentJourney = ({
     actionLabel: submitted && !interviewDone ? 'View registration' : undefined,
   };
   if (interview.actionLabel) interview.to = applicationPage;
+  // Once an advisor is assigned the student books the interview slot on the Registration page.
+  if (status === 'ASSIGNED') {
+    interview.actionLabel = application!.interviewRequest?.status === 'requested' ? 'View your request' : 'Book your interview';
+    interview.to = applicationHome;
+  }
 
   // Shortlisting (the advisor's decision after the interview)
   const notRecommended = Boolean(application) && isNotRecommended(application!);
