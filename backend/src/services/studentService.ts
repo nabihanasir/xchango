@@ -170,9 +170,24 @@ const DEGREE_LEVELS = ['Undergraduate', 'Graduate'];
 const MAX_PREFERRED_COUNTRIES = 20;
 
 /** Validates and normalises every field the student can edit; throws on the first problem. */
-const sanitizeProfileInput = async (profileData: StudentProfileUpdateInput): Promise<StudentProfileUpdateInput> => {
+const required = (code: string, label: string) =>
+  new ValidationError(`${label} is required.`, `${label} cannot be empty.`, `Enter ${label.toLowerCase()} and try again.`, code);
+
+const sanitizeProfileInput = async (
+  profileData: StudentProfileUpdateInput,
+  userId?: string
+): Promise<StudentProfileUpdateInput> => {
   const result: StudentProfileUpdateInput = {};
   const raw = (profileData ?? {}) as Record<string, any>;
+
+  if (raw.basicInfo === undefined && raw.preferences === undefined) {
+    throw new ValidationError(
+      'No profile fields were provided.',
+      'The request did not include any profile information.',
+      'Fill in the profile form and try again.',
+      'PROFILE_EMPTY'
+    );
+  }
 
   if (raw.basicInfo !== undefined) {
     if (raw.basicInfo === null || typeof raw.basicInfo !== 'object' || Array.isArray(raw.basicInfo)) {
@@ -184,8 +199,19 @@ const sanitizeProfileInput = async (profileData: StudentProfileUpdateInput): Pro
     if (info.fullName !== undefined) {
       basicInfo.fullName = readString(info.fullName, 'Full name', { max: 100, pattern: NAME_PATTERN, patternHint: 'Full name can only contain letters, spaces, apostrophes, dots and hyphens.' });
     }
+    if (basicInfo.fullName !== undefined && basicInfo.fullName.length < 2) {
+      throw new ValidationError('Name is too short.', 'The full name must be at least 2 characters.', 'Enter your full name and try again.', 'NAME_TOO_SHORT');
+    }
     if (info.email !== undefined) {
       basicInfo.email = readEmail(info.email, 'Email', false);
+      if (basicInfo.email && userId && (await User.exists({ email: basicInfo.email, _id: { $ne: userId } }))) {
+        throw new ValidationError(
+          'Email already in use.',
+          'Another account already uses this email address.',
+          'Enter a different email address.',
+          'EMAIL_ALREADY_EXISTS'
+        );
+      }
     }
     if (info.phone !== undefined) {
       const phone = readString(info.phone, 'Phone number', { max: 20, pattern: PHONE_PATTERN, patternHint: 'Phone number must be 7-15 digits and may start with +.' });
@@ -204,6 +230,7 @@ const sanitizeProfileInput = async (profileData: StudentProfileUpdateInput): Pro
     }
     if (info.department !== undefined) {
       basicInfo.department = readString(info.department, 'Program', { max: 100 });
+      if (!basicInfo.department) throw required('DEPARTMENT_REQUIRED', 'Department');
     }
     if (info.semester !== undefined) {
       const semester = info.semester;
@@ -241,16 +268,23 @@ const sanitizeProfileInput = async (profileData: StudentProfileUpdateInput): Pro
     }
     if (prefs.degreeLevel !== undefined) {
       const level = readString(prefs.degreeLevel, 'Degree level', { max: 50 });
+      if (!level) throw required('DEGREE_LEVEL_REQUIRED', 'Degree level');
       if (level && !DEGREE_LEVELS.includes(level)) {
         throw new ValidationError('Degree level is invalid.', `"${level}" is not an allowed degree level.`, `Choose one of: ${DEGREE_LEVELS.join(', ')}.`, 'DEGREE_LEVEL_INVALID');
       }
       preferences.degreeLevel = level;
     }
     if (prefs.fieldOfInterest !== undefined) {
-      preferences.fieldOfInterest = readString(prefs.fieldOfInterest, 'Field of interest', { max: 100 });
+      preferences.fieldOfInterest = readString(prefs.fieldOfInterest, 'Field of interest', {
+        max: 100,
+        pattern: /^[A-Za-z][A-Za-z0-9 &/,.'()-]*$/,
+        patternHint: 'Field of interest can only contain letters, numbers, spaces and common punctuation.',
+      });
+      if (!preferences.fieldOfInterest) throw required('FIELD_OF_INTEREST_REQUIRED', 'Field of interest');
     }
     if (prefs.intake !== undefined) {
       preferences.intake = readString(prefs.intake, 'Intake', { max: 20, pattern: INTAKE_PATTERN, patternHint: 'Intake must look like "Fall 2026" or "Spring 2027".' });
+      if (!preferences.intake) throw required('INTAKE_REQUIRED', 'Intake');
     }
     result.preferences = preferences;
   }
@@ -259,7 +293,7 @@ const sanitizeProfileInput = async (profileData: StudentProfileUpdateInput): Pro
 };
 
 export const updateStudentProfile = async (userId: string, rawProfileData: StudentProfileUpdateInput) => {
-  const profileData = await sanitizeProfileInput(rawProfileData);
+  const profileData = await sanitizeProfileInput(rawProfileData, userId);
 
   const profile = await ensureStudentProfile(userId);
 
