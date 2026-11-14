@@ -94,23 +94,23 @@ export default function HostCourseInstructors() {
               <Plus className="h-4 w-4" /> Add Host Course
             </button>
           </div>
-          <p className="mt-1 text-sm font-medium text-body-text">
+          <p className="mt-1 text-sm font-medium text-black">
             Courses taught at partner universities, which students request equivalency for. Instructors listed here are emailed when an exchange student enrolled in their course arrives.
             {missingCount ? ` ${missingCount} course${missingCount === 1 ? '' : 's'} still missing an email.` : ''}
           </p>
         </div>
         <div className="flex w-full flex-col gap-3 md:max-w-md">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-body-text opacity-40" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-black opacity-40" />
             <input
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by course, university or instructor"
-              className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-admin placeholder:text-body-text placeholder:opacity-40 focus:border-admin/20 focus:outline-none"
+              className="w-full rounded-xl border-2 border-admin bg-white py-3 pl-11 pr-4 font-medium text-admin placeholder:text-body-text placeholder:opacity-40 focus:border-admin/20 focus:outline-none"
             />
           </div>
-          <label className="flex items-center gap-2 text-sm font-semibold text-body-text">
+          <label className="flex items-center gap-2 text-sm font-semibold text-black">
             <input
               type="checkbox"
               checked={showMissingOnly}
@@ -133,7 +133,7 @@ export default function HostCourseInstructors() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <p className="rounded-2xl border-2 border-dashed border-light-color bg-slate-50 px-6 py-10 text-center text-sm text-body-text">
+        <p className="rounded-2xl border-2 border-dashed border-light-color bg-slate-50 px-6 py-10 text-center text-sm text-black">
           {courses.length ? 'No matching host courses.' : 'No host courses yet. Add one with the button above.'}
         </p>
       ) : (
@@ -157,14 +157,14 @@ export default function HostCourseInstructors() {
                     value={draft.instructorName}
                     onChange={(event) => setDraft((current) => ({ ...current, instructorName: event.target.value }))}
                     placeholder="Instructor name"
-                    className="rounded-lg border border-light-color bg-slate-50 px-3 py-2 text-sm font-medium text-admin focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                    className="rounded-lg border-2 border-admin bg-slate-50 px-3 py-2 text-sm font-medium text-admin focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                   />
                   <input
                     type="email"
                     value={draft.instructorEmail}
                     onChange={(event) => setDraft((current) => ({ ...current, instructorEmail: event.target.value }))}
                     placeholder="instructor@host.edu"
-                    className="rounded-lg border border-light-color bg-slate-50 px-3 py-2 text-sm font-medium text-admin focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                    className="rounded-lg border-2 border-admin bg-slate-50 px-3 py-2 text-sm font-medium text-admin focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                   />
                   <div className="flex gap-2">
                     <button
@@ -180,7 +180,7 @@ export default function HostCourseInstructors() {
                       type="button"
                       onClick={() => setEditingId('')}
                       disabled={saving}
-                      className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-body-text"
+                      className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-black"
                     >
                       <X className="h-3.5 w-3.5" />
                       Cancel
@@ -190,7 +190,7 @@ export default function HostCourseInstructors() {
               ) : (
                 <div className="flex items-center justify-between gap-4 md:justify-end">
                   {course.instructorEmail ? (
-                    <span className="flex min-w-0 items-center gap-2 text-sm text-slate-600">
+                    <span className="flex min-w-0 items-center gap-2 text-sm text-black">
                       <Mail className="h-4 w-4 shrink-0 text-admin/50" />
                       <span className="truncate">
                         {course.instructorName ? `${course.instructorName} · ` : ''}

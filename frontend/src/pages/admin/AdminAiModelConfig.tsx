@@ -123,7 +123,7 @@ export default function AdminAiModelConfig() {
           </div>
           <div>
             <h2 className="text-3xl font-bold text-admin mb-1">AI Model Configuration</h2>
-            <p className="text-body-text font-medium md:text-lg">
+            <p className="text-black font-medium md:text-lg">
               Choose which LLM powers AI course matching and manage its credentials.
             </p>
           </div>
@@ -141,7 +141,7 @@ export default function AdminAiModelConfig() {
       <div className="glass-card rounded-[2rem] bg-white p-6 md:p-8 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
           <div>
-            <label className="block text-xs font-bold text-admin/60 uppercase tracking-widest mb-2">Provider</label>
+            <label className="block text-xs font-bold text-black uppercase tracking-widest mb-2">Provider</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {(Object.keys(PROVIDER_PRESETS) as AiProvider[]).map((key) => (
                 <button
@@ -158,46 +158,46 @@ export default function AdminAiModelConfig() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-body-text font-medium mt-2">{preset.hint}</p>
+            <p className="text-xs text-black font-medium mt-2">{preset.hint}</p>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-admin/60 uppercase tracking-widest mb-2">Base URL</label>
+            <label className="block text-xs font-bold text-black uppercase tracking-widest mb-2">Base URL</label>
             <input
               type="url"
               required
               value={form.baseUrl}
               onChange={(e) => setForm({ ...form, baseUrl: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-admin"
+              className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-admin"
               placeholder={preset.baseUrl}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-admin/60 uppercase tracking-widest mb-2">Model Name</label>
+            <label className="block text-xs font-bold text-black uppercase tracking-widest mb-2">Model Name</label>
             <input
               type="text"
               required
               value={form.model}
               onChange={(e) => setForm({ ...form, model: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-admin"
+              className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-admin"
               placeholder={preset.modelPlaceholder}
             />
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-xs font-bold text-admin/60 uppercase tracking-widest mb-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-black uppercase tracking-widest mb-2">
               <KeyRound className="h-3.5 w-3.5" /> API Key
             </label>
             <input
               type="password"
               value={form.apiKey}
               onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-admin"
+              className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-admin"
               placeholder={existing?.apiKeySet ? `Currently set (${existing.apiKeyPreview}) — leave blank to keep` : 'sk-...'}
               autoComplete="off"
             />
-            <p className="text-xs text-body-text font-medium mt-2">
+            <p className="text-xs text-black font-medium mt-2">
               Stored server-side and never shown again after saving.
             </p>
           </div>
@@ -212,7 +212,7 @@ export default function AdminAiModelConfig() {
               />
               <span className="font-bold text-admin">Use this configuration for AI course matching</span>
             </label>
-            <p className="text-xs text-body-text font-medium mt-2 ml-8">
+            <p className="text-xs text-black font-medium mt-2 ml-8">
               When disabled, the system falls back to the built-in keyword-overlap heuristic.
             </p>
           </div>

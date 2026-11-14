@@ -343,7 +343,7 @@ function CountryPicker({
           ))}
         </ul>
       ) : (
-        <p className="absolute z-20 mt-1 w-full rounded-xl border border-light-color bg-white px-4 py-3 text-sm text-slate-500 shadow-xl">
+        <p className="absolute z-20 mt-1 w-full rounded-xl border border-light-color bg-white px-4 py-3 text-sm text-black shadow-xl">
           No country matches "{query}".
         </p>
       )}
@@ -530,7 +530,7 @@ export default function AdminUniversities() {
               Draft
             </span>
             {row.publishIssues.length ? (
-              <span className="mt-1 block text-xs text-slate-500">{row.publishIssues.length} to finish</span>
+              <span className="mt-1 block text-xs text-black">{row.publishIssues.length} to finish</span>
             ) : (
               <span className="mt-1 block text-xs text-emerald-600">Ready to publish</span>
             )}
@@ -571,7 +571,7 @@ export default function AdminUniversities() {
       <div className="glass-card flex flex-col gap-4 rounded-[2rem] border-b border-light-color/50 bg-white p-6 md:flex-row md:items-center md:justify-between md:p-8">
         <div>
           <h2 className="mb-2 text-3xl font-bold text-admin">Universities Catalog</h2>
-          <p className="mt-1 font-medium text-body-text md:text-lg">
+          <p className="mt-1 font-medium text-black md:text-lg">
             Add partner universities, publish them to students and set which advisors supervise each country.
           </p>
         </div>
@@ -592,13 +592,13 @@ export default function AdminUniversities() {
 
       <div className="glass-card rounded-[2rem] bg-white p-6 shadow-sm md:p-8">
         <div className="relative mb-6 max-w-md">
-          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-body-text opacity-40" />
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-black opacity-40" />
           <input
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by university, short code or country"
-            className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-admin placeholder:text-body-text placeholder:opacity-40 focus:border-admin/20 focus:outline-none"
+            className="w-full rounded-xl border-2 border-admin bg-white py-3 pl-11 pr-4 font-medium text-admin placeholder:text-body-text placeholder:opacity-40 focus:border-admin/20 focus:outline-none"
           />
         </div>
 
@@ -612,7 +612,7 @@ export default function AdminUniversities() {
           <div className="rounded-2xl border-2 border-dashed border-light-color bg-slate-50 px-6 py-12 text-center">
             <Building className="mx-auto mb-3 h-10 w-10 text-slate-300" />
             <h3 className="text-xl font-bold text-admin">No Universities Found</h3>
-            <p className="mt-2 text-body-text">Add your first partner university to the system.</p>
+            <p className="mt-2 text-black">Add your first partner university to the system.</p>
           </div>
         ) : (
           <div className="overflow-hidden rounded-2xl border border-light-color/50">
@@ -632,7 +632,7 @@ export default function AdminUniversities() {
                 <h2 id="university-form-title" className="text-2xl font-bold text-admin">
                   {form.id ? 'Edit University' : 'New University'}
                 </h2>
-                <p className="text-sm font-medium text-body-text">
+                <p className="text-sm font-medium text-black">
                   Everything here is shown to students and advisors once the university is published.
                 </p>
               </div>
@@ -682,9 +682,9 @@ export default function AdminUniversities() {
                   {scraping ? 'Reading website...' : 'Auto-fill from website'}
                 </button>
               </div>
-              {scraping ? <p className="mt-3 text-xs font-medium text-body-text">This can take up to a minute.</p> : null}
+              {scraping ? <p className="mt-3 text-xs font-medium text-black">This can take up to a minute.</p> : null}
               {scrapeResult ? (
-                <div className="mt-4 space-y-2 text-xs font-medium text-body-text">
+                <div className="mt-4 space-y-2 text-xs font-medium text-black">
                   <p className="flex items-center gap-2 font-bold text-emerald-700">
                     <CheckCircle2 className="h-4 w-4" /> Read {scrapeResult.sources.length} page{scrapeResult.sources.length === 1 ? '' : 's'}. Check every
                     highlighted section before saving.
@@ -719,7 +719,7 @@ export default function AdminUniversities() {
                   <span className={labelClass}>
                     {form.country ? `Advisors for ${form.country.name}` : 'Advisors for this country'}
                   </span>
-                  <p className="mb-2 text-xs font-medium text-body-text">
+                  <p className="mb-2 text-xs font-medium text-black">
                     Advisors belong to the country, so every university in it shares them. New applications are assigned automatically to the
                     advisor with the fewest open applications, and applications already waiting are assigned when you save.
                   </p>
@@ -735,7 +735,7 @@ export default function AdminUniversities() {
                           <label
                             key={advisor._id}
                             className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-                              checked ? 'border-admin bg-admin/5 text-admin' : 'border-light-color bg-slate-50 text-slate-600'
+                              checked ? 'border-admin bg-admin/5 text-admin' : 'border-light-color bg-slate-50 text-black'
                             }`}
                           >
                             <input
@@ -1065,7 +1065,7 @@ export default function AdminUniversities() {
                 type="button"
                 onClick={closeForm}
                 disabled={saving !== null}
-                className="rounded-xl bg-slate-100 px-6 py-2.5 font-bold text-body-text transition-all hover:bg-slate-200 disabled:opacity-50"
+                className="rounded-xl bg-slate-100 px-6 py-2.5 font-bold text-black transition-all hover:bg-slate-200 disabled:opacity-50"
               >
                 Cancel
               </button>

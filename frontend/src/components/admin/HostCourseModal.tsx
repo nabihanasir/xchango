@@ -79,7 +79,7 @@ export default function HostCourseModal({ onClose, onCreated }: HostCourseModalP
             <h2 id="host-course-title" className="text-2xl font-bold text-admin">
               New Host Course
             </h2>
-            <p className="text-sm font-medium text-body-text">A course taught at a partner university.</p>
+            <p className="text-sm font-medium text-black">A course taught at a partner university.</p>
           </div>
         </div>
         <button
@@ -188,7 +188,7 @@ export default function HostCourseModal({ onClose, onCreated }: HostCourseModalP
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="rounded-xl bg-slate-100 px-6 py-2.5 font-bold text-body-text transition-all hover:bg-slate-200 disabled:opacity-50"
+            className="rounded-xl bg-slate-100 px-6 py-2.5 font-bold text-black transition-all hover:bg-slate-200 disabled:opacity-50"
           >
             Cancel
           </button>

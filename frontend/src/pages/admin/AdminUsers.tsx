@@ -17,7 +17,7 @@ function CountryCheckboxes({
   onChange: (countries: string[]) => void;
 }) {
   if (!countries.length) {
-    return <p className="text-sm text-slate-500">No countries yet. Add a university first (Universities tab).</p>;
+    return <p className="text-sm text-black">No countries yet. Add a university first (Universities tab).</p>;
   }
 
   return (
@@ -28,7 +28,7 @@ function CountryCheckboxes({
           <label
             key={country}
             className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-              checked ? 'border-admin bg-admin/5 text-admin' : 'border-light-color bg-slate-50 text-slate-600'
+              checked ? 'border-admin bg-admin/5 text-admin' : 'border-light-color bg-slate-50 text-black'
             }`}
           >
             <input
@@ -278,7 +278,7 @@ export default function AdminUsers() {
       <div className="flex items-center justify-between border-b border-light-color/50 pb-6">
         <div>
           <h2 className="text-3xl font-bold text-admin">Users Management</h2>
-          <p className="text-body-text font-medium mt-1">Create advisor accounts and manage platform users.</p>
+          <p className="text-black font-medium mt-1">Create advisor accounts and manage platform users.</p>
         </div>
         <button
           onClick={() => {
@@ -307,35 +307,35 @@ export default function AdminUsers() {
             <h3 className="text-2xl font-bold text-admin mb-6">Create New User</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-admin/60 uppercase mb-2">Full Name</label>
+                <label className="block text-xs font-bold text-black uppercase mb-2">Full Name</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(event) => setForm({ ...form, name: event.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                   placeholder="Advisor Name"
                   maxLength={100}
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-admin/60 uppercase mb-2">Email</label>
+                <label className="block text-xs font-bold text-black uppercase mb-2">Email</label>
                 <input
                   type="email"
                   value={form.email}
                   onChange={(event) => setForm({ ...form, email: event.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                   placeholder="advisor@xchango.com"
                   maxLength={254}
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-admin/60 uppercase mb-2">Role</label>
+                <label className="block text-xs font-bold text-black uppercase mb-2">Role</label>
                 <select
                   value={form.role}
                   onChange={(event) => setForm({ ...form, role: event.target.value as CreateUserFormState['role'] })}
-                  className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                 >
                   <option value="advisor">Advisor</option>
                   <option value="admin">Admin</option>
@@ -344,43 +344,43 @@ export default function AdminUsers() {
               {form.role === 'advisor' ? (
                 <>
                   <div>
-                    <label className="block text-xs font-bold text-admin/60 uppercase mb-2">Designation</label>
+                    <label className="block text-xs font-bold text-black uppercase mb-2">Designation</label>
                     <input
                       type="text"
                       value={form.designation}
                       onChange={(event) => setForm({ ...form, designation: event.target.value })}
-                      className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                       placeholder="Senior Academic Advisor"
                       maxLength={100}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-admin/60 uppercase mb-2">Department</label>
+                    <label className="block text-xs font-bold text-black uppercase mb-2">Department</label>
                     <input
                       type="text"
                       value={form.department}
                       onChange={(event) => setForm({ ...form, department: event.target.value })}
-                      className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                       placeholder="Computer Science"
                       maxLength={100}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-admin/60 uppercase mb-2">Supervises countries</label>
+                    <label className="block text-xs font-bold text-black uppercase mb-2">Supervises countries</label>
                     <CountryCheckboxes countries={countryNames} selected={form.countries} onChange={(countries) => setForm({ ...form, countries })} />
-                    <p className="mt-2 text-xs text-slate-500">Applications to these countries are assigned to this advisor automatically.</p>
+                    <p className="mt-2 text-xs text-black">Applications to these countries are assigned to this advisor automatically.</p>
                   </div>
                 </>
               ) : null}
               <div>
-                <label className="block text-xs font-bold text-admin/60 uppercase mb-2">Password</label>
+                <label className="block text-xs font-bold text-black uppercase mb-2">Password</label>
                 <input
                   type="text"
                   value={form.password}
                   onChange={(event) => setForm({ ...form, password: event.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                   placeholder="Leave blank to auto-generate"
                   minLength={8}
                   maxLength={128}
@@ -415,7 +415,7 @@ export default function AdminUsers() {
         <Modal onClose={() => setDeactivateTarget(null)} widthClass="max-w-md">
           <div className="space-y-4 p-6">
             <h2 className="text-xl font-bold text-slate-900">Deactivate {deactivateTarget.name}?</h2>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-black">
               They will be signed out and unable to log in until you activate the account again. Their records are kept.
               {deactivateTarget.role === 'advisor'
                 ? ' Reassign their students first — applications assigned to a deactivated advisor stay stuck.'
@@ -443,7 +443,7 @@ export default function AdminUsers() {
         <Modal onClose={() => setCountryEdit(null)} widthClass="max-w-md" locked={savingCountries}>
           <div className="overflow-y-auto p-8">
             <h3 className="text-xl font-bold text-admin">Countries for {countryEdit.user.name}</h3>
-            <p className="mt-2 text-sm text-slate-500">New applications to these countries are assigned to this advisor.</p>
+            <p className="mt-2 text-sm text-black">New applications to these countries are assigned to this advisor.</p>
             <div className="mt-5">
               <CountryCheckboxes
                 countries={countryNames}

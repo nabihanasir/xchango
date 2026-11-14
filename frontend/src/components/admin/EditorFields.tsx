@@ -2,16 +2,16 @@ import type { ReactNode } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 
 export const fieldClass =
-  'w-full rounded-xl border border-light-color bg-slate-50 px-4 py-2.5 text-sm font-medium text-admin transition-all focus:border-accent-yellow focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 disabled:cursor-not-allowed disabled:opacity-60';
+  'w-full rounded-xl border-2 border-admin bg-slate-50 px-4 py-2.5 text-sm font-medium text-admin transition-all focus:border-accent-yellow focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 disabled:cursor-not-allowed disabled:opacity-60';
 
-export const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-widest text-admin/60';
+export const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-widest text-black';
 
 export type Confidence = 'found' | 'review' | 'empty';
 
 const CONFIDENCE_STYLES: Record<Confidence, { label: string; className: string }> = {
   found: { label: 'Found on website', className: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
   review: { label: 'Review before saving', className: 'bg-amber-50 text-amber-700 ring-amber-200' },
-  empty: { label: 'Not found - fill in', className: 'bg-slate-100 text-slate-500 ring-slate-200' },
+  empty: { label: 'Not found - fill in', className: 'bg-slate-100 text-black ring-slate-200' },
 };
 
 export function ConfidenceBadge({ value }: { value?: Confidence }) {
@@ -41,7 +41,7 @@ export function Section({
         <h3 className="text-base font-bold text-admin">{title}</h3>
         <ConfidenceBadge value={confidence} />
       </div>
-      {hint ? <p className="-mt-2 mb-4 text-xs font-medium text-body-text">{hint}</p> : null}
+      {hint ? <p className="-mt-2 mb-4 text-xs font-medium text-black">{hint}</p> : null}
       {children}
     </section>
   );
@@ -164,7 +164,7 @@ export function RowsEditor<T extends object>({
             <button
               type="button"
               onClick={() => onChange(rows.filter((_, i) => i !== index))}
-              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold text-black transition hover:bg-red-50 hover:text-red-600"
             >
               <Trash2 className="h-3.5 w-3.5" /> Remove
             </button>

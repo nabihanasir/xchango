@@ -27,7 +27,7 @@ const emptyForm = (): CourseFormState => ({
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const inputClassName =
-  'w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50';
+  'w-full rounded-xl border-2 border-admin bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50';
 
 function InstructorCell({ course }: { course: ApplicationCourseSummary }) {
   if (!course.instructorEmail) {
@@ -37,7 +37,7 @@ function InstructorCell({ course }: { course: ApplicationCourseSummary }) {
   return (
     <div className="text-sm">
       <p className="font-semibold text-slate-700">{course.instructorName || 'Instructor'}</p>
-      <p className="text-xs text-slate-500">{course.instructorEmail}</p>
+      <p className="text-xs text-black">{course.instructorEmail}</p>
     </div>
   );
 }
@@ -269,7 +269,7 @@ export default function AdminCourses() {
       <div className="flex items-center justify-between rounded-[2rem] border-b border-light-color/50 bg-white p-6 md:p-8 glass-card">
         <div>
           <h2 className="mb-2 text-3xl font-bold text-admin">Manage Home Courses</h2>
-          <p className="mt-1 text-body-text font-medium md:text-lg">
+          <p className="mt-1 text-black font-medium md:text-lg">
             Maintain the central list of home courses used by advisors during equivalency review.
           </p>
         </div>
@@ -291,18 +291,18 @@ export default function AdminCourses() {
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 className="text-xl font-bold text-admin">Home Course Catalog</h3>
-            <p className="mt-1 text-sm font-medium text-body-text">
+            <p className="mt-1 text-sm font-medium text-black">
               Search, update, and remove home courses used by the advisor equivalency workflow.
             </p>
           </div>
           <div className="relative w-full md:max-w-sm">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-body-text opacity-40" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-black opacity-40" />
             <input
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by title or description"
-              className="w-full rounded-xl border border-light-color/50 bg-white py-3 pl-11 pr-4 font-medium text-admin placeholder:text-body-text focus:border-admin/20 focus:outline-none"
+              className="w-full rounded-xl border-2 border-admin bg-white py-3 pl-11 pr-4 font-medium text-admin placeholder:text-body-text focus:border-admin/20 focus:outline-none"
             />
           </div>
         </div>
@@ -319,7 +319,7 @@ export default function AdminCourses() {
             <h3 className="text-xl font-bold text-admin">
               {courses.length ? 'No matching courses' : 'No home courses yet'}
             </h3>
-            <p className="mt-2 text-body-text">
+            <p className="mt-2 text-black">
               {courses.length
                 ? 'Try a different search term.'
                 : 'Add the first home course to seed the advisor dropdown.'}
@@ -345,7 +345,7 @@ export default function AdminCourses() {
                   <h2 className="text-2xl font-bold text-admin">
                     {editingCourseId ? 'Edit Home Course' : 'New Home Course'}
                   </h2>
-                  <p className="text-sm font-medium text-body-text">
+                  <p className="text-sm font-medium text-black">
                     Courses are automatically available to advisors and students in view-only mode.
                   </p>
                 </div>
@@ -362,7 +362,7 @@ export default function AdminCourses() {
 
             <form onSubmit={handleSubmit} className="space-y-5 overflow-y-auto p-8">
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                   Title
                 </label>
                 <input
@@ -370,14 +370,14 @@ export default function AdminCourses() {
                   value={form.title}
                   onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
                   placeholder="e.g. Data Structures"
-                  className="w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                  className="w-full rounded-xl border-2 border-admin bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                     Description
                   </label>
                   <textarea
@@ -385,12 +385,12 @@ export default function AdminCourses() {
                     value={form.description}
                     onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                     placeholder="Short description of the course..."
-                    className="w-full resize-none rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                    className="w-full resize-none rounded-xl border-2 border-admin bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                   />
                 </div>
 
                 <div className="md:col-span-1">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                     Credit Hours
                   </label>
                   <input
@@ -399,13 +399,13 @@ export default function AdminCourses() {
                     step="1"
                     value={form.creditHours}
                     onChange={(event) => setForm((current) => ({ ...current, creditHours: event.target.value }))}
-                    className="w-full rounded-xl border border-light-color bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
+                    className="w-full rounded-xl border-2 border-admin bg-slate-50 px-4 py-3 font-medium text-admin transition-all focus:border-accent-yellow/50 focus:outline-none focus:ring-2 focus:ring-accent-yellow/50"
                     required
                   />
                 </div>
 
                 <div className="md:col-span-1">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                     Instructor Name
                   </label>
                   <input
@@ -418,7 +418,7 @@ export default function AdminCourses() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-admin/60">
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                     Instructor Email
                   </label>
                   <input
@@ -428,7 +428,7 @@ export default function AdminCourses() {
                     placeholder="instructor@university.edu"
                     className={inputClassName}
                   />
-                  <p className="mt-2 text-xs text-body-text">
+                  <p className="mt-2 text-xs text-black">
                     Emailed when a student taking this course online from abroad arrives at their host university.
                   </p>
                 </div>
@@ -442,7 +442,7 @@ export default function AdminCourses() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-xl bg-slate-100 px-6 py-2.5 font-bold text-body-text transition-all hover:bg-slate-200"
+                  className="rounded-xl bg-slate-100 px-6 py-2.5 font-bold text-black transition-all hover:bg-slate-200"
                 >
                   Cancel
                 </button>

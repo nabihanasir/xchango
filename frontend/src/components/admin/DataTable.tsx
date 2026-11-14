@@ -51,7 +51,7 @@ export default function DataTable({ columns, data, onRowClick, pageSize = DEFAUL
           ))}
           {data.length === 0 && (
             <tr>
-              <td colSpan={columns.length} className="px-6 py-10 text-center text-body-text opacity-50">
+              <td colSpan={columns.length} className="px-6 py-10 text-center text-black opacity-50">
                 No records found
               </td>
             </tr>

@@ -43,16 +43,16 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
       <div className="px-6 py-4 bg-slate-50 border-b border-light-color/80 flex justify-between items-center text-sm">
         <div className="flex gap-8">
           <div>
-            <span className="text-xs font-bold text-body-text/40 uppercase tracking-widest block">Student Name</span>
+            <span className="text-xs font-bold text-black/40 uppercase tracking-widest block">Student Name</span>
             <span className="font-bold text-admin">{studentName}</span>
           </div>
           <div>
-            <span className="text-xs font-bold text-body-text/40 uppercase tracking-widest block">SAP ID</span>
+            <span className="text-xs font-bold text-black/40 uppercase tracking-widest block">SAP ID</span>
             <span className="font-bold text-admin">{sapId}</span>
           </div>
         </div>
         <div className="text-right">
-          <span className="text-xs font-bold text-body-text/40 uppercase tracking-widest block">Last Synchronized</span>
+          <span className="text-xs font-bold text-black/40 uppercase tracking-widest block">Last Synchronized</span>
           <span className="font-bold text-admin italic opacity-60">March 18, 2024</span>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
              <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto">
                <Calculator className="h-8 w-8 text-slate-300" />
              </div>
-             <p className="text-body-text font-bold">No transcript data available for this student.</p>
+             <p className="text-black font-bold">No transcript data available for this student.</p>
           </div>
         ) : (
           transcript.map((sem) => (
@@ -80,14 +80,14 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
 
               <div className="rounded-2xl border border-light-color/40 overflow-hidden shadow-sm">
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50/50 text-xs font-bold text-body-text/50 uppercase tracking-widest">
+                  <thead className="bg-slate-50/50 text-xs font-bold text-black/50 uppercase tracking-widest">
                     <tr>
                       <th className="px-5 py-3">Course Title</th>
                       <th className="px-5 py-3 text-center">Cr. Hrs</th>
                       <th className="px-5 py-3 text-right">Grade</th>
                     </tr>
                   </thead>
-                  <tbody className="text-sm font-bold text-admin/80">
+                  <tbody className="text-sm font-bold text-black">
                     {sem.courses.map((course, idx) => (
                       <tr key={idx} className="border-t border-slate-50 hover:bg-slate-50/30 transition-colors">
                         <td className="px-5 py-3.5">{course.name}</td>
@@ -104,7 +104,7 @@ export default function TranscriptCalculator({ transcript, cgpa, sapId, studentN
                   </tbody>
                 </table>
                 <div className="bg-slate-100/50 px-5 py-3 flex justify-between items-center border-t border-slate-100">
-                  <span className="text-xs font-bold text-body-text/40 uppercase tracking-widest">Semester Performance</span>
+                  <span className="text-xs font-bold text-black/40 uppercase tracking-widest">Semester Performance</span>
                   <div className="flex gap-4">
                     <span className="text-xs font-bold">Total Credits: <span className="text-admin">{sem.credits}</span></span>
                     <span className="text-xs font-bold bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm text-admin">

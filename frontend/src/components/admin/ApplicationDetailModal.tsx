@@ -159,7 +159,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                 <h2 className="text-2xl font-bold text-admin">{studentName}</h2>
                 <StatusBadge status={app.status.toLowerCase()} />
               </div>
-              <p className="text-body-text font-bold text-sm opacity-60 mt-1">
+              <p className="text-black font-bold text-sm opacity-60 mt-1">
                 Application ID: <span className="text-admin">#{app._id.slice(-6).toUpperCase()}</span> · Created {new Date(app.createdAt).toLocaleDateString()}
               </p>
             </div>
@@ -217,9 +217,9 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                       type="date"
                       value={endDate}
                       onChange={(event) => setEndDate(event.target.value)}
-                      className="w-full rounded-xl border border-light-color px-4 py-2 text-sm font-bold text-admin"
+                      className="w-full rounded-xl border-2 border-admin px-4 py-2 text-sm font-bold text-admin"
                     />
-                    <p className="text-xs font-medium text-body-text">
+                    <p className="text-xs font-medium text-black">
                       Once this date passes the application is completed and the student is off-boarded to read-only access.
                     </p>
                     <button
@@ -231,7 +231,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                     </button>
                   </>
                 ) : (
-                  <p className="text-xs font-medium text-body-text">Available once the application is submitted.</p>
+                  <p className="text-xs font-medium text-black">Available once the application is submitted.</p>
                 )}
               </div>
 
@@ -239,7 +239,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                 <div className="bg-white p-6 rounded-3xl border border-emerald-200 shadow-sm space-y-2">
                   <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-[0.2em]">Arrived</h4>
                   <p className="text-sm font-bold text-admin">{new Date(arrival.arrivedAt).toLocaleDateString()}</p>
-                  <p className="text-xs font-medium text-body-text">
+                  <p className="text-xs font-medium text-black">
                     {arrival.notices.filter((notice) => notice.sent).length} of {arrival.notices.length} instructor email(s) sent
                   </p>
                 </div>
@@ -250,10 +250,10 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                 <div className="space-y-6">
                   <div className="flex justify-between items-end">
                     <div className="flex flex-col">
-                        <span className="text-xs font-bold text-body-text opacity-60">Status Mapped Level</span>
+                        <span className="text-xs font-bold text-black opacity-60">Status Mapped Level</span>
                         <span className="text-2xl font-bold text-admin">{Math.round(progressPercent)}%</span>
                     </div>
-                    <span className="text-xs font-bold text-body-text opacity-60">Level {currentStage} of 5</span>
+                    <span className="text-xs font-bold text-black opacity-60">Level {currentStage} of 5</span>
                   </div>
                   <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div 
@@ -301,7 +301,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                     </div>
                 ) : (
                     <div className="py-4 text-center rounded-xl bg-slate-50 border border-dashed border-light-color">
-                        <span className="text-sm font-bold text-slate-600">No courses selected yet.</span>
+                        <span className="text-sm font-bold text-black">No courses selected yet.</span>
                     </div>
                 )}
               </div>
@@ -327,8 +327,8 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-[0.2em]">Transcript Calculator</h4>
                 <div className="py-8 text-center rounded-xl bg-slate-50 border border-dashed border-light-color space-y-2">
                     <Calendar className="h-8 w-8 text-slate-300 mx-auto" />
-                    <p className="text-sm font-bold text-slate-500">Transcript data is not linked to this application format natively.</p>
-                    <p className="text-xs text-slate-600">Using older calculation mock model until unified transcript endpoint is added.</p>
+                    <p className="text-sm font-bold text-black">Transcript data is not linked to this application format natively.</p>
+                    <p className="text-xs text-black">Using older calculation mock model until unified transcript endpoint is added.</p>
                 </div>
               </div>
             </div>
@@ -339,7 +339,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
         <footer className="bg-white px-8 py-6 border-t border-light-color/60 flex flex-wrap justify-end gap-3 shrink-0">
           <button 
             onClick={onClose}
-            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-body-text font-bold rounded-xl transition-all"
+            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-black font-bold rounded-xl transition-all"
           >
              Close View
           </button>
@@ -396,7 +396,7 @@ function ProfileItem({ icon: Icon, label, value, highlighted = false }: any) {
       </div>
       <div>
         <span className="text-xs font-bold text-slate-900 uppercase tracking-widest block">{label}</span>
-        <span className={`text-sm font-bold ${highlighted ? 'text-admin' : 'text-body-text'}`}>{value}</span>
+        <span className={`text-sm font-bold ${highlighted ? 'text-admin' : 'text-black'}`}>{value}</span>
       </div>
     </div>
   );

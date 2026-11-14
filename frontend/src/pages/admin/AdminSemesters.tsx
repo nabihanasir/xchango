@@ -12,8 +12,8 @@ const formatDate = (value: string) =>
   new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
 const inputClass =
-  'w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-admin';
-const labelClass = 'block text-xs font-bold text-admin/60 uppercase tracking-widest mb-2';
+  'w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/50 focus:border-accent-yellow transition-all font-medium text-admin';
+const labelClass = 'block text-xs font-bold text-black uppercase tracking-widest mb-2';
 
 export default function AdminSemesters() {
   const [semesters, setSemesters] = useState<SemesterRecord[]>([]);
@@ -112,7 +112,7 @@ export default function AdminSemesters() {
           </div>
           <div>
             <h2 className="text-3xl font-bold text-admin mb-1">Semesters</h2>
-            <p className="text-body-text font-medium md:text-lg">
+            <p className="text-black font-medium md:text-lg">
               A student whose application is rejected, not recommended or completed cannot apply again until the
               semester it closed in has ended. Semesters cannot overlap.
             </p>
@@ -182,7 +182,7 @@ export default function AdminSemesters() {
         {loading ? (
           <div className="h-16 animate-pulse rounded-xl border border-light-color/30 bg-slate-50" />
         ) : semesters.length === 0 ? (
-          <p className="text-sm font-semibold text-slate-600">
+          <p className="text-sm font-semibold text-black">
             No semesters yet. Until you add them, rejected students can apply again straight away.
           </p>
         ) : (
@@ -191,12 +191,12 @@ export default function AdminSemesters() {
               <li key={semester._id} className="flex flex-wrap items-center justify-between gap-3 py-4">
                 <div>
                   <p className="font-bold text-admin">{semester.name}</p>
-                  <p className="text-sm font-medium text-body-text">
+                  <p className="text-sm font-medium text-black">
                     {formatDate(semester.startDate)} to {formatDate(semester.endDate)}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-widest text-slate-600">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-widest text-black">
                     {stateOf(semester)}
                   </span>
                   <button

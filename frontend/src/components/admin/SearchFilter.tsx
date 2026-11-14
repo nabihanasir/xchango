@@ -12,19 +12,19 @@ export default function SearchFilter({ onSearch, onFilterChange, filterOptions, 
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
       <div className="relative flex-1">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-body-text opacity-40" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-black opacity-40" />
         <input
           type="text"
           placeholder={placeholder}
           onChange={(e) => onSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-xl border border-light-color/50 bg-white focus:outline-none focus:border-admin/20 transition-all font-medium text-admin placeholder:text-body-text"
+          className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-admin bg-white focus:outline-none focus:border-admin/20 transition-all font-medium text-admin placeholder:text-body-text"
         />
       </div>
       <div className="relative min-w-[180px]">
-        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-body-text opacity-40" />
+        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-black opacity-40" />
         <select
           onChange={(e) => onFilterChange(e.target.value)}
-          className="w-full pl-11 pr-8 py-3 rounded-xl border border-light-color/50 bg-white focus:outline-none focus:border-admin/20 transition-all font-medium text-admin appearance-none cursor-pointer"
+          className="w-full pl-11 pr-8 py-3 rounded-xl border-2 border-admin bg-white focus:outline-none focus:border-admin/20 transition-all font-medium text-admin appearance-none cursor-pointer"
         >
           {filterOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>

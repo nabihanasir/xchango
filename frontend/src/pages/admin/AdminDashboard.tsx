@@ -151,7 +151,7 @@ export default function AdminDashboard() {
               Home Course Catalog
             </div>
             <h3 className="mt-4 text-2xl font-bold text-slate-800">Manage the central home-course list</h3>
-            <p className="mt-2 text-sm font-medium leading-7 text-slate-500">
+            <p className="mt-2 text-sm font-medium leading-7 text-black">
               Add, edit, and delete the home courses that advisors use while pairing student requests.
             </p>
           </div>

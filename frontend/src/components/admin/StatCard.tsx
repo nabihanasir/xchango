@@ -35,14 +35,14 @@ export default function StatCard({ title, value, icon, trend, color }: StatCardP
       
       <div className="flex items-start justify-between relative z-10">
         <div>
-          <p className="text-body-text text-xs font-semibold mb-1 uppercase tracking-wider">{title}</p>
+          <p className="text-black text-xs font-semibold mb-1 uppercase tracking-wider">{title}</p>
           <h3 className="text-3xl font-bold text-admin">{value}</h3>
           <div className="mt-2 flex items-center gap-1">
             <TrendingUp className={`h-3 w-3 ${trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`} />
             <span className={`text-xs font-bold ${trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
               {trend}
             </span>
-            <span className="text-xs text-body-text ml-1 opacity-60">vs last month</span>
+            <span className="text-xs text-black ml-1 opacity-60">vs last month</span>
           </div>
         </div>
         <div className={`p-3 rounded-xl bg-light-color/30 group-hover:bg-white transition-colors duration-300`}>
