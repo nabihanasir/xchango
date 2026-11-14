@@ -286,4 +286,30 @@ ApplicationSchema.index(
   }
 );
 
+// Every status change is written to the application's timeline so the student can see the history.
+const recordTimeline = (applicationId: unknown, status: unknown) =>
+  mongoose
+    .model('ApplicationTimeline')
+    .create({ applicationId, status: String(status), timestamp: new Date() })
+    .catch(() => undefined);
+
+ApplicationSchema.pre('save', function () {
+  (this as any).$locals.statusChanged = this.isNew || this.isModified('status');
+});
+
+ApplicationSchema.post('save', async function (doc) {
+  if ((doc as any).$locals?.statusChanged) {
+    await recordTimeline(doc._id, doc.status);
+  }
+});
+
+// Updates made with findOneAndUpdate / findByIdAndUpdate bypass save(), so catch status changes there too.
+ApplicationSchema.post('findOneAndUpdate', async function (doc: any) {
+  const update: any = this.getUpdate() || {};
+  const status = update.status ?? update.$set?.status;
+  if (doc && status) {
+    await recordTimeline(doc._id, status);
+  }
+});
+
 export default mongoose.model<IApplication>('Application', ApplicationSchema);

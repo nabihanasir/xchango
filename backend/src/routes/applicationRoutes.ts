@@ -10,7 +10,8 @@ import { UserRole } from '../models/User';
 
 const router = express.Router();
 const applicationDocumentUpload = createUploader('application-documents', ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'], {
-  fileSize: 10 * 1024 * 1024,
+  // 5 MB per document; the +1 keeps a file of exactly 5 MB acceptable (busboy stops at the limit).
+  fileSize: 5 * 1024 * 1024 + 1,
   files: 10,
 });
 

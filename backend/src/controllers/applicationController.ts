@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { ForbiddenError, ValidationError } from '../errors/AppError';
 import { ApplicationStatus } from '../models/Application';
+import ApplicationTimeline from '../models/ApplicationTimeline';
 import { UserRole } from '../models/User';
 import * as applicationService from '../services/applicationService';
 import { recordArrival, reportArrival } from '../services/arrivalService';
@@ -44,7 +45,11 @@ export const getApplication = async (req: any, res: Response) => {
     _id: req.user._id.toString(),
     role: req.user.role,
   });
-  sendResponse(res, 200, 'Application fetched successfully', application);
+  const timeline = await ApplicationTimeline.find({ applicationId: req.params.id }).sort({ timestamp: 1 }).lean();
+  const entries = timeline.length
+    ? timeline.map((entry) => ({ status: entry.status, timestamp: entry.timestamp }))
+    : [{ status: (application as any).status, timestamp: (application as any).updatedAt ?? (application as any).createdAt }];
+  sendResponse(res, 200, 'Application fetched successfully', { ...(application as any).toJSON(), timeline: entries });
 };
 
 /** What the advisor needs to draw the student's progress bar: course requests, visa and published results. */
