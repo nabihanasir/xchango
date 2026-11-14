@@ -72,7 +72,7 @@ export default function AdminVisa() {
       render: (student: AdminVisaRow['student']) => (
         <div>
           <p className="font-bold text-admin">{student.name}</p>
-          <p className="text-xs text-slate-500">{student.sapId || student.email}</p>
+          <p className="text-xs text-black">{student.sapId || student.email}</p>
         </div>
       ),
     },
@@ -82,7 +82,7 @@ export default function AdminVisa() {
       render: (application: AdminVisaRow['application']) => (
         <div>
           <p className="font-semibold text-slate-700">{application.university}</p>
-          <p className="text-xs text-slate-500">{application.country}</p>
+          <p className="text-xs text-black">{application.country}</p>
         </div>
       ),
     },
@@ -120,7 +120,7 @@ export default function AdminVisa() {
       <div className="glass-card flex items-center justify-between rounded-[2rem] border-b border-light-color/50 bg-white p-6 pb-6 md:p-8">
         <div>
           <h2 className="mb-2 text-3xl font-bold text-admin">Visa Process</h2>
-          <p className="mt-1 font-medium text-body-text md:text-lg">
+          <p className="mt-1 font-medium text-black md:text-lg">
             Update each student&apos;s visa status. They see it on their own dashboard and are notified of changes.
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function AdminVisa() {
         ) : rows.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-light-color bg-slate-50 px-6 py-12 text-center">
             <h3 className="text-xl font-bold text-admin">No students to process</h3>
-            <p className="mt-2 text-body-text">
+            <p className="mt-2 text-black">
               Students appear here once they have an active (non-draft, non-rejected) application.
             </p>
           </div>

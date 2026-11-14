@@ -5,12 +5,12 @@ import { authApi } from '../../lib/authApi';
 import Notice from '../../components/Notice';
 
 const inputClass =
-  'w-full rounded-xl border border-light-color/60 bg-white px-4 py-2.5 text-sm font-semibold text-body-text outline-none focus:border-admin focus:ring-2 focus:ring-admin/20';
-const labelClass = 'text-xs font-bold uppercase tracking-widest text-admin';
+  'w-full rounded-xl border-2 border-admin bg-white px-4 py-2.5 text-sm font-semibold text-black outline-none focus:border-admin focus:ring-2 focus:ring-admin/20';
+const labelClass = 'text-xs font-bold uppercase tracking-widest text-black';
 const primaryButton =
   'rounded-xl bg-admin px-5 py-2.5 text-sm font-bold text-white hover:bg-admin-hover disabled:opacity-60';
 const secondaryButton =
-  'rounded-xl border border-light-color/60 px-5 py-2.5 text-sm font-bold text-body-text hover:bg-slate-50';
+  'rounded-xl border border-light-color/60 px-5 py-2.5 text-sm font-bold text-black hover:bg-slate-50';
 
 export default function AdminProfile() {
   const { user, login } = useAuth();
@@ -108,13 +108,13 @@ export default function AdminProfile() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-admin">{user?.name || 'Admin'}</h3>
-            <p className="inline-flex items-center gap-1.5 text-body-text">
+            <p className="inline-flex items-center gap-1.5 text-black">
               <ShieldCheck className="h-4 w-4" /> Super Admin
             </p>
           </div>
         </div>
 
-        <div className="mt-6 flex items-center gap-3 text-body-text">
+        <div className="mt-6 flex items-center gap-3 text-black">
           <Mail className="h-5 w-5 text-accent-yellow" />
           <span className="font-semibold">{user?.email || 'Email unavailable'}</span>
         </div>
@@ -190,7 +190,7 @@ export default function AdminProfile() {
               />
             </label>
           </div>
-          <p className="text-xs font-medium text-slate-500">Use at least 8 characters.</p>
+          <p className="text-xs font-medium text-black">Use at least 8 characters.</p>
           <button type="submit" disabled={savingPassword} className={primaryButton}>
             {savingPassword ? 'Updating…' : 'Update password'}
           </button>
