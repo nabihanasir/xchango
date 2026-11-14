@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
+import { startTransition, useEffect, useMemo, useState } from 'react';
 import {
   Check,
   Eye,
@@ -29,6 +29,7 @@ import ApplicationJourney from './ApplicationJourney';
 import ProgramOutlinePanel from './ProgramOutlinePanel';
 import Pagination, { usePagination } from '../Pagination';
 import Notice from '../Notice';
+import Modal from '../Modal';
 
 type Tab = 'overview' | 'interview' | 'transcript' | 'curriculum' | 'student' | 'documents' | 'arrival';
 type JourneyExtras = Pick<JourneyInput, 'requests' | 'visa' | 'results'>;
@@ -49,7 +50,7 @@ const Field = ({ label, value }: { label: string; value: string }) => (
 
 export default function AdvisorApplicationsWorkspace() {
   const { user } = useAuth();
-  const applicationRef = useRef<HTMLElement | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [journeyExtras, setJourneyExtras] = useState<JourneyExtras>({ requests: [], visa: null, results: [] });
   const [programOutline, setProgramOutline] = useState<ProgramOutline | null>(null);
@@ -100,9 +101,7 @@ export default function AdvisorApplicationsWorkspace() {
         startTransition(() => {
           setApplications(data);
           setSelectedApplicationId((current) =>
-            current && data.some((application) => application._id === current)
-              ? current
-              : data[0]?._id || ''
+            current && data.some((application) => application._id === current) ? current : ''
           );
         });
       } catch (error) {
@@ -230,7 +229,14 @@ export default function AdvisorApplicationsWorkspace() {
 
   const handleOpen = (applicationId: string) => {
     setSelectedApplicationId(applicationId);
-    applicationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setActiveTab('overview');
+    setReviewOpen(true);
+  };
+
+  const closeReview = () => {
+    setReviewOpen(false);
+    setSelectedApplicationId('');
+    setSelectedApplication(null);
   };
 
   const handleDocumentStatusUpdate = async (documentId: string, status: 'approved' | 'rejected') => {
@@ -359,7 +365,7 @@ export default function AdvisorApplicationsWorkspace() {
       <section className="glass-card overflow-hidden rounded-[2rem]">
         <div className="border-b border-slate-200/80 px-6 py-5">
           <h2 className="text-xl font-bold text-slate-900">Assigned Applications</h2>
-          <p className="mt-1 text-sm text-slate-500">Select a row to review that student below.</p>
+          <p className="mt-1 text-sm text-slate-500">Select a row to open that student's application.</p>
         </div>
 
         {loading ? (
@@ -436,10 +442,11 @@ export default function AdvisorApplicationsWorkspace() {
         )}
       </section>
 
-      {detailsError ? <Notice tone="error">{detailsError}</Notice> : null}
-      {actionError ? <Notice tone="error">{actionError}</Notice> : null}
-
-      <section ref={applicationRef} className="glass-card rounded-[2rem] p-6 lg:p-8">
+      {reviewOpen ? (
+        <Modal onClose={closeReview} widthClass="max-w-5xl" labelledBy="application-review-title">
+          <div className="space-y-4 overflow-y-auto p-6 lg:p-8">
+        {detailsError ? <Notice tone="error">{detailsError}</Notice> : null}
+        {actionError ? <Notice tone="error">{actionError}</Notice> : null}
         {detailsLoading ? (
           <div className="h-48 animate-pulse rounded-2xl bg-slate-100" />
         ) : selectedApplication ? (
@@ -447,14 +454,26 @@ export default function AdvisorApplicationsWorkspace() {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium text-slate-500">{selectedStudent?.name || 'Student record'}</p>
-                <h2 className="text-2xl font-bold text-slate-900">{selectedApplication.university}</h2>
+                <h2 id="application-review-title" className="text-2xl font-bold text-slate-900">
+                  {selectedApplication.university}
+                </h2>
                 <p className="text-sm text-slate-500">
                   {selectedApplication.program} · {selectedApplication.country}
                 </p>
               </div>
-              <span className="inline-flex rounded-full bg-teal-700 px-4 py-1.5 text-sm font-semibold text-white">
-                {getApplicationStatusLabel(selectedApplication)}
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="inline-flex rounded-full bg-teal-700 px-4 py-1.5 text-sm font-semibold text-white">
+                  {getApplicationStatusLabel(selectedApplication)}
+                </span>
+                <button
+                  type="button"
+                  onClick={closeReview}
+                  aria-label="Close"
+                  className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             <ApplicationJourney
@@ -472,11 +491,11 @@ export default function AdvisorApplicationsWorkspace() {
               {(
                 [
                   ['overview', 'Overview'],
-                  ['interview', 'Interview'],
-                  ['transcript', 'Transcript'],
-                  ['curriculum', 'Curriculum'],
                   ['student', 'Student profile'],
+                  ['transcript', 'Transcript'],
                   ['documents', `Documents (${studentDocuments.length})`],
+                  ['interview', 'Interview'],
+                  ['curriculum', 'Curriculum'],
                   ['arrival', 'Arrival'],
                 ] as const
               ).map(([key, label]) => (
@@ -830,10 +849,12 @@ export default function AdvisorApplicationsWorkspace() {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-slate-300 px-6 py-10 text-center text-sm font-medium text-slate-500">
-            Select an application above to review it.
+            Application not found.
           </div>
         )}
-      </section>
+          </div>
+        </Modal>
+      ) : null}
       {arrivalModalOpen && selectedApplication ? (
         <MarkArrivalModal
           role="advisor"
