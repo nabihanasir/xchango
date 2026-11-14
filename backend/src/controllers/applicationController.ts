@@ -8,6 +8,7 @@ import * as courseEquivalencyService from '../services/courseEquivalencyService'
 import * as resultService from '../services/resultService';
 import * as visaService from '../services/visaService';
 import { sendResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 import { toPublicFileUrl } from '../utils/upload';
 
 const assertStudentAccess = (req: any, studentId: string) => {
@@ -80,7 +81,7 @@ export const assignAdvisor = async (req: any, res: Response) => {
 };
 
 export const getAdvisorApplications = async (req: any, res: Response) => {
-  const applications = await applicationService.getAdvisorApplications(req.user._id.toString());
+  const applications = await applicationService.getAdvisorApplications(req.user._id.toString(), parsePagination(req.query));
   sendResponse(res, 200, 'Assigned applications fetched successfully', applications);
 };
 

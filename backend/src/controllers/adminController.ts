@@ -3,6 +3,7 @@ import * as adminService from '../services/adminService';
 import { scrapeUniversityWebsite } from '../services/universityScraperService';
 import * as offboardingService from '../services/offboardingService';
 import { sendResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 
 export const getDashboardStats = async (req: Request, res: Response) => {
   const stats = await adminService.getAllStats();
@@ -40,12 +41,12 @@ export const addCourse = async (req: any, res: Response) => {
 };
 
 export const getUsers = async (req: Request, res: Response) => {
-  const users = await adminService.getAllUsers();
+  const users = await adminService.getAllUsers(parsePagination(req.query));
   sendResponse(res, 200, 'Users fetched successfully', users);
 };
 
-export const getApplications = async (_req: Request, res: Response) => {
-  const applications = await adminService.getAllApplications();
+export const getApplications = async (req: Request, res: Response) => {
+  const applications = await adminService.getAllApplications(parsePagination(req.query));
   sendResponse(res, 200, 'Applications fetched successfully', applications);
 };
 

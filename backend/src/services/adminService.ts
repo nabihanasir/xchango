@@ -25,6 +25,7 @@ import {
   readString,
   readUrl,
 } from '../utils/validators';
+import { buildPage, paginateQuery, type PageRequest } from '../utils/pagination';
 
 const populateApplications = <T>(query: T) =>
   (query as any)
@@ -95,16 +96,24 @@ export const createCourse = async (adminId: string, courseData: any) => {
   return courseService.createHomeCourse(adminId, courseData);
 };
 
-export const getAllUsers = async () => {
-  const [users, advisorProfiles] = await Promise.all([
-    User.find().select('-password').lean(),
-    AdvisorProfile.find().select('userId countries').lean(),
+/** Returns every user, or one page of them (newest first) when a page request is supplied. */
+export const getAllUsers = async (page: PageRequest | null = null) => {
+  const [users, total] = await Promise.all([
+    page
+      ? User.find().select('-password').sort({ createdAt: -1, _id: -1 }).skip(page.skip).limit(page.limit).lean()
+      : User.find().select('-password').lean(),
+    page ? User.countDocuments() : Promise.resolve(0),
   ]);
+  const advisorIds = users.filter((user) => user.role === UserRole.ADVISOR).map((user) => user._id);
+  const advisorProfiles = await AdvisorProfile.find(page ? { userId: { $in: advisorIds } } : {})
+    .select('userId countries')
+    .lean();
   const countriesByAdvisor = new Map(advisorProfiles.map((profile) => [String(profile.userId), profile.countries ?? []]));
 
-  return users.map((user) =>
+  const withCountries = users.map((user) =>
     user.role === UserRole.ADVISOR ? { ...user, countries: countriesByAdvisor.get(String(user._id)) ?? [] } : user
   );
+  return page ? buildPage(withCountries, total, page) : withCountries;
 };
 
 /** Countries come from the database, so any country an admin has added can be assigned to an advisor. */
@@ -141,8 +150,12 @@ export const setAdvisorCountries = async (rawUserId: unknown, countries: unknown
   return { _id: userId, countries: profile.countries };
 };
 
-export const getAllApplications = async () =>
-  populateApplications(Application.find().sort({ createdAt: -1 }));
+export const getAllApplications = async (page: PageRequest | null = null) =>
+  paginateQuery(
+    populateApplications(Application.find().sort({ createdAt: -1, _id: -1 })),
+    () => Application.countDocuments(),
+    page,
+  );
 
 export const getPendingApplications = async () =>
   populateApplications(

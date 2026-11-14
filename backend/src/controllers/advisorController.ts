@@ -1,14 +1,15 @@
 import { Response } from 'express';
 import * as advisorService from '../services/advisorService';
 import { sendResponse } from '../utils/response';
+import { parsePagination } from '../utils/pagination';
 
 export const getAssignedApps = async (req: any, res: Response) => {
-  const applications = await advisorService.getAssignedApplications(req.user._id);
+  const applications = await advisorService.getAssignedApplications(req.user._id, parsePagination(req.query));
   sendResponse(res, 200, 'Assigned applications fetched', applications);
 };
 
 export const getAssignedStudents = async (req: any, res: Response) => {
-  const students = await advisorService.getAssignedStudents(req.user._id);
+  const students = await advisorService.getAssignedStudents(req.user._id, parsePagination(req.query));
   sendResponse(res, 200, 'Assigned students fetched', students);
 };
 
