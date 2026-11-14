@@ -373,9 +373,9 @@ function CourseCard({
           {activeMatch?.reasoning ? (
             <Collapsible title="Topic comparison">
               <div className="grid gap-4 sm:grid-cols-3">
-                <TopicColumn title="Overlapping" topics={activeMatch.reasoning.overlappingTopics} tone="border-emerald-200 bg-emerald-50 text-emerald-700" />
-                <TopicColumn title="Missing" topics={activeMatch.reasoning.missingTopics} tone="border-red-200 bg-red-50 text-red-700" />
-                <TopicColumn title="Additional" topics={activeMatch.reasoning.additionalTopics} tone="border-sky-200 bg-sky-50 text-sky-700" />
+                <TopicColumn title="Only in Home University" topics={activeMatch.reasoning.missingTopics} tone="border-red-200 bg-red-50 text-red-700" />
+                <TopicColumn title="Only in Host University" topics={activeMatch.reasoning.additionalTopics} tone="border-sky-200 bg-sky-50 text-sky-700" />
+                <TopicColumn title="Topics common in both" topics={activeMatch.reasoning.overlappingTopics} tone="border-emerald-200 bg-emerald-50 text-emerald-700" />
               </div>
               <p className="mt-4 text-sm font-medium leading-6 text-slate-600">
                 <span className="font-bold text-slate-700">Credit hours: </span>
