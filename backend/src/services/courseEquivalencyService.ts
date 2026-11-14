@@ -26,6 +26,13 @@ import {
 } from './aiCourseMatcherService';
 import { extractOutlineText } from './outlineTextService';
 import {
+  MAX_COMMENT_LENGTH,
+  MAX_PASTED_OUTLINE_LENGTH,
+  assertObjectId,
+  assertOneOf,
+  readString,
+} from '../utils/validators';
+import {
   CourseLike,
   PlanContext,
   evaluateCandidate,
@@ -431,6 +438,14 @@ const notifyAdvisorsOfCourseRequest = async (studentId: string, courseCount: num
 };
 
 export const createCourseRequest = async (studentId: string, hostCourseIds: string[]) => {
+  if (!Array.isArray(hostCourseIds) || hostCourseIds.length > 50 || hostCourseIds.some((id) => typeof id !== 'string')) {
+    throw new ValidationError(
+      'Course selection is invalid.',
+      'Host course IDs must be a list of up to 50 identifiers.',
+      'Reload the page and select the courses again.',
+      'COURSE_SELECTION_INVALID'
+    );
+  }
   if (!hostCourseIds.length) {
     throw new Error('Select at least one host course to submit a request.');
   }
@@ -455,7 +470,7 @@ export const createCourseRequest = async (studentId: string, hostCourseIds: stri
     );
   }
 
-  hostCourseIds.forEach((courseId) => ensureValidObjectId(courseId, 'One or more host course IDs are invalid.'));
+  hostCourseIds = [...new Set(hostCourseIds.map((courseId) => assertObjectId(courseId, 'Host course', 'COURSE_SELECTION_INVALID')))];
   const hostCourses = await Course.find({
     _id: { $in: hostCourseIds.map(toObjectId) },
     type: CourseType.HOST,
@@ -536,6 +551,14 @@ export const uploadCourseOutline = async (
       throw new Error('Your previous outline for this course is still being matched. Try again in a moment.');
     }
 
+    if (pastedText !== undefined && (typeof pastedText !== 'string' || pastedText.length > MAX_PASTED_OUTLINE_LENGTH)) {
+      throw new ValidationError(
+        'Pasted outline is too long.',
+        `Pasted text must be ${MAX_PASTED_OUTLINE_LENGTH} characters or fewer.`,
+        'Upload the outline as a file or shorten the text.',
+        'OUTLINE_TEXT_TOO_LONG'
+      );
+    }
     const text = await extractOutlineText({ filePath: file?.path, pastedText });
 
     item.uploadedOutline = {
@@ -658,7 +681,7 @@ const scorePairedCourse = async (
  * before an outline is uploaded) already scored that course its reasoning is reused; otherwise it is scored now.
  */
 export const updatePairedHomeCourse = async (requestId: string, itemId: string, homeCourseId: string) => {
-  ensureValidObjectId(homeCourseId, 'Invalid home course ID.');
+  assertObjectId(homeCourseId, 'Home course', 'HOME_COURSE_INVALID');
   const { request, item } = await loadRequestItem(requestId, itemId);
 
   const homeCourse = await Course.findOne({ _id: homeCourseId, ...homeCourseFilter });
@@ -735,7 +758,20 @@ export const submitAdvisorDecision = async (
   itemDecisions: DecisionInput[],
   wholeRequestDecision?: CourseRequestItemStatus
 ) => {
-  ensureValidObjectId(requestId, 'Invalid course request ID.');
+  assertObjectId(requestId, 'Course request', 'COURSE_REQUEST_INVALID');
+  const decisionStatuses = Object.values(CourseRequestItemStatus) as CourseRequestItemStatus[];
+  advisorComment = readString(advisorComment, 'Advisor comment', { max: MAX_COMMENT_LENGTH });
+  if (wholeRequestDecision !== undefined && wholeRequestDecision !== null) {
+    assertOneOf(wholeRequestDecision, decisionStatuses, 'Decision', 'COURSE_DECISION_INVALID');
+  }
+  if (!Array.isArray(itemDecisions) || itemDecisions.length > 100) {
+    throw new ValidationError('Item decisions are invalid.', 'Item decisions must be a list.', 'Reload the page and try again.', 'COURSE_DECISION_INVALID');
+  }
+  itemDecisions = itemDecisions.map((decision) => ({
+    itemId: assertObjectId(decision?.itemId, 'Request item', 'COURSE_DECISION_INVALID'),
+    status: assertOneOf(decision?.status, decisionStatuses, 'Decision', 'COURSE_DECISION_INVALID'),
+    advisorComment: readString(decision?.advisorComment, 'Advisor comment', { max: MAX_COMMENT_LENGTH }),
+  }));
   const request = await CourseRequest.findById(requestId);
   if (!request) {
     throw new Error('Course request not found.');

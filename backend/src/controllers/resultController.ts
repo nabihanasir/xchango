@@ -20,8 +20,8 @@ export const upsertResult = async (req: any, res: Response) => {
   const status = req.body.status === ResultStatus.PUBLISHED ? ResultStatus.PUBLISHED : ResultStatus.DRAFT;
   const result = await resultService.upsertResult(req.user._id.toString(), req.params.courseRequestItemId, {
     grade: req.body.grade,
-    marks: req.body.marks !== undefined && req.body.marks !== '' ? Number(req.body.marks) : null,
-    remarks: req.body.remarks || '',
+    marks: req.body.marks !== undefined && req.body.marks !== '' ? (req.body.marks as any) : null,
+    remarks: req.body.remarks,
     status,
     resultFileUrl: req.file ? toPublicFileUrl(req.file.path) : undefined,
   });
@@ -62,7 +62,15 @@ export const getAdvisorVerifications = async (req: any, res: Response) => {
 };
 
 export const reviewVerification = async (req: any, res: Response) => {
-  const action = req.body.action === 'return' ? 'return' : 'verify';
+  if (req.body.action !== 'return' && req.body.action !== 'verify') {
+    throw new ValidationError(
+      'Review action is invalid.',
+      `"${String(req.body.action)}" is not a valid review action.`,
+      'Choose verify or return.',
+      'EXAM_VERIFICATION_ACTION_INVALID'
+    );
+  }
+  const action: 'verify' | 'return' = req.body.action;
   const data = await examVerificationService.reviewVerification(req.user._id.toString(), req.params.id, {
     action,
     reason: req.body.reason,

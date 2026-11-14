@@ -194,19 +194,42 @@ export default function AdminUsers() {
   };
 
   const handleCreateUser = async () => {
-    setSubmitting(true);
     setCreateError('');
     setGeneratedPassword('');
 
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const password = form.password.trim();
+    if (!name) return setCreateError('Full name is required.');
+    if (name.length < 2 || name.length > 100 || !/^[A-Za-z][A-Za-z .'-]*$/.test(name)) {
+      return setCreateError('Full name must be 2-100 characters and contain only letters, spaces, apostrophes, dots and hyphens.');
+    }
+    if (!email) return setCreateError('Email is required.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 254) {
+      return setCreateError('Enter a valid email address, e.g. advisor@xchango.com.');
+    }
+    if (form.role === 'advisor') {
+      if (!form.designation.trim()) return setCreateError('Designation is required for advisors.');
+      if (!form.department.trim()) return setCreateError('Department is required for advisors.');
+      if (form.designation.trim().length > 100 || form.department.trim().length > 100) {
+        return setCreateError('Designation and department must be 100 characters or fewer.');
+      }
+    }
+    if (password && (password.length < 8 || password.length > 128 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password))) {
+      return setCreateError('Password must be 8-128 characters and include both letters and numbers, or leave it blank to auto-generate.');
+    }
+
+    setSubmitting(true);
+
     try {
       const createdUser = await adminApi.createUser({
-        name: form.name,
-        email: form.email,
+        name,
+        email,
         role: form.role,
-        designation: form.role === 'advisor' ? form.designation : undefined,
-        department: form.role === 'advisor' ? form.department : undefined,
+        designation: form.role === 'advisor' ? form.designation.trim() : undefined,
+        department: form.role === 'advisor' ? form.department.trim() : undefined,
         countries: form.role === 'advisor' ? form.countries : undefined,
-        password: form.password || undefined,
+        password: password || undefined,
       });
 
       setUsers((current) => [createdUser, ...current]);
@@ -261,6 +284,8 @@ export default function AdminUsers() {
                   onChange={(event) => setForm({ ...form, name: event.target.value })}
                   className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                   placeholder="Advisor Name"
+                  maxLength={100}
+                  required
                 />
               </div>
               <div>
@@ -271,6 +296,8 @@ export default function AdminUsers() {
                   onChange={(event) => setForm({ ...form, email: event.target.value })}
                   className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                   placeholder="advisor@xchango.com"
+                  maxLength={254}
+                  required
                 />
               </div>
               <div>
@@ -294,6 +321,8 @@ export default function AdminUsers() {
                       onChange={(event) => setForm({ ...form, designation: event.target.value })}
                       className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                       placeholder="Senior Academic Advisor"
+                      maxLength={100}
+                      required
                     />
                   </div>
                   <div>
@@ -304,6 +333,8 @@ export default function AdminUsers() {
                       onChange={(event) => setForm({ ...form, department: event.target.value })}
                       className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                       placeholder="Computer Science"
+                      maxLength={100}
+                      required
                     />
                   </div>
                   <div>
@@ -321,6 +352,8 @@ export default function AdminUsers() {
                   onChange={(event) => setForm({ ...form, password: event.target.value })}
                   className="w-full px-4 py-3 bg-slate-50 border border-light-color rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
                   placeholder="Leave blank to auto-generate"
+                  minLength={8}
+                  maxLength={128}
                 />
               </div>
             </div>

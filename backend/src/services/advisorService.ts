@@ -4,6 +4,7 @@ import StudentProfile from '../models/StudentProfile';
 import User from '../models/User';
 import { NotFoundError, ValidationError } from '../errors/AppError';
 import * as applicationService from './applicationService';
+import { NAME_PATTERN, PHONE_PATTERN } from '../utils/validators';
 
 export const getAssignedApplications = async (advisorId: string) => {
   return await Application.find({
@@ -79,9 +80,23 @@ export const updateAdvisorProfile = async (userId: string, input: AdvisorProfile
   }
 
   const name = readText(input.name, 'Name', 100, true);
+  if (name !== undefined && !NAME_PATTERN.test(name)) {
+    throw new ValidationError(
+      'Name is invalid.',
+      'Name can only contain letters, spaces, apostrophes, dots and hyphens.',
+      'Remove special characters from the name.'
+    );
+  }
   const designation = readText(input.designation, 'Designation', 100, true);
   const department = readText(input.department, 'Department', 100, true);
   const phone = readText(input.phone, 'Phone', 30, false);
+  if (phone && !PHONE_PATTERN.test(phone)) {
+    throw new ValidationError(
+      'Phone is invalid.',
+      'Phone number must be 7-15 digits and may start with +.',
+      'Enter a valid phone number or leave it empty.'
+    );
+  }
   const bio = readText(input.bio, 'Bio', 1000, false);
   const officeHours = readText(input.officeHours, 'Office hours', 200, false);
 

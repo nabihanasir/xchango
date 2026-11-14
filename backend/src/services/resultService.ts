@@ -6,6 +6,7 @@ import ExamVerification from '../models/ExamVerification';
 import { appUrl, notifyUser } from './notificationService';
 import Result, { IResult, ResultStatus } from '../models/Result';
 import { advisorCanReviewStudent } from './examVerificationService';
+import { GRADE_PATTERN, MAX_COMMENT_LENGTH, assertObjectId, readNumber, readString } from '../utils/validators';
 
 interface UpsertResultInput {
   grade: string;
@@ -93,7 +94,16 @@ export const upsertResult = async (
   courseRequestItemId: string,
   input: UpsertResultInput
 ) => {
-  ensureValidObjectId(courseRequestItemId, 'Invalid course request item ID.');
+  assertObjectId(courseRequestItemId, 'Course request item', 'RESULT_ITEM_INVALID');
+  const grade = readString(input.grade, 'Grade', {
+    required: true,
+    max: 6,
+    pattern: GRADE_PATTERN,
+    patternHint: 'Grade must be a letter grade such as A, B+ or F, or a numeric score.',
+    code: 'RESULT_GRADE_INVALID',
+  }).toUpperCase();
+  const marks = readNumber(input.marks, 'Marks', { min: 0, max: 100, required: false });
+  const remarks = readString(input.remarks, 'Remarks', { max: MAX_COMMENT_LENGTH });
 
   const request = await CourseRequest.findOne({ 'items._id': courseRequestItemId });
   if (!request) {
@@ -119,9 +129,9 @@ export const upsertResult = async (
     courseRequestItemId: item._id,
     hostCourseId: item.hostCourseId,
     advisorId,
-    grade: input.grade,
-    marks: input.marks ?? null,
-    remarks: input.remarks || '',
+    grade,
+    marks,
+    remarks,
     status: input.status,
     publishedAt: input.status === ResultStatus.PUBLISHED ? new Date() : null,
   };

@@ -3,7 +3,16 @@ import StudentProfile, {
   IStudentTranscript,
 } from '../models/StudentProfile';
 import User from '../models/User';
+import Country from '../models/Country';
 import { NotFoundError, ValidationError } from '../errors/AppError';
+import {
+  INTAKE_PATTERN,
+  NAME_PATTERN,
+  PHONE_PATTERN,
+  REGISTRATION_NUMBER_PATTERN,
+  readEmail,
+  readString,
+} from '../utils/validators';
 
 const MAX_SEMESTER = 8;
 
@@ -157,19 +166,100 @@ export const ensureStudentProfile = async (userId: string) => {
 
 export const getStudentProfile = async (userId: string) => ensureStudentProfile(userId);
 
-export const updateStudentProfile = async (userId: string, profileData: StudentProfileUpdateInput) => {
-  const requestedSemester = profileData.basicInfo?.semester;
-  if (
-    requestedSemester !== undefined &&
-    (!Number.isInteger(requestedSemester) || requestedSemester < 0 || requestedSemester > MAX_SEMESTER)
-  ) {
-    throw new ValidationError(
-      `Semester must be a whole number between 1 and ${MAX_SEMESTER}.`,
-      `The submitted semester (${requestedSemester}) is outside the allowed range.`,
-      `Enter a semester from 1 to ${MAX_SEMESTER}.`,
-      'INVALID_SEMESTER'
-    );
+const DEGREE_LEVELS = ['Undergraduate', 'Graduate'];
+const MAX_PREFERRED_COUNTRIES = 20;
+
+/** Validates and normalises every field the student can edit; throws on the first problem. */
+const sanitizeProfileInput = async (profileData: StudentProfileUpdateInput): Promise<StudentProfileUpdateInput> => {
+  const result: StudentProfileUpdateInput = {};
+  const raw = (profileData ?? {}) as Record<string, any>;
+
+  if (raw.basicInfo !== undefined) {
+    if (raw.basicInfo === null || typeof raw.basicInfo !== 'object' || Array.isArray(raw.basicInfo)) {
+      throw new ValidationError('Basic info is invalid.', 'Basic info must be an object.', 'Reload the page and try again.', 'BASIC_INFO_INVALID');
+    }
+    const info = raw.basicInfo as Record<string, unknown>;
+    const basicInfo: Partial<IStudentProfile['basicInfo']> = {};
+
+    if (info.fullName !== undefined) {
+      basicInfo.fullName = readString(info.fullName, 'Full name', { max: 100, pattern: NAME_PATTERN, patternHint: 'Full name can only contain letters, spaces, apostrophes, dots and hyphens.' });
+    }
+    if (info.email !== undefined) {
+      basicInfo.email = readEmail(info.email, 'Email', false);
+    }
+    if (info.phone !== undefined) {
+      const phone = readString(info.phone, 'Phone number', { max: 20, pattern: PHONE_PATTERN, patternHint: 'Phone number must be 7-15 digits and may start with +.' });
+      const digits = phone.replace(/[^0-9]/g, '').length;
+      if (phone && (digits < 7 || digits > 15)) {
+        throw new ValidationError('Phone number is invalid.', 'Phone number must contain between 7 and 15 digits.', 'Enter a valid phone number.', 'PHONE_INVALID');
+      }
+      basicInfo.phone = phone;
+    }
+    if (info.cmsId !== undefined) {
+      basicInfo.cmsId = readString(info.cmsId, 'Registration number', {
+        max: 30,
+        pattern: REGISTRATION_NUMBER_PATTERN,
+        patternHint: 'Registration number may only contain letters, digits, dashes, dots and slashes (3-30 characters).',
+      });
+    }
+    if (info.department !== undefined) {
+      basicInfo.department = readString(info.department, 'Program', { max: 100 });
+    }
+    if (info.semester !== undefined) {
+      const semester = info.semester;
+      if (typeof semester !== 'number' || !Number.isInteger(semester) || semester < 1 || semester > MAX_SEMESTER) {
+        throw new ValidationError(
+          `Semester must be a whole number between 1 and ${MAX_SEMESTER}.`,
+          `The submitted semester (${String(semester)}) is outside the allowed range.`,
+          `Enter a semester from 1 to ${MAX_SEMESTER}.`,
+          'INVALID_SEMESTER'
+        );
+      }
+      basicInfo.semester = semester;
+    }
+    result.basicInfo = basicInfo;
   }
+
+  if (raw.preferences !== undefined) {
+    if (raw.preferences === null || typeof raw.preferences !== 'object' || Array.isArray(raw.preferences)) {
+      throw new ValidationError('Preferences are invalid.', 'Preferences must be an object.', 'Reload the page and try again.', 'PREFERENCES_INVALID');
+    }
+    const prefs = raw.preferences as Record<string, unknown>;
+    const preferences: Partial<IStudentProfile['preferences']> = {};
+
+    if (prefs.preferredCountries !== undefined) {
+      if (!Array.isArray(prefs.preferredCountries) || prefs.preferredCountries.length > MAX_PREFERRED_COUNTRIES) {
+        throw new ValidationError('Preferred countries are invalid.', `Provide a list of up to ${MAX_PREFERRED_COUNTRIES} countries.`, 'Select countries from the list.', 'PREFERRED_COUNTRIES_INVALID');
+      }
+      const requested = [...new Set(prefs.preferredCountries.map((country) => readString(country, 'Country', { required: true, max: 100 })))];
+      const known = (await Country.find({ isActive: { $ne: false } }).select('name')).map((country) => country.name);
+      const invalid = requested.filter((country) => !known.includes(country));
+      if (invalid.length) {
+        throw new ValidationError('Preferred country is not supported.', `Unsupported: ${invalid.join(', ')}.`, 'Select countries from the list.', 'PREFERRED_COUNTRIES_INVALID');
+      }
+      preferences.preferredCountries = requested;
+    }
+    if (prefs.degreeLevel !== undefined) {
+      const level = readString(prefs.degreeLevel, 'Degree level', { max: 50 });
+      if (level && !DEGREE_LEVELS.includes(level)) {
+        throw new ValidationError('Degree level is invalid.', `"${level}" is not an allowed degree level.`, `Choose one of: ${DEGREE_LEVELS.join(', ')}.`, 'DEGREE_LEVEL_INVALID');
+      }
+      preferences.degreeLevel = level;
+    }
+    if (prefs.fieldOfInterest !== undefined) {
+      preferences.fieldOfInterest = readString(prefs.fieldOfInterest, 'Field of interest', { max: 100 });
+    }
+    if (prefs.intake !== undefined) {
+      preferences.intake = readString(prefs.intake, 'Intake', { max: 20, pattern: INTAKE_PATTERN, patternHint: 'Intake must look like "Fall 2026" or "Spring 2027".' });
+    }
+    result.preferences = preferences;
+  }
+
+  return result;
+};
+
+export const updateStudentProfile = async (userId: string, rawProfileData: StudentProfileUpdateInput) => {
+  const profileData = await sanitizeProfileInput(rawProfileData);
 
   const profile = await ensureStudentProfile(userId);
 
@@ -194,6 +284,15 @@ export const updateStudentProfile = async (userId: string, profileData: StudentP
 };
 
 export const saveTranscript = async (userId: string, transcriptData: IStudentTranscript) => {
+  const cgpa = Number(transcriptData?.cgpa);
+  if (!Number.isFinite(cgpa) || cgpa < 0 || cgpa > 4.5) {
+    throw new ValidationError(
+      'Transcript CGPA is out of range.',
+      `The CGPA read from the transcript (${String(transcriptData?.cgpa)}) is not between 0 and 4.5.`,
+      'Upload a transcript that lists a valid CGPA on a 4.0 scale.',
+      'TRANSCRIPT_CGPA_INVALID'
+    );
+  }
   const profile = await ensureStudentProfile(userId);
   profile.transcript = transcriptData;
   syncProfileWithLegacyFields(profile);

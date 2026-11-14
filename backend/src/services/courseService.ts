@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import Course, { CourseType, ICourse } from '../models/Course';
 import User, { UserRole } from '../models/User';
 import { ForbiddenError, NotFoundError, ValidationError } from '../errors/AppError';
+import { MAX_DESCRIPTION_LENGTH, assertObjectId, readEmail, readString } from '../utils/validators';
 
 export interface CourseInput {
   title: string;
@@ -16,7 +17,6 @@ export interface InstructorInput {
   instructorEmail?: string;
 }
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const DEMO_ADMIN_EMAIL = 'admin@xchango.com';
 const DEMO_ADMIN_PASSWORD = 'Admin@123';
@@ -59,10 +59,9 @@ const DEMO_HOME_COURSES: CourseInput[] = [
   },
 ];
 
-const normalizeTitle = (value?: string) => value?.trim() || '';
 
 const validateCourseInput = (payload: CourseInput) => {
-  const title = normalizeTitle(payload.title);
+  const title = readString(payload.title, 'Title', { required: true, max: 150, code: 'COURSE_TITLE_REQUIRED' });
   const creditHours = Number(payload.creditHours);
 
   if (!title) {
@@ -74,30 +73,28 @@ const validateCourseInput = (payload: CourseInput) => {
     );
   }
 
-  if (!Number.isFinite(creditHours) || creditHours <= 0) {
+  if (!Number.isFinite(creditHours) || creditHours <= 0 || creditHours > 12) {
     throw new ValidationError(
-      'Credit hours must be greater than zero.',
+      'Credit hours must be between 1 and 12.',
       'The course credit hours value is invalid.',
-      'Enter a positive credit hour value and try again.',
+      'Enter a positive credit hour value up to 12 and try again.',
       'COURSE_CREDIT_HOURS_INVALID'
     );
   }
+
+  readString(payload.description, 'Description', { max: MAX_DESCRIPTION_LENGTH });
 
   return { title, creditHours };
 };
 
 const validateInstructorInput = (payload: InstructorInput) => {
-  const instructorName = payload.instructorName?.trim() || '';
-  const instructorEmail = payload.instructorEmail?.trim().toLowerCase() || '';
-
-  if (instructorEmail && !EMAIL_PATTERN.test(instructorEmail)) {
-    throw new ValidationError(
-      'Instructor email is invalid.',
-      'The instructor email address is not in a valid format.',
-      'Enter an address like name@university.edu or leave it empty.',
-      'COURSE_INSTRUCTOR_EMAIL_INVALID'
-    );
-  }
+  const instructorName = readString(payload.instructorName, 'Instructor name', {
+    max: 100,
+    pattern: /^[A-Za-z][A-Za-z .'-]*$/,
+    patternHint: 'Instructor name can only contain letters, spaces, apostrophes, dots and hyphens.',
+    code: 'COURSE_INSTRUCTOR_NAME_INVALID',
+  });
+  const instructorEmail = readEmail(payload.instructorEmail, 'Instructor email', false, 'COURSE_INSTRUCTOR_EMAIL_INVALID');
 
   return { instructorName, instructorEmail };
 };
@@ -174,7 +171,8 @@ export const createHomeCourse = async (adminId: string, payload: CourseInput) =>
   return getCourseById(course._id.toString());
 };
 
-export const updateHomeCourse = async (courseId: string, payload: CourseInput) => {
+export const updateHomeCourse = async (rawCourseId: string, payload: CourseInput) => {
+  const courseId = assertObjectId(rawCourseId, 'Course', 'COURSE_INVALID');
   const { title, creditHours } = validateCourseInput(payload);
   const instructor = validateInstructorInput(payload);
   const course = await Course.findOne({
@@ -208,7 +206,8 @@ export const listHostCourses = async () =>
   Course.find({ type: CourseType.HOST }).populate('universityId', 'name').sort({ code: 1, title: 1 });
 
 /** Sets who teaches a course (home or host). Empty values clear the instructor. */
-export const updateCourseInstructor = async (courseId: string, payload: InstructorInput) => {
+export const updateCourseInstructor = async (rawCourseId: string, payload: InstructorInput) => {
+  const courseId = assertObjectId(rawCourseId, 'Course', 'COURSE_INVALID');
   const instructor = validateInstructorInput(payload);
   const course = await Course.findById(courseId);
 
@@ -228,7 +227,8 @@ export const updateCourseInstructor = async (courseId: string, payload: Instruct
   return course.populate('universityId', 'name');
 };
 
-export const deleteHomeCourse = async (courseId: string) => {
+export const deleteHomeCourse = async (rawCourseId: string) => {
+  const courseId = assertObjectId(rawCourseId, 'Course', 'COURSE_INVALID');
   const deleted = await Course.findOneAndDelete({
     _id: courseId,
     $or: [{ isHomeCourse: true }, { type: CourseType.HOME }],

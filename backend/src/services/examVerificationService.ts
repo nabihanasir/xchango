@@ -5,6 +5,7 @@ import Application, { ApplicationStatus, IApplication } from '../models/Applicat
 import ExamVerification, { ExamVerificationStatus } from '../models/ExamVerification';
 import { deleteStoredFile } from '../utils/storedFiles';
 import { appUrl, notifyAdmins, notifyUserSafely } from './notificationService';
+import { MAX_COMMENT_LENGTH, assertObjectId, readString } from '../utils/validators';
 
 /** The exchange the student is returning from: their latest application that got past the draft stage. */
 export const findStudentExchange = async (studentId: string): Promise<IApplication | null> =>
@@ -35,6 +36,12 @@ export const submitVerification = async (
   studentId: string,
   input: { fileUrl: string; fileName: string; note?: string }
 ) => {
+  try {
+    readString(input.note, 'Note', { max: MAX_COMMENT_LENGTH });
+  } catch (error) {
+    await deleteStoredFile(input.fileUrl);
+    throw error;
+  }
   const application = await findStudentExchange(studentId);
   if (!application) {
     throw new ValidationError(
@@ -187,7 +194,7 @@ export const reviewVerification = async (
     );
   }
 
-  const reason = (input.reason || '').trim();
+  const reason = readString(input.reason, 'Reason', { max: MAX_COMMENT_LENGTH });
   if (input.action === 'return' && !reason) {
     throw new ValidationError(
       'Give a reason for returning the document.',

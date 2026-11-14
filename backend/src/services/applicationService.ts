@@ -21,6 +21,14 @@ import {
   NotFoundError,
   ValidationError,
 } from '../errors/AppError';
+import {
+  MAX_COMMENT_LENGTH,
+  REGISTRATION_NUMBER_PATTERN,
+  assertObjectId,
+  assertOneOf,
+  readIsoDate,
+  readString,
+} from '../utils/validators';
 
 interface ApplicationStepInput {
   country?: string;
@@ -313,15 +321,77 @@ const calculatePostShortlistStatus = (application: IApplication) => {
   return ApplicationStatus.SHORTLISTED;
 };
 
-const applyStepInput = async (application: IApplication, input: ApplicationStepInput) => {
-  if (input.country) {
-    application.country = input.country;
+const requireBoolean = (value: unknown, label: string): boolean | undefined => {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'boolean') {
+    throw new ValidationError(
+      `${label} is invalid.`,
+      `${label} must be true or false.`,
+      'Reload the page and try again.',
+      'APPLICATION_FIELD_INVALID'
+    );
+  }
+  return value;
+};
+
+const requireFlagWithDetails = (value: unknown, flagKey: string, label: string) => {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw new ValidationError(`${label} is invalid.`, `${label} must be an object.`, 'Reload the page and try again.', 'APPLICATION_FIELD_INVALID');
+  }
+  const raw = value as Record<string, unknown>;
+  return {
+    [flagKey]: requireBoolean(raw[flagKey], label) ?? false,
+    details: readString(raw.details, `${label} details`, { max: MAX_COMMENT_LENGTH }),
+  };
+};
+
+/** Type-checks and normalises every client-supplied application field before it is used. */
+const sanitizeStepInput = (raw: ApplicationStepInput): ApplicationStepInput => {
+  const input = (raw ?? {}) as Record<string, unknown>;
+  const clean: Record<string, unknown> = {};
+
+  if (input.country !== undefined) clean.country = readString(input.country, 'Country', { required: true, max: 100 });
+  if (input.university !== undefined) clean.university = readString(input.university, 'University', { required: true, max: 50 });
+  if (input.program !== undefined) clean.program = readString(input.program, 'Program', { required: true, max: 150 });
+
+  const travel = requireFlagWithDetails(input.travelHistory, 'hasTravelHistory', 'Travel history');
+  if (travel) clean.travelHistory = travel;
+  const medical = requireFlagWithDetails(input.medicalCondition, 'hasCondition', 'Medical condition');
+  if (medical) clean.medicalCondition = medical;
+
+  const passportValid = requireBoolean(input.passportValid, 'Passport validity');
+  if (passportValid !== undefined) clean.passportValid = passportValid;
+  const financialEligible = requireBoolean(input.financialEligible, 'Financial eligibility');
+  if (financialEligible !== undefined) clean.financialEligible = financialEligible;
+  const consentExtension = requireBoolean(input.consentExtension, 'Consent');
+  if (consentExtension !== undefined) clean.consentExtension = consentExtension;
+
+  if (input.registrationNumber !== undefined) {
+    clean.registrationNumber = readString(input.registrationNumber, 'Registration number', {
+      max: 30,
+      pattern: REGISTRATION_NUMBER_PATTERN,
+      patternHint: 'Registration number may only contain letters, digits, dashes, dots and slashes (3-30 characters).',
+    });
+  }
+  if (input.accommodationPreference !== undefined) {
+    clean.accommodationPreference = assertOneOf(
+      input.accommodationPreference,
+      Object.values(AccommodationPreference),
+      'Accommodation preference',
+      'ACCOMMODATION_PREFERENCE_INVALID'
+    );
   }
 
-  if (input.university) {
+  return clean as ApplicationStepInput;
+};
+
+const applyStepInput = async (application: IApplication, input: ApplicationStepInput) => {
+  if (input.country || input.university) {
     const country = input.country || application.country;
-    validateUniversitySelection(country, input.university);
-    application.university = input.university;
+    const university = input.university || application.university;
+    application.country = await validateUniversitySelection(country, university);
+    application.university = university;
   }
 
   if (input.program) {
@@ -453,8 +523,9 @@ const getAvailableCoursesForApplication = async (application: IApplication): Pro
     .sort({ code: 1, name: 1 });
 };
 
-export const createApplication = async (studentId: string, payload: ApplicationStepInput) => {
+export const createApplication = async (studentId: string, rawPayload: ApplicationStepInput) => {
   await assertProfileComplete(studentId);
+  const payload = sanitizeStepInput(rawPayload);
 
   if (!payload.country || !payload.university || !payload.program) {
     throw new ValidationError(
@@ -499,8 +570,10 @@ export const createApplication = async (studentId: string, payload: ApplicationS
 export const updateApplicationStep = async (
   applicationId: string,
   studentId: string,
-  payload: ApplicationStepInput
+  rawPayload: ApplicationStepInput
 ) => {
+  assertObjectId(applicationId, 'Application', 'INVALID_APPLICATION_ID');
+  const payload = sanitizeStepInput(rawPayload);
   const application = ensureApplicationAccess(await Application.findById(applicationId), studentId);
 
   if (application.status === ApplicationStatus.REJECTED) {
@@ -715,6 +788,8 @@ export const findAdvisorForApplication = async (application: IApplication) => {
 };
 
 export const assignAdvisor = async (applicationId: string, advisorId: string) => {
+  assertObjectId(applicationId, 'Application', 'INVALID_APPLICATION_ID');
+  assertObjectId(advisorId, 'Advisor', 'ADVISOR_INVALID');
   const application = ensureApplicationExists(await Application.findById(applicationId));
   const advisor = await User.findById(advisorId);
   const assignableStatuses = [
@@ -751,12 +826,45 @@ export const assignAdvisor = async (applicationId: string, advisorId: string) =>
 export const scheduleInterview = async (
   applicationId: string,
   advisorId: string,
-  interview: {
-    date: Date;
-    location: string;
-    stakeholders: string[];
+  rawInterview: {
+    date: Date | string;
+    location?: string;
+    stakeholders?: string[];
   }
 ) => {
+  const interviewDate = readIsoDate(rawInterview?.date, 'Interview date') as Date;
+  if (interviewDate.getTime() < Date.now() - 24 * 60 * 60 * 1000) {
+    throw new ValidationError(
+      'Interview date is in the past.',
+      'An interview cannot be scheduled for a date that has already passed.',
+      'Pick today or a future date.',
+      'INTERVIEW_DATE_IN_PAST'
+    );
+  }
+  if (interviewDate.getTime() > Date.now() + 3 * 365 * 24 * 60 * 60 * 1000) {
+    throw new ValidationError(
+      'Interview date is too far away.',
+      'The interview date must be within the next three years.',
+      'Pick a closer date.',
+      'INTERVIEW_DATE_INVALID'
+    );
+  }
+  const rawStakeholders = rawInterview?.stakeholders;
+  if (rawStakeholders !== undefined && (!Array.isArray(rawStakeholders) || rawStakeholders.length > 20)) {
+    throw new ValidationError(
+      'Stakeholders are invalid.',
+      'Stakeholders must be a list of up to 20 names.',
+      'Remove extra entries and try again.',
+      'INTERVIEW_STAKEHOLDERS_INVALID'
+    );
+  }
+  const interview = {
+    date: interviewDate,
+    location: readString(rawInterview?.location, 'Interview location', { max: 200 }) || 'Advisor Office',
+    stakeholders: (rawStakeholders ?? [])
+      .map((name) => readString(name, 'Stakeholder', { max: 100 }))
+      .filter(Boolean),
+  };
   const application = ensureAdvisorOwnsApplication(
     ensureApplicationExists(await Application.findById(applicationId)),
     advisorId
@@ -842,7 +950,7 @@ export const recordInterviewDecision = async (
     );
   }
 
-  const notes = input.notes?.trim() ?? '';
+  const notes = readString(input.notes, 'Notes', { max: MAX_COMMENT_LENGTH });
 
   if (!input.recommended && !notes) {
     throw new ValidationError(
@@ -894,7 +1002,12 @@ export const updateStatus = async (
   );
 
   if (![ApplicationStatus.SHORTLISTED, ApplicationStatus.REJECTED].includes(status)) {
-    throw new Error('Only shortlist or reject decisions are supported here.');
+    throw new ValidationError(
+      'Status is not allowed.',
+      'Only shortlist or reject decisions are supported here.',
+      'Choose SHORTLISTED or REJECTED.',
+      'APPLICATION_STATUS_INVALID'
+    );
   }
 
   if (![ApplicationStatus.PENDING_INTERVIEW, ApplicationStatus.INTERVIEW_SCHEDULED].includes(application.status)) {
@@ -920,6 +1033,14 @@ export const uploadDocuments = async (
   studentId: string,
   documents: Array<{ type: string; fileUrl: string }>
 ) => {
+  documents.forEach((document) => {
+    document.type = readString(document.type, 'Document type', {
+      required: true,
+      max: 50,
+      pattern: /^[A-Za-z0-9_\- ]+$/,
+      patternHint: 'Document type may only contain letters, digits, spaces, dashes and underscores.',
+    });
+  });
   const application = ensureApplicationAccess(await Application.findById(applicationId), studentId);
 
   if (!accessibleStatusesForCourseWork.includes(application.status as (typeof accessibleStatusesForCourseWork)[number])) {
@@ -966,6 +1087,15 @@ export const selectCourses = async (
       'You can only request courses once your advisor has recommended you after the interview.',
       'Wait for your advisor to record a recommendation, then submit course requests.',
       'INTERVIEW_NOT_COMPLETED'
+    );
+  }
+
+  if (!Array.isArray(courseIds) || courseIds.length > 50 || courseIds.some((courseId) => typeof courseId !== 'string')) {
+    throw new ValidationError(
+      'Course selection is invalid.',
+      'Course IDs must be a list of up to 50 identifiers.',
+      'Reload the page and select the courses again.',
+      'COURSE_SELECTION_INVALID'
     );
   }
 
@@ -1044,6 +1174,8 @@ export const updateCourseDecision = async (
   payload: CourseDecisionInput
 ) => {
   ensureObjectId(payload.courseId, 'Invalid course ID.');
+  assertOneOf(payload.status, ['approved', 'rejected'] as const, 'Course decision', 'COURSE_DECISION_INVALID');
+  const advisorComment = readString(payload.advisorComment, 'Advisor comment', { max: MAX_COMMENT_LENGTH });
 
   const application = ensureCourseWorkStatus(
     ensureAdvisorOwnsApplication(
@@ -1066,7 +1198,7 @@ export const updateCourseDecision = async (
   }
 
   selectedCourse.status = payload.status;
-  selectedCourse.advisorComment = payload.advisorComment?.trim() || '';
+  selectedCourse.advisorComment = advisorComment;
 
   await application.save();
   return getApplicationById(applicationId, { _id: advisorId, role: UserRole.ADVISOR });
