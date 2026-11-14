@@ -3,8 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAdvisorTasks } from '../../hooks/useAdvisorTasks';
 import { pickNextAdvisorTask } from '../../utils/advisorTasks';
 
-/** Pages where a prompt would get in the way. */
-const HIDDEN_ON = ['/advisor/communicate', '/advisor/profile'];
+/** Pages where a prompt would get in the way. The dashboard already lists every task. */
+const HIDDEN_ON = ['/advisor', '/advisor/communicate', '/advisor/profile'];
 
 /**
  * Sticky bar on advisor screens that links to the most urgent thing waiting for the advisor. It skips tasks that
