@@ -107,4 +107,17 @@ describe('updateVisaStatus', () => {
     expect(existing.save).not.toHaveBeenCalled();
     expect(MockedNotification.create).not.toHaveBeenCalled();
   });
+
+  it.each([VisaStatus.APPROVED, VisaStatus.REJECTED])('refuses any change once the visa is %s', async (finalStatus) => {
+    givenStudentWithActiveApplication();
+    const existing = { status: finalStatus, remarks: 'Done', save: jest.fn() };
+    MockedVisaProcess.findOne.mockResolvedValue(existing);
+
+    await expect(
+      updateVisaStatus(adminId, studentId, { status: VisaStatus.UNDER_REVIEW, remarks: 'Changed my mind' })
+    ).rejects.toMatchObject({ code: 'VISA_DECISION_FINAL', status: 400 });
+
+    expect(existing.save).not.toHaveBeenCalled();
+    expect(MockedNotification.create).not.toHaveBeenCalled();
+  });
 });

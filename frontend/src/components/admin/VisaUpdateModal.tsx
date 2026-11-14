@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { visaApi } from '../../lib/api';
 import type { AdminVisaRow, VisaStatus } from '../../types/visa';
 import { VISA_STATUS_META, VISA_STATUSES } from '../../utils/visa';
+import ConfirmDialog from '../ConfirmDialog';
 import Notice from '../Notice';
 
 const MAX_REMARKS = 1000;
@@ -22,17 +23,22 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
   const [remarks, setRemarks] = useState(row.visa?.remarks ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      // While the confirmation popup is open, Escape only closes that popup.
+      if (event.key === 'Escape' && !confirming) onClose();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
+  }, [onClose, confirming]);
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
+  // Approved and rejected are final: the form is read-only once one is recorded.
+  const locked = row.visa?.status === 'approved' || row.visa?.status === 'rejected';
+  const isFinalChoice = status === 'approved' || status === 'rejected';
+
+  const save = async () => {
     if (!user?.token) return;
 
     setSaving(true);
@@ -43,7 +49,20 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update the visa status.');
       setSaving(false);
+      setConfirming(false);
     }
+  };
+
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    if (locked) return;
+
+    if (isFinalChoice) {
+      setConfirming(true);
+      return;
+    }
+
+    void save();
   };
 
   // Portalled to <body>: the dashboard shell wraps pages in a transformed element, which would
@@ -83,6 +102,7 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
             <select
               value={status}
               onChange={(event) => setStatus(event.target.value as VisaStatus)}
+              disabled={locked}
               className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-admin focus:border-admin focus:outline-none"
             >
               {VISA_STATUSES.map((value) => (
@@ -104,6 +124,7 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
               value={remarks}
               onChange={(event) => setRemarks(event.target.value)}
               maxLength={MAX_REMARKS}
+              readOnly={locked}
               rows={4}
               placeholder="e.g. Please bring your original passport to the appointment on 12 March."
               className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 focus:border-admin focus:outline-none"
@@ -115,7 +136,9 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
         </div>
 
         <p className="mt-2 text-xs font-medium text-slate-500">
-          The student sees this status and note on their Visa Status page and is notified when it changes.
+          {locked
+            ? 'This visa decision is final and cannot be changed.'
+            : 'The student sees this status and note on their Visa Status page and is notified when it changes.'}
         </p>
 
         {error ? (
@@ -128,18 +151,35 @@ export default function VisaUpdateModal({ row, onClose, onSaved }: VisaUpdateMod
             onClick={onClose}
             className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-admin transition hover:bg-slate-50"
           >
-            Cancel
+            {locked ? 'Close' : 'Cancel'}
           </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-admin hover:bg-admin-hover px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-admin/20 transition hover:brightness-110 disabled:opacity-60"
-          >
-            {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
-            {saving ? 'Saving...' : 'Save update'}
-          </button>
+          {locked ? null : (
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-xl bg-admin hover:bg-admin-hover px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-admin/20 transition hover:brightness-110 disabled:opacity-60"
+            >
+              {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+              {saving ? 'Saving...' : 'Save update'}
+            </button>
+          )}
         </div>
       </form>
+
+      {confirming ? (
+        <ConfirmDialog
+          title={status === 'approved' ? 'Approve this visa?' : 'Reject this visa?'}
+          message={
+            status === 'approved'
+              ? 'This decision is final and cannot be changed afterwards. The student will be able to continue to arrival.'
+              : 'This decision is final and cannot be changed afterwards. The student will not be able to continue their exchange.'
+          }
+          confirmLabel={status === 'approved' ? 'Approve visa' : 'Reject visa'}
+          busy={saving}
+          onConfirm={() => void save()}
+          onCancel={() => setConfirming(false)}
+        />
+      ) : null}
     </div>,
     document.body
   );

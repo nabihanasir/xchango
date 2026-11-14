@@ -10,6 +10,8 @@ const MAX_REMARKS_LENGTH = 1000;
 /** Applications in these states never reach the visa stage, so they are left out. */
 const INELIGIBLE_APPLICATION_STATUSES = [ApplicationStatus.DRAFT, ApplicationStatus.REJECTED];
 
+const FINAL_VISA_STATUSES = [VisaStatus.APPROVED, VisaStatus.REJECTED];
+
 const VISA_STATUS_LABELS: Record<VisaStatus, string> = {
   [VisaStatus.NOT_STARTED]: 'Not started',
   [VisaStatus.DOCUMENTS_REQUIRED]: 'Documents required',
@@ -146,6 +148,18 @@ export const updateVisaStatus = async (adminId: string, studentId: string, input
   const existing = await VisaProcess.findOne({ studentId });
   if (existing && existing.status === input.status && existing.remarks === remarks) {
     return existing; // nothing changed — avoid a duplicate history entry and notification
+  }
+
+  // Approved and rejected are final: the journey either moves on or stops here, so the office cannot reverse it.
+  if (existing && FINAL_VISA_STATUSES.includes(existing.status)) {
+    throw new ValidationError(
+      `This visa has already been ${VISA_STATUS_LABELS[existing.status].toLowerCase()}.`,
+      'An approved or rejected visa decision is final and cannot be changed.',
+      existing.status === VisaStatus.REJECTED
+        ? 'The student cannot continue this exchange. No further visa updates are possible.'
+        : 'No further visa updates are needed.',
+      'VISA_DECISION_FINAL'
+    );
   }
 
   const visa = existing ?? new VisaProcess({ studentId });
