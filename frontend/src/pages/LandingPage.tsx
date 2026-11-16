@@ -22,7 +22,7 @@ export default function LandingPage() {
         <StatsBand />
         <About />
         <Equivalency />
-        {/* Student Exchange Programs — search is surfaced high, mirroring a program-finder */}
+        {/* Student Exchange Programs: search is surfaced high, mirroring a program-finder */}
         <Partners />
         <GlobalVision />
         <Tips />

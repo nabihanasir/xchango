@@ -2,7 +2,7 @@ import { HelpCircle } from 'lucide-react';
 import { rioFaqs } from '../../data/rioContent';
 import SectionHeading from './SectionHeading';
 
-/** Three-card FAQ block — quick answers before a student commits to applying. */
+/** Three-card FAQ block with quick answers before a student commits to applying. */
 export default function Faq() {
   return (
     <section id="faq" className="scroll-mt-24 bg-light-color px-4 py-24 sm:px-6 lg:px-8">

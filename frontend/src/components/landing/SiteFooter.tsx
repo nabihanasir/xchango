@@ -46,7 +46,7 @@ export default function SiteFooter() {
               </div>
             </div>
             <p className="mt-6 max-w-sm text-sm leading-7 text-white/50">
-              Connecting Riphah students to partner universities abroad — from first enquiry through credit
+              Connecting Riphah students to partner universities abroad, from first enquiry through credit
               recognition.
             </p>
           </div>
@@ -105,7 +105,7 @@ export default function SiteFooter() {
             <Linkedin className="h-4 w-4" aria-hidden="true" />
             <Youtube className="h-4 w-4" aria-hidden="true" />
           </div>
-          <p className="text-xs text-white/35">Xchango — student mobility platform</p>
+          <p className="text-xs text-white/35">Xchango, student mobility platform</p>
         </div>
       </div>
     </footer>

@@ -20,7 +20,7 @@ const tips = [
   {
     icon: Wallet,
     title: 'Plan the full cost',
-    body: 'Account for tuition, housing, travel and insurance together — not tuition alone — when comparing destinations.',
+    body: 'Account for tuition, housing, travel and insurance together, including more than tuition alone, when comparing destinations.',
   },
 ];
 
@@ -29,7 +29,7 @@ export default function Tips() {
     <section className="px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="Before You Apply" title="Tips">
-          A few things worth settling early — they save the most time later.
+          A few things worth settling early can save the most time later.
         </SectionHeading>
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">

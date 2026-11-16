@@ -7,7 +7,7 @@ export default function About() {
     <section id="about" className="scroll-mt-24 px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <SectionHeading eyebrow="About RIO" title="A campus that reaches past its own borders">
-          Riphah International Office exists to make study abroad a workable part of a Riphah degree — running
+          Riphah International Office exists to make study abroad a workable part of a Riphah degree, running
           the partnerships, the exchanges and the credit recognition that sit behind every placement.
         </SectionHeading>
 
@@ -24,7 +24,7 @@ export default function About() {
           <div>
             <p className="text-base leading-8 text-slate-600">
               Through student and faculty exchange, joint research and cross-cultural learning, RIO supports the
-              university’s international academic engagement — and gives students a named route into it.
+              university’s international academic engagement, and gives students a named route into it.
             </p>
 
             <ul className="mt-8 space-y-4">

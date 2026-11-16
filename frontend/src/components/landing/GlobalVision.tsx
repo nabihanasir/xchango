@@ -4,7 +4,7 @@ const principles = [
   {
     number: '01',
     title: 'Academic Advancement',
-    body: 'Extend the curriculum beyond a single campus — joint programmes, shared research and access to disciplines Riphah does not yet teach in depth.',
+    body: 'Extend the curriculum beyond a single campus through joint programmes, shared research and access to disciplines Riphah does not yet teach in depth.',
   },
   {
     number: '02',
@@ -19,7 +19,7 @@ const principles = [
   {
     number: '04',
     title: 'Institutional Partnership',
-    body: 'Every exchange rests on a standing agreement between universities — recognised credit, aligned calendars and a named advisor on each side.',
+    body: 'Every exchange rests on a standing agreement between universities, with recognised credit, aligned calendars and a named advisor on each side.',
   },
 ];
 

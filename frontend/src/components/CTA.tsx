@@ -9,7 +9,7 @@ export default function CTA() {
           <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-2xl">
               <p className="text-sm font-bold uppercase tracking-[0.32em] text-accent-yellow">Start Now</p>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
                 Start Your International Journey Today
               </h2>
               <p className="mt-4 text-base leading-8 text-white/75">

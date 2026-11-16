@@ -22,7 +22,7 @@ const points = [
   },
 ];
 
-/** Sample mapping shown in the illustration — mirrors the catalogue in rioContent. */
+/** Sample mapping shown in the illustration, mirroring the catalogue in rioContent. */
 const sampleMappings = [
   { from: 'Machine Learning', to: 'Artificial Intelligence', status: 'Approved' },
   { from: 'Computer Vision', to: 'Digital Image Processing', status: 'Approved' },
@@ -38,7 +38,7 @@ export default function Equivalency() {
           onto its own programmes so the credit you earn overseas is recognised at home.
         </SectionHeading>
 
-        {/* Three-up cards — what equivalency covers, read left to right */}
+        {/* Three-up cards explain what equivalency covers, read left to right */}
         <div className="mt-16 grid gap-6 md:grid-cols-3">
           {points.map(({ icon: Icon, title, body, bg }, index) => (
             <article

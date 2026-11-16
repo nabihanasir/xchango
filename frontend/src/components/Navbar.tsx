@@ -12,8 +12,8 @@ const navItems = [
 ];
 
 /**
- * Fixed header that floats transparently over the hero photo — logo and
- * links in white — then swaps to a solid white bar once the page scrolls
+ * Fixed header that floats transparently over the hero photo, with logo and
+ * links in white, then swaps to a solid white bar once the page scrolls
  * past the hero, matching the reference site's overlaid-nav slideshow look.
  */
 export default function Navbar() {
@@ -35,7 +35,7 @@ export default function Navbar() {
         solid ? 'border-b border-white/40 bg-white/90 backdrop-blur-xl' : 'bg-transparent'
       }`}
     >
-      {/* Utility strip — contact details and a quick jump to applications */}
+      {/* Utility strip: contact details and a quick jump to applications */}
       <div
         className={`hidden px-4 transition-colors duration-300 sm:block lg:px-8 ${
           solid ? 'bg-dark-blue-deep text-white' : 'bg-black/10 text-white backdrop-blur-sm'

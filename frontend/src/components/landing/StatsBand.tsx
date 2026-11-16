@@ -4,7 +4,7 @@ import { partnerUniversities } from '../../data/rioContent';
  * Large-numeral statistics band.
  *
  * Every figure is derived from `partnerUniversities` at render time rather than
- * hard-coded, so the band can never drift out of step with the catalogue —
+ * hard-coded, so the band can never drift out of step with the catalogue:
  * add a partner to the data file and these counts follow.
  */
 const uniqueCount = (values: string[]) => new Set(values.map((v) => v.toLowerCase())).size;

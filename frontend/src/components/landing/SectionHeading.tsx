@@ -4,14 +4,14 @@ interface SectionHeadingProps {
   children?: React.ReactNode;
 }
 
-/** Centred section heading — the repeating rhythm between content blocks. */
+/** Centred section heading, the repeating rhythm between content blocks. */
 export default function SectionHeading({ eyebrow, title, children }: SectionHeadingProps) {
   return (
     <div className="mx-auto max-w-3xl text-center">
       {eyebrow ? (
-        <p className="text-xs font-bold uppercase tracking-[0.32em] text-yellow-default">{eyebrow}</p>
+        <p className="text-sm font-bold uppercase tracking-[0.32em] text-yellow-default">{eyebrow}</p>
       ) : null}
-      <h2 className="mt-4 text-3xl font-bold tracking-tight text-head-text sm:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-4xl font-bold tracking-tight text-head-text sm:text-5xl">{title}</h2>
       <span className="mx-auto mt-6 block h-1 w-16 rounded-full bg-accent-yellow" />
       {children ? <p className="mt-6 text-base leading-8 text-slate-600">{children}</p> : null}
     </div>

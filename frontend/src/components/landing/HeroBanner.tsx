@@ -16,7 +16,7 @@ const slides: Slide[] = [
     image: '/bg.jpg',
     eyebrow: 'Riphah International Office',
     title: 'Education at Riphah',
-    subtitle: 'Decades of scholarship, research and global partnership — within your reach.',
+    subtitle: 'Decades of scholarship, research and global partnership within your reach.',
     description:
       'Riphah International Office connects students to partner universities abroad, guiding credit recognition, exchange placements and the academic pathways that follow.',
   },
@@ -42,14 +42,14 @@ const slides: Slide[] = [
     title: 'Engineering Systems at Istanbul Aydin',
     subtitle: 'Applied systems thinking, taught across a global academic bridge.',
     description:
-      'A partnership built around computer engineering and MIS — algorithms, computer vision and data mining, all weighed against the Riphah catalogue.',
+      'A partnership built around computer engineering and MIS, including algorithms, computer vision and data mining, all weighed against the Riphah catalogue.',
   },
 ];
 
 const AUTOPLAY_MS = 3000;
 
 /**
- * Full-bleed photographic hero carousel — one slide per flagship destination,
+ * Full-bleed photographic hero carousel, with one slide per flagship destination,
  * with arrow controls and dot indicators. Bottom padding leaves clearance for
  * the PillarNav card strip that overlaps it.
  */
@@ -86,14 +86,14 @@ export default function HeroBanner() {
           }`}
         />
       ))}
-      {/* Light blue wash — brightens the photo instead of blacking it out */}
+      {/* Light blue wash brightens the photo instead of blacking it out */}
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-dark-blue/20" />
-      {/* Left-side gradient — just enough contrast to keep the headline readable */}
+      {/* Left-side gradient keeps the headline readable */}
       <div
         aria-hidden="true"
         className="absolute inset-0 -z-10 bg-gradient-to-r from-dark-blue/75 via-dark-blue/35 to-transparent"
       />
-      {/* Top gradient — keeps the floating nav legible against any part of the photo */}
+      {/* Top gradient keeps the floating nav legible against any part of the photo */}
       <div
         aria-hidden="true"
         className="absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-dark-blue-deep/60 to-transparent"
@@ -106,7 +106,7 @@ export default function HeroBanner() {
             {slides[index].eyebrow}
           </p>
 
-          <h1 className="mt-7 text-4xl font-bold uppercase leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-7 text-5xl font-bold uppercase leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
             {slides[index].title}
           </h1>
 

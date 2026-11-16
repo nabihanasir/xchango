@@ -22,7 +22,7 @@ const pillars = [
 ];
 
 /**
- * Three jump-cards that preview — and link to — the page's main content blocks.
+ * Three jump-cards that preview and link to the page's main content blocks.
  * Pulled up with a negative margin so the strip overlaps the hero's bottom edge,
  * the way a campaign card-row sits across a photographic banner seam.
  */
