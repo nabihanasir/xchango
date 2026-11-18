@@ -49,6 +49,8 @@ export const applicationApi = {
     unwrap<WorkflowApplication>(apiClient.post('/applications', { studentId, ...payload })),
   updateApplicationStep: (applicationId: string, payload: Partial<ApplicationDraftPayload>) =>
     unwrap<WorkflowApplication>(apiClient.patch(`/applications/${applicationId}`, payload)),
+  /** Everything the student's progress steps are built from, in one request. */
+  getMyJourney: () => unwrap<JourneyInput>(apiClient.get('/applications/my-journey')),
   /** Rejects (with the usual API error) when the student may not start another application. */
   checkEligibility: () => unwrap<{ eligible: boolean }>(apiClient.get('/applications/eligibility')),
   getApplication: (applicationId: string) =>

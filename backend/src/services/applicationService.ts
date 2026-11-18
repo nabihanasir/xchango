@@ -681,6 +681,12 @@ export const getApplicationById = async (
 export const getStudentApplications = async (studentId: string) =>
   populateApplication(Application.find({ studentId }).sort({ createdAt: -1 }));
 
+/** The application the student's journey follows: their most recent one, in the same shape as the full list. */
+export const getLatestStudentApplication = async (studentId: string) => {
+  const [latest] = await populateApplication(Application.find({ studentId }).sort({ createdAt: -1 }).limit(1));
+  return latest ?? null;
+};
+
 export const getAdvisorApplications = async (advisorId: string, page: PageRequest | null = null) =>
   paginateQuery(
     populateApplication(Application.find({ advisorId }).sort({ createdAt: -1, _id: -1 })),

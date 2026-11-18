@@ -1,53 +1,27 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { applicationApi } from '../lib/applicationApi';
-import { equivalencyApi, resultsApi, visaApi } from '../lib/api';
-import { documentApi } from '../lib/documentApi';
-import { studentProfileApi } from '../lib/studentProfileApi';
-import { pickJourneyApplication, type JourneyInput } from '../utils/studentJourney';
+import { useContext, useEffect, useRef } from 'react';
+import { JourneyContext } from './studentJourneyContext';
 
 /**
- * Loads everything the student's progress steps are built from. Pass a value that changes (for example the
- * current path) as `refreshKey` to load it again.
+ * The student's journey, shared across the student area (see StudentJourneyProvider). Pass a value that changes as
+ * `refreshKey` to load it again, for example after the student does something that changes their progress.
  */
 export function useStudentJourney(refreshKey?: unknown) {
-  const { user } = useAuth();
-  const [journey, setJourney] = useState<JourneyInput | null>(null);
-  const studentId = user?._id;
-  const token = user?.token;
+  const context = useContext(JourneyContext);
+  if (!context) {
+    throw new Error('useStudentJourney must be used inside StudentJourneyProvider.');
+  }
+
+  const { journey, setJourney, reload } = context;
+  const first = useRef(true);
 
   useEffect(() => {
-    if (!studentId || !token) {
+    // The provider already loads on mount, so only a changed key asks for another load.
+    if (first.current) {
+      first.current = false;
       return;
     }
-
-    let cancelled = false;
-
-    // Each source is optional: a failed request just leaves that step unfinished.
-    Promise.all([
-      applicationApi.getStudentApplications(studentId).catch(() => []),
-      equivalencyApi.getStudentRequests(token).catch(() => []),
-      documentApi.getStudentDocuments(studentId).catch(() => []),
-      studentProfileApi.getStudentProfile(studentId).catch(() => null),
-      visaApi.getStudentVisa(token).catch(() => null),
-      resultsApi.getStudentResults(token).catch(() => []),
-    ]).then(([applications, requests, documents, profile, visa, results]) => {
-      if (!cancelled) {
-        setJourney({
-          application: pickJourneyApplication(applications),
-          requests,
-          documents,
-          transcriptUploaded: Boolean(profile?.transcript?.fileUrl),
-          visa,
-          results,
-        });
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [studentId, token, refreshKey]);
+    reload();
+  }, [refreshKey, reload]);
 
   return [journey, setJourney] as const;
 }

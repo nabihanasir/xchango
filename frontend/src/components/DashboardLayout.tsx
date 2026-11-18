@@ -5,6 +5,7 @@ import GlobalLayout from './GlobalLayout';
 import NextStepBar from './student/NextStepBar';
 import StudentPageHeader from './student/StudentPageHeader';
 import { useEffect, useState } from 'react';
+import StudentJourneyProvider from './student/StudentJourneyProvider';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/httpClient';
 
@@ -48,6 +49,7 @@ const DashboardLayout = () => {
   };
 
   return (
+    <StudentJourneyProvider>
     <GlobalLayout
       panelName="Student Panel"
       role="student"
@@ -66,6 +68,7 @@ const DashboardLayout = () => {
           : undefined
       }
     />
+    </StudentJourneyProvider>
   );
 };
 

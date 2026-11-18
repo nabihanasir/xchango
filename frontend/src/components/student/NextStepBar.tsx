@@ -15,7 +15,7 @@ const trimPath = (path: string) => path.replace(/\/+$/, '') || '/';
  */
 export default function NextStepBar() {
   const { pathname } = useLocation();
-  const [journey] = useStudentJourney(pathname);
+  const [journey] = useStudentJourney();
 
   const here = trimPath(pathname);
   if (!journey || HIDDEN_ON.includes(here)) {

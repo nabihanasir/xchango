@@ -6,6 +6,7 @@ import { UserRole } from '../models/User';
 import * as applicationService from '../services/applicationService';
 import { recordArrival, reportArrival } from '../services/arrivalService';
 import * as courseEquivalencyService from '../services/courseEquivalencyService';
+import { getStudentJourneyData } from '../services/studentJourneyService';
 import * as interviewSlots from '../services/interviewSlotService';
 import * as resultService from '../services/resultService';
 import * as visaService from '../services/visaService';
@@ -29,6 +30,11 @@ export const createApplication = async (req: any, res: Response) => {
   assertStudentAccess(req, studentId);
   const application = await applicationService.createApplication(studentId, req.body);
   sendResponse(res, 201, 'Application draft created successfully', application);
+};
+
+export const getMyJourney = async (req: any, res: Response) => {
+  const journey = await getStudentJourneyData(req.user._id.toString());
+  sendResponse(res, 200, 'Journey fetched successfully', journey);
 };
 
 export const checkApplicationEligibility = async (req: any, res: Response) => {

@@ -23,6 +23,7 @@ router.post(
   requireCompleteStudentProfile,
   applicationController.createApplication
 );
+router.get('/my-journey', authorizeRoles(UserRole.STUDENT), applicationController.getMyJourney);
 router.get('/eligibility', authorizeRoles(UserRole.STUDENT), applicationController.checkApplicationEligibility);
 router.get(
   '/student/:studentId',
