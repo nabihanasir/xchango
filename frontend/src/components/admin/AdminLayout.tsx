@@ -12,7 +12,7 @@ const AdminLayout = () => {
     { name: 'Users', path: '/admin/users', icon: Users },
     { name: 'Applications', path: '/admin/applications', icon: FileText },
     { name: 'Universities', path: '/admin/universities', icon: School },
-    { name: 'Home Courses', path: '/admin/courses', icon: BookOpen },
+    { name: 'Courses', path: '/admin/courses', icon: BookOpen },
     { name: 'Results', path: '/admin/results', icon: GraduationCap },
     { name: 'Visa Process', path: '/admin/visa', icon: Stamp },
     { name: 'Semesters', path: '/admin/semesters', icon: CalendarRange },
