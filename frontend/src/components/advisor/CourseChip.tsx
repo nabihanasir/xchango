@@ -25,7 +25,7 @@ export default function CourseChip({ kind, name, code, creditHours, size = 'md' 
         <Icon className="h-4 w-4" />
       </span>
       <div className="min-w-0">
-        <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${style.label}`}>
+        <p className={`text-xs font-bold uppercase tracking-[0.2em] ${style.label}`}>
           {style.title}
           {creditHours !== undefined ? ` · ${creditHours} CH` : ''}
         </p>

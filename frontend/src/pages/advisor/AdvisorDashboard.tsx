@@ -42,7 +42,7 @@ function InterviewRow({ interview }: { interview: UpcomingInterview }) {
     <li className="flex items-center gap-4 border-t border-slate-100 py-3 first:border-t-0 first:pt-0 last:pb-0">
       <div className="w-14 shrink-0 rounded-2xl bg-teal-50 py-1.5 text-center leading-tight text-teal-700">
         <b className="block text-xl">{day}</b>
-        <span className="text-[11px] font-bold uppercase tracking-wider">{month}</span>
+        <span className="text-xs font-bold uppercase tracking-wider">{month}</span>
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-bold text-slate-900">{interview.studentName}</p>

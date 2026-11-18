@@ -18,7 +18,7 @@ export function ConfidenceBadge({ value }: { value?: Confidence }) {
   if (!value) return null;
   const style = CONFIDENCE_STYLES[value];
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${style.className}`}>
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ring-1 ${style.className}`}>
       {style.label}
     </span>
   );

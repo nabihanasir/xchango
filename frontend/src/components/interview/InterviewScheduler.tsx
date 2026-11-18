@@ -195,7 +195,7 @@ export default function InterviewScheduler({ application, onChanged }: Props) {
                     }`}
                   >
                     {day.label}
-                    {!free ? <span className="block text-[10px] font-semibold">Full</span> : null}
+                    {!free ? <span className="block text-xs font-semibold">Full</span> : null}
                   </button>
                 );
               })}

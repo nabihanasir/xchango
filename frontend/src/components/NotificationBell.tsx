@@ -109,7 +109,7 @@ export default function NotificationBell({ buttonClassName }: NotificationBellPr
       >
         <Bell className="h-5 w-5" />
         {unread > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-xs font-bold leading-none text-white">
             {unread > 9 ? '9+' : unread}
           </span>
         ) : null}
@@ -149,7 +149,7 @@ export default function NotificationBell({ buttonClassName }: NotificationBellPr
                     <span className="mt-0.5 line-clamp-3 block text-xs font-medium leading-5 text-slate-600">
                       {item.message}
                     </span>
-                    <span className="mt-1 block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    <span className="mt-1 block text-xs font-bold uppercase tracking-wider text-slate-400">
                       {timeAgo(item.createdAt)}
                     </span>
                   </span>

@@ -182,7 +182,7 @@ export default function StudentDocumentChecklist({
                 <span className={`mt-2 text-sm font-semibold ${done || current ? 'text-slate-900' : 'text-slate-600'}`}>
                   {kind.short}
                 </span>
-                <span className="text-[11px] text-slate-400">{kind.required ? 'Required' : 'Optional'}</span>
+                <span className="text-xs text-slate-400">{kind.required ? 'Required' : 'Optional'}</span>
               </li>
             );
           })}
@@ -229,7 +229,7 @@ export default function StudentDocumentChecklist({
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-base font-bold text-slate-900">{kind.label}</h3>
                     <span
-                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${
                         kind.required ? 'bg-dark-blue text-white' : 'bg-slate-100 text-slate-500'
                       }`}
                     >

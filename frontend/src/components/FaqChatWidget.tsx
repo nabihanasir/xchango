@@ -61,7 +61,7 @@ export default function FaqChatWidget() {
             </span>
             <div className="flex-1">
               <p className="text-sm font-black leading-tight">Xchango Assistant</p>
-              <p className="text-[11px] text-white/70">Ask me anything about your exchange</p>
+              <p className="text-xs text-white/70">Ask me anything about your exchange</p>
             </div>
             <button
               onClick={() => setOpen(false)}

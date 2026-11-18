@@ -48,7 +48,7 @@ export default function ScoreRing({ score, size = 56, showLabel = false }: Score
           {score}
         </span>
       </div>
-      {showLabel ? <span className={`text-[10px] font-bold uppercase tracking-[0.15em] ${tier.text}`}>{tier.label}</span> : null}
+      {showLabel ? <span className={`text-xs font-bold uppercase tracking-[0.15em] ${tier.text}`}>{tier.label}</span> : null}
     </div>
   );
 }

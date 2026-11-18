@@ -122,11 +122,11 @@ export default function AdvisorStudents() {
 
                 <div className="grid grid-cols-2 gap-3 px-6">
                   <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">CGPA</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">CGPA</p>
                     <p className={`mt-0.5 text-2xl font-bold ${getCgpaTone(getCgpa(student))}`}>{getCgpa(student)?.toFixed(2) ?? 'N/A'}</p>
                   </div>
                   <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Credits</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Credits</p>
                     <p className="mt-0.5 text-2xl font-bold text-slate-800">{student.transcript?.totalCredits ?? 'N/A'}</p>
                   </div>
                 </div>
@@ -143,7 +143,7 @@ export default function AdvisorStudents() {
                 </div>
 
                 <div className="mt-4 flex-1 px-6">
-                  <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Interested in</p>
+                  <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Interested in</p>
                   <div className="flex flex-wrap gap-2">
                     {student.preferences?.preferredCountries?.slice(0, 3).map((country) => (
                       <span key={country} className="rounded-full border border-teal-700/15 bg-teal-700/5 px-3 py-1 text-sm font-semibold text-teal-700">

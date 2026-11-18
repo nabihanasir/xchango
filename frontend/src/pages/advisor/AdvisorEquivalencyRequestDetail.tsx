@@ -124,7 +124,7 @@ function MatchScoreTile({ label, match, status, isActive, emptyText }: MatchScor
         tier ? tier.soft : 'border-dashed border-slate-300 bg-white'
       } ${isActive ? 'ring-2 ring-accent-yellow/50' : 'opacity-75'}`}
     >
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{label}</p>
+      <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">{label}</p>
       {status === 'in_progress' ? (
         <p className="mt-2 flex items-center gap-2 text-sm font-bold text-slate-600">
           <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -585,7 +585,7 @@ function CourseDetailPane({
               />
             </div>
             <div className="rounded-[1.1rem] border border-slate-200 bg-white p-3">
-              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
                 <FileText className="h-3.5 w-3.5" />
                 Student's course outline
               </p>
@@ -775,7 +775,7 @@ function CourseDetailPane({
 
 const StatTile = ({ label, value, tone = 'text-slate-800' }: { label: string; value: string; tone?: string }) => (
   <div className="rounded-[1.25rem] bg-slate-50 px-4 py-3 text-center">
-    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{label}</p>
+    <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">{label}</p>
     <p className={`mt-1 text-2xl font-bold ${tone}`}>{value}</p>
   </div>
 );

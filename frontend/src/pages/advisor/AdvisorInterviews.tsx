@@ -357,7 +357,7 @@ function Availability() {
                           );
                         })}
                       </div>
-                      <p className="flex flex-wrap gap-x-3 text-[11px] text-slate-500">
+                      <p className="flex flex-wrap gap-x-3 text-xs text-slate-500">
                         <span>▢ free</span>
                         <span className="text-rose-600">▣ unavailable</span>
                         <span className="text-amber-700">▣ requested</span>
