@@ -7,19 +7,17 @@ import StudentProgressTracker from '../../components/student/StudentProgressTrac
 const QuickAction = ({ title, description, icon: Icon, to, delay }: any) => (
   <Link
     to={to}
-    className={`block glass-card rounded-[2rem] p-8 transition-all duration-300 group hover:-translate-y-1 animate-fade-in-up`}
+    className="glass-card group flex h-full flex-col rounded-[1.75rem] p-6 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up"
     style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
   >
-    <div className="flex items-center gap-4 mb-6">
-      <div className="p-4 bg-slate-50 border border-slate-100 rounded-[1.25rem] group-hover:bg-dark-blue-deep group-hover:border-dark-blue-deep group-hover:text-white transition-all duration-300 text-dark-blue shadow-sm">
-        <Icon className="h-7 w-7" />
-      </div>
-      <h4 className="text-xl font-bold text-slate-800 group-hover:text-dark-blue transition-colors">{title}</h4>
+    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 text-dark-blue shadow-sm transition-all duration-300 group-hover:border-dark-blue-deep group-hover:bg-dark-blue-deep group-hover:text-white">
+      <Icon className="h-6 w-6" />
     </div>
-    <p className="text-slate-500 text-base font-medium mb-8 line-clamp-2 leading-relaxed">{description}</p>
-    <div className="flex items-center text-accent-yellow font-bold text-sm uppercase tracking-widest group-hover:text-yellow-default transition-colors">
-      <span>Get Started</span>
-      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-2 transition-transform duration-300" />
+    <h4 className="mb-2 text-lg font-bold text-slate-800 transition-colors group-hover:text-dark-blue">{title}</h4>
+    <p className="mb-6 text-sm font-medium leading-relaxed text-slate-600">{description}</p>
+    <div className="mt-auto flex items-center border-t border-slate-100 pt-4 text-sm font-bold text-dark-blue">
+      <span>Get started</span>
+      <ArrowRight className="ml-2 h-4 w-4 text-accent-yellow transition-transform duration-300 group-hover:translate-x-1.5" />
     </div>
   </Link>
 );
@@ -55,7 +53,7 @@ export default function StudentDashboard() {
           <span className="w-1.5 h-7 bg-accent-yellow rounded-full inline-block" />
           Quick Actions
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <QuickAction title="Browse Programs" description="Search through hundreds of programs across South Korea, Malaysia, and Turkiye." icon={Globe} to="/dashboard/programmes" delay={500} />
           <QuickAction title="Track Application" description="View the real-time status of your submitted university applications." icon={FileCheck} to="/dashboard/applications" delay={600} />
           <QuickAction title="International Office" description="Learn how the Riphah International Office supports your exchange journey." icon={Building2} to="/dashboard/international-office" delay={700} />
