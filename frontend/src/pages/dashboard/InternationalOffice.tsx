@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Award,
   BookOpen,
-  Building2,
   ExternalLink,
   Globe2,
   Handshake,
@@ -90,19 +89,6 @@ export default function InternationalOffice() {
 
   return (
     <div className="space-y-12 pb-12">
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-student-hero p-8 text-white shadow-2xl shadow-dark-blue/20 md:p-12">
-        <div className="absolute right-0 top-0 h-72 w-72 translate-x-1/3 -translate-y-1/3 animate-pulse rounded-full bg-accent-yellow/20 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-56 w-56 -translate-x-1/4 translate-y-1/4 animate-pulse rounded-full bg-cyan-400/15 blur-3xl" />
-        <Reveal className="relative z-10 max-w-3xl">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] text-accent-yellow">
-            <Building2 className="h-4 w-4" />
-            {officeIntro.eyebrow}
-          </p>
-          <h1 className="mt-5 text-4xl font-bold leading-tight md:text-5xl">{officeIntro.title}</h1>
-          <p className="mt-4 text-base text-slate-200 md:text-lg">{officeIntro.paragraphs[0]}</p>
-        </Reveal>
-      </section>
-
       <div className="grid gap-4 md:grid-cols-3">
         {[
           { label: 'Exchange Partners', value: exchangePartners.length },
@@ -122,13 +108,13 @@ export default function InternationalOffice() {
         <Reveal>
           <SectionTitle eyebrow="Introduction" title="About the International Office" />
         </Reveal>
-        <div className="space-y-4">
-          {officeIntro.paragraphs.map((paragraph, index) => (
-            <Reveal key={paragraph} delay={index * 100}>
-              <p className="rounded-2xl border border-slate-200 bg-white p-5 leading-relaxed text-slate-700">{paragraph}</p>
-            </Reveal>
-          ))}
-        </div>
+        <Reveal>
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 leading-relaxed text-slate-700">
+            {officeIntro.paragraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+        </Reveal>
       </section>
 
       <section>
