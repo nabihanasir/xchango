@@ -47,7 +47,7 @@ export default {
           tint: '#FBF4E9',
         },
         'head-text': '#090638',
-        'body-text': '#64748B', // Softer, more modern slate
+        'body-text': '#475569', // Slate 600: readable on light backgrounds
         'light-color': '#F8FAFC', // Crisp background accent
         
         // Extended States

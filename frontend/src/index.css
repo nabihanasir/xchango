@@ -6,7 +6,7 @@
 
 @layer base {
   html {
-    font-size: 14px;
+    font-size: 16px;
     scroll-behavior: smooth;
   }
   body {
@@ -37,6 +37,17 @@
     @apply min-h-screen;
   }
 }
+
+/* Readability: darken faint grey text inside the portal content area (light background). Dark heroes/sidebars sit outside <main> or use their own colors. */
+main .text-slate-400 { color: #64748b; }
+main .text-slate-500 { color: #475569; }
+main .text-slate-600 { color: #334155; }
+/* Keep light text legible where it sits on dark panels inside main */
+main [class*="bg-dark-blue"] .text-slate-400,
+main [class*="bg-dark-blue"] .text-slate-500,
+main [class*="bg-student-hero"] .text-slate-400,
+main [class*="bg-advisor-hero"] .text-slate-400,
+main [class*="bg-admin-hero"] .text-slate-400 { color: #cbd5e1; }
 
 /* Animated progress bar: moving candy-stripe fill */
 .progress-bar-animated {
