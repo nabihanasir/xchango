@@ -107,9 +107,9 @@ export default function LoginPage() {
           required
         />
 
-        <Button type="submit" variant="primary" className="mt-3 !py-2 text-sm">
+        <Button type="submit" variant="primary" className="mt-3 mx-auto !w-56 py-2.5 text-base">
           {submitting ? 'Signing In...' : 'Login'}
-          <ArrowRight className="ml-2 h-4 w-4" />
+          <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
 
         {error ? <ErrorAlert error={error} titleOverride="Login failed" /> : null}
