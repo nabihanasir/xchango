@@ -84,11 +84,11 @@ export default function AdminApplications() {
       header: 'Action',
       accessor: '_id',
       render: (_: any, row: any) => (
-        <div className="flex flex-wrap items-center gap-2" onClick={(event) => event.stopPropagation()}>
+        <div className="flex items-center gap-3 whitespace-nowrap" onClick={(event) => event.stopPropagation()}>
           <button
             type="button"
             onClick={() => setSelectedApp(row)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-admin hover:text-white text-admin font-bold rounded-lg transition-all text-xs"
+            className="flex shrink-0 items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-admin hover:text-white text-admin font-bold rounded-lg transition-all text-xs"
           >
             <Eye className="h-3.5 w-3.5" />
             View Details
@@ -101,7 +101,7 @@ export default function AdminApplications() {
                 [row._id]: event.target.value,
               }))
             }
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
+            className="w-40 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
           >
             <option value="">Select advisor</option>
             {advisors.map((advisor) => (
@@ -114,7 +114,7 @@ export default function AdminApplications() {
             type="button"
             onClick={() => void handleAssignAdvisor(row._id)}
             disabled={!advisorSelections[row._id] || assigningId === row._id}
-            className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
             <UserPlus2 className="h-3.5 w-3.5" />
             {assigningId === row._id ? 'Assigning...' : 'Assign'}
