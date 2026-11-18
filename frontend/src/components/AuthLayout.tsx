@@ -20,7 +20,7 @@ export default function AuthLayout({ children, title, subtitle, wide = false }: 
       <div className={`glass-panel rounded-[2.5rem] w-full ${wide ? "max-w-[640px]" : "max-w-[440px]"} p-5 sm:p-7 relative z-10 animate-fade-in-up border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]`}>
         
         {/* Header Logo & Typography */}
-        <div className="text-center mb-4 flex flex-col items-center">
+        <div className="text-center mb-6 flex flex-col items-center">
           <img 
             src="/logo.png" 
             alt="Xchango Logo" 

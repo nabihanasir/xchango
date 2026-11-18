@@ -74,7 +74,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout title="Welcome Back" subtitle="Sign in to continue your international learning journey">
-      <form className="w-full space-y-3" onSubmit={handleSubmit}>
+      <form className="w-full space-y-4" onSubmit={handleSubmit}>
         <InputField
           label="Email Address"
           type="email"
@@ -107,7 +107,7 @@ export default function LoginPage() {
           required
         />
 
-        <Button type="submit" variant="primary" className="mt-3 mx-auto !w-56 py-2.5 text-base">
+        <Button type="submit" variant="primary" className="mt-6 mx-auto !w-56 py-2.5 text-base">
           {submitting ? 'Signing In...' : 'Login'}
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
@@ -115,22 +115,15 @@ export default function LoginPage() {
         {error ? <ErrorAlert error={error} titleOverride="Login failed" /> : null}
       </form>
 
-      <div className="mt-4 flex w-full items-center justify-between">
-        <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
-        <Link
-          to="/signup"
-          className="text-center text-small font-bold uppercase tracking-wider text-body-text transition-colors hover:text-dark-blue"
-        >
-          Don&apos;t have an account? Sign up
+      <p className="mt-6 text-center text-sm font-medium text-slate-600">
+        Don&apos;t have an account?{' '}
+        <Link to="/signup" className="font-bold text-dark-blue underline-offset-4 hover:underline">
+          Sign up
         </Link>
-        <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
-      </div>
+      </p>
 
-      <div className="mt-2 text-center">
-        <Link
-          to="/"
-          className="text-small font-bold uppercase tracking-wider text-body-text transition-colors hover:text-dark-blue"
-        >
+      <div className="mt-3 text-center">
+        <Link to="/" className="text-sm font-medium text-slate-500 transition-colors hover:text-dark-blue">
           Back to landing page
         </Link>
       </div>

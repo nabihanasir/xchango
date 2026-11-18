@@ -29,7 +29,7 @@ export default function InputField({
   const errorId = `${inputId}-error`;
   return (
     <div className={`space-y-1.5 ${className}`}>
-      <div className="flex justify-between items-end px-1">
+      <div className="flex justify-between items-center px-1">
         <label htmlFor={inputId} className="block text-xs font-bold text-slate-600 uppercase tracking-widest">
           {label}
         </label>

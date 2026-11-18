@@ -213,7 +213,7 @@ export default function Signup() {
           />
         </div>
 
-        <Button type="submit" variant="primary" className="mt-3 mx-auto !w-56 py-2.5 text-base">
+        <Button type="submit" variant="primary" className="mt-5 mx-auto !w-56 py-2.5 text-base">
           {submitting ? 'Creating Account...' : 'Create Account'}
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
@@ -221,16 +221,12 @@ export default function Signup() {
         {error ? <ErrorAlert error={error} titleOverride="Registration failed" /> : null}
       </form>
 
-      <div className="mt-4 flex w-full items-center justify-between">
-        <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
-        <Link
-          to="/login"
-          className="text-small text-center font-bold uppercase tracking-wider text-body-text transition-colors hover:text-dark-blue"
-        >
-          Already have an account? Sign in
+      <p className="mt-6 text-center text-sm font-medium text-slate-600">
+        Already have an account?{' '}
+        <Link to="/login" className="font-bold text-dark-blue underline-offset-4 hover:underline">
+          Sign in
         </Link>
-        <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
-      </div>
+      </p>
     </AuthLayout>
   );
 }
