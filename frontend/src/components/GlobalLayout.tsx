@@ -207,7 +207,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
       {/* ── Main Content Area ── */}
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         {/* Top Navbar */}
-        <header className="h-24 m-4 lg:ml-0 rounded-[2rem] glass-panel flex items-center justify-between px-6 lg:px-8 shrink-0 transition-all z-20">
+        <header className="h-16 mx-4 mt-3 mb-2 lg:ml-0 rounded-2xl glass-panel flex items-center justify-between px-5 lg:px-6 shrink-0 transition-all z-20">
           <div className="flex items-center gap-4 lg:gap-8">
             <button aria-label="Open menu" 
               className={`lg:hidden p-3 ${theme.chromeText} bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors`}
@@ -219,14 +219,14 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
               <img 
                 src="/logo.png" 
                 alt="Xchango Logo" 
-                className="h-12 w-auto object-contain transition-transform duration-300 hover:scale-105"
+                className="h-9 w-auto object-contain transition-transform duration-300 hover:scale-105"
               />
             </Link>
           </div>
 
           <div className="flex items-center gap-3 lg:gap-6">
             <NotificationBell
-              buttonClassName={`relative p-3.5 text-slate-500 ${theme.chromeHoverText} bg-slate-100/50 hover:bg-slate-100 rounded-[1.25rem] transition-all`}
+              buttonClassName={`relative p-2.5 text-slate-500 ${theme.chromeHoverText} bg-slate-100/50 hover:bg-slate-100 rounded-xl transition-all`}
             />
             
             <div className="h-8 w-px bg-slate-200 hidden sm:block" />
@@ -235,14 +235,14 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
               to={profilePath}
               title="Open my profile"
               aria-label="Open my profile"
-              className="flex items-center gap-3 bg-white border border-slate-100 py-1.5 pl-1.5 pr-5 rounded-full shadow-sm hover:shadow-soft transition-all cursor-pointer select-none group"
+              className="flex items-center gap-3 bg-white border border-slate-100 py-1 pl-1 pr-4 rounded-full shadow-sm hover:shadow-soft transition-all cursor-pointer select-none group"
             >
-              <div className={`${theme.avatar} h-11 w-11 rounded-full flex items-center justify-center font-bold text-white text-base ring-2 ring-white shadow-md group-hover:scale-105 transition-transform`}>
+              <div className={`${theme.avatar} h-9 w-9 rounded-full flex items-center justify-center font-bold text-white text-sm ring-2 ring-white shadow-md group-hover:scale-105 transition-transform`}>
                 {userProfile.initials}
               </div>
               <div className="hidden sm:block">
-                <p className={`text-base font-bold text-slate-800 leading-none ${theme.groupHoverText} transition-colors`}>{userProfile.name}</p>
-                <p className={`text-xs font-bold ${theme.roleCaption} uppercase tracking-widest mt-1.5 leading-none`}>{userProfile.role}</p>
+                <p className={`text-sm font-bold text-slate-800 leading-none ${theme.groupHoverText} transition-colors`}>{userProfile.name}</p>
+                <p className={`text-xs font-bold ${theme.roleCaption} uppercase tracking-widest mt-1 leading-none`}>{userProfile.role}</p>
               </div>
             </Link>
           </div>

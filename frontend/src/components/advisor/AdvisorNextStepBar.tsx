@@ -24,22 +24,21 @@ export default function AdvisorNextStepBar() {
   }
 
   return (
-    <div className="sticky bottom-4 z-20 mt-8">
-      <div className="flex flex-col gap-3 rounded-[1.5rem] border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Your next step</p>
-          <p className="mt-0.5 text-sm font-bold text-slate-900">
-            {next.title} <span className="font-normal text-slate-600">— {next.description}</span>
-          </p>
+    <div className="sticky bottom-2 z-20 mt-4 md:pr-20">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/95 py-2 pl-4 pr-2 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between">
+        <p className="min-w-0 text-sm md:truncate">
+          <span className="mr-2 text-xs font-bold uppercase tracking-widest text-slate-500">Next step</span>
+          <span className="font-bold text-slate-900">{next.title}</span>
+          <span className="font-normal text-slate-600"> — {next.description}</span>
           {others > 0 ? (
-            <p className="mt-0.5 text-xs text-slate-500">
-              {others} more thing{others === 1 ? '' : 's'} waiting after this.
-            </p>
+            <span className="ml-2 text-xs text-slate-500">
+              (+{others} more)
+            </span>
           ) : null}
-        </div>
+        </p>
         <Link
           to={next.to}
-          className="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-2xl bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#0e1550]"
+          className="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-xl bg-dark-blue px-4 py-2 text-sm font-bold text-white transition hover:bg-[#0e1550]"
         >
           {next.actionLabel}
           <ArrowRight className="h-4 w-4" />

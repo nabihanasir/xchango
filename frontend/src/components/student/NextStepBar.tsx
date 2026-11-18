@@ -36,23 +36,22 @@ export default function NextStepBar() {
   const stopped = step.state === 'stopped';
 
   return (
-    <div className="sticky bottom-4 z-20 mt-8">
+    <div className="sticky bottom-2 z-20 mt-4 md:pr-20">
       <div
-        className={`flex flex-col gap-3 rounded-[1.5rem] border p-4 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between ${
+        className={`flex flex-col gap-3 rounded-2xl border py-2 pl-4 pr-2 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between ${
           stopped ? 'border-red-200 bg-red-50/95' : 'border-slate-200 bg-white/95'
         }`}
       >
-        <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
-            {stopped ? 'Needs attention' : 'Your next step'}
-          </p>
-          <p className="mt-0.5 text-sm font-bold text-slate-900">
-            {step.title} <span className="font-normal text-slate-600">— {step.description}</span>
-          </p>
-        </div>
+        <p className="min-w-0 text-sm md:truncate">
+          <span className="mr-2 text-xs font-bold uppercase tracking-widest text-slate-500">
+            {stopped ? 'Needs attention' : 'Next step'}
+          </span>
+          <span className="font-bold text-slate-900">{step.title}</span>
+          <span className="font-normal text-slate-600"> — {step.description}</span>
+        </p>
         <Link
           to={target}
-          className="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-2xl bg-dark-blue px-5 py-3 text-sm font-bold text-white transition hover:bg-[#0e1550]"
+          className="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-xl bg-dark-blue px-4 py-2 text-sm font-bold text-white transition hover:bg-[#0e1550]"
         >
           {step.actionLabel}
           <ArrowRight className="h-4 w-4" />
