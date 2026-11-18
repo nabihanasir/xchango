@@ -23,6 +23,7 @@ router.post(
   requireCompleteStudentProfile,
   applicationController.createApplication
 );
+router.get('/eligibility', authorizeRoles(UserRole.STUDENT), applicationController.checkApplicationEligibility);
 router.get(
   '/student/:studentId',
   authorizeRoles(UserRole.STUDENT, UserRole.ADMIN),

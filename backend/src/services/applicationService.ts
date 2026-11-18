@@ -573,6 +573,11 @@ const getAvailableCoursesForApplication = async (application: IApplication): Pro
     .sort({ code: 1, name: 1 });
 };
 
+/** Lets the registration page refuse early, using the same rules as creating an application. */
+export const assertCanStartApplication = async (studentId: string) => {
+  await assertNoActiveApplication(studentId);
+};
+
 export const createApplication = async (studentId: string, rawPayload: ApplicationStepInput) => {
   await assertProfileComplete(studentId);
   await assertNoActiveApplication(studentId);

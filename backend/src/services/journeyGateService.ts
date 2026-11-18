@@ -215,6 +215,31 @@ export const loadJourneyFacts = async (studentId: string): Promise<JourneyFacts>
 
 export const getJourneyGate = async (studentId: string) => evaluateJourney(await loadJourneyFacts(studentId));
 
+/** Refuses access until `step` itself is finished, for things that only open once something has happened. */
+export const assertJourneyStepDone = async (studentId: string, step: JourneyStepKey) => {
+  const gate = await getJourneyGate(studentId);
+  if (gate.steps[step] === 'done') {
+    return gate;
+  }
+
+  if (gate.stoppedReason) {
+    throw new ValidationError(
+      'This application has stopped.',
+      gate.stoppedReason,
+      'No further steps are available for this application.',
+      'JOURNEY_STOPPED'
+    );
+  }
+
+  const missing = JOURNEY_STEPS.slice(0, JOURNEY_STEPS.indexOf(step) + 1).find((key) => gate.steps[key] !== 'done')!;
+  throw new ValidationError(
+    `${STEP_LABELS[step]} is not complete yet.`,
+    `${STEP_LABELS[missing]} must be completed first.`,
+    `Complete the ${STEP_LABELS[missing].toLowerCase()} step first.`,
+    'JOURNEY_STEP_LOCKED'
+  );
+};
+
 /**
  * Refuses an action on `step` unless every earlier step is complete. A stopped application gets its own message,
  * because nothing the student or staff does can move it forward.

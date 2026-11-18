@@ -4,6 +4,7 @@ import AdvisorProfile from '../models/AdvisorProfile';
 import Application, { ApplicationStatus, IApplication } from '../models/Application';
 import ExamVerification, { ExamVerificationStatus } from '../models/ExamVerification';
 import { deleteStoredFile } from '../utils/storedFiles';
+import { assertJourneyReady } from './journeyGateService';
 import { appUrl, notifyAdmins, notifyUserSafely } from './notificationService';
 import { MAX_COMMENT_LENGTH, assertObjectId, readString } from '../utils/validators';
 
@@ -38,6 +39,13 @@ export const submitVerification = async (
 ) => {
   try {
     readString(input.note, 'Note', { max: MAX_COMMENT_LENGTH });
+  } catch (error) {
+    await deleteStoredFile(input.fileUrl);
+    throw error;
+  }
+  // The host document comes after the exchange itself, so it follows the same step order as results.
+  try {
+    await assertJourneyReady(studentId, 'results');
   } catch (error) {
     await deleteStoredFile(input.fileUrl);
     throw error;

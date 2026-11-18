@@ -31,6 +31,11 @@ export const createApplication = async (req: any, res: Response) => {
   sendResponse(res, 201, 'Application draft created successfully', application);
 };
 
+export const checkApplicationEligibility = async (req: any, res: Response) => {
+  await applicationService.assertCanStartApplication(req.user._id.toString());
+  sendResponse(res, 200, 'You can start a new application', { eligible: true });
+};
+
 export const updateApplicationStep = async (req: any, res: Response) => {
   const application = await applicationService.updateApplicationStep(
     req.params.id,

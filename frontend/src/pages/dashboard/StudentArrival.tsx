@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ArrowRight, CheckCircle2, Clock, Lock, PlaneLanding } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock, PlaneLanding } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Notice from '../../components/Notice';
+import LockedStepNotice from '../../components/student/LockedStepNotice';
 import { useStudentJourney } from '../../hooks/useStudentJourney';
 import { applicationApi } from '../../lib/applicationApi';
 import { parseApiError } from '../../lib/errorUtils';
@@ -35,25 +36,16 @@ export default function StudentArrival() {
   if (!application || !step || step.state === 'locked') {
     const missing = steps.find((item) => item.state !== 'done');
     return (
-      <div className="glass-card flex items-start gap-4 rounded-[2rem] p-6 md:p-8">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
-          <Lock className="h-5 w-5" />
-        </span>
-        <div className="space-y-3">
-          <p className="text-lg font-bold text-slate-900">Arrival is not open yet</p>
-          <p className="text-sm text-slate-600">
-            {missing
-              ? `Finish "${missing.title}" first. ${missing.description}`
-              : 'It opens once the steps before it are complete.'}
-          </p>
-          {missing ? (
-            <Link to={missing.to} className="inline-flex items-center gap-2 text-sm font-bold text-dark-blue">
-              Go to {missing.title}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : null}
-        </div>
-      </div>
+      <LockedStepNotice
+        title="Arrival is not open yet"
+        message={
+          missing
+            ? `Finish "${missing.title}" first. ${missing.description}`
+            : 'It opens once the steps before it are complete.'
+        }
+        actionLabel={missing ? `Go to ${missing.title}` : undefined}
+        actionTo={missing?.to}
+      />
     );
   }
 

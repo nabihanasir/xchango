@@ -48,7 +48,8 @@ import AdminSemesters from './pages/admin/AdminSemesters';
 import FaqChatWidget from './components/FaqChatWidget';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import {
-  RequireInterviewCompleted,
+  RequireCanStartApplication,
+  RequireJourneyStep,
   RequireProfileComplete,
 } from './components/auth/WorkflowRouteGuard';
 
@@ -66,24 +67,34 @@ function App() {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<StudentDashboard />} />
             <Route path="profile" element={<StudentProfile />} />
-            <Route path="documents" element={<StudentDocuments />} />
+            <Route element={<RequireJourneyStep step="documents" />}>
+              <Route path="documents" element={<StudentDocuments />} />
+            </Route>
             <Route path="programmes" element={<UniversityProgrammes />} />
             <Route path="programmes/:slug" element={<UniversityDetail />} />
             <Route path="international-office" element={<InternationalOffice />} />
             <Route path="applications" element={<StudentApplicationsPage />} />
             <Route element={<RequireProfileComplete />}>
-              <Route path="applications/new" element={<ApplicationWorkflowPage />} />
+              <Route element={<RequireCanStartApplication />}>
+                <Route path="applications/new" element={<ApplicationWorkflowPage />} />
+              </Route>
             </Route>
             <Route path="applications/:id" element={<ApplicationWorkflowPage />} />
             <Route path="communicate" element={<Communicate />} />
-            <Route path="online-classes" element={<OnlineClasses />} />
-            <Route element={<RequireInterviewCompleted />}>
+            <Route element={<RequireJourneyStep step="arrival" requireDone />}>
+              <Route path="online-classes" element={<OnlineClasses />} />
+            </Route>
+            <Route element={<RequireJourneyStep step="course-selection" />}>
               <Route path="courses" element={<StudentCourses />} />
             </Route>
             <Route path="equivalency/courses" element={<Navigate to="/dashboard/courses" replace />} />
             <Route path="equivalency/requests" element={<Navigate to="/dashboard/courses" replace />} />
-            <Route path="results" element={<StudentResults />} />
-            <Route path="visa" element={<StudentVisa />} />
+            <Route element={<RequireJourneyStep step="results" />}>
+              <Route path="results" element={<StudentResults />} />
+            </Route>
+            <Route element={<RequireJourneyStep step="visa" />}>
+              <Route path="visa" element={<StudentVisa />} />
+            </Route>
             <Route path="interview" element={<StudentInterview />} />
             <Route path="arrival" element={<StudentArrival />} />
           </Route>

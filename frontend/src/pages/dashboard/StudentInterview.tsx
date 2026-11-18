@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Lock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import LockedStepNotice from '../../components/student/LockedStepNotice';
 import InterviewDecisionBanner from '../../components/InterviewDecisionBanner';
 import InterviewScheduler from '../../components/interview/InterviewScheduler';
 import { formatSlotFull } from '../../components/interview/interviewTime';
@@ -23,19 +22,12 @@ export default function StudentInterview() {
   // Not open yet: say why and where to go.
   if (!application || step?.state === 'locked') {
     return (
-      <div className="glass-card flex items-start gap-4 rounded-[2rem] p-6 md:p-8">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
-          <Lock className="h-5 w-5" />
-        </span>
-        <div className="space-y-3">
-          <p className="text-lg font-bold text-slate-900">The interview is not open yet</p>
-          <p className="text-sm text-slate-600">{step?.description ?? 'Available once you submit your registration.'}</p>
-          <Link to="/dashboard/applications" className="inline-flex items-center gap-2 text-sm font-bold text-dark-blue">
-            Go to Registration
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+      <LockedStepNotice
+        title="The interview is not open yet"
+        message={step?.description ?? 'Available once you submit your registration.'}
+        actionLabel="Go to Registration"
+        actionTo="/dashboard/applications"
+      />
     );
   }
 

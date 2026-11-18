@@ -1,6 +1,7 @@
-import { ForbiddenError } from '../../errors/AppError';
+import { ForbiddenError, ValidationError } from '../../errors/AppError';
 import { UserRole } from '../../models/User';
 import { uploadDocument } from './document.controller';
+import { assertJourneyReady } from '../../services/journeyGateService';
 import { createDocument } from './document.service';
 
 jest.mock('./document.service', () => ({
@@ -12,9 +13,11 @@ jest.mock('./document.service', () => ({
 }));
 jest.mock('../../services/applicationService', () => ({ advisorCanAccessStudent: jest.fn() }));
 jest.mock('../../utils/upload', () => ({ toPublicFileUrl: (path: string) => `/uploads/${path}` }));
+jest.mock('../../services/journeyGateService', () => ({ assertJourneyReady: jest.fn() }));
 
 const file = { path: 'documents/cv.pdf', originalname: 'cv.pdf' };
 const createMock = createDocument as jest.Mock;
+const gateMock = assertJourneyReady as jest.Mock;
 
 const makeReq = (role: UserRole, userId: string, body: Record<string, unknown>) => ({
   user: { _id: userId, role },
@@ -30,7 +33,27 @@ const makeRes = () => {
 };
 
 describe('uploadDocument access rules', () => {
-  beforeEach(() => createMock.mockClear());
+  beforeEach(() => {
+    createMock.mockClear();
+    gateMock.mockReset();
+  });
+
+  it('refuses a student document before the Documents step opens', async () => {
+    gateMock.mockRejectedValueOnce(new ValidationError('Documents is not available yet.', 'x', 'y', 'JOURNEY_STEP_LOCKED'));
+
+    await expect(
+      uploadDocument(makeReq(UserRole.STUDENT, 'student-1', { type: 'cv' }), makeRes())
+    ).rejects.toMatchObject({ code: 'JOURNEY_STEP_LOCKED' });
+    expect(gateMock).toHaveBeenCalledWith('student-1', 'documents');
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
+  it('does not hold back the transcript, which course approval needs earlier', async () => {
+    await uploadDocument(makeReq(UserRole.STUDENT, 'student-1', { type: 'transcript' }), makeRes());
+
+    expect(gateMock).not.toHaveBeenCalled();
+    expect(createMock).toHaveBeenCalled();
+  });
 
   it('lets a student upload to their own account', async () => {
     const res = makeRes();

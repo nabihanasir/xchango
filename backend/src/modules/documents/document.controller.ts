@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { ForbiddenError, ValidationError } from '../../errors/AppError';
 import { UserRole } from '../../models/User';
 import * as applicationService from '../../services/applicationService';
+import { assertJourneyReady } from '../../services/journeyGateService';
 import { sendResponse } from '../../utils/response';
 import { toPublicFileUrl } from '../../utils/upload';
 import {
@@ -149,6 +150,12 @@ export const uploadDocument = async (req: any, res: Response) => {
       'Provide the document type and try again.',
       'DOCUMENT_TYPE_REQUIRED'
     );
+  }
+
+  // The transcript lives on the profile and is needed earlier, for course approval. Every other document belongs
+  // to the Documents step, which opens once the steps before it are done.
+  if (req.user.role === UserRole.STUDENT && type.toLowerCase() !== 'transcript') {
+    await assertJourneyReady(studentId, 'documents');
   }
 
   const document = await createDocument({
