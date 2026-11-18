@@ -307,8 +307,8 @@ export default function AdminUsers() {
             <h3 className="text-2xl font-bold text-admin mb-6">Create New User</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-black uppercase mb-2">Full Name</label>
-                <input
+                <label htmlFor="adminusers-field-1" className="block text-xs font-bold text-black uppercase mb-2">Full Name</label>
+                <input id="adminusers-field-1"
                   type="text"
                   value={form.name}
                   onChange={(event) => setForm({ ...form, name: event.target.value })}
@@ -319,8 +319,8 @@ export default function AdminUsers() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-black uppercase mb-2">Email</label>
-                <input
+                <label htmlFor="adminusers-field-2" className="block text-xs font-bold text-black uppercase mb-2">Email</label>
+                <input id="adminusers-field-2"
                   type="email"
                   value={form.email}
                   onChange={(event) => setForm({ ...form, email: event.target.value })}
@@ -331,8 +331,8 @@ export default function AdminUsers() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-black uppercase mb-2">Role</label>
-                <select
+                <label htmlFor="adminusers-field-3" className="block text-xs font-bold text-black uppercase mb-2">Role</label>
+                <select id="adminusers-field-3"
                   value={form.role}
                   onChange={(event) => setForm({ ...form, role: event.target.value as CreateUserFormState['role'] })}
                   className="w-full px-4 py-3 bg-slate-50 border-2 border-admin rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow/20"
@@ -344,8 +344,8 @@ export default function AdminUsers() {
               {form.role === 'advisor' ? (
                 <>
                   <div>
-                    <label className="block text-xs font-bold text-black uppercase mb-2">Designation</label>
-                    <input
+                    <label htmlFor="adminusers-field-4" className="block text-xs font-bold text-black uppercase mb-2">Designation</label>
+                    <input id="adminusers-field-4"
                       type="text"
                       value={form.designation}
                       onChange={(event) => setForm({ ...form, designation: event.target.value })}
@@ -356,8 +356,8 @@ export default function AdminUsers() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-black uppercase mb-2">Department</label>
-                    <input
+                    <label htmlFor="adminusers-field-5" className="block text-xs font-bold text-black uppercase mb-2">Department</label>
+                    <input id="adminusers-field-5"
                       type="text"
                       value={form.department}
                       onChange={(event) => setForm({ ...form, department: event.target.value })}
@@ -375,8 +375,8 @@ export default function AdminUsers() {
                 </>
               ) : null}
               <div>
-                <label className="block text-xs font-bold text-black uppercase mb-2">Password</label>
-                <input
+                <label htmlFor="adminusers-field-6" className="block text-xs font-bold text-black uppercase mb-2">Password</label>
+                <input id="adminusers-field-6"
                   type="text"
                   value={form.password}
                   onChange={(event) => setForm({ ...form, password: event.target.value })}

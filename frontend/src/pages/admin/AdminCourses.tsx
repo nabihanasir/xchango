@@ -371,10 +371,10 @@ export default function AdminCourses() {
 
             <form onSubmit={handleSubmit} className="space-y-5 overflow-y-auto p-8">
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
+                <label htmlFor="admincourses-field-1" className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                   Title
                 </label>
-                <input
+                <input id="admincourses-field-1"
                   type="text"
                   value={form.title}
                   onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
@@ -386,10 +386,10 @@ export default function AdminCourses() {
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
+                  <label htmlFor="admincourses-field-2" className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                     Description
                   </label>
-                  <textarea
+                  <textarea id="admincourses-field-2"
                     rows={4}
                     value={form.description}
                     onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
@@ -399,10 +399,10 @@ export default function AdminCourses() {
                 </div>
 
                 <div className="md:col-span-1">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
+                  <label htmlFor="admincourses-field-3" className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                     Credit Hours
                   </label>
-                  <input
+                  <input id="admincourses-field-3"
                     type="number"
                     min="1"
                     step="1"
@@ -414,10 +414,10 @@ export default function AdminCourses() {
                 </div>
 
                 <div className="md:col-span-1">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
+                  <label htmlFor="admincourses-field-4" className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                     Instructor Name
                   </label>
-                  <input
+                  <input id="admincourses-field-4"
                     type="text"
                     value={form.instructorName}
                     onChange={(event) => setForm((current) => ({ ...current, instructorName: event.target.value }))}
@@ -427,10 +427,10 @@ export default function AdminCourses() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
+                  <label htmlFor="admincourses-field-5" className="mb-2 block text-xs font-bold uppercase tracking-widest text-black">
                     Instructor Email
                   </label>
-                  <input
+                  <input id="admincourses-field-5"
                     type="email"
                     value={form.instructorEmail}
                     onChange={(event) => setForm((current) => ({ ...current, instructorEmail: event.target.value }))}

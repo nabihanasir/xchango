@@ -178,8 +178,8 @@ export default function MarkArrivalModal({ application, onClose, onRecorded, rol
             </p>
 
             <div>
-              <label className={`mb-2 block text-xs font-bold uppercase tracking-widest ${c.label}`}>Arrival date</label>
-              <input
+              <label htmlFor="markarrivalmodal-field-1" className={`mb-2 block text-xs font-bold uppercase tracking-widest ${c.label}`}>Arrival date</label>
+              <input id="markarrivalmodal-field-1"
                 type="date"
                 value={arrivedAt}
                 max={today()}

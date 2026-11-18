@@ -162,8 +162,8 @@ export default function AdminAiModelConfig() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-black uppercase tracking-widest mb-2">Base URL</label>
-            <input
+            <label htmlFor="adminaimodelconfig-field-1" className="block text-xs font-bold text-black uppercase tracking-widest mb-2">Base URL</label>
+            <input id="adminaimodelconfig-field-1"
               type="url"
               required
               value={form.baseUrl}
@@ -174,8 +174,8 @@ export default function AdminAiModelConfig() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-black uppercase tracking-widest mb-2">Model Name</label>
-            <input
+            <label htmlFor="adminaimodelconfig-field-2" className="block text-xs font-bold text-black uppercase tracking-widest mb-2">Model Name</label>
+            <input id="adminaimodelconfig-field-2"
               type="text"
               required
               value={form.model}
@@ -186,10 +186,10 @@ export default function AdminAiModelConfig() {
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-xs font-bold text-black uppercase tracking-widest mb-2">
+            <label htmlFor="adminaimodelconfig-field-3" className="flex items-center gap-2 text-xs font-bold text-black uppercase tracking-widest mb-2">
               <KeyRound className="h-3.5 w-3.5" /> API Key
             </label>
-            <input
+            <input id="adminaimodelconfig-field-3"
               type="password"
               value={form.apiKey}
               onChange={(e) => setForm({ ...form, apiKey: e.target.value })}

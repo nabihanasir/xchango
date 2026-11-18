@@ -116,10 +116,10 @@ export default function StudentVerificationPanel({ embedded = false }: { embedde
       {canUpload ? (
         <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
           <div>
-            <label className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
+            <label htmlFor="studentverificationpanel-field-1" className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">
               {verification ? 'Replace document' : 'Document'} (PDF, JPG, PNG, max 10 MB)
             </label>
-            <input
+            <input id="studentverificationpanel-field-1"
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
               onChange={(event) => setFile(event.target.files?.[0] || null)}
@@ -127,8 +127,8 @@ export default function StudentVerificationPanel({ embedded = false }: { embedde
             />
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Note (optional)</label>
-            <input
+            <label htmlFor="studentverificationpanel-field-2" className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500">Note (optional)</label>
+            <input id="studentverificationpanel-field-2"
               type="text"
               value={note}
               maxLength={1000}

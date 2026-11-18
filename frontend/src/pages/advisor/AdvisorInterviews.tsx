@@ -155,10 +155,10 @@ function RecommendationModal({
 
         {choice !== null ? (
           <div>
-            <label className="text-sm font-bold text-slate-800">
+            <label htmlFor="advisorinterviews-field-1" className="text-sm font-bold text-slate-800">
               {needsNote ? 'Reason (required — the student will see this)' : 'Feedback (optional)'}
             </label>
-            <textarea
+            <textarea id="advisorinterviews-field-1"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               maxLength={1000}
