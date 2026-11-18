@@ -101,6 +101,8 @@ export interface UniversityProfile {
   region: string;
   tagline: string;
   gradient: string;
+  /** Hero photo: the university's own image, or its country's image as a fallback. */
+  image: string;
   about: string[];
   facts: UniversityFact[];
   highlights: string[];

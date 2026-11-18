@@ -115,6 +115,7 @@ export const toUniversityProfile = (university: CatalogUniversity): UniversityPr
     region: university.region || '',
     tagline: university.tagline || '',
     gradient: DEFAULT_GRADIENT,
+    image: university.image || university.countryId?.image || '',
     about: university.about ?? [],
     facts: university.facts ?? [],
     highlights: university.highlights ?? [],

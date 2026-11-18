@@ -106,23 +106,31 @@ function Card({ children, className = '' }: { children: React.ReactNode; classNa
 
 function Hero({ university }: { university: UniversityProfile }) {
   return (
-    <section className={`relative overflow-hidden rounded-[2rem] bg-gradient-to-br ${university.gradient} px-6 pb-20 pt-8 text-white shadow-xl md:px-10`}>
+    <section className={`relative flex min-h-[45vh] flex-col justify-between overflow-hidden rounded-[2rem] bg-gradient-to-br ${university.gradient} px-6 pb-16 pt-6 text-white shadow-xl md:px-10`}>
+      {university.image ? (
+        <>
+          <img src={university.image} alt={university.name} className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-dark-blue/90 via-dark-blue/55 to-dark-blue/30" />
+        </>
+      ) : null}
       <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
       <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-accent-yellow/20 blur-3xl" />
-      <div className="pointer-events-none absolute right-10 top-10 select-none text-[9rem] leading-none opacity-20 md:text-[12rem]">
-        {university.flag}
-      </div>
+      {university.image ? null : (
+        <div className="pointer-events-none absolute right-10 top-10 select-none text-[9rem] leading-none opacity-20 md:text-[12rem]">
+          {university.flag}
+        </div>
+      )}
 
-      <div className="relative z-10">
+      <div className="relative z-10 flex flex-1 flex-col justify-between gap-6">
         <Link
           to="/dashboard/programmes"
-          className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white/90 backdrop-blur transition hover:bg-white/20"
+          className="inline-flex w-fit items-center gap-2 self-start rounded-full bg-black/30 px-3.5 py-1.5 text-sm font-semibold text-white/95 backdrop-blur transition hover:bg-black/45"
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
+          <ArrowLeft className="h-4 w-4" />
           All universities
         </Link>
 
-        <div className="mt-10 max-w-3xl">
+        <div className="mt-6 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 backdrop-blur">
               <MapPin className="h-3.5 w-3.5" />
@@ -132,10 +140,10 @@ function Hero({ university }: { university: UniversityProfile }) {
               Partner university
             </span>
           </div>
-          <h1 className="mt-5 text-white">{university.name}</h1>
-          <p className="mt-4 max-w-2xl text-base text-white/80 md:text-lg">{university.tagline}</p>
+          <h1 className="mt-3 text-white">{university.name}</h1>
+          <p className="mt-2 max-w-2xl text-base text-white/85 md:text-lg">{university.tagline}</p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-5 flex flex-wrap gap-3">
             <Link
               to="/dashboard/applications/new"
               className="inline-flex items-center gap-2 rounded-2xl bg-accent-yellow px-6 py-3.5 text-sm font-bold text-dark-blue shadow-lg shadow-black/20 transition hover:-translate-y-0.5 hover:bg-yellow-default"
