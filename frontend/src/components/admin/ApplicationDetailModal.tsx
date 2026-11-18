@@ -146,11 +146,23 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
     }
   };
 
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      // Nested dialogs handle their own Escape.
+      if (event.key === 'Escape' && !offerDialogOpen && !arrivalModalOpen) onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose, offerDialogOpen, arrivalModalOpen]);
+
   return createPortal(
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 lg:p-10 animate-fade-in text-slate-800">
       <div className="absolute inset-0 bg-transparent backdrop-blur-md" onClick={onClose} />
 
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Application for ${studentName}`}
         className="bg-slate-50 w-full max-w-6xl h-full max-h-[90vh] rounded-[40px] shadow-2xl relative z-10 overflow-hidden flex flex-col animate-fade-in-up border border-white/20"
         onClick={(event) => event.stopPropagation()}
       >
@@ -169,7 +181,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
               </p>
             </div>
           </div>
-          <button 
+          <button aria-label="Close" 
             onClick={onClose}
             className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-admin/40 hover:text-admin border border-transparent hover:border-light-color"
           >

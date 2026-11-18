@@ -86,10 +86,18 @@ export default function MarkArrivalModal({ application, onClose, onRecorded, rol
 
   const sentCount = result?.notices.filter((notice) => notice.sent).length ?? 0;
 
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !submitting) onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose, submitting]);
+
   return createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-transparent backdrop-blur-md" onClick={() => !submitting && onClose()} />
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-[32px] border border-white/20 bg-white shadow-2xl animate-fade-in-up">
+      <div role="dialog" aria-modal="true" aria-label="Mark arrival" className="relative z-10 flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-[32px] border border-white/20 bg-white shadow-2xl animate-fade-in-up">
         <header className="flex items-center justify-between border-b border-light-color/60 px-6 py-5 sm:px-8">
           <div className="flex items-center gap-4">
             <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 ${c.text}`}>
@@ -102,7 +110,7 @@ export default function MarkArrivalModal({ application, onClose, onRecorded, rol
               </p>
             </div>
           </div>
-          <button
+          <button aria-label="Close"
             type="button"
             onClick={onClose}
             disabled={submitting}

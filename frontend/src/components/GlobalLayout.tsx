@@ -125,6 +125,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
         <div className="px-4 py-3 border-t border-white/10 space-y-1 shrink-0">
           <button 
             onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             className={`w-full flex items-center gap-3.5 px-4 py-2 rounded-2xl ${theme.footerButton} transition-all outline-none`}
           >
             <Menu className={`h-5 w-5 transition-transform duration-500 ${collapsed ? 'rotate-180' : ''}`} />
@@ -133,6 +134,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
           <Link
             to="/login"
             onClick={logout}
+            aria-label="Sign out"
             className={`flex items-center gap-3.5 px-4 py-2 rounded-2xl ${theme.signOut} transition-all`}
           >
             <LogOut className="h-5 w-5" />
@@ -160,7 +162,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
               <span className={`${theme.panelLabel} text-xs uppercase font-bold tracking-widest`}>{panelName}</span>
             </div>
           </Link>
-          <button onClick={() => setIsMobileMenuOpen(false)} className="text-white/50 hover:text-white p-2 bg-white/5 rounded-xl transition-colors">
+          <button aria-label="Close menu" onClick={() => setIsMobileMenuOpen(false)} className="text-white/50 hover:text-white p-2 bg-white/5 rounded-xl transition-colors">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -207,7 +209,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
         {/* Top Navbar */}
         <header className="h-24 m-4 lg:ml-0 rounded-[2rem] glass-panel flex items-center justify-between px-6 lg:px-8 shrink-0 transition-all z-20">
           <div className="flex items-center gap-4 lg:gap-8">
-            <button 
+            <button aria-label="Open menu" 
               className={`lg:hidden p-3 ${theme.chromeText} bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors`}
               onClick={() => setIsMobileMenuOpen(true)}
             >

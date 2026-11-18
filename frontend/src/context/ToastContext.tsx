@@ -46,7 +46,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="pointer-events-none fixed right-4 top-4 z-[200] flex w-full max-w-sm flex-col gap-3">
+      <div className="pointer-events-none fixed right-4 top-4 z-[300] flex w-full max-w-sm flex-col gap-3">
         {toasts.map((toast) => {
           const Icon = icons[toast.tone];
 
@@ -61,7 +61,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   <p className="font-bold">{toast.title}</p>
                   {toast.description ? <p className="mt-1 text-sm leading-6">{toast.description}</p> : null}
                 </div>
-                <button
+                <button aria-label="Dismiss notification"
                   type="button"
                   className="rounded-full p-1 transition hover:bg-white/60"
                   onClick={() => setToasts((current) => current.filter((item) => item.id !== toast.id))}

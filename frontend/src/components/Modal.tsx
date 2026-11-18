@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 interface ModalProps {
@@ -16,10 +16,41 @@ interface ModalProps {
  * would pin it to the animated page wrapper instead, which made the backdrop fill the page and pushed the dialog
  * below the fold.
  */
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export default function Modal({ onClose, children, widthClass = 'max-w-lg', locked = false, labelledBy }: ModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Move focus into the dialog when it opens and give it back to the trigger when it closes.
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const panel = panelRef.current;
+    if (panel && !panel.contains(document.activeElement)) {
+      (panel.querySelector<HTMLElement>('[autofocus], input, textarea, select') ?? panel.querySelector<HTMLElement>(FOCUSABLE) ?? panel).focus();
+    }
+    return () => previouslyFocused?.focus?.();
+  }, []);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !locked) onClose();
+      // Keep Tab / Shift+Tab inside the dialog.
+      if (event.key === 'Tab' && panelRef.current) {
+        const items = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+        if (items.length === 0) {
+          event.preventDefault();
+          return;
+        }
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
     };
     document.addEventListener('keydown', onKey);
     const previousOverflow = document.body.style.overflow;
@@ -34,6 +65,8 @@ export default function Modal({ onClose, children, widthClass = 'max-w-lg', lock
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-transparent backdrop-blur-md" onClick={() => !locked && onClose()} />
       <div
+        ref={panelRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}

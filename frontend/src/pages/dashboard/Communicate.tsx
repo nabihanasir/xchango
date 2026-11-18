@@ -199,7 +199,7 @@ export default function Communicate() {
                   placeholder="Type your message..."
                   className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 px-4 text-base text-body-text"
                 />
-                <button 
+                <button aria-label="Send message" 
                   onClick={() => void handleSendMessage()}
                   className="bg-accent-yellow hover:bg-yellow-default text-dark-blue p-3.5 rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-yellow"
                 >

@@ -359,7 +359,7 @@ export default function AdminCourses() {
                   </p>
                 </div>
               </div>
-              <button
+              <button aria-label="Close"
                 type="button"
                 onClick={closeModal}
                 disabled={submitting}
