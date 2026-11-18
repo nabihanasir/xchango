@@ -38,6 +38,18 @@
   }
 }
 
+/* Keyboard focus: always show a visible ring on interactive controls, even where a component removed the default
+   outline. Yellow + navy is visible on both light pages and the dark sidebars. Mouse clicks do not trigger it. */
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+[role='button']:focus-visible,
+[role='tab']:focus-visible {
+  outline: 2px solid #FBD213 !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px #090638;
+}
+
 /* Readability: darken faint grey text inside the portal content area (light background). Dark heroes/sidebars sit outside <main> or use their own colors. */
 main .text-slate-400 { color: #64748b; }
 main .text-slate-500 { color: #475569; }
