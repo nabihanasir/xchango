@@ -213,9 +213,9 @@ export default function Signup() {
           />
         </div>
 
-        <Button type="submit" variant="primary" className="mt-3 py-2.5 text-base">
+        <Button type="submit" variant="primary" className="mt-3 !py-2 text-sm">
           {submitting ? 'Creating Account...' : 'Create Account'}
-          <ArrowRight className="ml-2 h-5 w-5" />
+          <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
 
         {error ? <ErrorAlert error={error} titleOverride="Registration failed" /> : null}
