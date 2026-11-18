@@ -4,31 +4,13 @@ import {
 import GlobalLayout from './GlobalLayout';
 import NextStepBar from './student/NextStepBar';
 import StudentPageHeader from './student/StudentPageHeader';
-import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useStudentJourney } from '../hooks/useStudentJourney';
-import { buildStudentJourney, type JourneyStepKey } from '../utils/studentJourney';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/httpClient';
 
 const DashboardLayout = () => {
   const { user } = useAuth();
   const [offboarded, setOffboarded] = useState(Boolean(user?.offboarded));
-  const { pathname } = useLocation();
-  const [journey] = useStudentJourney(pathname);
-
-  // Interview and arrival come at fixed points of the journey, so the sidebar shows whether they are open yet.
-  const stepStates = useMemo(() => {
-    const steps = journey ? buildStudentJourney(journey) : [];
-    const stateOf = (key: JourneyStepKey) => {
-      const step = steps.find((item) => item.key === key);
-      if (!step) return {};
-      if (step.state === 'done') return { state: 'done' as const };
-      if (step.state === 'locked') return { state: 'locked' as const, hint: step.description };
-      return {};
-    };
-    return { interview: stateOf('interview'), arrival: stateOf('arrival') };
-  }, [journey]);
 
   // Refresh from the server: the semester may have ended since the user signed in.
   useEffect(() => {
@@ -43,11 +25,11 @@ const DashboardLayout = () => {
     { name: 'International Office',    path: '/dashboard/international-office', icon: Building2 },
     { name: 'Student Profile',         path: '/dashboard/profile',      icon: UserRoundCog },
     { name: 'Registration',            path: '/dashboard/applications', icon: FileText },
-    { name: 'Interview',               path: '/dashboard/interview',    icon: CalendarClock, ...stepStates.interview },
-    { name: 'Documents',               path: '/dashboard/documents',    icon: FileText },
+    { name: 'Interview',               path: '/dashboard/interview',    icon: CalendarClock },
     { name: 'Courses',                 path: '/dashboard/courses', icon: BookOpenCheck },
+    { name: 'Documents',               path: '/dashboard/documents',    icon: FileText },
     { name: 'Visa Status',             path: '/dashboard/visa', icon: Stamp },
-    { name: 'Arrival',                 path: '/dashboard/arrival', icon: PlaneLanding, ...stepStates.arrival },
+    { name: 'Arrival',                 path: '/dashboard/arrival', icon: PlaneLanding },
     { name: 'Online Classes',          path: '/dashboard/online-classes', icon: Video },
     { name: 'Results',                 path: '/dashboard/results', icon: GraduationCap },
   ];
@@ -66,14 +48,18 @@ const DashboardLayout = () => {
   };
 
   return (
-    <GlobalLayout 
+    <GlobalLayout
       panelName="Student Panel"
       role="student"
       navItems={navItems}
       userProfile={userProfile}
       profilePath="/dashboard/profile"
-      header={<StudentPageHeader />}
-      footer={<NextStepBar />}
+      header={
+        <>
+          <StudentPageHeader />
+          <NextStepBar />
+        </>
+      }
       notice={
         offboarded
           ? 'Your exchange semester is complete. Your account is now read-only: you can view your records but not make changes. Contact the International Office if you need access restored.'

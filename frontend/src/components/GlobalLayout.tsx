@@ -57,11 +57,11 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
       {/* ── Desktop Sidebar ── */}
       <aside
         className={`hidden lg:flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-30 rounded-none glass-sidebar ${theme.sidebarBg} ${
-          collapsed ? 'w-24' : 'w-72'
+          collapsed ? 'w-20' : 'w-64'
         }`}
       >
         {/* Sidebar Header */}
-        <div className="h-20 flex items-center px-7 border-b border-white/10 shrink-0">
+        <div className="h-20 flex items-center px-6 border-b border-white/10 shrink-0">
           <Link to={navItems[0]?.path || '/'} className="flex items-center gap-4 overflow-hidden group">
             {!collapsed && (
               <div className="flex flex-col animate-fade-in py-2">
@@ -82,7 +82,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
         </div>
 
         {/* Sidebar Nav */}
-        <nav className="flex-1 py-4 px-4 flex flex-col gap-1 min-h-0 overflow-y-auto [@media(min-height:600px)]:overflow-hidden custom-scrollbar">
+        <nav className="flex-1 py-4 px-3 flex flex-col gap-1 min-h-0 overflow-y-auto [@media(min-height:600px)]:overflow-hidden custom-scrollbar">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path || (item.path !== navItems[0].path && location.pathname.startsWith(item.path));
             const Icon = item.icon;
@@ -91,7 +91,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center gap-3.5 px-4 py-1 flex-1 min-h-[2.5rem] max-h-[3.25rem] rounded-2xl transition-all duration-300 relative group ${
+                className={`flex items-center gap-3 px-3 py-1 flex-1 min-h-[2.5rem] max-h-[3.25rem] rounded-2xl transition-all duration-300 relative group ${
                   isActive
                     ? theme.navActive
                     : theme.navInactive
@@ -105,7 +105,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
                 <Icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-300 ${isActive ? `scale-110 ${theme.navActiveIconGlow}` : 'group-hover:scale-110'}`} />
                 
                 {!collapsed && (
-                  <span className={`font-semibold text-[0.95rem] whitespace-nowrap ${isActive ? 'text-white' : ''}`}>
+                  <span className={`font-semibold text-sm whitespace-nowrap ${isActive ? 'text-white' : ''}`}>
                     {item.name}
                   </span>
                 )}
@@ -122,11 +122,11 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="px-4 py-3 border-t border-white/10 space-y-1 shrink-0">
+        <div className="px-3 py-3 border-t border-white/10 space-y-1 shrink-0">
           <button 
             onClick={() => setCollapsed(!collapsed)}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className={`w-full flex items-center gap-3.5 px-4 py-2 rounded-2xl ${theme.footerButton} transition-all outline-none`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl ${theme.footerButton} transition-all outline-none`}
           >
             <Menu className={`h-5 w-5 transition-transform duration-500 ${collapsed ? 'rotate-180' : ''}`} />
             {!collapsed && <span className="text-sm font-semibold">Collapse</span>}
@@ -135,7 +135,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
             to="/login"
             onClick={logout}
             aria-label="Sign out"
-            className={`flex items-center gap-3.5 px-4 py-2 rounded-2xl ${theme.signOut} transition-all`}
+            className={`flex items-center gap-3 px-3 py-2 rounded-2xl ${theme.signOut} transition-all`}
           >
             <LogOut className="h-5 w-5" />
             {!collapsed && <span className="text-sm font-semibold">Sign Out</span>}
@@ -249,7 +249,7 @@ const GlobalLayout = ({ panelName, navItems, userProfile, role, notice, profileP
         </header>
 
         {/* Main Content Scrollable Area */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 lg:px-8 pb-8 custom-scrollbar">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 lg:px-8 pb-24 custom-scrollbar">
           <div className="max-w-[1600px] mx-auto w-full animate-page-in">
             {notice ? (
               <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm font-medium text-amber-800">

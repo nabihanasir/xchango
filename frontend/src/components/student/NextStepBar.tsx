@@ -9,8 +9,9 @@ const HIDDEN_ON = ['/dashboard', '/dashboard/applications/new', '/dashboard/comm
 const trimPath = (path: string) => path.replace(/\/+$/, '') || '/';
 
 /**
- * Sticky bar shown on student screens that links to the student's next step in the application journey.
- * It stays out of the way on the page that step already lives on.
+ * Bar shown under the page header on student screens that links to the student's next step in the application
+ * journey. It sits in the page flow, so it never covers content, and it stays out of the way on the page that
+ * step already lives on.
  */
 export default function NextStepBar() {
   const { pathname } = useLocation();
@@ -36,9 +37,9 @@ export default function NextStepBar() {
   const stopped = step.state === 'stopped';
 
   return (
-    <div className="sticky bottom-2 z-20 mt-4 md:pr-20">
+    <div className="mb-6">
       <div
-        className={`flex flex-col gap-3 rounded-2xl border py-2 pl-4 pr-2 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between ${
+        className={`flex flex-col gap-3 rounded-2xl border py-2 pl-4 pr-2 shadow-sm md:flex-row md:items-center md:justify-between ${
           stopped ? 'border-red-200 bg-red-50/95' : 'border-slate-200 bg-white/95'
         }`}
       >
