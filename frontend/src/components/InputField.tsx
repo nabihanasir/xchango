@@ -34,7 +34,7 @@ export default function InputField({
         <input
           {...props}
           aria-invalid={Boolean(error)}
-          className={`block w-full pl-12 pr-12 py-3.5 bg-slate-50 hover:bg-slate-100/50 focus:bg-white border rounded-xl focus:outline-none transition-all text-slate-800 placeholder-slate-500 font-medium shadow-sm ${
+          className={`block w-full pl-12 pr-12 py-2.5 bg-slate-50 hover:bg-slate-100/50 focus:bg-white border rounded-xl focus:outline-none transition-all text-slate-800 placeholder-slate-600 placeholder:opacity-100 text-base font-medium shadow-sm ${
             error
               ? 'border-red-300 focus:border-red-300 focus:ring-4 focus:ring-red-100'
               : 'border-slate-200 focus:border-accent-yellow/50 focus:ring-4 focus:ring-accent-yellow/10'

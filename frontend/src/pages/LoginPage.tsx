@@ -74,12 +74,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout title="Welcome Back" subtitle="Sign in to continue your international learning journey">
-      <div className="mb-6 rounded-2xl border border-accent-yellow/40 bg-accent-yellow/10 px-4 py-3 text-sm font-medium text-dark-blue">
-        Returning users can log in to continue with applications, equivalency requests, and international program
-        exploration.
-      </div>
-
-      <form className="w-full space-y-6" onSubmit={handleSubmit}>
+      <form className="w-full space-y-3" onSubmit={handleSubmit}>
         <InputField
           label="Email Address"
           type="email"
@@ -112,7 +107,7 @@ export default function LoginPage() {
           required
         />
 
-        <Button type="submit" variant="primary" className="mt-6 py-4 text-lg">
+        <Button type="submit" variant="primary" className="mt-3 py-2.5 text-base">
           {submitting ? 'Signing In...' : 'Login'}
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
@@ -120,7 +115,7 @@ export default function LoginPage() {
         {error ? <ErrorAlert error={error} titleOverride="Login failed" /> : null}
       </form>
 
-      <div className="mt-8 flex w-full items-center justify-between">
+      <div className="mt-4 flex w-full items-center justify-between">
         <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
         <Link
           to="/signup"
@@ -131,7 +126,7 @@ export default function LoginPage() {
         <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
       </div>
 
-      <div className="mt-4 text-center">
+      <div className="mt-2 text-center">
         <Link
           to="/"
           className="text-small font-bold uppercase tracking-wider text-body-text transition-colors hover:text-dark-blue"

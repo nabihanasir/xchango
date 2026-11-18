@@ -151,9 +151,9 @@ export default function Signup() {
   };
 
   return (
-    <AuthLayout title="Create Account" subtitle="Register with clear guidance and instant validation">
-      <form className="w-full space-y-6" onSubmit={handleSubmit} noValidate>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <AuthLayout title="Create Account" subtitle="Register with clear guidance and instant validation" wide>
+      <form className="w-full space-y-4" onSubmit={handleSubmit} noValidate>
+        <div className="grid grid-cols-1 gap-x-4 gap-y-3 md:grid-cols-2">
           <InputField
             label="Full Name"
             type="text"
@@ -194,7 +194,7 @@ export default function Signup() {
             label="Password"
             type={showPassword ? 'text' : 'password'}
             {...fieldProps('password', setPassword)}
-            placeholder="8+ characters, letters and numbers"
+            placeholder="8+ characters"
             icon={<Lock className="h-5 w-5" />}
             rightIcon={showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             onRightIconClick={() => setShowPassword((value) => !value)}
@@ -205,7 +205,7 @@ export default function Signup() {
             label="Confirm Password"
             type={showConfirmPassword ? 'text' : 'password'}
             {...fieldProps('confirmPassword', setConfirmPassword)}
-            placeholder="Re-enter your password"
+            placeholder="Re-enter password"
             icon={<Lock className="h-5 w-5" />}
             rightIcon={showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             onRightIconClick={() => setShowConfirmPassword((value) => !value)}
@@ -213,7 +213,7 @@ export default function Signup() {
           />
         </div>
 
-        <Button type="submit" variant="primary" className="mt-6 py-4 text-lg">
+        <Button type="submit" variant="primary" className="mt-3 py-2.5 text-base">
           {submitting ? 'Creating Account...' : 'Create Account'}
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
@@ -221,7 +221,7 @@ export default function Signup() {
         {error ? <ErrorAlert error={error} titleOverride="Registration failed" /> : null}
       </form>
 
-      <div className="mt-8 flex w-full items-center justify-between">
+      <div className="mt-4 flex w-full items-center justify-between">
         <span className="w-1/5 border-b border-light-color lg:w-1/4"></span>
         <Link
           to="/login"
