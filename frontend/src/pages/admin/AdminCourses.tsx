@@ -7,6 +7,7 @@ import type { ApplicationCourseSummary } from '../../types/application';
 import { getCourseDisplayTitle } from '../../types/course';
 import Notice from '../../components/Notice';
 import Modal from '../../components/Modal';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 type CourseFormState = {
   title: string;
@@ -53,6 +54,7 @@ export default function AdminCourses() {
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [deletingCourseId, setDeletingCourseId] = useState('');
+  const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
 
   const loadCourses = async () => {
     setLoading(true);
@@ -174,11 +176,6 @@ export default function AdminCourses() {
   };
 
   const handleDelete = async (courseId: string) => {
-    const confirmed = window.confirm('Delete this home course? This cannot be undone.');
-    if (!confirmed) {
-      return;
-    }
-
     try {
       setDeletingCourseId(courseId);
       await adminApi.deleteCourse(courseId);
@@ -187,6 +184,7 @@ export default function AdminCourses() {
       setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete course.');
     } finally {
       setDeletingCourseId('');
+      setCourseToDelete(null);
     }
   };
 
@@ -252,7 +250,7 @@ export default function AdminCourses() {
           </button>
           <button
             type="button"
-            onClick={() => void handleDelete(row._id)}
+            onClick={() => setCourseToDelete(row._id)}
             disabled={deletingCourseId === row._id}
             className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
           >
@@ -285,6 +283,17 @@ export default function AdminCourses() {
 
       {error ? (
         <Notice tone="error">{error}</Notice>
+      ) : null}
+
+      {courseToDelete ? (
+        <ConfirmDialog
+          title="Delete this home course?"
+          message="This cannot be undone."
+          confirmLabel="Delete course"
+          busy={deletingCourseId !== ''}
+          onConfirm={() => void handleDelete(courseToDelete)}
+          onCancel={() => setCourseToDelete(null)}
+        />
       ) : null}
 
       <div className="glass-card rounded-[2rem] bg-white p-6 shadow-sm md:p-8">

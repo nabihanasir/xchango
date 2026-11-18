@@ -30,6 +30,7 @@ import ProgramOutlinePanel from './ProgramOutlinePanel';
 import Pagination, { usePagination } from '../Pagination';
 import Notice from '../Notice';
 import Modal from '../Modal';
+import ConfirmDialog from '../ConfirmDialog';
 import { Link } from 'react-router-dom';
 import { formatSlotFull } from '../interview/interviewTime';
 
@@ -53,6 +54,7 @@ const Field = ({ label, value }: { label: string; value: string }) => (
 export default function AdvisorApplicationsWorkspace() {
   const { user } = useAuth();
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [confirmNotRecommendOpen, setConfirmNotRecommendOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [journeyExtras, setJourneyExtras] = useState<JourneyExtras>({ requests: [], visa: null, results: [] });
   const [programOutline, setProgramOutline] = useState<ProgramOutline | null>(null);
@@ -236,7 +238,7 @@ export default function AdvisorApplicationsWorkspace() {
     }
   };
 
-  const handleInterviewDecision = async (recommended: boolean) => {
+  const handleInterviewDecision = async (recommended: boolean, confirmedNotRecommend = false) => {
     if (!selectedApplicationId) {
       return;
     }
@@ -249,7 +251,8 @@ export default function AdvisorApplicationsWorkspace() {
         return;
       }
 
-      if (!window.confirm('Not recommending this student stops their application and cannot be undone. Continue?')) {
+      if (!confirmedNotRecommend) {
+        setConfirmNotRecommendOpen(true);
         return;
       }
     }
@@ -396,6 +399,19 @@ export default function AdvisorApplicationsWorkspace() {
           <div className="space-y-4 overflow-y-auto p-6 lg:p-8">
         {detailsError ? <Notice tone="error">{detailsError}</Notice> : null}
         {actionError ? <Notice tone="error">{actionError}</Notice> : null}
+        {confirmNotRecommendOpen ? (
+          <ConfirmDialog
+            title="Do not recommend this student?"
+            message="This stops their application and cannot be undone."
+            confirmLabel="Do not recommend"
+            busy={submittingDecision !== ''}
+            onConfirm={() => {
+              setConfirmNotRecommendOpen(false);
+              void handleInterviewDecision(false, true);
+            }}
+            onCancel={() => setConfirmNotRecommendOpen(false)}
+          />
+        ) : null}
         {detailsLoading ? (
           <div className="h-48 animate-pulse rounded-2xl bg-slate-100" />
         ) : selectedApplication ? (

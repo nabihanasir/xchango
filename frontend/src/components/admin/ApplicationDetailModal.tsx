@@ -10,6 +10,8 @@ import type { DocumentStatus, StudentDocument } from '../../types/document';
 import { canMarkArrival } from '../../utils/arrival';
 import type { WorkflowApplication } from '../../types/application';
 import Notice from '../Notice';
+import Modal from '../Modal';
+import { useToast } from '../../context/ToastContext';
 
 interface ApplicationDetailModalProps {
   app: WorkflowApplication;
@@ -27,7 +29,10 @@ const WIZARD_STEPS = [
 
 export default function ApplicationDetailModal({ app, onClose, onApplicationUpdate }: ApplicationDetailModalProps) {
   const [submitting, setSubmitting] = useState(false);
+  const { showToast } = useToast();
   const [arrivalModalOpen, setArrivalModalOpen] = useState(false);
+  const [offerDialogOpen, setOfferDialogOpen] = useState(false);
+  const [offerUrl, setOfferUrl] = useState('');
   // Keeps the arrival visible right after it is recorded, before the parent list reloads.
   const [arrival, setArrival] = useState(app.arrival);
 
@@ -113,14 +118,14 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
       onApplicationUpdate?.();
       onClose();
     } catch (err: any) {
-      alert(`Failed to save semester end date: ${err.message}`);
+      showToast({ tone: 'error', title: 'Could not save the semester end date', description: err.message });
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleIssueOfferLetter = async () => {
-    const url = prompt('Enter Offer Letter URL (e.g., Google Drive link):');
+    const url = offerUrl.trim();
     if (!url) return;
 
     setSubmitting(true);
@@ -129,13 +134,13 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
         applicationId: app._id,
         offerLetterUrl: url,
       });
-      alert(`Offer Letter Issued Successfully for ${studentName}!`);
+      showToast({ tone: 'success', title: 'Offer letter issued', description: `The offer letter for ${studentName} has been issued.` });
       if (onApplicationUpdate) {
         onApplicationUpdate();
       }
       onClose();
     } catch (err: any) {
-      alert(`Failed to issue offer letter: ${err.message}`);
+      showToast({ tone: 'error', title: 'Could not issue the offer letter', description: err.message });
     } finally {
       setSubmitting(false);
     }
@@ -354,7 +359,7 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
           )}
           {app.status === 'SHORTLISTED' && (
             <button 
-              onClick={handleIssueOfferLetter}
+              onClick={() => setOfferDialogOpen(true)}
               disabled={submitting}
               className="px-6 py-3 bg-accent-yellow text-admin font-bold rounded-xl hover:bg-yellow-default transition-all shadow-lg shadow-accent-yellow/20 disabled:opacity-50"
             >
@@ -363,6 +368,52 @@ export default function ApplicationDetailModal({ app, onClose, onApplicationUpda
           )}
         </footer>
       </div>
+
+      {offerDialogOpen ? (
+        <Modal onClose={() => setOfferDialogOpen(false)} locked={submitting} widthClass="max-w-md" labelledBy="offer-letter-title">
+          <form
+            className="p-6 md:p-8"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleIssueOfferLetter();
+            }}
+          >
+            <h3 id="offer-letter-title" className="text-lg font-bold text-slate-900">
+              Issue offer letter
+            </h3>
+            <label htmlFor="offer-letter-url" className="mt-4 block text-sm font-semibold text-slate-700">
+              Offer letter link (for example a Google Drive link)
+            </label>
+            <input
+              id="offer-letter-url"
+              type="url"
+              required
+              autoFocus
+              value={offerUrl}
+              onChange={(event) => setOfferUrl(event.target.value)}
+              placeholder="https://drive.google.com/..."
+              className="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 focus:border-accent-yellow focus:outline-none focus:ring-4 focus:ring-accent-yellow/20"
+            />
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setOfferDialogOpen(false)}
+                disabled={submitting}
+                className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="rounded-xl bg-accent-yellow px-5 py-2.5 text-sm font-bold text-admin hover:bg-yellow-default disabled:opacity-60"
+              >
+                {submitting ? 'Issuing...' : 'Issue offer letter'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      ) : null}
 
       {arrivalModalOpen ? (
         <MarkArrivalModal
