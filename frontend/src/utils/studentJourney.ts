@@ -177,7 +177,8 @@ export const buildStudentJourney = ({
         : courseState === 'in_review'
           ? 'Your request is with your advisor.'
           : 'Follows course selection.',
-    actionLabel: courseState === 'in_review' ? 'View request' : undefined,
+    // Once outlines are being uploaded, a request under review is about those outlines, not course approval.
+    actionLabel: courseState === 'in_review' && !arrived ? 'View request' : undefined,
   };
 
   // Documents
@@ -239,7 +240,9 @@ export const buildStudentJourney = ({
     to: '/dashboard/courses',
     description: outlineDone
       ? 'Outlines uploaded for all your courses.'
-      : arrived
+      : arrived && courseState === 'in_review' && outlinesUploaded > 0
+        ? `Your outlines are with your advisor for review (${outlinesUploaded} of ${approvedItems.length || 0} uploaded).`
+        : arrived
         ? `Upload the course outline you received for each course (${outlinesUploaded} of ${approvedItems.length || 0} uploaded).`
         : 'Opens once your arrival is recorded.',
     actionLabel: arrived ? 'Upload outlines' : undefined,

@@ -71,10 +71,24 @@ export default function StudentCourses() {
   }
 
   const stepState = getCourseStepState(requests);
+  // After arrival the student is on the outline step; a request under review then is about outlines, not course approval.
+  const outlineStage = requests.some((request) => request.outlineUploadOpen);
 
   return (
     <div className="space-y-8">
-      {stepState === 'in_review' ? (
+      {stepState === 'in_review' && outlineStage ? (
+        <div className="flex items-start gap-4 rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-amber-800">
+          <Clock3 className="mt-0.5 h-6 w-6 flex-shrink-0" />
+          <div>
+            <h2 className="text-lg font-bold">Your outline is with your advisor</h2>
+            <p className="mt-1 text-sm font-medium">
+              Your courses are already approved. Your advisor is reviewing the outline you uploaded.
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      {stepState === 'in_review' && !outlineStage ? (
         <div className="flex items-start gap-4 rounded-[2rem] border border-amber-200 bg-amber-50 p-6 text-amber-800">
           <Clock3 className="mt-0.5 h-6 w-6 flex-shrink-0" />
           <div>
