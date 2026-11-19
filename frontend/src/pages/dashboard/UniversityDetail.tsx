@@ -398,10 +398,10 @@ export default function UniversityDetail() {
       <Hero university={university} />
 
       {university.facts.length > 0 ? (
-        <div className="relative z-10 -mt-14 grid grid-cols-2 gap-3 px-2 md:grid-cols-3 md:px-6 lg:grid-cols-6">
+        <div className="relative z-10 -mt-14 grid grid-cols-2 gap-3 px-2 md:grid-cols-3 md:px-6 2xl:grid-cols-6">
           {university.facts.map((fact) => (
-            <div key={fact.label} className="rounded-2xl border border-slate-200/60 bg-white p-4 text-center shadow-lg shadow-slate-200/60">
-              <p className="font-display text-lg font-bold text-dark-blue">{fact.value}</p>
+            <div key={fact.label} className="min-w-0 rounded-2xl border border-slate-200/60 bg-white p-4 text-center shadow-lg shadow-slate-200/60">
+              <p className="break-words font-display text-base font-bold leading-snug text-dark-blue">{fact.value}</p>
               <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">{fact.label}</p>
             </div>
           ))}
