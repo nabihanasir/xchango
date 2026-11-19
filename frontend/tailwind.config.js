@@ -11,7 +11,9 @@ export default {
     },
     extend: {
       fontSize: {
-        'small': '0.75rem',  // 12px
+        // Projector-friendly: nothing renders below 14px.
+        'xs': ['0.875rem', { lineHeight: '1.25rem' }],  // 14px (Tailwind default 12px)
+        'small': '0.875rem',  // 14px
         'body': '1rem',      // 16px
         'h5': '1.333rem',    // 21.33px
         'h4': '1.777rem',    // 28.43px
